@@ -27,6 +27,27 @@ Signed-off-by: Your Name <your.email@example.org>
 
 Use `git commit -s` to add it. There is no contributor licence agreement. Contributions are licensed under Apache-2.0 OR MIT, as stated in the [README](README.md).
 
+## Signed commits
+
+Every commit must also carry a cryptographic signature that GitHub shows as *Verified*. The sign-off states that you have the right to contribute; the signature shows that the commit was made with your key.
+
+You can sign with an SSH or a GPG key:
+
+1. Add the public key to your GitHub account. An SSH key must be added with the key type *Signing Key*, separately from any authentication key. The email address you commit with must be verified on your account.
+2. Configure git to sign every commit, for example with an SSH key whose private key is loaded in `ssh-agent`:
+
+   ```
+   git config --global gpg.format ssh
+   git config --global user.signingkey ~/.ssh/id_ed25519.pub
+   git config --global commit.gpgsign true
+   ```
+
+3. Commit with `git commit -s`. Without `commit.gpgsign`, add `-S`.
+
+The "Verified commit signatures" check fails a pull request that contains any commit without a verified signature. Commits made through the GitHub web interface, including those from Dependabot, are signed by GitHub and pass the check.
+
+Pull requests are merged by squash, and GitHub signs the resulting commit on `main`. The ruleset on `main` rejects commits pushed directly to `main` without a verified signature. Repository administrators can bypass the ruleset, including its required checks.
+
 ## Code standards
 
 - Rust edition 2024; minimum supported Rust version as stated in [docs/design/architecture.md](docs/design/architecture.md).

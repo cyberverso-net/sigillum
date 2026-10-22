@@ -14,6 +14,7 @@ Every change must pass the gates below before it is merged. Continuous integrati
 | Portability | `cargo check` for `wasm32-unknown-unknown`, `aarch64-apple-ios`, `aarch64-linux-android` | Builds |
 | Dependencies | `cargo deny check` | No licence, advisory or source violations |
 | Sign-off | DCO check | Every commit signed off |
+| Commit signatures | Verified commit signatures check | Every commit in the pull request has a verified signature |
 
 ## Author gates
 
