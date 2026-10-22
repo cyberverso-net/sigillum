@@ -1,0 +1,42 @@
+name: Bug
+description: A defect in merged or released behaviour. Report security vulnerabilities privately, as described in SECURITY.md.
+title: "Short description of the defect"
+type: Bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        If the defect could cause a forged or altered signature to be accepted, or affects key material, do not report it here. Use private vulnerability reporting as described in [SECURITY.md](https://github.com/cyberverso-net/sigillum/blob/main/SECURITY.md).
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happens
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What should happen
+      description: Cite the standard clause or DSS result where relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Minimal code or a test vector. Do not attach documents containing personal data.
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Platform
+      placeholder: Android 15, arm64
+    validations:
+      required: false

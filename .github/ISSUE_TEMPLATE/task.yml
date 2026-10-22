@@ -1,0 +1,26 @@
+name: Task
+description: Technical work with no direct user-visible effect, such as tooling or continuous integration.
+title: "Short imperative title"
+type: Task
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What
+      description: The work to be done.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: The reason it is needed.
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      description: Checkable completion criteria.
+    validations:
+      required: true

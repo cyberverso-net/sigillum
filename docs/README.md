@@ -1,0 +1,30 @@
+# sigillum documentation
+
+The documentation is organised in three parts: what the project aims to do, how it is designed, and how it is developed.
+
+## Project
+
+| Document | Content |
+| --- | --- |
+| [Charter](project/charter.md) | Mission, goals with acceptance criteria, guiding principles |
+| [Scope](project/scope.md) | What is in scope, deferred and excluded |
+| [Roadmap](project/roadmap.md) | Phases, deliverables and exit criteria |
+
+## Design
+
+| Document | Content |
+| --- | --- |
+| [Architecture](design/architecture.md) | Workspace layout, main design choices, open questions |
+| [Architecture decision records](design/adr/README.md) | One record per significant decision |
+| [Conformance strategy](design/conformance.md) | How equivalence with DSS and the ETSI standards is demonstrated |
+| [Recorded divergences](design/divergences.md) | Intentional differences from DSS behaviour |
+
+## Development
+
+| Document | Content |
+| --- | --- |
+| [Process](development/process.md) | Issue types, workflow, Definition of Ready and Done, labels, releases |
+| [Quality gates](development/quality-gates.md) | Automated and author gates, thresholds, review checklist |
+| [Style guide](development/style-guide.md) | How to write documentation, comments, issues and commits |
+
+Contribution rules, the security policy and governance are in the repository root: [CONTRIBUTING.md](../CONTRIBUTING.md), [SECURITY.md](../SECURITY.md) and [GOVERNANCE.md](../GOVERNANCE.md).

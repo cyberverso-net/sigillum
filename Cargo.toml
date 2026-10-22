@@ -1,0 +1,29 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/sigillum-pki",
+    "crates/sigillum-cms",
+    "crates/sigillum-cades",
+    "crates/sigillum-pades",
+    "crates/sigillum-ffi",
+    "crates/sigillum-oracle",
+]
+
+[workspace.package]
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.85"
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/cyberverso-net/sigillum"
+authors = ["Paolo De Rosa"]
+categories = ["cryptography", "authentication"]
+keywords = ["eidas", "ades", "cades", "pades", "e-signature"]
+
+[workspace.lints.rust]
+unsafe_code = "deny"
+missing_docs = "warn"
+
+[workspace.lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"

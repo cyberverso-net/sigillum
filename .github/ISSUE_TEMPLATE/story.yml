@@ -1,0 +1,56 @@
+name: Story
+description: A user-visible increment that can be implemented, tested and reviewed on its own.
+title: "Short imperative title"
+type: Story
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Stories follow the [development process](https://github.com/cyberverso-net/sigillum/blob/main/docs/development/process.md). A story is ready when every field below is complete.
+  - type: textarea
+    id: story
+    attributes:
+      label: User story
+      description: As a … I want … so that …
+      placeholder: As a wallet developer, I want to create a CAdES-BES signature over a document so that the user can sign without a server.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Background, related issues and ADRs.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Numbered, each one testable.
+      placeholder: |
+        1. …
+        2. …
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: Normative references
+      description: Standards and clauses the implementation must follow.
+      placeholder: ETSI EN 319 122-1, clause 5.2.2; RFC 5652, section 5.4
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: Test plan
+      description: Unit, property and known-answer tests; differential tests against DSS; fuzz targets for parsers; negative cases.
+    validations:
+      required: true
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of scope
+      description: What this story deliberately does not cover.
+    validations:
+      required: false

@@ -1,0 +1,36 @@
+name: Epic
+description: A coherent capability, delivered through several stories attached as sub-issues.
+title: "Capability name"
+type: Epic
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What the capability enables, and for whom.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: What is included and what is not, with reference to docs/project/scope.md.
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Completion criteria
+      description: When the epic as a whole is complete.
+    validations:
+      required: true
+  - type: textarea
+    id: decisions
+    attributes:
+      label: Related decisions
+      description: ADRs that apply, or decisions still needed.
+    validations:
+      required: false
+  - type: markdown
+    attributes:
+      value: Attach the stories as sub-issues once they are written.
