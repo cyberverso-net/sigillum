@@ -103,3 +103,28 @@ jobs:
             fi
           done
           exit $missing
+
+  signatures:
+    name: Verified commit signatures
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      - name: Check every commit has a verified signature
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          COMMITS: ${{ github.event.pull_request.commits }}
+        run: |
+          if [ "$COMMITS" -gt 250 ]; then
+            echo "The pull request has more than 250 commits, which cannot all be checked."
+            exit 1
+          fi
+          unverified=$(gh api --paginate "repos/$REPO/pulls/$PR/commits" \
+            --jq '.[] | select(.commit.verification.verified | not) | .sha')
+          for commit in $unverified; do
+            echo "Commit $commit has no verified signature."
+          done
+          test -z "$unverified"
