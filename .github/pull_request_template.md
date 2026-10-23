@@ -13,7 +13,7 @@ Closes #
 - [ ] Documentation and rustdoc updated
 - [ ] ADR added for any significant decision
 - [ ] Intentional divergences from DSS recorded in `docs/design/divergences.md`
-- [ ] CHANGELOG updated under *Unreleased*
+- [ ] Changelog fragment added under `changelog.d/`, or not needed (reason given above)
 - [ ] Commits signed off
 
 ## Quality report

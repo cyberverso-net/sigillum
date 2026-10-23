@@ -38,7 +38,7 @@ Every parser (ASN.1 structures, CMS, PDF objects and cross-reference sections, O
 
 ## Recording divergences
 
-Where sigillum intentionally behaves differently from DSS, because the ETSI text requires it or because DSS behaviour appears incorrect, the case is recorded in [divergences.md](divergences.md) with the clause of the standard concerned, a test vector, and a link to the report made to the DSS maintainers. An unrecorded divergence is a defect.
+sigillum may behave differently from DSS on purpose, because the ETSI text requires it or because DSS behaviour appears incorrect. Each such case is recorded in [divergences.md](divergences.md), with the clause of the standard concerned, a test vector, and a link to the report made to the DSS maintainers. An unrecorded divergence is a defect.
 
 ## External evidence
 

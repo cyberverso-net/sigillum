@@ -59,7 +59,7 @@ A story is done when:
 - documentation, including rustdoc for public items, is updated;
 - any significant decision is recorded in an ADR;
 - any intentional divergence from DSS is recorded in [divergences.md](../design/divergences.md);
-- the [CHANGELOG](../../CHANGELOG.md) is updated under *Unreleased*.
+- a changelog fragment is added under `changelog.d/` where one is needed, as described in [changelog.d/README.md](../../changelog.d/README.md).
 
 ## Labels
 
@@ -76,4 +76,15 @@ Issue type, milestone and status are not duplicated as labels.
 
 ## Releases
 
-Versions follow Semantic Versioning. Before 1.0, minor versions may contain breaking changes, which are listed in the changelog. A release is tagged `vX.Y.Z` from `main` once its milestone's exit criteria, or the subset planned for that release, are met.
+Versions follow Semantic Versioning. Before 1.0, minor versions may contain breaking changes, which are listed in the changelog. A release is tagged `vX.Y.Z` from `main` once its milestone's exit criteria, or the subset planned for that release, are met. When a release is prepared, the changelog fragments in `changelog.d/` are compiled into [CHANGELOG.md](../../CHANGELOG.md).
+
+## Raising the minimum supported Rust version
+
+The minimum supported Rust version (MSRV) is raised only in a minor release, as stated in [architecture.md](../design/architecture.md). A raise follows these steps:
+
+1. Open an issue that states the reason for the raise and the new version. The remaining steps are made in one pull request.
+2. Change `rust-version` in the workspace `Cargo.toml`. The CI job for the minimum supported Rust version reads it from there.
+3. Update the version stated in [architecture.md](../design/architecture.md).
+4. Check that every pin of `dtolnay/rust-toolchain` in `.github/workflows/` is the current commit of its `v1` tag, and refresh it if not, keeping the `# v1` comment. A current commit keeps the action's handling of toolchain versions up to date when the CI job switches to the new version. The commit is given by `gh api repos/dtolnay/rust-toolchain/commits/v1 --jq .sha`. Dependabot may propose newer commits of this action at any time, taken from its default branch rather than from the tag.
+5. Check that every CI job passes with the new version.
+6. Record the raise under *Changed* in a changelog fragment.
