@@ -5,7 +5,7 @@
 
 ## Context
 
-[ADR-0008](0008-include-jades-baseline.md) brought JAdES into scope, partly because Commission Implementing Regulation (EU) 2026/248 lists it among the formats that public sector bodies must recognise from 23 February 2027. The same Annex I lists XAdES (ETSI EN 319 132-1), which is more widely used than JAdES: it is accepted by the Italian e-invoicing system (FatturaPA) and is common in several Member States, including through ASiC-E containers. The question is whether XAdES should be brought into scope on the same grounds.
+[ADR-0008](0008-include-jades-baseline.md) brought JAdES into scope, partly because Commission Implementing Regulation (EU) 2026/248 lists it among the formats that public sector bodies must recognise from 23 February 2027. The same Annex I lists the XAdES Baseline Profile (ETSI EN 319 132-1 V1.3.1), which is more widely used than JAdES: it is accepted by the Italian e-invoicing system (FatturaPA) and is common in several Member States, including through ASiC-E containers. The question is whether XAdES should be brought into scope on the same grounds.
 
 ## Decision
 
