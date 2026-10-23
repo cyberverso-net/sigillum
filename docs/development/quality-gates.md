@@ -8,13 +8,17 @@ Every change must pass the gates below before it is merged. Continuous integrati
 | --- | --- | --- |
 | Formatting | `cargo fmt --all --check` | No differences |
 | Linting | `cargo clippy --workspace --all-targets --all-features -- -D warnings` | No warnings |
-| Tests | `cargo test --workspace --all-features` | All pass on Linux, macOS and Windows |
+| Tests | `cargo test --workspace --all-features --exclude sigillum-oracle` and `cargo test -p sigillum-oracle` | All pass on Linux, macOS and Windows |
 | Documentation | `RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps` | No warnings; every public item documented |
 | Minimum Rust version | `cargo check` with the declared `rust-version` | Builds |
 | Portability | `cargo check` for `wasm32-unknown-unknown`, `aarch64-apple-ios`, `aarch64-linux-android` | Builds |
 | Dependencies | `cargo deny check` | No licence, advisory or source violations |
 | Sign-off | DCO check | Every commit signed off |
 | Commit signatures | Verified commit signatures check | Every commit in the pull request has a verified signature |
+| Fixture verification (planned with the test PKI, phase 0) | `sigillum-testpki verify` with OpenSSL and `tools/dss-oracle`, Linux | Every artefact matches the result in its manifest |
+| Differential tests (planned with the harness, phase 0) | `cargo test -p sigillum-oracle --features dss` on Linux, with Java and Maven | Pass |
+
+The `dss` feature of `sigillum-oracle` is excluded from the cross-platform test job, which tests `sigillum-oracle` with its default features only.
 
 ## Author gates
 

@@ -2,27 +2,40 @@
 
 - **Status:** Accepted
 - **Date:** 2026-10-23
+- **Issue:** #19
 
 ## Context
 
-AdES creation at level B-LT and AdES verification need certificate path building and validation according to RFC 5280, section 6. AdES differs from web PKI in three ways: validation must be possible at a time in the past, for example the time of a signature timestamp, as the validation processes of ETSI EN 319 102-1 require; all algorithms in scope must be supported, including RSASSA-PSS, Ed25519 and P-521; and missing intermediate certificates may have to be retrieved through the authority information access extension, which under [ADR-0006](0006-no-network-access-in-core.md) must go through the caller's fetcher.
+AdES creation at level B-LT and AdES verification need certificate path building and validation according to RFC 5280, section 6. In AdES, validation also has to:
 
-Existing Rust validators do not fit. `rustls-webpki` targets TLS server authentication at the current time. `pkix-path` is recent, maintained by a single author, and does not yet support RSASSA-PSS, Ed25519 or P-521.
+- run at a time chosen by the caller, often in the past, such as the time of a signature timestamp;
+- use revocation data embedded in the signature or supplied by the caller, including OCSP responses;
+- support every algorithm in scope, including RSASSA-PSS keys identified as `id-RSASSA-PSS`;
+- report failures in terms that map onto the indications and sub-indications of ETSI EN 319 102-1 V1.4.1;
+- retrieve missing intermediate certificates only through the caller's fetcher ([ADR-0006](0006-no-network-access-in-core.md)).
+
+Two Rust validators were considered. `rustls-webpki` validates at a caller-supplied time and supports Ed25519 and RSASSA-PSS signatures, but it is built for TLS. It has no certificate policy processing, no OCSP, TLS-oriented extended key usage checks and no support for `id-RSASSA-PSS` keys. Its signature verification is pluggable through `rustls-pki-types`. `pkix-path` 0.3 implements RFC 5280 closely, including policy processing, has a pluggable signature verifier and is tested with PKITS; path building and revocation live in sibling crates. It is young and has a single maintainer, and its results are not expressed in AdES terms.
 
 ## Decision
 
-sigillum implements path building and RFC 5280 basic path validation in `sigillum-pki`, on top of `x509-cert` ([ADR-0011](0011-asn1-x509-cms-foundations.md)) and the provider interface of [ADR-0010](0010-cryptographic-backend.md). The validation time is always an explicit input. The implementation covers signature verification, validity periods, basic constraints, key usage and extended key usage, name constraints and revocation status supplied by the caller or embedded in the signature. Certificate policy identifiers are collected for later qualification checks; certificates that require explicit policy processing beyond this yield a "not supported" result under [ADR-0007](0007-asymmetric-scope.md).
+sigillum implements path building and RFC 5280 path validation in `sigillum-pki`, on top of `x509-cert` ([ADR-0011](0011-asn1-x509-cms-foundations.md)) and the provider interface of [ADR-0010](0010-cryptographic-backend.md). The validation time is always an explicit input. Results carry the information needed to derive EN 319 102-1 sub-indications.
 
-The implementation is tested against the RFC 5280 path validation test suite published by NIST (PKITS) where it applies, and against DSS through the differential harness.
+The implementation covers signature verification, validity periods, basic constraints, key usage and extended key usage, name constraints, and revocation status from embedded or supplied OCSP responses and CRLs. Certificate policy identifiers are collected for later qualification checks. Explicit policy processing is required when the caller supplies an initial policy set other than `anyPolicy`. It is also required when the path contains a `policyMappings` or `inhibitAnyPolicy` extension, or a `policyConstraints` extension with `requireExplicitPolicy`. In those cases:
+
+- **verification** returns INDETERMINATE with a "not supported" reason ([ADR-0007](0007-asymmetric-scope.md));
+- **creation** at B-LT fails with a typed "not supported" error, so that no signature is produced on an unvalidated path.
+
+`pkix-path` and `rustls-webpki` are used in tests as independent implementations to cross-check results where their scope overlaps.
 
 ## Alternatives considered
 
 | Option | Advantages | Disadvantages |
 | --- | --- | --- |
-| `rustls-webpki` | Mature, audited | Web PKI only; no validation at a past time; limited algorithms |
-| `pkix-path` | Follows RFC 5280 closely | Young, single maintainer; missing algorithms and path building |
-| In-house implementation | Fits AdES needs exactly; same API conventions as the rest of sigillum | Effort; must be tested thoroughly |
+| `rustls-webpki` | Mature; its predecessor `webpki` was audited in 2020 | TLS-oriented; no policy processing, no OCSP, no `id-RSASSA-PSS` keys |
+| `pkix-path` and sibling crates | Close to RFC 5280; pluggable verifier; PKITS-tested | Young, single maintainer; results not in AdES terms; three crates to integrate (`pkix-path`, `pkix-path-builder`, `pkix-revocation`) |
+| Contribute to or fork `pkix-path` | Shared effort; existing test coverage | Design changes for AdES may not fit the upstream project; a fork carries the maintenance alone |
+| Own implementation | Fits AdES needs exactly; same API conventions as the rest of sigillum | Effort; must be tested thoroughly |
 
 ## Consequences
 
-Path validation is one of the critical modules subject to the mutation-testing threshold in the quality gates. PKITS test vectors are added to the test corpus with their licence recorded.
+Path validation is a critical module subject to the mutation-testing threshold in the quality gates. The NIST PKITS test vectors are used where they apply. Because PKITS states no licence and includes private keys, the vectors are downloaded at test time and checked against a recorded digest, not committed ([ADR-0014](0014-test-pki-and-corpus.md)).

@@ -9,8 +9,8 @@ Phase 3 runs in parallel with phases 1 and 2: its first step, the validation log
 Deliverables:
 
 - Repository, licences, contribution rules and continuous integration in place.
-- Differential test harness (`sigillum-oracle`) able to submit a signed object to a pinned DSS release running as a separate process, with fixed validation time and offline certificate, revocation and timestamp sources, and to collect the reports.
-- Initial corpus of test vectors, generated from a private test PKI (root and issuing CAs, OCSP responder, CRLs, timestamping authority) created for the project.
+- Differential test harness (`sigillum-oracle`) with the command-line tool `tools/dss-oracle` ([ADR-0013](../design/adr/0013-dss-oracle-command-line-tool.md)). It submits a signed object to a pinned DSS release running as a separate process and collects the reports. Validation uses a fixed time and offline certificate, revocation and timestamp sources.
+- Test PKI generator (`sigillum-testpki`) and initial corpus of test vectors under `testdata/`, with a manifest of expected results ([ADR-0014](../design/adr/0014-test-pki-and-corpus.md)).
 - Measurements of the reference points for goal G4: signing latency and memory on a mid-range Android device and an iPhone, binary size, for at least DSS on a JVM and the PoDoFo-based stack used in current mobile wallets.
 
 Exit criteria:
@@ -25,7 +25,8 @@ Deliverables:
 - `sigillum-pki`: certificates, path building to a supplied anchor, OCSP and CRL handling, RFC 3161 client, signer and fetcher interfaces.
 - `sigillum-cms`: CMS SignedData and EnvelopedData construction and parsing.
 - `sigillum-cades`: CAdES-BES and baseline B-B, B-T, B-LT, enveloping and detached.
-- `sigillum-pades`: PAdES-BES and baseline B-B, B-T, B-LT, incremental update, document security store, invisible and simple visible appearance.
+- `sigillum-pdf`: minimal PDF reader, append-only incremental-update writer and revision analysis ([ADR-0015](../design/adr/0015-pdf-reader-and-incremental-writer.md)).
+- `sigillum-pades`: PAdES-BES and baseline B-B, B-T, B-LT on top of `sigillum-pdf`: signature dictionary, document security store, invisible and simple visible appearance.
 - `sigillum-jades`: JAdES baseline B-B, B-T, B-LT, JWS JSON and compact serialisations, enveloping and detached. Delivered after CAdES and PAdES; it may follow in release 0.2 without delaying release 0.1 ([ADR-0008](../design/adr/0008-include-jades-baseline.md)).
 - `sigillum-ffi`: Kotlin and Swift bindings through UniFFI; WASM build with `wasm-bindgen`.
 - Example applications: remote signing through the Cloud Signature Consortium API; PKCS#12 for local testing.
