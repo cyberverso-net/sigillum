@@ -1,5 +1,7 @@
 # sigillum
 
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/cyberverso-net/sigillum/badge)](https://scorecard.dev/viewer/?uri=github.com/cyberverso-net/sigillum)
+
 A portable, memory-safe Rust implementation of the core of European advanced electronic signatures (AdES), designed for mobile, desktop and browser environments where the Java-based [DSS](https://github.com/esig/dss) library cannot run.
 
 > **Status: pre-alpha.** No release has been published. The code base is a skeleton and nothing in it is fit for production use. This README describes intent, not capability.

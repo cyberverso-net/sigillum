@@ -18,6 +18,7 @@ All notable changes to this project are documented in this file. The format foll
 - Issue forms for epics, stories, tasks and bugs, and a pull request template.
 - Continuous integration for formatting, linting, tests on Linux, macOS and Windows, documentation, the minimum supported Rust version, WebAssembly and mobile targets, licence checks and commit sign-off; Dependabot updates.
 - Requirement for signed commits, enforced by a continuous integration check on pull requests and by the ruleset on `main`, and documented in the contribution rules.
+- OpenSSF Scorecard analysis, weekly and on every push to `main`, with results in code scanning and a badge in the README.
 
 ### Changed
 
