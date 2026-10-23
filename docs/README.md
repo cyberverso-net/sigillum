@@ -9,6 +9,7 @@ The documentation is organised in three parts: what the project aims to do, how 
 | [Charter](project/charter.md) | Mission, goals with acceptance criteria, guiding principles |
 | [Scope](project/scope.md) | What is in scope, deferred and excluded |
 | [Roadmap](project/roadmap.md) | Phases, deliverables and exit criteria |
+| [Measurements](project/measurements.md) | Protocol and results of the measurements for goal G4 |
 
 ## Design
 
