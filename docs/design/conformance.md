@@ -43,5 +43,5 @@ Where sigillum intentionally behaves differently from DSS, because the ETSI text
 
 - Structural checks of produced signatures with the ETSI signatures conformance checker.
 - Participation in ETSI remote signature plugtests from phase 3.
-- Conformance testing against the ETSI test specifications for each format (TS 119 124 for CAdES, TS 119 144 for PAdES).
+- Conformance testing against the ETSI test specifications for each format (TS 119 124 for CAdES, TS 119 144 for PAdES, and the corresponding specification for JAdES).
 - An independent security review before any verification feature is declared stable.

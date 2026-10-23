@@ -12,9 +12,12 @@ The scope is asymmetric by design. **Creation** is restricted to current baselin
 | --- | --- | --- | --- |
 | CAdES | B-B, B-T, B-LT; CAdES-BES | Enveloping (`.p7m`) and detached | ETSI EN 319 122-1 and -2 |
 | PAdES | B-B, B-T, B-LT; PAdES-BES | Incremental update, invisible or with a visible appearance | ETSI EN 319 142-1 and -2 |
+| JAdES | B-B, B-T, B-LT | JWS JSON serialisation, flattened and general; compact serialisation for B-B only; enveloping, or detached through the `ObjectIdByURI` and `ObjectIdByURIHash` mechanisms | ETSI TS 119 182-1 |
 | CMS EnvelopedData | Not applicable | Key transport (RSA-OAEP, RSA PKCS#1 v1.5 for compatibility) and key agreement (ECDH) | RFC 5652, RFC 5753 |
 
 CAdES-BES and PAdES-BES are retained because they remain required by existing national systems, including the Italian Processo Civile Telematico, and are structurally close to baseline B-B.
+
+JAdES signatures always carry the `x5c` header parameter, as required by Commission Implementing Regulation (EU) 2026/248. Unsigned properties in the `etsiU` header are created in base64url-encoded form only. JAdES is delivered after CAdES and PAdES, as recorded in [ADR-0008](../design/adr/0008-include-jades-baseline.md).
 
 ### Cryptographic algorithms (creation)
 
@@ -31,7 +34,7 @@ CAdES-BES and PAdES-BES are retained because they remain required by existing na
 
 ### Verification (phase 2)
 
-Basic verification of CAdES and PAdES signatures: cryptographic integrity, certificate chain to a caller-supplied trust anchor, revocation status from embedded or supplied data, timestamp integrity, and object-level detection of PDF modifications after signing. Results use the indications and sub-indications of ETSI EN 319 102-1 and are reported in the ETSI TS 119 102-2 format, with a compact summary for applications. This is not a full EN 319 102-1 validation and is labelled as such.
+Basic verification of CAdES, PAdES and JAdES signatures: cryptographic integrity, certificate chain to a caller-supplied trust anchor, revocation status from embedded or supplied data, timestamp integrity, object-level detection of PDF modifications after signing, and, for JAdES, both base64url-encoded and clear JSON incorporation of unsigned properties. Results use the indications and sub-indications of ETSI EN 319 102-1 and are reported in the ETSI TS 119 102-2 format, with a compact summary for applications. This is not a full EN 319 102-1 validation and is labelled as such.
 
 ### Bindings
 
@@ -44,10 +47,10 @@ These are expected to be added later, in the order of the [roadmap](roadmap.md) 
 | Item | Condition for inclusion |
 | --- | --- |
 | Full EN 319 102-1 validation engine with qualification (TS 119 172-4, TS 119 615) and EU trusted lists | Phase 3 |
-| Baseline -LTA for CAdES and PAdES | Phase 3 or a partner need |
-| XAdES baseline (namespaces 1.3.2 and 1.4.1 only) | Partner need |
+| Baseline -LTA for CAdES, PAdES and JAdES | Phase 3 or a partner need |
+| XAdES baseline (namespaces 1.3.2 and 1.4.1 only) | Review after the phase 3 XML component for trusted lists, or a partner need; reasons in [ADR-0009](../design/adr/0009-keep-xades-deferred.md) |
 | ASiC-E with XAdES, then ASiC-S and ASiC-E with CAdES | Partner need |
-| JAdES baseline | Partner need |
+| JAdES detached signatures through the `HttpHeaders` mechanism | Demand |
 | Archival profile: validation of CAdES and XAdES -C, -X, -XL, -A, PAdES-LTV, pre-eIDAS qualification rules | Demand from an archival or validation-service user |
 | Counter-signatures | Demand |
 | Configurable validation policy | Demand from a validation-service user |

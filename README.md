@@ -12,7 +12,7 @@ As a result, mobile wallets, native desktop applications and browser-based tools
 
 ## What sigillum is
 
-- A **narrow core**: CAdES and PAdES signature creation up to baseline -LT, CMS EnvelopedData, and, in a second stage, basic signature verification.
+- A **narrow core**: CAdES, PAdES and JAdES signature creation up to baseline -LT, CMS EnvelopedData, and, in a second stage, basic signature verification.
 - **Portable**: one Rust code base for Android, iOS, macOS, Windows, Linux and `wasm32`, with bindings for Kotlin, Swift and JavaScript.
 - **Memory-safe**: no `unsafe` code outside the binding layer; every parser is fuzzed.
 - **Verified against DSS**: every signature sigillum produces is validated by DSS in continuous integration; DSS is used as an external test oracle, never linked or copied.
@@ -22,7 +22,7 @@ As a result, mobile wallets, native desktop applications and browser-based tools
 
 - Not a port or a fork of DSS, and not a replacement for it.
 - Not a qualified validation service, nor a substitute for one.
-- Not, in its first phases, an implementation of XAdES, JAdES, ASiC, archival (-LTA) signatures, legacy signature forms, or configurable validation policies.
+- Not, in its first phases, an implementation of XAdES, ASiC, archival (-LTA) signatures, legacy signature forms, or configurable validation policies.
 
 The full scope, including what is deliberately left out, is set out in [docs/project/scope.md](docs/project/scope.md).
 

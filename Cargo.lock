@@ -15,6 +15,10 @@ name = "sigillum-ffi"
 version = "0.0.0"
 
 [[package]]
+name = "sigillum-jades"
+version = "0.0.0"
+
+[[package]]
 name = "sigillum-oracle"
 version = "0.0.0"
 

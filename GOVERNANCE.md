@@ -6,6 +6,8 @@ sigillum is a personal open-source project hosted in the `cyberverso-net` GitHub
 
 Decisions are made in the open: in issues and pull requests for day-to-day matters, and through a change to the relevant document for anything affecting the [charter](docs/project/charter.md), [scope](docs/project/scope.md) or [roadmap](docs/project/roadmap.md). Such changes are proposed in a pull request and left open for comment for at least 7 days before being merged.
 
+The lead maintainer may shorten or waive the comment period when the change has already been discussed in the open, is needed to unblock planned work, or corrects an error. The pull request states that the period was shortened and why. Any comment received after merging is considered, and the decision is reopened if warranted.
+
 ## Maintainers
 
 | Name | Role |

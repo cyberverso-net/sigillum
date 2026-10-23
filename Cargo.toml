@@ -5,6 +5,7 @@ members = [
     "crates/sigillum-cms",
     "crates/sigillum-cades",
     "crates/sigillum-pades",
+    "crates/sigillum-jades",
     "crates/sigillum-ffi",
     "crates/sigillum-oracle",
 ]
