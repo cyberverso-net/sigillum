@@ -42,4 +42,4 @@ Routine implementation choices do not need an ADR.
 | [0006](0006-no-network-access-in-core.md) | No network access in the core | Accepted |
 | [0007](0007-asymmetric-scope.md) | Asymmetric scope and explicit unsupported results | Accepted |
 | [0008](0008-include-jades-baseline.md) | Include JAdES baseline in scope | Accepted |
-| [0009](0009-keep-xades-deferred.md) | Keep XAdES deferred | Proposed |
+| [0009](0009-keep-xades-deferred.md) | Keep XAdES deferred | Accepted |

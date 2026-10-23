@@ -1,6 +1,6 @@
 # ADR-0009: Keep XAdES deferred
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-23
 
 ## Context
