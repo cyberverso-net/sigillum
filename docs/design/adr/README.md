@@ -43,3 +43,10 @@ Routine implementation choices do not need an ADR.
 | [0007](0007-asymmetric-scope.md) | Asymmetric scope and explicit unsupported results | Accepted |
 | [0008](0008-include-jades-baseline.md) | Include JAdES baseline in scope | Accepted |
 | [0009](0009-keep-xades-deferred.md) | Keep XAdES deferred | Accepted |
+| [0010](0010-cryptographic-backend.md) | Use RustCrypto as the default cryptographic backend | Accepted |
+| [0011](0011-asn1-x509-cms-foundations.md) | Build ASN.1, X.509 and CMS on the RustCrypto formats crates | Accepted |
+| [0012](0012-certificate-path-validation.md) | Implement certificate path validation in sigillum | Accepted |
+| [0013](0013-dss-oracle-command-line-tool.md) | Run DSS through a purpose-built command-line tool | Accepted |
+| [0014](0014-test-pki-and-corpus.md) | Generate the test PKI and corpus independently of the code under test | Accepted |
+| [0015](0015-pdf-reader-and-incremental-writer.md) | Implement a minimal PDF reader and an incremental-update writer | Accepted |
+| [0016](0016-jades-implementation-basis.md) | Implement JAdES on sigillum's own foundations | Accepted |

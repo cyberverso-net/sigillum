@@ -4,7 +4,7 @@ sigillum demonstrates conformance in two ways: mechanically, by differential tes
 
 ## DSS as an oracle
 
-DSS is used as a black box for testing. It runs as a separate process (a pinned release of its validation web service or command-line demonstration), receives signed objects, and returns its reports. It is never linked into sigillum, and no DSS code or test data is included in the repository ([ADR-0004](adr/0004-dss-as-test-oracle.md)).
+DSS is used as a black box for testing. It runs as a separate process, through a purpose-built command-line tool against a pinned DSS release ([ADR-0013](adr/0013-dss-oracle-command-line-tool.md)), receives signed objects, and returns its reports. It is never linked into sigillum, and no DSS code or test data is included in the repository ([ADR-0004](adr/0004-dss-as-test-oracle.md)).
 
 Every comparison runs with:
 
