@@ -5,6 +5,113 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    # ADR-0011: the RustCrypto and dalek crates, and the rust-random crates
+    # they depend on, move together within the pinned generation.
+    # Generation changes are handled by issue #21. Add every new dependency
+    # from these projects to both lists below.
+    groups:
+      rustcrypto-dalek:
+        patterns:
+          - aes
+          - aes-gcm
+          - aes-kw
+          - ansi-x963-kdf
+          - cms
+          - const-oid
+          - curve25519-dalek
+          - der
+          - digest
+          - ecdsa
+          - ed25519
+          - ed25519-dalek
+          - elliptic-curve
+          - getrandom
+          - p256
+          - p384
+          - p521
+          - pem-rfc7468
+          - pkcs1
+          - pkcs8
+          - rand
+          - rand_core
+          - rsa
+          - sec1
+          - sha1
+          - sha2
+          - sha3
+          - signature
+          - spki
+          - x509-cert
+          - x509-ocsp
+          - x509-tsp
+    # For 0.y.z versions, Dependabot's Cargo support treats a change of y
+    # as semver-major, as Cargo does, so these rules also hold the der 0.7
+    # generation. They do not affect security updates.
+    ignore:
+      - dependency-name: aes
+        update-types: [version-update:semver-major]
+      - dependency-name: aes-gcm
+        update-types: [version-update:semver-major]
+      - dependency-name: aes-kw
+        update-types: [version-update:semver-major]
+      - dependency-name: ansi-x963-kdf
+        update-types: [version-update:semver-major]
+      - dependency-name: cms
+        update-types: [version-update:semver-major]
+      - dependency-name: const-oid
+        update-types: [version-update:semver-major]
+      - dependency-name: curve25519-dalek
+        update-types: [version-update:semver-major]
+      - dependency-name: der
+        update-types: [version-update:semver-major]
+      - dependency-name: digest
+        update-types: [version-update:semver-major]
+      - dependency-name: ecdsa
+        update-types: [version-update:semver-major]
+      - dependency-name: ed25519
+        update-types: [version-update:semver-major]
+      - dependency-name: ed25519-dalek
+        update-types: [version-update:semver-major]
+      - dependency-name: elliptic-curve
+        update-types: [version-update:semver-major]
+      - dependency-name: getrandom
+        update-types: [version-update:semver-major]
+      - dependency-name: p256
+        update-types: [version-update:semver-major]
+      - dependency-name: p384
+        update-types: [version-update:semver-major]
+      - dependency-name: p521
+        update-types: [version-update:semver-major]
+      - dependency-name: pem-rfc7468
+        update-types: [version-update:semver-major]
+      - dependency-name: pkcs1
+        update-types: [version-update:semver-major]
+      - dependency-name: pkcs8
+        update-types: [version-update:semver-major]
+      - dependency-name: rand
+        update-types: [version-update:semver-major]
+      - dependency-name: rand_core
+        update-types: [version-update:semver-major]
+      - dependency-name: rsa
+        update-types: [version-update:semver-major]
+      - dependency-name: sec1
+        update-types: [version-update:semver-major]
+      - dependency-name: sha1
+        update-types: [version-update:semver-major]
+      - dependency-name: sha2
+        update-types: [version-update:semver-major]
+      - dependency-name: sha3
+        update-types: [version-update:semver-major]
+      - dependency-name: signature
+        update-types: [version-update:semver-major]
+      - dependency-name: spki
+        update-types: [version-update:semver-major]
+      - dependency-name: x509-cert
+        update-types: [version-update:semver-major]
+      - dependency-name: x509-ocsp
+        update-types: [version-update:semver-major]
+      - dependency-name: x509-tsp
+        update-types: [version-update:semver-major]
   - package-ecosystem: github-actions
     directory: /
     schedule:
