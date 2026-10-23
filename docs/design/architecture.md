@@ -119,4 +119,4 @@ Malformed input never causes a panic. Every parser returns a typed error. `clipp
 
 ### Minimum supported Rust version
 
-Rust 1.85 (edition 2024). Raised only in a minor release, with notice in the changelog.
+Rust 1.88 (edition 2024). Raised only in a minor release, with notice in the changelog.
