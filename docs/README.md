@@ -14,7 +14,7 @@ The documentation is organised in three parts: what the project aims to do, how 
 
 | Document | Content |
 | --- | --- |
-| [Architecture](design/architecture.md) | Workspace layout, main design choices, open questions |
+| [Architecture](design/architecture.md) | Workspace layout, structure and dependency diagrams, design overview |
 | [Architecture decision records](design/adr/README.md) | One record per significant decision |
 | [Conformance strategy](design/conformance.md) | How equivalence with DSS and the ETSI standards is demonstrated |
 | [Recorded divergences](design/divergences.md) | Intentional differences from DSS behaviour |

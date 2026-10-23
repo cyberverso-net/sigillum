@@ -11,6 +11,8 @@ All notable changes to this project are documented in this file. The format foll
 - Architecture decision records 0001 to 0007.
 - ADR-0008, bringing JAdES baseline (B-B to B-LT) into scope, and the `sigillum-jades` crate skeleton.
 - ADR-0009, recording why XAdES remains deferred.
+- ADR-0010 to ADR-0016, settling the phase 0 design questions. They cover the cryptographic backend, ASN.1 and CMS foundations, certificate path validation, DSS execution for the oracle, the test PKI and corpus, PDF handling and the JAdES implementation basis.
+- Architecture diagrams of the library structure, its dependencies and the test tooling.
 - Provision in the governance for the lead maintainer to shorten the comment period on charter, scope and roadmap changes, with the reason stated in the pull request.
 - Development process, quality gates and writing style guide.
 - Cargo workspace skeleton with the phase 1 crates.
@@ -26,3 +28,4 @@ All notable changes to this project are documented in this file. The format foll
 - CAdES and PAdES crate documentation cites part 1 of each standard for the baseline levels.
 - Continuous integration references every action by full commit hash, with the release as a comment, so that Dependabot can update them.
 - The minimum supported Rust version job reads `rust-version` from `Cargo.toml` instead of naming the toolchain in an action reference.
+- The cross-platform test job runs `sigillum-oracle` with its default features only, so that the differential tests of its `dss` feature run only in their own Linux job.
