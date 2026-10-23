@@ -72,3 +72,7 @@ Documentation and comments are written in British English, following the [style 
 ## Commit messages
 
 A short imperative summary line (at most 72 characters), a blank line, then the reason for the change. Reference issues as `Refs #12` or `Closes #12`.
+
+## Changelog
+
+Do not edit `CHANGELOG.md` directly. Add a changelog fragment for your issue under `changelog.d/`, as described in [changelog.d/README.md](changelog.d/README.md). Fragments are compiled into the changelog when a release is prepared.

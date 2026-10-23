@@ -6,7 +6,7 @@ sigillum is pre-alpha. No version is supported for production use, and no securi
 
 ## Reporting a vulnerability
 
-Report vulnerabilities privately through GitHub's private vulnerability reporting for this repository (Security tab, "Report a vulnerability"). Do not open a public issue.
+Report vulnerabilities privately through GitHub's private vulnerability reporting for this repository: <https://github.com/cyberverso-net/sigillum/security/advisories/new> (Security tab, "Report a vulnerability"). Do not open a public issue.
 
 Please include the affected component and version or commit, a description of the issue and its impact, and, where possible, a test vector or steps to reproduce.
 
