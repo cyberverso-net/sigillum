@@ -26,6 +26,7 @@ Deliverables:
 - `sigillum-cms`: CMS SignedData and EnvelopedData construction and parsing.
 - `sigillum-cades`: CAdES-BES and baseline B-B, B-T, B-LT, enveloping and detached.
 - `sigillum-pades`: PAdES-BES and baseline B-B, B-T, B-LT, incremental update, document security store, invisible and simple visible appearance.
+- `sigillum-jades`: JAdES baseline B-B, B-T, B-LT, JWS JSON and compact serialisations, enveloping and detached. Delivered after CAdES and PAdES; it may follow in release 0.2 without delaying release 0.1 ([ADR-0008](../design/adr/0008-include-jades-baseline.md)).
 - `sigillum-ffi`: Kotlin and Swift bindings through UniFFI; WASM build with `wasm-bindgen`.
 - Example applications: remote signing through the Cloud Signature Consortium API; PKCS#12 for local testing.
 
@@ -35,13 +36,13 @@ Exit criteria:
 - All parsers under continuous fuzzing, with no open crash.
 - Builds and tests pass on Android, iOS, macOS, Windows, Linux and `wasm32`.
 - The G4 targets set in phase 0 are met.
-- First release (0.1) published on crates.io.
+- First release (0.1), covering at least CAdES, PAdES and CMS EnvelopedData, published on crates.io.
 
 ## Phase 2: basic verification (indicative: about 6 months)
 
 Deliverables:
 
-- Verification of CAdES and PAdES signatures as defined in [scope.md](scope.md): integrity, chain, revocation, timestamps, object-level PDF modification detection.
+- Verification of CAdES, PAdES and JAdES signatures as defined in [scope.md](scope.md): integrity, chain, revocation, timestamps, object-level PDF modification detection.
 - Reporting in the ETSI TS 119 102-2 format and a compact summary.
 - Explicit "not supported" results for every deferred and excluded feature.
 
@@ -56,8 +57,8 @@ Deliverables:
 
 - Implementation of the ETSI EN 319 102-1 validation processes (basic, with time, long-term) and the qualification determination of TS 119 172-4 and TS 119 615, under a fixed default policy.
 - Step one: the engine consumes DSS diagnostic data and is compared with DSS reports for every check.
-- Step two: sigillum's own parsers produce the diagnostic data; EU trusted list (LOTL and national lists) retrieval, signature verification and history.
-- Baseline -LTA for CAdES and PAdES.
+- Step two: sigillum's own parsers produce the diagnostic data; EU trusted list (LOTL and national lists) retrieval, signature verification and history. The hardened XML component built for trusted-list signatures is designed so that it can later support XAdES ([ADR-0009](../design/adr/0009-keep-xades-deferred.md)).
+- Baseline -LTA for CAdES, PAdES and JAdES.
 
 Exit criteria:
 
@@ -66,7 +67,7 @@ Exit criteria:
 
 ## Phase 4: extensions (only with a partner and funding)
 
-Candidates, in the order set by demand: XAdES baseline, ASiC-E with XAdES, JAdES, the archival profile, counter-signatures, configurable policy, C ABI.
+Candidates, in the order set by demand: XAdES baseline, ASiC-E with XAdES, the archival profile, counter-signatures, configurable policy, C ABI.
 
 ## Tracking
 

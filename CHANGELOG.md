@@ -9,6 +9,9 @@ All notable changes to this project are documented in this file. The format foll
 - Project charter, scope and roadmap.
 - Architecture overview, conformance strategy and register of divergences from DSS.
 - Architecture decision records 0001 to 0007.
+- ADR-0008, bringing JAdES baseline (B-B to B-LT) into scope, and the `sigillum-jades` crate skeleton.
+- ADR-0009, recording why XAdES remains deferred.
+- Provision in the governance for the lead maintainer to shorten the comment period on charter, scope and roadmap changes, with the reason stated in the pull request.
 - Development process, quality gates and writing style guide.
 - Cargo workspace skeleton with the phase 1 crates.
 - Contribution rules (Developer Certificate of Origin, provenance rule), security policy and governance.
