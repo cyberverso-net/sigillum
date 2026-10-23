@@ -29,3 +29,4 @@ All notable changes to this project are documented in this file. The format foll
 - Continuous integration references every action by full commit hash, with the release as a comment, so that Dependabot can update them.
 - The minimum supported Rust version job reads `rust-version` from `Cargo.toml` instead of naming the toolchain in an action reference.
 - The cross-platform test job runs `sigillum-oracle` with its default features only, so that the differential tests of its `dss` feature run only in their own Linux job.
+- Dependabot groups the RustCrypto and dalek crates, and the rust-random crates they depend on, into one pull request and ignores their semver-major updates, so the set stays on the pinned `der` 0.7 generation and is updated as one.
