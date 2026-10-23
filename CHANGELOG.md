@@ -23,3 +23,5 @@ All notable changes to this project are documented in this file. The format foll
 
 - Regulation references in ADR-0008, ADR-0009 and the scope aligned with the Official Journal text, including the target versions of the standards.
 - CAdES and PAdES crate documentation cites part 1 of each standard for the baseline levels.
+- Continuous integration references every action by full commit hash, with the release as a comment, so that Dependabot can update them.
+- The minimum supported Rust version job reads `rust-version` from `Cargo.toml` instead of naming the toolchain in an action reference.
