@@ -8,7 +8,7 @@ updates:
     # ADR-0011: the RustCrypto and dalek crates, and the rust-random crates
     # they depend on, move together within the pinned generation.
     # Generation changes are handled by issue #21. Add every new dependency
-    # from these projects to both lists below.
+    # from these projects to both lists below; CI checks that they match.
     groups:
       rustcrypto-dalek:
         patterns:

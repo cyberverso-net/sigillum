@@ -15,6 +15,7 @@ Every change must pass the gates below before it is merged. Continuous integrati
 | Dependencies | `cargo deny check` | No licence, advisory or source violations |
 | Sign-off | DCO check | Every commit signed off |
 | Commit signatures | Verified commit signatures check | Every commit in the pull request has a verified signature |
+| Dependabot lists | `.github/scripts/check-dependabot-lists.sh` | The RustCrypto group and the ignore rules in `dependabot.yml` name the same crates |
 | Fixture verification (planned with the test PKI, phase 0) | `sigillum-testpki verify` with OpenSSL and `tools/dss-oracle`, Linux | Every artefact matches the result in its manifest |
 | Differential tests (planned with the harness, phase 0) | `cargo test -p sigillum-oracle --features dss` on Linux, with Java and Maven | Pass |
 

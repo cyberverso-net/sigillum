@@ -1,6 +1,6 @@
 # sigillum documentation
 
-The documentation is organised in three parts: what the project aims to do, how it is designed, and how it is developed.
+The documentation is organised in three parts: what the project aims to do, how it is designed, and how it is developed. A glossary explains the terms they use.
 
 ## Project
 
@@ -27,5 +27,11 @@ The documentation is organised in three parts: what the project aims to do, how 
 | [Process](development/process.md) | Issue types, workflow, Definition of Ready and Done, labels, releases |
 | [Quality gates](development/quality-gates.md) | Automated and author gates, thresholds, review checklist |
 | [Style guide](development/style-guide.md) | How to write documentation, comments, issues and commits |
+
+## Reference
+
+| Document | Content |
+| --- | --- |
+| [Glossary](glossary.md) | Terms used in the documentation, each with its normative source |
 
 Contribution rules, the security policy and governance are in the repository root: [CONTRIBUTING.md](../CONTRIBUTING.md), [SECURITY.md](../SECURITY.md) and [GOVERNANCE.md](../GOVERNANCE.md).
