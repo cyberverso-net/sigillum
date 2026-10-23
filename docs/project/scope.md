@@ -17,7 +17,7 @@ The scope is asymmetric by design. **Creation** is restricted to current baselin
 
 CAdES-BES and PAdES-BES are retained because they remain required by existing national systems, including the Italian Processo Civile Telematico, and are structurally close to baseline B-B.
 
-JAdES signatures always carry the `x5c` header parameter, as required by Commission Implementing Regulation (EU) 2026/248. Unsigned properties in the `etsiU` header are created in base64url-encoded form only. JAdES is delivered after CAdES and PAdES, as recorded in [ADR-0008](../design/adr/0008-include-jades-baseline.md).
+The target versions of the standards are those listed in Annex I of [Commission Implementing Regulation (EU) 2026/248](http://data.europa.eu/eli/reg_impl/2026/248/oj): ETSI EN 319 122-1 V1.3.1, ETSI EN 319 142-1 V1.2.1 and ETSI TS 119 182-1 V1.2.1. JAdES signatures always carry the `x5c` header parameter, as required by the adaptation of clause 5.1.8 in that Annex. Unsigned properties in the `etsiU` header are created in base64url-encoded form only. JAdES is delivered after CAdES and PAdES, as recorded in [ADR-0008](../design/adr/0008-include-jades-baseline.md).
 
 ### Cryptographic algorithms (creation)
 
