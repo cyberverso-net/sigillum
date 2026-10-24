@@ -650,7 +650,7 @@ fn errors_are_described() {
     let cases = [
         (
             TsaError::Key,
-            "the private key is not a PKCS#8 PEM document of an RSA, ECDSA or Ed25519 key; DER and other encodings are not accepted",
+            "the private key is not a PKCS#8 PEM document of an RSA, ECDSA or Ed25519 key of a supported form; DER and other encodings are not accepted, and an RSA key needs two primes of equal size and a modulus of 2048 to 4096 bits",
         ),
         (
             TsaError::PkiNotInManifest("pki/tsa".to_owned()),
@@ -830,11 +830,13 @@ fn each_token_has_its_defect_and_only_it() -> TestResult {
         );
         let notes = artefact.notes.as_deref().unwrap_or_default();
         match name {
-            // EN 319 102-1 V1.4.1, clause 5.2.6.4, step 4, checks revocation:
-            // PASSED assumes revocation data for the TSA chain.
+            // EN 319 102-1 V1.4.1, clause 5.2.6.4, step 4, checks revocation
+            // with the CRLs that the chain of pki/tsa links.
             "valid" | "gen-time-after-validation-time" => {
-                assert!(notes.contains("revocation data"), "{name}: {notes}");
-                assert!(notes.contains("INDETERMINATE"), "{name}: {notes}");
+                assert!(notes.contains("5.2.6.4, step 4"), "{name}: {notes}");
+                assert!(notes.contains("crl/ca-ecdsa"), "{name}: {notes}");
+                assert!(notes.contains("crl/root-ca"), "{name}: {notes}");
+                assert!(!notes.contains("later stories"), "{name}: {notes}");
             }
             "imprint-mismatch" => {
                 assert!(!notes.contains("5.2.7.4"), "{notes}");
@@ -1116,4 +1118,96 @@ fn the_certificate_is_a_single_pem_block_or_der() -> TestResult {
         );
     }
     Ok(())
+}
+
+/// The certificate of `pki/tsa` with the public key of `key` instead of
+/// its own, encoded as DER.
+fn tsa_certificate_for(key: &rsa::RsaPrivateKey) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    use spki::EncodePublicKey;
+    let spki = key.to_public_key().to_public_key_der()?;
+    let mut certificate = certificate("tsa")?;
+    certificate.tbs_certificate.subject_public_key_info =
+        SubjectPublicKeyInfoOwned::from_der(spki.as_bytes())?;
+    Ok(certificate.to_der()?)
+}
+
+/// The RSA key with these primes and the exponent 65537. `from_p_q`
+/// computes the private exponent; no prime is generated.
+fn rsa_key(p: rsa::BigUint, q: rsa::BigUint) -> Result<rsa::RsaPrivateKey, rsa::Error> {
+    rsa::RsaPrivateKey::from_p_q(p, q, rsa::BigUint::from(65_537_u32))
+}
+
+/// The Mersenne prime 2^exponent - 1.
+fn mersenne(exponent: usize) -> rsa::BigUint {
+    (rsa::BigUint::from(1_u8) << exponent) - rsa::BigUint::from(1_u8)
+}
+
+/// RSA keys of a form the test PKI does not use are refused before any
+/// signature, both from PKCS#8 and as a key pair. With p = 3 and q =
+/// 2^607 - 1, rsa 0.9.10 would take practically forever to sign. These
+/// checks only construct the authority; nothing is signed.
+#[test]
+fn rsa_keys_of_an_unsupported_form_are_refused() -> TestResult {
+    use pkcs8::EncodePrivateKey;
+    let cases = [
+        // The reported key: a 609-bit modulus with a 2-bit prime.
+        rsa_key(rsa::BigUint::from(3_u8), mersenne(607))?,
+        // A 2205-bit modulus, within the size limits, with a 2-bit prime.
+        rsa_key(rsa::BigUint::from(3_u8), mersenne(2203))?,
+    ];
+    for key in cases {
+        let certificate = tsa_certificate_for(&key)?;
+        let pem = key.to_pkcs8_pem(der::pem::LineEnding::LF)?;
+        assert_eq!(
+            Tsa::from_pem(pem.as_bytes(), &certificate).err(),
+            Some(TsaError::Key)
+        );
+        assert_eq!(
+            Tsa::new(KeyPair::Rsa(Box::new(key)), &certificate).err(),
+            Some(TsaError::Key)
+        );
+    }
+    // A balanced key whose modulus is below 2048 bits.
+    let KeyPair::Rsa(small) = KeyPair::derive(crate::pki::keys::KeyType::Rsa(1024), "small")?
+    else {
+        return Err("not an RSA key".into());
+    };
+    let certificate = tsa_certificate_for(&small)?;
+    assert_eq!(
+        Tsa::new(KeyPair::Rsa(small), &certificate).err(),
+        Some(TsaError::Key)
+    );
+    // The RSA keys of the test PKI, of 2048 and 3072 bits, are accepted.
+    for name in ["signer-rsa-2048", "signer-rsa-3072"] {
+        Tsa::from_pem(pki_file(&key_id(name))?, pki_file(&certificate_id(name))?)?;
+    }
+    Ok(())
+}
+
+#[test]
+fn rsa_moduli_and_primes_have_bounded_sizes() {
+    let accepted: [(usize, &[usize]); 5] = [
+        (2048, &[1024, 1024]),
+        (2048, &[1023, 1025]),
+        (3072, &[1536, 1536]),
+        (4096, &[2048, 2048]),
+        (4096, &[2047, 2049]),
+    ];
+    for (modulus, primes) in accepted {
+        assert!(supported_rsa_form(modulus, primes), "{modulus} {primes:?}");
+    }
+    let refused: [(usize, &[usize]); 9] = [
+        (2047, &[1023, 1024]),
+        (2046, &[1023, 1023]),
+        (4097, &[2048, 2049]),
+        (2048, &[1022, 1026]),
+        (2048, &[1026, 1022]),
+        (2048, &[1024]),
+        (2048, &[1024, 1024, 1024]),
+        (2205, &[2, 2203]),
+        (609, &[2, 607]),
+    ];
+    for (modulus, primes) in refused {
+        assert!(!supported_rsa_form(modulus, primes), "{modulus} {primes:?}");
+    }
 }

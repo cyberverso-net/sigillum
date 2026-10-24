@@ -127,7 +127,8 @@ impl DigestAlgorithm {
 /// An error found while issuing a timestamp token.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TsaError {
-    /// The private key is not a PKCS#8 PEM document of a supported key type.
+    /// The private key is not a PKCS#8 PEM document of a supported key type,
+    /// or an RSA key does not have the form that [`check_rsa_key`] requires.
     Key,
     /// The certificate is neither a PEM nor a DER X.509 certificate.
     Certificate,
@@ -154,7 +155,7 @@ impl fmt::Display for TsaError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Key => f.write_str(
-                "the private key is not a PKCS#8 PEM document of an RSA, ECDSA or Ed25519 key; DER and other encodings are not accepted",
+                "the private key is not a PKCS#8 PEM document of an RSA, ECDSA or Ed25519 key of a supported form; DER and other encodings are not accepted, and an RSA key needs two primes of equal size and a modulus of 2048 to 4096 bits",
             ),
             Self::Certificate => {
                 f.write_str("the certificate is not a PEM or DER X.509 certificate")
@@ -211,6 +212,9 @@ impl Tsa {
     /// are refused. Every DER length is checked against the input before
     /// decoding ([`input::check_der`]).
     ///
+    /// An RSA key must have the form that [`check_rsa_key`] describes;
+    /// another gives [`TsaError::Key`] before anything is signed.
+    ///
     /// The key matches the certificate when their public keys are equal
     /// once decoded, so an elliptic-curve point may be compressed or not in
     /// the certificate; a point that is not on the curve is refused.
@@ -222,9 +226,13 @@ impl Tsa {
     ///
     /// # Errors
     ///
-    /// Returns [`TsaError::Certificate`] if the certificate cannot be
-    /// parsed, and [`TsaError::KeyMismatch`] if the key does not belong to it.
+    /// Returns [`TsaError::Key`] if an RSA key has an unsupported form,
+    /// [`TsaError::Certificate`] if the certificate cannot be parsed, and
+    /// [`TsaError::KeyMismatch`] if the key does not belong to it.
     pub fn new(key: KeyPair, certificate: &[u8]) -> Result<Self, TsaError> {
+        if let KeyPair::Rsa(rsa_key) = &key {
+            check_rsa_key(rsa_key)?;
+        }
         // The DER is decoded from PEM first, and its lengths are checked
         // before x509-cert decodes it (see input::check_der).
         let der = if input::is_pem(certificate) {
@@ -386,6 +394,58 @@ impl Tsa {
             values: SetOfVec::try_from(vec![value]).map_err(encoding)?,
         })
     }
+}
+
+/// The smallest RSA modulus that a timestamping authority may have, in bits.
+pub const MIN_RSA_BITS: usize = 2048;
+
+/// The largest RSA modulus that a timestamping authority may have, in bits.
+pub const MAX_RSA_BITS: usize = 4096;
+
+/// Checks that an RSA private key has the form of the keys of the test PKI
+/// before it signs anything.
+///
+/// RFC 8017, section 3.2, allows any product of distinct odd primes, with a
+/// public exponent between 3 and n - 1 (section 3.1). A key with very
+/// unequal primes is valid there, yet rsa 0.9.10 may take practically
+/// forever to sign with it: with p = 3 and q = 2^607 - 1, the recombination
+/// of the Chinese remainder theorem adds p to a negative difference of the
+/// order of q one step at a time. This tool therefore accepts only:
+///
+/// - the key's own consistency check, `RsaPrivateKey::validate`, which
+///   checks that the primes multiply to n and that d inverts e;
+/// - exactly two primes (the quintuple form of section 3.2, with u = 2);
+/// - a modulus of [`MIN_RSA_BITS`] to [`MAX_RSA_BITS`] bits, which covers
+///   the 2048-bit and 3072-bit keys of the test PKI;
+/// - primes of half the modulus length each, within one bit;
+/// - as a consequence of the consistency check, an odd public exponent of
+///   at least 3, as section 3.1 requires: the rsa crate refuses an
+///   exponent below 2 or above 2^33 - 1, and d e = 1 modulo the even
+///   number p - 1 holds only for an odd e.
+///
+/// # Errors
+///
+/// Returns [`TsaError::Key`] for a key of another form.
+pub fn check_rsa_key(key: &rsa::RsaPrivateKey) -> Result<(), TsaError> {
+    use rsa::traits::{PrivateKeyParts, PublicKeyParts};
+    key.validate().map_err(invalid_key)?;
+    let primes: Vec<usize> = key.primes().iter().map(rsa::BigUint::bits).collect();
+    if supported_rsa_form(key.n().bits(), &primes) {
+        Ok(())
+    } else {
+        Err(TsaError::Key)
+    }
+}
+
+/// Reports whether a modulus of `modulus_bits` with primes of `prime_bits`
+/// has the form that [`check_rsa_key`] accepts.
+fn supported_rsa_form(modulus_bits: usize, prime_bits: &[usize]) -> bool {
+    let half = modulus_bits / 2;
+    (MIN_RSA_BITS..=MAX_RSA_BITS).contains(&modulus_bits)
+        && prime_bits.len() == 2
+        && prime_bits
+            .iter()
+            .all(|&bits| bits + 1 >= half && bits <= half + 1)
 }
 
 /// Reports whether `key` is the private key of the public key in `spki`.
@@ -618,7 +678,7 @@ const TOKENS: [TokenSpec; 4] = [
         purpose: "Valid timestamp token over timestamps/content, issued by pki/tsa one day before the validation time.",
         expected_openssl: OpensslResult::Verified,
         expected_dss: (Indication::Passed, None),
-        notes: "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, clause 5.4.4, to be confirmed when verify runs DSS. Step 1 runs the basic signature validation, whose X.509 validation checks revocation (clause 5.2.6.4, step 4), so PASSED assumes the revocation data for the chain of pki/tsa that later stories link. Without it, DSS would likely report INDETERMINATE.",
+        notes: "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, clause 5.4.4, to be confirmed when verify runs DSS. Step 1 runs the basic signature validation, whose X.509 validation checks revocation (clause 5.2.6.4, step 4) with the CRLs that the chain of pki/tsa links: crl/ca-ecdsa for pki/tsa and crl/root-ca for pki/ca-ecdsa. Neither CRL revokes a certificate of the chain.",
     },
     TokenSpec {
         name: "signer-without-time-stamping",
@@ -648,7 +708,7 @@ const TOKENS: [TokenSpec; 4] = [
         purpose: "Timestamp token over timestamps/content, issued by pki/tsa with a genTime one day after the validation time.",
         expected_openssl: OpensslResult::Verified,
         expected_dss: (Indication::Passed, None),
-        notes: "openssl ts -verify does not compare genTime with the verification time. Neither does the time-stamp validation building block of ETSI EN 319 102-1 V1.4.1, clause 5.4.4, so the DSS result PASSED is a prediction, to be confirmed when verify runs DSS. Like that of timestamps/valid, it assumes the revocation data for the chain of pki/tsa that later stories link (clause 5.2.6.4, step 4); without it, DSS would likely report INDETERMINATE. A verifier that uses the token as time evidence must reject a genTime after the validation time.",
+        notes: "openssl ts -verify does not compare genTime with the verification time. Neither does the time-stamp validation building block of ETSI EN 319 102-1 V1.4.1, clause 5.4.4, so the DSS result PASSED is a prediction, to be confirmed when verify runs DSS. As for timestamps/valid, revocation is checked (clause 5.2.6.4, step 4) with the CRLs that the chain of pki/tsa links, crl/ca-ecdsa and crl/root-ca, which revoke none of its certificates. A verifier that uses the token as time evidence must reject a genTime after the validation time.",
     },
 ];
 
@@ -780,11 +840,16 @@ fn generated_here(artefact: &Artefact) -> bool {
 /// list the test PKI or cannot be updated, or a file cannot be generated
 /// or written.
 pub fn write_into_corpus(manifest_path: &Path) -> Result<Summary, GenerateError> {
-    let manifest = Manifest::load(manifest_path).map_err(GenerateError::Manifest)?;
-    check_pki_listed(&manifest).map_err(GenerateError::Timestamp)?;
-    pki::write_generated(manifest_path, DIRECTORY, generated_here, |time| {
-        generate(time).map_err(GenerateError::Timestamp)
-    })
+    pki::write_generated(
+        manifest_path,
+        DIRECTORY,
+        generated_here,
+        |manifest| {
+            check_pki_listed(manifest).map_err(GenerateError::Timestamp)?;
+            generate(manifest.header.validation_time).map_err(GenerateError::Timestamp)
+        },
+        |_, _| {},
+    )
 }
 
 #[cfg(test)]

@@ -5,8 +5,13 @@
 //! certificates. The ECDSA CA also issues the timestamping authority, the
 //! OCSP responder and the validity and misconfiguration cases. Every time
 //! is an offset from the fixed validation time of the manifest.
+//!
+//! One end-entity certificate per family is revoked before the planned
+//! signing time, and one ECDSA certificate after it. The CRLs of
+//! [`super::crl`] record these revocations.
 
 use time::{Duration, OffsetDateTime};
+use x509_cert::ext::pkix::crl::CrlReason;
 
 use super::PkiError;
 use super::keys::{KeyType, SignatureAlgorithm};
@@ -75,6 +80,35 @@ impl Offset {
     }
 }
 
+/// The planned signing time of the signed corpus, 30 days before the
+/// validation time. The revocations of the test PKI are placed before or
+/// after it, for the B-T and B-LT cases of later stories.
+pub const PLANNED_SIGNING_TIME: Offset = Offset::days(-30);
+
+/// The revocation of a certificate, as the CRL of its issuer records it
+/// (RFC 5280, section 5.1.2.6).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Revocation {
+    /// The revocation date, from the validation time.
+    pub date: Offset,
+    /// The reason code (RFC 5280, section 5.3.1).
+    pub reason: CrlReason,
+}
+
+/// A revocation 60 days before the validation time, and so before the
+/// planned signing time, for key compromise.
+const REVOKED_BEFORE_SIGNING: Revocation = Revocation {
+    date: Offset::days(-60),
+    reason: CrlReason::KeyCompromise,
+};
+
+/// A revocation 10 days before the validation time, after the planned
+/// signing time, for key compromise.
+const REVOKED_AFTER_SIGNING: Revocation = Revocation {
+    date: Offset::days(-10),
+    reason: CrlReason::KeyCompromise,
+};
+
 /// The result expected from DSS for a certificate.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ExpectedDss {
@@ -114,6 +148,8 @@ pub struct CertSpec {
     pub expected_dss: ExpectedDss,
     /// Remarks for the manifest.
     pub notes: Option<&'static str>,
+    /// The revocation of the certificate, or `None` if it is not revoked.
+    pub revocation: Option<Revocation>,
 }
 
 const PASSED: ExpectedDss = ExpectedDss {
@@ -133,6 +169,13 @@ const OUT_OF_BOUNDS: ExpectedDss = ExpectedDss {
 const CHAIN_FAILURE: ExpectedDss = ExpectedDss {
     indication: Indication::Indeterminate,
     sub_indication: Some("CERTIFICATE_CHAIN_GENERAL_FAILURE"),
+};
+
+/// ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, step 4 b): the path
+/// validation finds the certificate revoked.
+const REVOKED: ExpectedDss = ExpectedDss {
+    indication: Indication::Indeterminate,
+    sub_indication: Some("REVOKED_NO_POE"),
 };
 
 /// An end-entity signing certificate, valid from one year before to two
@@ -160,6 +203,18 @@ pub(super) const fn signer(
         expected_openssl: OpensslResult::Verified,
         expected_dss: PASSED,
         notes: None,
+        revocation: None,
+    }
+}
+
+/// An end-entity signing certificate revoked by its issuer, whose
+/// validation therefore fails at the validation time.
+pub(super) const fn revoked(revocation: Revocation, spec: CertSpec) -> CertSpec {
+    CertSpec {
+        revocation: Some(revocation),
+        expected_openssl: OpensslResult::Rejected,
+        expected_dss: REVOKED,
+        ..spec
     }
 }
 
@@ -190,7 +245,7 @@ pub(super) const fn ca(
 
 /// Every certificate of the test PKI, each issuer before the certificates
 /// it issues.
-pub const CERTIFICATES: [CertSpec; 27] = [
+pub const CERTIFICATES: [CertSpec; 32] = [
     CertSpec {
         issuer: None,
         role: Role::Root,
@@ -476,6 +531,71 @@ pub const CERTIFICATES: [CertSpec; 27] = [
             Sig::EcdsaSha384,
             0x1209,
             "End-entity signing certificate with a critical extension that no implementation recognises.",
+        )
+    },
+    revoked(
+        REVOKED_BEFORE_SIGNING,
+        signer(
+            "signer-rsa-revoked",
+            "sigillum test signer RSA revoked",
+            Rsa(2048),
+            "ca-rsa",
+            Sig::RsaPkcs1Sha256,
+            0x1004,
+            "End-entity signing certificate of the RSA PKCS#1 v1.5 family, revoked for key compromise before the planned signing time.",
+        ),
+    ),
+    revoked(
+        REVOKED_BEFORE_SIGNING,
+        signer(
+            "signer-rsa-pss-revoked",
+            "sigillum test signer RSASSA-PSS revoked",
+            Rsa(2048),
+            "ca-rsa-pss",
+            Sig::RsaPssSha256,
+            0x1103,
+            "End-entity signing certificate of the RSASSA-PSS family, revoked for key compromise before the planned signing time.",
+        ),
+    ),
+    revoked(
+        REVOKED_BEFORE_SIGNING,
+        signer(
+            "signer-p256-revoked",
+            "sigillum test signer P-256 revoked",
+            P256,
+            "ca-ecdsa",
+            Sig::EcdsaSha384,
+            0x120A,
+            "End-entity signing certificate of the ECDSA family, revoked for key compromise before the planned signing time.",
+        ),
+    ),
+    revoked(
+        REVOKED_BEFORE_SIGNING,
+        signer(
+            "signer-ed25519-revoked",
+            "sigillum test signer Ed25519 revoked",
+            Ed25519,
+            "ca-ed25519",
+            Sig::Ed25519,
+            0x1302,
+            "End-entity signing certificate of the Ed25519 family, revoked for key compromise before the planned signing time.",
+        ),
+    ),
+    CertSpec {
+        notes: Some(
+            "Revoked 10 days before the validation time, 20 days after the planned signing time, for signatures that a timestamp shows to exist before the revocation.",
+        ),
+        ..revoked(
+            REVOKED_AFTER_SIGNING,
+            signer(
+                "signer-p256-revoked-after-signing",
+                "sigillum test signer P-256 revoked after signing",
+                P256,
+                "ca-ecdsa",
+                Sig::EcdsaSha384,
+                0x120B,
+                "End-entity signing certificate of the ECDSA family, revoked for key compromise after the planned signing time.",
+            ),
         )
     },
 ];

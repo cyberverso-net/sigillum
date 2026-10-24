@@ -58,8 +58,22 @@ struct GenerateOptions {
 enum Target {
     /// The certificates and private keys of the test PKI, under pki/.
     Pki,
-    /// The standalone timestamp tokens and the data they cover, under timestamps/.
+    /// The CRLs of the test PKI, under crl/, after the certificates.
+    Crls,
+    /// The standalone timestamp tokens and the data they cover, under
+    /// timestamps/, after the certificates.
     Timestamps,
+}
+
+impl Target {
+    /// The name of the target on the command line.
+    fn name(self) -> &'static str {
+        match self {
+            Self::Pki => "pki",
+            Self::Crls => "crls",
+            Self::Timestamps => "timestamps",
+        }
+    }
 }
 
 const NOT_IMPLEMENTED: u8 = 3;
@@ -72,13 +86,12 @@ fn main() -> ExitCode {
     let cli = Cli::parse();
     let (name, time) = match &cli.command {
         Command::Generate(GenerateOptions { target, corpus }) => {
-            let (name, result) = match target {
-                Target::Pki => ("pki", pki::write_into_corpus(&corpus.manifest)),
-                Target::Timestamps => {
-                    ("timestamps", timestamp::write_into_corpus(&corpus.manifest))
-                }
+            let result = match target {
+                Target::Pki => pki::write_into_corpus(&corpus.manifest),
+                Target::Crls => pki::crl::write_into_corpus(&corpus.manifest),
+                Target::Timestamps => timestamp::write_into_corpus(&corpus.manifest),
             };
-            return report(name, result, &corpus.manifest);
+            return report(target.name(), result, &corpus.manifest);
         }
         Command::Verify(options) => match Manifest::load(&options.manifest) {
             Ok(manifest) => ("verify", manifest.header.validation_time),

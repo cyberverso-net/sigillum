@@ -36,6 +36,7 @@ fn every_subcommand_has_help() -> std::io::Result<()> {
     for (subcommand, option) in [
         ("generate", "--manifest"),
         ("generate", "pki"),
+        ("generate", "crls"),
         ("generate", "timestamps"),
         ("tsa", "--tsa-cert"),
         ("tsa", "--digest-algorithm"),
@@ -81,10 +82,10 @@ fn generate_pki_writes_the_files_and_the_manifest() -> Result<(), Box<dyn std::e
     let dir = manifest.parent().ok_or("no parent")?.to_path_buf();
     let output = run(&["generate", "pki", "--manifest", &manifest.to_string_lossy()])?;
     assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
-    assert!(text(&output.stdout).contains("wrote 54 files"));
+    assert!(text(&output.stdout).contains("wrote 64 files"));
     let written = std::fs::read_to_string(&manifest)?;
     let parsed = sigillum_testpki::manifest::Manifest::parse(&written)?;
-    assert_eq!(parsed.artefacts.len(), 54);
+    assert_eq!(parsed.artefacts.len(), 64);
     for artefact in &parsed.artefacts {
         assert!(dir.join(&artefact.path).is_file(), "{}", artefact.id);
     }
@@ -100,7 +101,12 @@ fn generate_pki_writes_the_files_and_the_manifest() -> Result<(), Box<dyn std::e
         m.artefacts
             .iter()
             .filter(|a| a.id.starts_with("pki/"))
-            .map(|a| (a.id.clone(), a.clone()))
+            .map(|a| {
+                // generate crls adds the revocation links.
+                let mut a = a.clone();
+                a.links.revocation.clear();
+                (a.id.clone(), a)
+            })
             .collect::<std::collections::BTreeMap<_, _>>()
     };
     assert_eq!(pki_entries(&parsed), pki_entries(&committed));
@@ -115,7 +121,7 @@ fn generate_pki_keeps_other_artefacts() -> Result<(), Box<dyn std::error::Error>
     let output = run(&["generate", "pki", "--manifest", &manifest.to_string_lossy()])?;
     assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
     let parsed = sigillum_testpki::manifest::Manifest::load(&manifest)?;
-    assert_eq!(parsed.artefacts.len(), 55);
+    assert_eq!(parsed.artefacts.len(), 65);
     assert_eq!(parsed.artefacts[0].id, "doc/a");
     let _ = std::fs::remove_dir_all(manifest.parent().ok_or("no parent")?);
     Ok(())
@@ -262,7 +268,7 @@ fn generate_needs_a_known_target() -> std::io::Result<()> {
         Some(2)
     );
     assert_eq!(
-        run(&["generate", "crls", "--manifest", &manifest])?
+        run(&["generate", "unknown", "--manifest", &manifest])?
             .status
             .code(),
         Some(2)
@@ -603,7 +609,7 @@ fn generate_timestamps_writes_the_tokens_and_the_manifest() -> Result<(), Box<dy
     assert!(output.stderr.is_empty(), "{}", text(&output.stderr));
     let written = std::fs::read_to_string(&manifest)?;
     let parsed = sigillum_testpki::manifest::Manifest::parse(&written)?;
-    assert_eq!(parsed.artefacts.len(), 59);
+    assert_eq!(parsed.artefacts.len(), 69);
     // Running again changes nothing, and the entries are those of the
     // committed corpus.
     let output = run(&["generate", "timestamps", "--manifest", &path])?;
@@ -733,6 +739,197 @@ fn tsa_reads_key_and_certificate_files_up_to_64_kib() -> Result<(), Box<dyn std:
         let stderr = text(&output.stderr);
         assert!(stderr.contains(path.as_str()), "{stderr}");
         assert!(stderr.contains("larger than 65536 bytes"), "{stderr}");
+    }
+    let _ = std::fs::remove_dir_all(&dir);
+    Ok(())
+}
+
+/// The manifest at `path`, parsed.
+fn load(
+    path: &std::path::Path,
+) -> Result<sigillum_testpki::manifest::Manifest, Box<dyn std::error::Error>> {
+    Ok(sigillum_testpki::manifest::Manifest::load(path)?)
+}
+
+#[test]
+fn generate_crls_writes_the_crls_and_links_the_certificates()
+-> Result<(), Box<dyn std::error::Error>> {
+    let manifest = corpus("generate_crls_writes_the_crls", "")?;
+    let dir = manifest.parent().ok_or("no parent")?.to_path_buf();
+    let path = manifest.to_string_lossy().into_owned();
+    let output = run(&["generate", "pki", "--manifest", &path])?;
+    assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
+    let output = run(&["generate", "crls", "--manifest", &path])?;
+    assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
+    assert!(text(&output.stdout).contains("generate crls: wrote 12 files"));
+    assert!(text(&output.stderr).is_empty(), "{}", text(&output.stderr));
+    let written = std::fs::read_to_string(&manifest)?;
+    // The entries are those of the committed corpus, which also holds
+    // the timestamp tokens.
+    let committed: Vec<_> = load(&committed_manifest())?
+        .artefacts
+        .into_iter()
+        .filter(|a| !a.id.starts_with("timestamps/"))
+        .collect();
+    assert_eq!(load(&manifest)?.artefacts, committed);
+    for artefact in &load(&manifest)?.artefacts {
+        assert!(dir.join(&artefact.path).is_file(), "{}", artefact.id);
+    }
+    // Running either generator again changes nothing: generate pki keeps
+    // the revocation links that generate crls set.
+    for target in ["crls", "pki"] {
+        let output = run(&["generate", target, "--manifest", &path])?;
+        assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
+        assert!(text(&output.stderr).is_empty(), "{}", text(&output.stderr));
+        assert_eq!(std::fs::read_to_string(&manifest)?, written, "{target}");
+    }
+    let _ = std::fs::remove_dir_all(&dir);
+    Ok(())
+}
+
+#[test]
+fn generate_crls_needs_the_certificates() -> Result<(), Box<dyn std::error::Error>> {
+    let manifest = corpus("generate_crls_needs_the_certificates", "")?;
+    let dir = manifest.parent().ok_or("no parent")?.to_path_buf();
+    let before = std::fs::read_to_string(&manifest)?;
+    let output = run(&[
+        "generate",
+        "crls",
+        "--manifest",
+        &manifest.to_string_lossy(),
+    ])?;
+    assert_eq!(output.status.code(), Some(1));
+    let stderr = text(&output.stderr);
+    assert!(stderr.contains("\"pki/root-ca\""), "{stderr}");
+    assert_eq!(std::fs::read_to_string(&manifest)?, before);
+    assert!(!dir.join("crl").exists());
+    let _ = std::fs::remove_dir_all(&dir);
+    Ok(())
+}
+
+#[test]
+fn generate_crls_prunes_stale_crls_and_the_links_to_them() -> Result<(), Box<dyn std::error::Error>>
+{
+    let manifest = corpus("generate_crls_prunes_stale_crls", "")?;
+    let dir = manifest.parent().ok_or("no parent")?.to_path_buf();
+    let path = manifest.to_string_lossy().into_owned();
+    let output = run(&["generate", "pki", "--manifest", &path])?;
+    assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
+    let entry = |id: &str, path: &str, kind: &str, links: &str| {
+        format!(
+            "\n[[artefact]]\nid = \"{id}\"\npath = \"{path}\"\nsha256 = \"0000000000000000000000000000000000000000000000000000000000000000\"\nkind = \"{kind}\"\npurpose = \"Other\"\nexpected-openssl = \"not-applicable\"\nexpected-dss = \"not-applicable\"\n{links}"
+        )
+    };
+    let extra = [
+        // A CRL the generator no longer produces: removed, with the links to it.
+        entry("crl/old", "crl/old.crl", "crl", ""),
+        // A revocation artefact of another generator: kept, with its links.
+        entry(
+            "ocsp/signer-p256",
+            "ocsp/signer-p256.der",
+            "ocsp-response",
+            "",
+        ),
+        entry(
+            "doc/a",
+            "doc/a.txt",
+            "document",
+            "links = { revocation = [\"crl/old\", \"ocsp/signer-p256\"] }\n",
+        ),
+    ]
+    .concat();
+    let mut text_before = std::fs::read_to_string(&manifest)?;
+    text_before.push_str(&extra);
+    std::fs::write(&manifest, &text_before)?;
+    std::fs::create_dir_all(dir.join("crl"))?;
+    std::fs::write(dir.join("crl/old.crl"), "")?;
+    std::fs::write(dir.join("crl/stray.crl"), "")?;
+    let output = run(&["generate", "crls", "--manifest", &path])?;
+    assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
+    let stderr = text(&output.stderr);
+    assert!(
+        stderr.contains("generate crls: removed the manifest entry crl/old"),
+        "{stderr}"
+    );
+    assert!(
+        stderr.contains("no manifest entry names crl/old.crl"),
+        "{stderr}"
+    );
+    assert!(
+        stderr.contains("no manifest entry names crl/stray.crl"),
+        "{stderr}"
+    );
+    let parsed = load(&manifest)?;
+    assert!(parsed.artefacts.iter().all(|a| a.id != "crl/old"));
+    let doc = parsed
+        .artefacts
+        .iter()
+        .find(|a| a.id == "doc/a")
+        .ok_or("no doc/a")?;
+    assert_eq!(doc.links.revocation, ["ocsp/signer-p256"]);
+    assert!(dir.join("crl/old.crl").is_file());
+    let _ = std::fs::remove_dir_all(&dir);
+    Ok(())
+}
+
+/// generate crls keeps the revocation links of the CRL entries it
+/// replaces, as generate pki does for certificates.
+#[test]
+fn generate_crls_keeps_the_revocation_links_of_its_entries()
+-> Result<(), Box<dyn std::error::Error>> {
+    let manifest = corpus("generate_crls_keeps_the_revocation_links", "")?;
+    let dir = manifest.parent().ok_or("no parent")?.to_path_buf();
+    let path = manifest.to_string_lossy().into_owned();
+    for target in ["pki", "crls"] {
+        let output = run(&["generate", target, "--manifest", &path])?;
+        assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
+    }
+    let mut parsed = load(&manifest)?;
+    let crl = parsed
+        .artefacts
+        .iter_mut()
+        .find(|a| a.id == "crl/ca-rsa")
+        .ok_or("no crl/ca-rsa")?;
+    crl.links.revocation = vec!["crl/root-ca".to_owned()];
+    std::fs::write(&manifest, parsed.to_toml())?;
+    let output = run(&["generate", "crls", "--manifest", &path])?;
+    assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
+    let crl = load(&manifest)?
+        .artefacts
+        .into_iter()
+        .find(|a| a.id == "crl/ca-rsa")
+        .ok_or("no crl/ca-rsa")?;
+    assert_eq!(crl.links.revocation, ["crl/root-ca"]);
+    let _ = std::fs::remove_dir_all(&dir);
+    Ok(())
+}
+
+/// The three generators, run in the documented order on a manifest with
+/// only a header, reproduce the committed manifest byte for byte.
+#[test]
+fn the_generators_in_order_reproduce_the_committed_manifest()
+-> Result<(), Box<dyn std::error::Error>> {
+    let manifest = corpus("the_generators_in_order_reproduce_the_manifest", "")?;
+    let dir = manifest.parent().ok_or("no parent")?.to_path_buf();
+    let path = manifest.to_string_lossy().into_owned();
+    for target in ["pki", "crls", "timestamps"] {
+        let output = run(&["generate", target, "--manifest", &path])?;
+        assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
+        assert!(text(&output.stderr).is_empty(), "{}", text(&output.stderr));
+    }
+    assert_eq!(
+        std::fs::read_to_string(&manifest)?,
+        std::fs::read_to_string(committed_manifest())?
+    );
+    let committed = committed_manifest();
+    let testdata = committed.parent().ok_or("no parent")?;
+    for artefact in &load(&manifest)?.artefacts {
+        assert_eq!(
+            std::fs::read(dir.join(&artefact.path))?,
+            std::fs::read(testdata.join(&artefact.path))?,
+            "{}",
+            artefact.id
+        );
     }
     let _ = std::fs::remove_dir_all(&dir);
     Ok(())

@@ -32,7 +32,7 @@ kind = "certificate"
 purpose = "Issuing CA of the RSA PKCS#1 v1.5 family, with an RSA 3072-bit key."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/root-ca", chain = ["pki/root-ca"] }
+links = { issuer = "pki/root-ca", chain = ["pki/root-ca"], revocation = ["crl/root-ca"] }
 
 [[artefact]]
 id = "pki/keys/ca-rsa"
@@ -51,7 +51,7 @@ kind = "certificate"
 purpose = "Issuing CA of the RSASSA-PSS family, with an RSA 3072-bit key that signs with RSASSA-PSS."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/root-ca", chain = ["pki/root-ca"] }
+links = { issuer = "pki/root-ca", chain = ["pki/root-ca"], revocation = ["crl/root-ca"] }
 
 [[artefact]]
 id = "pki/keys/ca-rsa-pss"
@@ -70,7 +70,7 @@ kind = "certificate"
 purpose = "Issuing CA of the ECDSA family, with a P-384 key that signs with ECDSA and SHA-384."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/root-ca", chain = ["pki/root-ca"] }
+links = { issuer = "pki/root-ca", chain = ["pki/root-ca"], revocation = ["crl/root-ca"] }
 
 [[artefact]]
 id = "pki/keys/ca-ecdsa"
@@ -89,7 +89,7 @@ kind = "certificate"
 purpose = "Second issuing CA of the ECDSA family, with a P-521 key that signs with ECDSA and SHA-512."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/root-ca", chain = ["pki/root-ca"] }
+links = { issuer = "pki/root-ca", chain = ["pki/root-ca"], revocation = ["crl/root-ca"] }
 
 [[artefact]]
 id = "pki/keys/ca-ecdsa-p521"
@@ -108,7 +108,7 @@ kind = "certificate"
 purpose = "Issuing CA of the Ed25519 family."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/root-ca", chain = ["pki/root-ca"] }
+links = { issuer = "pki/root-ca", chain = ["pki/root-ca"], revocation = ["crl/root-ca"] }
 
 [[artefact]]
 id = "pki/keys/ca-ed25519"
@@ -127,7 +127,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate with an RSA 2048-bit key, signed with RSA PKCS#1 v1.5 and SHA-256."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"] }
+links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"], revocation = ["crl/ca-rsa"] }
 
 [[artefact]]
 id = "pki/keys/signer-rsa-2048"
@@ -146,7 +146,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate with an RSA 3072-bit key, signed with RSA PKCS#1 v1.5 and SHA-256."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"] }
+links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"], revocation = ["crl/ca-rsa"] }
 
 [[artefact]]
 id = "pki/keys/signer-rsa-3072"
@@ -165,7 +165,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate with an RSA 2048-bit key, signed with RSA PKCS#1 v1.5 and SHA3-256."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"] }
+links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"], revocation = ["crl/ca-rsa"] }
 
 [[artefact]]
 id = "pki/keys/signer-rsa-sha3-256"
@@ -184,7 +184,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate with an RSA 3072-bit key, signed with RSASSA-PSS and SHA-256."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/ca-rsa-pss", chain = ["pki/ca-rsa-pss", "pki/root-ca"] }
+links = { issuer = "pki/ca-rsa-pss", chain = ["pki/ca-rsa-pss", "pki/root-ca"], revocation = ["crl/ca-rsa-pss"] }
 
 [[artefact]]
 id = "pki/keys/signer-rsa-pss-sha256"
@@ -203,7 +203,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate with an RSA 3072-bit key, signed with RSASSA-PSS and SHA-384."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/ca-rsa-pss", chain = ["pki/ca-rsa-pss", "pki/root-ca"] }
+links = { issuer = "pki/ca-rsa-pss", chain = ["pki/ca-rsa-pss", "pki/root-ca"], revocation = ["crl/ca-rsa-pss"] }
 
 [[artefact]]
 id = "pki/keys/signer-rsa-pss-sha384"
@@ -222,7 +222,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate with an ECDSA P-256 key."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"] }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa"] }
 
 [[artefact]]
 id = "pki/keys/signer-p256"
@@ -241,7 +241,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate with an ECDSA P-384 key."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"] }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa"] }
 
 [[artefact]]
 id = "pki/keys/signer-p384"
@@ -260,7 +260,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate with an ECDSA P-521 key, signed with ECDSA on P-521 and SHA-512."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/ca-ecdsa-p521", chain = ["pki/ca-ecdsa-p521", "pki/root-ca"] }
+links = { issuer = "pki/ca-ecdsa-p521", chain = ["pki/ca-ecdsa-p521", "pki/root-ca"], revocation = ["crl/ca-ecdsa-p521"] }
 
 [[artefact]]
 id = "pki/keys/signer-p521"
@@ -279,7 +279,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate with an Ed25519 key."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/ca-ed25519", chain = ["pki/ca-ed25519", "pki/root-ca"] }
+links = { issuer = "pki/ca-ed25519", chain = ["pki/ca-ed25519", "pki/root-ca"], revocation = ["crl/ca-ed25519"] }
 
 [[artefact]]
 id = "pki/keys/signer-ed25519"
@@ -298,7 +298,7 @@ kind = "certificate"
 purpose = "Timestamping authority certificate, with the critical extended key usage id-kp-timeStamping."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"] }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa"] }
 
 [[artefact]]
 id = "pki/keys/tsa"
@@ -317,7 +317,7 @@ kind = "certificate"
 purpose = "Delegated OCSP responder of the ECDSA CA, with id-kp-OCSPSigning and id-pkix-ocsp-nocheck."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"] }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa"] }
 
 [[artefact]]
 id = "pki/keys/ocsp-responder"
@@ -336,7 +336,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate that expired one day before the validation time."
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
-links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"] }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa"] }
 
 [[artefact]]
 id = "pki/keys/signer-expired"
@@ -355,7 +355,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate that becomes valid one day after the validation time."
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
-links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"] }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa"] }
 
 [[artefact]]
 id = "pki/keys/signer-not-yet-valid"
@@ -374,7 +374,7 @@ kind = "certificate"
 purpose = "Intermediate CA that expired one day before the validation time."
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
-links = { issuer = "pki/root-ca", chain = ["pki/root-ca"] }
+links = { issuer = "pki/root-ca", chain = ["pki/root-ca"], revocation = ["crl/root-ca"] }
 
 [[artefact]]
 id = "pki/keys/ca-expired"
@@ -393,7 +393,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate, valid at the validation time, issued by an intermediate CA that has expired."
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
-links = { issuer = "pki/ca-expired", chain = ["pki/ca-expired", "pki/root-ca"] }
+links = { issuer = "pki/ca-expired", chain = ["pki/ca-expired", "pki/root-ca"], revocation = ["crl/ca-expired"] }
 
 [[artefact]]
 id = "pki/keys/signer-under-expired-ca"
@@ -412,7 +412,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate whose key usage lacks nonRepudiation."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"] }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa"] }
 
 [[artefact]]
 id = "pki/keys/signer-without-non-repudiation"
@@ -431,7 +431,7 @@ kind = "certificate"
 purpose = "CA certificate whose basic constraints do not assert cA."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/root-ca", chain = ["pki/root-ca"] }
+links = { issuer = "pki/root-ca", chain = ["pki/root-ca"], revocation = ["crl/root-ca"] }
 notes = "Basic constraints are present and leave cA at its default, FALSE, while the key usage asserts keyCertSign. OpenSSL rejects the certificate itself only with -x509_strict."
 
 [[artefact]]
@@ -451,7 +451,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate issued by a CA certificate whose basic constraints do not assert cA."
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
-links = { issuer = "pki/ca-without-ca-flag", chain = ["pki/ca-without-ca-flag", "pki/root-ca"] }
+links = { issuer = "pki/ca-without-ca-flag", chain = ["pki/ca-without-ca-flag", "pki/root-ca"], revocation = ["crl/ca-without-ca-flag"] }
 
 [[artefact]]
 id = "pki/keys/signer-under-ca-without-ca-flag"
@@ -470,7 +470,7 @@ kind = "certificate"
 purpose = "CA certificate without the basic constraints extension, while the key usage asserts keyCertSign."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/root-ca", chain = ["pki/root-ca"] }
+links = { issuer = "pki/root-ca", chain = ["pki/root-ca"], revocation = ["crl/root-ca"] }
 notes = "The basic constraints extension is absent (RFC 5280, section 4.2.1.9). OpenSSL rejects the certificate itself only with -x509_strict."
 
 [[artefact]]
@@ -490,7 +490,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate issued by a CA certificate without the basic constraints extension."
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
-links = { issuer = "pki/ca-without-basic-constraints", chain = ["pki/ca-without-basic-constraints", "pki/root-ca"] }
+links = { issuer = "pki/ca-without-basic-constraints", chain = ["pki/ca-without-basic-constraints", "pki/root-ca"], revocation = ["crl/ca-without-basic-constraints"] }
 
 [[artefact]]
 id = "pki/keys/signer-under-ca-without-basic-constraints"
@@ -509,7 +509,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate with a critical extension that no implementation recognises."
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
-links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"] }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa"] }
 notes = "The extension 1.3.6.1.4.1.32473.1.1 is critical and its value is a DER NULL."
 
 [[artefact]]
@@ -520,6 +520,234 @@ kind = "private-key"
 purpose = "PKCS#8 private key of pki/signer-unknown-critical-extension, a test key with no value."
 expected-openssl = "parsed"
 expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/signer-rsa-revoked"
+path = "pki/signer-rsa-revoked.pem"
+sha256 = "e89a73fa94bb68e189f5cd50a683534ccd5a1e9c209a5e65b4ee7c77b3e4c6a3"
+kind = "certificate"
+purpose = "End-entity signing certificate of the RSA PKCS#1 v1.5 family, revoked for key compromise before the planned signing time."
+expected-openssl = "rejected"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "REVOKED_NO_POE" }
+links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"], revocation = ["crl/ca-rsa"] }
+
+[[artefact]]
+id = "pki/keys/signer-rsa-revoked"
+path = "pki/keys/signer-rsa-revoked.test-key.pem"
+sha256 = "eb37c67cbd0f8083825a658fa7361acf0b7f77e17005c34b54500e8bab5d09fe"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/signer-rsa-revoked, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/signer-rsa-pss-revoked"
+path = "pki/signer-rsa-pss-revoked.pem"
+sha256 = "0033c38af92d0e1e6d7292edc6a0dce6ce2e98a0b80fb3f0f15767218b127b38"
+kind = "certificate"
+purpose = "End-entity signing certificate of the RSASSA-PSS family, revoked for key compromise before the planned signing time."
+expected-openssl = "rejected"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "REVOKED_NO_POE" }
+links = { issuer = "pki/ca-rsa-pss", chain = ["pki/ca-rsa-pss", "pki/root-ca"], revocation = ["crl/ca-rsa-pss"] }
+
+[[artefact]]
+id = "pki/keys/signer-rsa-pss-revoked"
+path = "pki/keys/signer-rsa-pss-revoked.test-key.pem"
+sha256 = "74773c487ac461bc60e1b1237669b741e33ff3eb12ac698e7059c7bf060f609e"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/signer-rsa-pss-revoked, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/signer-p256-revoked"
+path = "pki/signer-p256-revoked.pem"
+sha256 = "c043dc82981b9f1a35943ff6bedaae46ee55c17bd6e68b678636c5e8481a4700"
+kind = "certificate"
+purpose = "End-entity signing certificate of the ECDSA family, revoked for key compromise before the planned signing time."
+expected-openssl = "rejected"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "REVOKED_NO_POE" }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa"] }
+
+[[artefact]]
+id = "pki/keys/signer-p256-revoked"
+path = "pki/keys/signer-p256-revoked.test-key.pem"
+sha256 = "6386505660382adabdc3b67b35e948f5838bc587220c828b90cf4c2e5f904d6a"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/signer-p256-revoked, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/signer-ed25519-revoked"
+path = "pki/signer-ed25519-revoked.pem"
+sha256 = "2847c326f1872c3cbc4de36f21e5ec2720502e26c33428242bcf21f1f9faddfb"
+kind = "certificate"
+purpose = "End-entity signing certificate of the Ed25519 family, revoked for key compromise before the planned signing time."
+expected-openssl = "rejected"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "REVOKED_NO_POE" }
+links = { issuer = "pki/ca-ed25519", chain = ["pki/ca-ed25519", "pki/root-ca"], revocation = ["crl/ca-ed25519"] }
+
+[[artefact]]
+id = "pki/keys/signer-ed25519-revoked"
+path = "pki/keys/signer-ed25519-revoked.test-key.pem"
+sha256 = "449a4e0deb92ae56a4a77e440c08056dc725d8115126ae965c14f78a988a36f2"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/signer-ed25519-revoked, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/signer-p256-revoked-after-signing"
+path = "pki/signer-p256-revoked-after-signing.pem"
+sha256 = "1baf1b58b4175fa0e11e6f1ff63dafaac13dc8af8ff81326dc77816f74fd45ad"
+kind = "certificate"
+purpose = "End-entity signing certificate of the ECDSA family, revoked for key compromise after the planned signing time."
+expected-openssl = "rejected"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "REVOKED_NO_POE" }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa"] }
+notes = "Revoked 10 days before the validation time, 20 days after the planned signing time, for signatures that a timestamp shows to exist before the revocation."
+
+[[artefact]]
+id = "pki/keys/signer-p256-revoked-after-signing"
+path = "pki/keys/signer-p256-revoked-after-signing.test-key.pem"
+sha256 = "c09c9af0394f3bb8abda615c6b0621ce582bea221236044908589b064b88dc84"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/signer-p256-revoked-after-signing, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "crl/root-ca"
+path = "crl/root-ca.crl"
+sha256 = "1192094d930b32cda1797b2120cc12e1903b8b7a7a615af8e4f0e8970bd4dc42"
+kind = "crl"
+purpose = "Current CRL of the root CA, which revokes none of the CA certificates it issued."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/root-ca", chain = ["pki/root-ca"] }
+notes = "Covered certificate: pki/ca-ecdsa."
+
+[[artefact]]
+id = "crl/ca-rsa"
+path = "crl/ca-rsa.crl"
+sha256 = "b55b0109f7bd2b76ed232f5019a2a0d2dc9b920808341e5ac02487f8848c17a9"
+kind = "crl"
+purpose = "Current CRL of the RSA PKCS#1 v1.5 CA, which revokes pki/signer-rsa-revoked."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-rsa-2048."
+
+[[artefact]]
+id = "crl/ca-rsa-pss"
+path = "crl/ca-rsa-pss.crl"
+sha256 = "f536ec60ba3189ba78511c5511b310fa9809b63b7b855a2ee2d141005919c602"
+kind = "crl"
+purpose = "Current CRL of the RSASSA-PSS CA, signed with RSASSA-PSS, which revokes pki/signer-rsa-pss-revoked."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ca-rsa-pss", chain = ["pki/ca-rsa-pss", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-rsa-pss-sha256."
+
+[[artefact]]
+id = "crl/ca-ecdsa"
+path = "crl/ca-ecdsa.crl"
+sha256 = "3869357696845489d7726f4cb411721bf907d3f30c6560d6efa3ee4cb9d6fbee"
+kind = "crl"
+purpose = "Current CRL of the ECDSA CA, which revokes pki/signer-p256-revoked and pki/signer-p256-revoked-after-signing."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-p256."
+
+[[artefact]]
+id = "crl/ca-ecdsa-p521"
+path = "crl/ca-ecdsa-p521.crl"
+sha256 = "8658b5002ac2ea28ec41ec3fe6adcf034d15241181405984a6dd53b10aa3d688"
+kind = "crl"
+purpose = "Current CRL of the ECDSA P-521 CA, signed with ECDSA on P-521 and SHA-512, which revokes no certificate."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ca-ecdsa-p521", chain = ["pki/ca-ecdsa-p521", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-p521."
+
+[[artefact]]
+id = "crl/ca-ed25519"
+path = "crl/ca-ed25519.crl"
+sha256 = "b56749a3ac01031f8b87b499cf839cd7261d94a446cceca5eea95ed48867c3f8"
+kind = "crl"
+purpose = "Current CRL of the Ed25519 CA, which revokes pki/signer-ed25519-revoked."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ca-ed25519", chain = ["pki/ca-ed25519", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-ed25519."
+
+[[artefact]]
+id = "crl/ca-expired"
+path = "crl/ca-expired.crl"
+sha256 = "f593bdcee1608d10db6ede7420b8cb8e1ef349596bd63936ae168b74bcb382cf"
+kind = "crl"
+purpose = "Current CRL of the expired intermediate CA, which revokes no certificate."
+expected-openssl = "verified"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
+links = { issuer = "pki/ca-expired", chain = ["pki/ca-expired", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-under-expired-ca. Issued one day before the validation time, at the instant the CA expires, so within its validity, because notAfter is inclusive (RFC 5280, section 4.1.2.5). The covered certificate fails because its CA has expired, not for want of revocation data."
+
+[[artefact]]
+id = "crl/ca-without-ca-flag"
+path = "crl/ca-without-ca-flag.crl"
+sha256 = "e3472fb52fe60eb014263d39597c027235a86f3499e4ba98836674dc8e16764c"
+kind = "crl"
+purpose = "Current CRL of the CA certificate whose basic constraints do not assert cA, which revokes no certificate."
+expected-openssl = "verified"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
+links = { issuer = "pki/ca-without-ca-flag", chain = ["pki/ca-without-ca-flag", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-under-ca-without-ca-flag. The covered certificate fails because its issuer is not a CA, not for want of revocation data."
+
+[[artefact]]
+id = "crl/ca-without-basic-constraints"
+path = "crl/ca-without-basic-constraints.crl"
+sha256 = "feefe71de04c5174d599f4acb1dde16f693d5928664c61bd26e10d06dcf18360"
+kind = "crl"
+purpose = "Current CRL of the CA certificate without basic constraints, which revokes no certificate."
+expected-openssl = "verified"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
+links = { issuer = "pki/ca-without-basic-constraints", chain = ["pki/ca-without-basic-constraints", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-under-ca-without-basic-constraints. The covered certificate fails because its issuer has no basic constraints, not for want of revocation data."
+
+[[artefact]]
+id = "crl/ca-ecdsa-expired"
+path = "crl/ca-ecdsa-expired.crl"
+sha256 = "1689e2177ae59ab7f9d8ce5c2449006356b47e2ea78506e345c54d2baa86f405"
+kind = "crl"
+purpose = "CRL of the ECDSA CA whose nextUpdate is seven days before the validation time."
+expected-openssl = "rejected"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "TRY_LATER" }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-p256. An earlier CRL of pki/ca-ecdsa, issued 14 days before the validation time. It lists pki/signer-p256-revoked, revoked before it was issued, and not pki/signer-p256-revoked-after-signing."
+
+[[artefact]]
+id = "crl/ca-ecdsa-wrong-key"
+path = "crl/ca-ecdsa-wrong-key.crl"
+sha256 = "f51cd6a9357c8f2ce589ce8e9be1158e2b845c2eb3546009c9861c4772c22160"
+kind = "crl"
+purpose = "CRL of the ECDSA CA signed with another key than the CA's."
+expected-openssl = "rejected"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-p256. Signed with the P-384 key of pki/signer-p384. The issuer name and the authority key identifier are those of pki/ca-ecdsa. DSS is likely to report TRY_LATER instead, from its check for acceptable revocation data."
+
+[[artefact]]
+id = "crl/ca-ecdsa-wrong-issuer"
+path = "crl/ca-ecdsa-wrong-issuer.crl"
+sha256 = "eb43df33a66905bf175a892fa7951f30bb9377a68edab129f7b050ebfbbf2f92"
+kind = "crl"
+purpose = "CRL of the ECDSA CA whose issuer name is not the CA's."
+expected-openssl = "rejected"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"] }
+notes = 'Covered certificate: pki/signer-p256. The issuer name is "O=sigillum test PKI, CN=sigillum test unknown CA", which no certificate has as subject. The CRL is signed with the key of pki/ca-ecdsa and carries its authority key identifier. DSS is likely to report TRY_LATER instead, from its check for acceptable revocation data.'
 
 [[artefact]]
 id = "timestamps/content"
@@ -539,7 +767,7 @@ purpose = "Valid timestamp token over timestamps/content, issued by pki/tsa one 
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
 links = { issuer = "pki/tsa", chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], content = "timestamps/content" }
-notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, clause 5.4.4, to be confirmed when verify runs DSS. Step 1 runs the basic signature validation, whose X.509 validation checks revocation (clause 5.2.6.4, step 4), so PASSED assumes the revocation data for the chain of pki/tsa that later stories link. Without it, DSS would likely report INDETERMINATE."
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, clause 5.4.4, to be confirmed when verify runs DSS. Step 1 runs the basic signature validation, whose X.509 validation checks revocation (clause 5.2.6.4, step 4) with the CRLs that the chain of pki/tsa links: crl/ca-ecdsa for pki/tsa and crl/root-ca for pki/ca-ecdsa. Neither CRL revokes a certificate of the chain."
 
 [[artefact]]
 id = "timestamps/signer-without-time-stamping"
@@ -572,4 +800,4 @@ purpose = "Timestamp token over timestamps/content, issued by pki/tsa with a gen
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
 links = { issuer = "pki/tsa", chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], content = "timestamps/content" }
-notes = "openssl ts -verify does not compare genTime with the verification time. Neither does the time-stamp validation building block of ETSI EN 319 102-1 V1.4.1, clause 5.4.4, so the DSS result PASSED is a prediction, to be confirmed when verify runs DSS. Like that of timestamps/valid, it assumes the revocation data for the chain of pki/tsa that later stories link (clause 5.2.6.4, step 4); without it, DSS would likely report INDETERMINATE. A verifier that uses the token as time evidence must reject a genTime after the validation time."
+notes = "openssl ts -verify does not compare genTime with the verification time. Neither does the time-stamp validation building block of ETSI EN 319 102-1 V1.4.1, clause 5.4.4, so the DSS result PASSED is a prediction, to be confirmed when verify runs DSS. As for timestamps/valid, revocation is checked (clause 5.2.6.4, step 4) with the CRLs that the chain of pki/tsa links, crl/ca-ecdsa and crl/root-ca, which revoke none of its certificates. A verifier that uses the token as time evidence must reject a genTime after the validation time."

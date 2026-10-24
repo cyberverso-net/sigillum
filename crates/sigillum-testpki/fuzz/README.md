@@ -14,4 +14,4 @@ The target `tsa_input` feeds arbitrary bytes to the input handling of the `tsa` 
 cargo +nightly fuzz run tsa_input corpus/tsa_input seeds/tsa_input -- -dict=tsa_input.dict -max_total_time=600
 ```
 
-`seeds/tsa_input` holds valid option values, certificate files in PEM, DER and with a byte order mark, and key files in PEM and DER, each after its selector byte. The key seeds, whose names end in `.test-key`, are copies of the published test keys under `testdata/pki/keys/`, with no value outside the test suite. `tsa_input.dict` holds the algorithm names and identifiers, time separators and PEM syntax.
+`seeds/tsa_input` holds valid option values, certificate files in PEM, DER and with a byte order mark, and key files in PEM and DER, each after its selector byte. The key seeds, whose names end in `.test-key`, are copies of the published test keys under `testdata/pki/keys/`, with no value outside the test suite, and `key-rsa-unbalanced.test-key`, an RSA key with the primes 3 and 2^607 - 1 that `Tsa::new` must refuse before signing. `tsa_input.dict` holds the algorithm names and identifiers, time separators and PEM syntax.

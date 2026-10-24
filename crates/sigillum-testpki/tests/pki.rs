@@ -1,5 +1,6 @@
 //! The committed test PKI under `testdata/pki/` is what `generate pki`
 //! produces, and every file is listed in the manifest with its digest.
+//! The CRLs under `testdata/crl/` are checked in `crl.rs`.
 
 use std::collections::HashSet;
 use std::path::PathBuf;
@@ -29,7 +30,13 @@ fn the_committed_pki_is_reproduced_byte_for_byte() -> TestResult {
             .iter()
             .find(|a| a.id == file.artefact.id)
             .ok_or_else(|| format!("{} is not in the manifest", file.artefact.id))?;
-        assert_eq!(entry, &file.artefact);
+        // The revocation links belong to generate crls and later generators.
+        let mut expected = file.artefact.clone();
+        expected
+            .links
+            .revocation
+            .clone_from(&entry.links.revocation);
+        assert_eq!(entry, &expected);
     }
     Ok(())
 }
