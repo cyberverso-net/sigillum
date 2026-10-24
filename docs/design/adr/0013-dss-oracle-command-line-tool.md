@@ -19,7 +19,7 @@ The repository contains a small Java command-line tool, `tools/dss-oracle`, buil
 - **validate-timestamp** takes a standalone RFC 3161 timestamp token and validates it;
 - **sign** creates CAdES, PAdES and JAdES signatures with test PKI keys, a fixed signing time and the levels requested, for use as verification fixtures. Its timestamp source calls `sigillum-testpki` to issue each token for the given digest at the fixed time, so no clock is read.
 
-Each result must match the one recorded in the manifest. A malformed isolated artefact counts as rejected when DSS reports a parsing failure or a failed indication. The Rust crate `sigillum-oracle` and the fixture checks of `sigillum-testpki` drive this tool as a separate process and compare its output with the expected results.
+Each result must match the one recorded in the manifest. An artefact counts as rejected only when DSS cannot parse it; a failed validation is recorded as an indication and a sub-indication. The Rust crate `sigillum-oracle` and the fixture checks of `sigillum-testpki` drive this tool as a separate process and compare its output with the expected results.
 
 **Licensing.** The tool's code is written for this project and licensed like the rest of the repository; it is not adapted from DSS cookbook or demonstration code. DSS, licensed under LGPL-2.1, is a build-time and test-time dependency resolved by Maven. No artefact that contains DSS is committed, published or distributed, so the distribution conditions of LGPL-2.1 do not arise. The tool keeps the licence set by [ADR-0003](0003-licence-and-contribution-terms.md). Its Maven dependencies fall outside the dependency-licence policy that `cargo deny` enforces, so they are reviewed by hand whenever they change.
 

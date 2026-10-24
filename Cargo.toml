@@ -9,6 +9,7 @@ members = [
     "crates/sigillum-ffi",
     "crates/sigillum-oracle",
     "crates/sigillum-bench",
+    "crates/sigillum-testpki",
 ]
 
 [workspace.package]

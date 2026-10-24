@@ -1,0 +1,122 @@
+package net.cyberverso.sigillum.dssoracle;
+
+import java.nio.file.Path;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
+import java.time.format.SignStyle;
+import java.time.temporal.ChronoField;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * The parsed command line: {@code dss-oracle <mode> [options]}.
+ *
+ * @param mode the mode to run
+ * @param validationTime the fixed validation or signing time, if given
+ * @param trustAnchors trust anchor certificates
+ * @param certificates certificates supplied offline
+ * @param crls CRLs supplied offline
+ * @param ocspResponses OCSP responses supplied offline
+ * @param out the output directory, if given
+ */
+public record Arguments(
+        Mode mode,
+        Optional<Instant> validationTime,
+        List<Path> trustAnchors,
+        List<Path> certificates,
+        List<Path> crls,
+        List<Path> ocspResponses,
+        Optional<Path> out) {
+
+    /**
+     * Parses the arguments that follow the program name.
+     *
+     * @param args the arguments
+     * @return the parsed command line
+     * @throws UsageException if the command line is not valid
+     */
+    public static Arguments parse(List<String> args) throws UsageException {
+        if (args.isEmpty()) {
+            throw new UsageException("No mode given.");
+        }
+        Mode mode = Arrays.stream(Mode.values())
+                .filter(candidate -> candidate.commandName().equals(args.get(0)))
+                .findFirst()
+                .orElseThrow(() -> new UsageException("Unknown mode: " + args.get(0)));
+        Instant validationTime = null;
+        Path out = null;
+        List<Path> trustAnchors = new ArrayList<>();
+        List<Path> certificates = new ArrayList<>();
+        List<Path> crls = new ArrayList<>();
+        List<Path> ocspResponses = new ArrayList<>();
+        for (int i = 1; i < args.size(); i += 2) {
+            String option = args.get(i);
+            String value = valueOf(args, i);
+            switch (option) {
+                case "--validation-time" -> {
+                    if (validationTime != null) {
+                        throw new UsageException("--validation-time is given more than once.");
+                    }
+                    validationTime = rfc3339(value);
+                }
+                case "--out" -> {
+                    if (out != null) {
+                        throw new UsageException("--out is given more than once.");
+                    }
+                    out = Path.of(value);
+                }
+                case "--trust-anchor" -> trustAnchors.add(Path.of(value));
+                case "--certificate" -> certificates.add(Path.of(value));
+                case "--crl" -> crls.add(Path.of(value));
+                case "--ocsp" -> ocspResponses.add(Path.of(value));
+                default -> throw new UsageException("Unknown option: " + option);
+            }
+        }
+        return new Arguments(mode, Optional.ofNullable(validationTime), List.copyOf(trustAnchors),
+                List.copyOf(certificates), List.copyOf(crls), List.copyOf(ocspResponses), Optional.ofNullable(out));
+    }
+
+    private static String valueOf(List<String> args, int optionIndex) throws UsageException {
+        String option = args.get(optionIndex);
+        if (!option.startsWith("--")) {
+            throw new UsageException("Unexpected argument: " + option);
+        }
+        if (optionIndex + 1 >= args.size() || args.get(optionIndex + 1).startsWith("--")) {
+            throw new UsageException(option + " needs a value.");
+        }
+        String value = args.get(optionIndex + 1);
+        if (value.isBlank()) {
+            throw new UsageException(option + " needs a value that is not blank.");
+        }
+        return value;
+    }
+
+    /** RFC 3339, section 5.6: full-date "T" full-time, with seconds and a numeric or "Z" offset. */
+    private static final DateTimeFormatter RFC_3339 = new DateTimeFormatterBuilder()
+            .parseCaseInsensitive()
+            .appendValue(ChronoField.YEAR, 4, 4, SignStyle.NOT_NEGATIVE)
+            .appendPattern("-MM-dd'T'HH:mm:ss")
+            .optionalStart()
+            .appendFraction(ChronoField.NANO_OF_SECOND, 1, 9, true)
+            .optionalEnd()
+            .appendOffset("+HH:MM", "Z")
+            .toFormatter()
+            .withResolverStyle(ResolverStyle.STRICT);
+
+    private static Instant rfc3339(String value) throws UsageException {
+        if (value.length() >= 19 && value.substring(17, 19).equals("60")) {
+            throw new UsageException("--validation-time: leap seconds are not supported: " + value);
+        }
+        try {
+            return OffsetDateTime.parse(value, RFC_3339).toInstant();
+        } catch (DateTimeParseException e) {
+            throw new UsageException("--validation-time is not an RFC 3339 time with an offset: " + value);
+        }
+    }
+}
