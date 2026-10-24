@@ -3,3 +3,6 @@ contact_links:
   - name: Report a security vulnerability
     url: https://github.com/cyberverso-net/sigillum/security/advisories/new
     about: Report vulnerabilities privately, never in a public issue.
+  - name: Report a conduct issue
+    url: https://github.com/cyberverso-net/sigillum/blob/main/CODE_OF_CONDUCT.md#enforcement
+    about: Report conduct issues privately, as the code of conduct describes.

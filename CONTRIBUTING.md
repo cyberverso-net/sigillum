@@ -2,6 +2,8 @@
 
 Thank you for your interest. This document sets out the rules that keep the project's code legally clean, its behaviour verifiable and its review manageable.
 
+Everyone taking part in the project follows the [code of conduct](CODE_OF_CONDUCT.md). Review requests are routed through [CODEOWNERS](.github/CODEOWNERS).
+
 ## Before you start
 
 Check [docs/project/scope.md](docs/project/scope.md). Features listed as deferred or excluded are not accepted without a prior discussion in an issue. For anything larger than a small fix, open an issue first so the approach can be agreed before you invest time.

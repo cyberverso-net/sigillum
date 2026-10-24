@@ -35,4 +35,4 @@ The documentation is organised in three parts: what the project aims to do, how 
 | --- | --- |
 | [Glossary](glossary.md) | Terms used in the documentation, each with its normative source |
 
-Contribution rules, the security policy and governance are in the repository root: [CONTRIBUTING.md](../CONTRIBUTING.md), [SECURITY.md](../SECURITY.md) and [GOVERNANCE.md](../GOVERNANCE.md).
+Contribution rules, the code of conduct, the security policy and governance are in the repository root: [CONTRIBUTING.md](../CONTRIBUTING.md), [CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md), [SECURITY.md](../SECURITY.md) and [GOVERNANCE.md](../GOVERNANCE.md).
