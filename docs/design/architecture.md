@@ -74,7 +74,7 @@ The test tooling sits outside the library and is never a dependency of it.
 
 ```mermaid
 flowchart LR
-    TPKI["sigillum-testpki (rcgen, x509-cert, cms, x509-ocsp)"] --> DATA["testdata/ and manifest"]
+    TPKI["sigillum-testpki (x509-cert, cms, x509-ocsp)"] --> DATA["testdata/ and manifest"]
     PKITS["NIST PKITS, downloaded at test time"] --> TESTS
     SAMPLES["Public samples with recorded licences"] --> DATA
     CLI -- "sign mode" --> DATA

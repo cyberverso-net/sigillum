@@ -53,6 +53,18 @@ struct GenerateOptions {
 enum Target {
     /// The certificates and private keys of the test PKI, under pki/.
     Pki,
+    /// The CRLs of the test PKI, under crl/, after the certificates.
+    Crls,
+}
+
+impl Target {
+    /// The name of the target on the command line.
+    fn name(self) -> &'static str {
+        match self {
+            Self::Pki => "pki",
+            Self::Crls => "crls",
+        }
+    }
 }
 
 /// Options of `tsa`, which does not read the manifest.
@@ -82,24 +94,28 @@ fn format_time(time: OffsetDateTime) -> String {
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let (name, time) = match &cli.command {
-        Command::Generate(GenerateOptions {
-            target: Target::Pki,
-            corpus,
-        }) => {
-            return match pki::write_into_corpus(&corpus.manifest) {
+        Command::Generate(GenerateOptions { target, corpus }) => {
+            let result = match target {
+                Target::Pki => pki::write_into_corpus(&corpus.manifest),
+                Target::Crls => pki::crl::write_into_corpus(&corpus.manifest),
+            };
+            let name = target.name();
+            return match result {
                 Ok(summary) => {
                     println!(
-                        "sigillum-testpki generate pki: wrote {} files and updated {}",
+                        "sigillum-testpki generate {name}: wrote {} files and updated {}",
                         summary.written,
                         corpus.manifest.display()
                     );
                     for id in &summary.removed {
                         eprintln!(
-                            "sigillum-testpki generate pki: removed the manifest entry {id}, which is no longer generated"
+                            "sigillum-testpki generate {name}: removed the manifest entry {id}, which is no longer generated"
                         );
                     }
                     for path in &summary.unlisted {
-                        eprintln!("sigillum-testpki generate pki: no manifest entry names {path}");
+                        eprintln!(
+                            "sigillum-testpki generate {name}: no manifest entry names {path}"
+                        );
                     }
                     ExitCode::SUCCESS
                 }

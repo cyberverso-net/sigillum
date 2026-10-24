@@ -53,7 +53,7 @@ links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"] }
 
 Regeneration works as follows:
 
-- Entries with the same identifiers are replaced, and new ones are appended.
+- Entries with the same identifiers are replaced, and new ones are appended. The `revocation` links of a replaced entry are kept, because `generate crls` and later generators set them.
 - `generate pki` owns every certificate and private-key entry under `pki/`. Those that the generator no longer produces are removed from the manifest, and their files are left in place. Certificates and keys made by other means, such as the mutated variants that ADR-0014 plans, must therefore live outside `pki/`. Entries of other kinds, and entries outside `pki/`, are kept.
 - Files under `pki/` that no manifest entry names are reported on standard error, and left in place.
 - The manifest is written anew, so comments added to it by hand are lost.
@@ -73,14 +73,40 @@ Regeneration works as follows:
 | `pki/ca-without-ca-flag`, `pki/signer-under-ca-without-ca-flag` | A CA certificate whose basic constraints leave `cA` at its default, FALSE, and an end entity it issued |
 | `pki/ca-without-basic-constraints`, `pki/signer-under-ca-without-basic-constraints` | A CA certificate without the basic constraints extension, and an end entity it issued |
 | `pki/signer-unknown-critical-extension` | End entity with the critical extension `1.3.6.1.4.1.32473.1.1`, which no implementation recognises, and a DER NULL as its value |
+| `pki/signer-rsa-revoked`, `pki/signer-rsa-pss-revoked`, `pki/signer-p256-revoked`, `pki/signer-ed25519-revoked` | One end entity per signature family, revoked for key compromise 60 days before the validation time, before the planned signing time |
+| `pki/signer-p256-revoked-after-signing` | End entity of the ECDSA family, revoked for key compromise 10 days before the validation time, after the planned signing time |
 
 The certificates follow RFC 5280, sections 4.1 and 4.2:
 
 - Every time is a fixed offset from the validation time: the root is valid from three years before to ten years after it, the issuing CAs from two years before to five years after, and the end entities from one year before to two years after, except the validity cases.
 - Serial numbers are fixed and unique in the test PKI.
 - Subject key identifiers use method 1 of RFC 7093, section 2. Every certificate but the root carries the authority key identifier of its issuer.
+- The planned signing time of the signed corpus is 30 days before the validation time, 2029-12-16T10:00:00Z. The revoked end entities are separate certificates, so that the other signers stay valid for the fixtures that use them. Their revocations are recorded in the CRLs below.
 - Every certificate but the root carries a CRL distribution point and authority information access URIs under `http://example.invalid/`, a domain reserved by RFC 2606 that never resolves. End entities other than the OCSP responder also name an OCSP responder.
 - Algorithm identifiers follow RFC 4055 for RSA, RFC 5758 for ECDSA and RFC 8410 for Ed25519. SHA3-256 with RSA PKCS#1 v1.5 uses the identifier of the NIST Computer Security Objects Register, `2.16.840.1.101.3.4.3.14`, with NULL parameters, as OpenSSL encodes it; the register does not specify the parameters.
+
+### Timeline
+
+Every time of the test PKI, in order, for the validation time `2030-01-15T10:00:00Z`. All times are at 10:00:00 UTC. Stories that sign at the planned signing time, or timestamp or validate later, refer to this list. A test checks that the planned signing time falls inside the validity of every certificate that valid fixtures use, and of the CAs above it.
+
+| Time | Offset | Event |
+| --- | --- | --- |
+| 2027-01-15 | 3 years before | `notBefore` of `pki/root-ca` and `pki/ca-expired` |
+| 2028-01-15 | 2 years before | `notBefore` of the other CA certificates |
+| 2029-01-15 | 1 year before | `notBefore` of the end entities, except `pki/signer-not-yet-valid` |
+| 2029-11-16 | 60 days before | Revocation of `pki/signer-rsa-revoked`, `pki/signer-rsa-pss-revoked`, `pki/signer-p256-revoked` and `pki/signer-ed25519-revoked` |
+| 2029-12-16 | 30 days before | Planned signing time |
+| 2030-01-01 | 14 days before | `thisUpdate` of `crl/ca-ecdsa-expired` |
+| 2030-01-05 | 10 days before | Revocation of `pki/signer-p256-revoked-after-signing` |
+| 2030-01-08 | 7 days before | `nextUpdate` of `crl/ca-ecdsa-expired` |
+| 2030-01-14 | 1 day before | `thisUpdate` of the other CRLs; `notAfter` of `pki/signer-expired` and `pki/ca-expired` |
+| 2030-01-15 | 0 | Validation time |
+| 2030-01-16 | 1 day after | `notBefore` of `pki/signer-not-yet-valid` |
+| 2030-01-21 | 6 days after | `nextUpdate` of the CRLs other than `crl/ca-ecdsa-expired` |
+| 2031-01-15 | 1 year after | `notAfter` of `pki/signer-not-yet-valid` |
+| 2032-01-15 | 2 years after | `notAfter` of the other end entities |
+| 2035-01-15 | 5 years after | `notAfter` of the CA certificates, except `pki/ca-expired` |
+| 2040-01-15 | 10 years after | `notAfter` of `pki/root-ca` |
 
 ### Test object identifiers
 
@@ -94,7 +120,53 @@ Object identifiers that the test corpus needs, and that no standard defines, sit
 
 Generation is reproducible byte for byte with the same validation time and the same `Cargo.lock`. Each key is derived from its name by a deterministic generator, SHA-256 in counter mode, so the keys are public by construction. RSA PKCS#1 v1.5, ECDSA on P-256 and P-384 (RFC 6979) and Ed25519 signatures are deterministic. Each RSASSA-PSS salt is derived from the signed data by the same generator. ECDSA signatures on P-521 are reproducible too: the `p521` crate offers no RFC 6979 signer, so each nonce is derived by the same generator from the private key and the signed data, as RFC 6979 derives it from both. A change of the RSA or elliptic-curve crates may change the keys, and then every certificate.
 
-The expected OpenSSL results are those of `openssl verify` at the validation time (`-attime`), with the chain of the manifest and default flags. `pki/ca-without-ca-flag` and `pki/ca-without-basic-constraints` verify with default flags and fail with `-x509_strict`. Private keys are expected to parse. The expected DSS results are those of the X.509 certificate validation of ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, given the CRLs and OCSP responses that later stories link. They are confirmed once `verify` runs DSS. The predictions most likely to change are CERTIFICATE_CHAIN_GENERAL_FAILURE for the end entities under the expired CA and under the CA certificates without cA, and OUT_OF_BOUNDS_NO_POE for the expired and not yet valid certificates, which becomes OUT_OF_BOUNDS_NOT_REVOKED once a CRL that proves non-revocation is linked.
+The expected OpenSSL results are those of `openssl verify` at the validation time (`-attime`), with the chain of the manifest and default flags. When the certificate links a CRL in `revocation`, the check adds `-crl_check_all` and every CRL linked by the certificate and by the certificates of its chain, each given with `-CRLfile`. `pki/ca-without-ca-flag` and `pki/ca-without-basic-constraints` verify with default flags and fail with `-x509_strict`. Private keys are expected to parse. The expected DSS results are those of the X.509 certificate validation of ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, given the CRLs and OCSP responses that later stories link. They are confirmed once `verify` runs DSS. The predictions most likely to change are CERTIFICATE_CHAIN_GENERAL_FAILURE for the end entities under the expired CA and under the CA certificates without cA, and OUT_OF_BOUNDS_NO_POE for the expired and not yet valid certificates. The linked CRLs do not show that `pki/signer-expired` was not revoked after it expired, as clause 5.2.6.4, step 7 and NOTE 8, would require for OUT_OF_BOUNDS_NOT_REVOKED. DSS may still report OUT_OF_BOUNDS_NOT_REVOKED for `pki/signer-not-yet-valid`, which the current CRL of its issuer does not list. The revoked end entities are predicted INDETERMINATE with REVOKED_NO_POE, from clause 5.2.6.4, step 4 b).
+
+## CRLs
+
+`sigillum-testpki generate crls` writes the CRLs of the test PKI under `crl/` and records each in `manifest.toml`. It reads the validation time from the manifest, like `generate pki`, and runs after it, because the CRL entries link the certificates. Every CRL is built from the `x509-cert` CRL structures, encoded with `der` and signed by the generator, as [ADR-0022](../docs/design/adr/0022-x509-cert-structures-for-test-crls.md) decides. A test checks that the committed files are what the generator produces.
+
+Regeneration follows the rules of `generate pki`, with these differences:
+
+- `generate crls` owns every CRL entry under `crl/`. The `revocation` links of a replaced CRL entry are kept. Those it no longer produces are removed from the manifest, with every `revocation` link to them, and their files are left in place. Files under `crl/` that no manifest entry names are reported.
+- It also owns the links to its CRLs in the `revocation` lists of the certificate entries under `pki/`. Each certificate whose issuer has a current CRL links that CRL, in first place. Other `revocation` links, such as OCSP responses, are kept.
+
+Each CRL is a DER file named after the CRL distribution point of the certificates it covers: `http://example.invalid/crl/ca-ecdsa.crl` is `crl/ca-ecdsa.crl`. RFC 5280, section 4.2.1.13, requires a DER-encoded CRL behind an HTTP distribution point. The CRLs follow RFC 5280, section 5:
+
+- Every CRL is a version 2 CRL, signed with an algorithm its issuer uses for certificates, with the issuer name of the issuer's certificate.
+- It carries two non-critical extensions: the authority key identifier of its issuer (section 5.2.1) and a CRL number (section 5.2.3), 2 for the current CRLs and 1 for the expired one.
+- It lists the certificates of its issuer revoked on or before its `thisUpdate`, by serial number, each with a non-critical reason code (section 5.3.1). When none is revoked, the list is absent (section 5.1.2.6).
+- Times are UTCTime through 2049 and GeneralizedTime from 2050 (section 5.1.2.4).
+- Delta CRLs and indirect CRLs are out of scope.
+
+| CRLs | Content |
+| --- | --- |
+| `crl/root-ca` | Current CRL of the root CA, linked by every CA certificate it issued; it revokes none |
+| `crl/ca-rsa`, `crl/ca-rsa-pss`, `crl/ca-ecdsa`, `crl/ca-ecdsa-p521`, `crl/ca-ed25519` | Current CRL of each issuing CA of a signature family, with `thisUpdate` one day before and `nextUpdate` six days after the validation time. Each lists the revoked end entities of its CA; `crl/ca-ecdsa-p521` lists none |
+| `crl/ca-expired`, `crl/ca-without-ca-flag`, `crl/ca-without-basic-constraints` | Current CRL of each misconfigured CA, with the same times; none revokes a certificate. `crl/ca-expired` is issued at the instant its CA expires, still within the CA's validity, because `notAfter` is inclusive (RFC 5280, section 4.1.2.5). Their end entities link them, so that they fail only for the defect of their CA |
+| `crl/ca-ecdsa-expired` | An earlier CRL of `pki/ca-ecdsa`, with `thisUpdate` 14 days and `nextUpdate` 7 days before the validation time. It lists `pki/signer-p256-revoked` only |
+| `crl/ca-ecdsa-wrong-key` | The current CRL of `pki/ca-ecdsa`, signed with the key of `pki/signer-p384` |
+| `crl/ca-ecdsa-wrong-issuer` | The current CRL of `pki/ca-ecdsa`, with the issuer name `O=sigillum test PKI, CN=sigillum test unknown CA`, which no certificate has as subject |
+
+The expected OpenSSL result of a CRL is `verified` when two checks pass, and `rejected` otherwise:
+
+- `openssl crl -inform DER -verify -CAfile` with the certificate of the issuer, which finds the issuer by name and checks the signature;
+- `openssl verify -attime` at the validation time, with `-crl_check_all`, this CRL and the CRLs linked by the chain, for each certificate that its issuer issued and that is expected to verify.
+
+For `crl/ca-expired`, `crl/ca-without-ca-flag` and `crl/ca-without-basic-constraints`, `verified` rests only on `openssl crl -verify`, because no certificate of those CAs is expected to verify.
+
+The expected DSS result of a CRL is the result of the X.509 certificate validation of ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, at the validation time, of one certificate that the CRL covers, with this CRL as its revocation data. The CA certificates above it use the current CRLs that they link. This is the result that the `validate-certificate` mode of `tools/dss-oracle` gives for that certificate and CRL. The covered certificate is issued by the issuer of the CRL and not revoked, and the notes of the CRL entry name it in their first sentence, of the form `Covered certificate: pki/<name>.`
+
+| CRLs | Covered certificate | Predicted result |
+| --- | --- | --- |
+| `crl/root-ca` | `pki/ca-ecdsa` | PASSED (step 9) |
+| `crl/ca-rsa`, `crl/ca-rsa-pss`, `crl/ca-ecdsa`, `crl/ca-ecdsa-p521`, `crl/ca-ed25519` | `pki/signer-rsa-2048`, `pki/signer-rsa-pss-sha256`, `pki/signer-p256`, `pki/signer-p521`, `pki/signer-ed25519` | PASSED (step 9) |
+| `crl/ca-expired`, `crl/ca-without-ca-flag`, `crl/ca-without-basic-constraints` | The end entity of each CA | INDETERMINATE with CERTIFICATE_CHAIN_GENERAL_FAILURE, from step 4 e), the result predicted for the certificate itself: its path fails for the defect of its CA, not for want of revocation data |
+| `crl/ca-ecdsa-expired` | `pki/signer-p256` | INDETERMINATE with TRY_LATER, from step 4 a): the revocation freshness checker of clause 5.2.5.4 takes the seven days from `thisUpdate` to `nextUpdate` as the maximum accepted freshness, and the CRL was issued 14 days before the validation time |
+| `crl/ca-ecdsa-wrong-key` | `pki/signer-p256` | INDETERMINATE with CERTIFICATE_CHAIN_GENERAL_FAILURE, from step 4 e): the signature of the CRL does not verify with the key of the CA, so the CRL cannot be used (RFC 5280, section 6.3.3, step (g)). The path validation cannot show that the certificate is not revoked (RFC 5280, section 6.1.3, step (a)(3)), and fails |
+| `crl/ca-ecdsa-wrong-issuer` | `pki/signer-p256` | INDETERMINATE with CERTIFICATE_CHAIN_GENERAL_FAILURE, from step 4 e): the issuer name of the CRL differs from the issuer of the certificate, so the CRL does not apply to it (RFC 5280, section 6.3.3, step (b)). The path validation cannot show that the certificate is not revoked, and fails |
+
+These are predictions from the text of the standard, confirmed once `verify` runs DSS. For the wrong-key and wrong-issuer CRLs, DSS is likely to report TRY_LATER instead, from its check for acceptable revocation data; the notes of both entries say so. Step 4 a), which gives TRY_LATER in the standard, applies only when the path validation succeeds, as it does with the expired CRL.
 
 ## Test keys
 
