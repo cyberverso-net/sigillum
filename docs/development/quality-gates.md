@@ -13,6 +13,7 @@ Every change must pass the gates below before it is merged. Continuous integrati
 | Minimum Rust version | `cargo check --workspace --all-features --all-targets` with the declared `rust-version` | Builds, including tests and benchmarks |
 | Portability | `cargo check` for `wasm32-unknown-unknown`, `aarch64-apple-ios`, `aarch64-linux-android` | Builds |
 | Dependencies | `cargo deny check` | No licence, advisory or source violations |
+| Dependency audits | `cargo vet --locked` | Every third-party dependency is covered by an audit or a recorded exemption, as described below |
 | Sign-off | DCO check | Every commit signed off |
 | Commit signatures | Verified commit signatures check | Every commit in the pull request has a verified signature |
 | Dependabot lists | `.github/scripts/check-dependabot-lists.sh` | The RustCrypto group and the ignore rules in `dependabot.yml` name the same crates |
@@ -21,6 +22,52 @@ Every change must pass the gates below before it is merged. Continuous integrati
 | Differential tests (planned with the harness, phase 0) | `cargo test -p sigillum-oracle --features dss` on Linux, with Java and Maven, running `tools/dss-oracle` without network | Pass |
 
 The `dss` feature of `sigillum-oracle` is excluded from the cross-platform test job, which tests `sigillum-oracle` with its default features only.
+
+## Dependency audits
+
+`cargo vet` checks that someone has reviewed the code of every third-party crate in `Cargo.lock`. Its configuration and records are in `supply-chain/`.
+
+- **Criteria.** Both criteria are built into `cargo vet`.
+  - Normal and build dependencies must meet `safe-to-deploy`. It attests that the crate will not introduce a serious security vulnerability to production software exposed to untrusted input.
+  - Dependencies used only in tests and benchmarks must meet `safe-to-run`. It attests only that running the crate on a developer machine or in CI is safe.
+  - The unpublished tooling crates `sigillum-oracle`, `sigillum-testpki` and `sigillum-bench` are never deployed. A `[policy]` entry in `supply-chain/config.toml` requires only `safe-to-run` of all their dependencies.
+  - A new tooling crate gets its `[policy]` entry in the pull request that adds it to the workspace. `cargo vet` rejects entries for crates that are not in the workspace.
+- **Cryptography.** Neither criterion attests that a crate implements cryptography correctly, and no criterion for that is required for now. Whether cryptographic crates must meet one, such as `crypto-safe` from Google's audits, is reviewed before release 0.1.
+- **Trusted publishers.** Some RustCrypto and dalek crates are trusted for `safe-to-deploy` when released by a publisher that crates.io has recorded for them.
+  - The set starts from the `rustcrypto-dalek` group of `.github/dependabot.yml`, declared with default features and the `cms` builder. It covers the `der` 0.7 generation of [ADR-0011](../design/adr/0011-asn1-x509-cms-foundations.md) and the `der` 0.8 generation.
+  - The set includes the dependencies of that group that `cargo vet` sees, hosted under the RustCrypto or dalek-cryptography organisations on GitHub. `cargo vet` reads the dependency graph of `cargo metadata` with all features, so this includes optional dependencies that a build does not activate.
+  - It excludes `getrandom`, `rand` and `rand_core`, which come from elsewhere.
+  - For each crate, the publishers are those that crates.io recorded for its releases from 2022-01-01 to 2026-10-24. Publishers whose only releases in that period neither generation uses are left out.
+  - A publisher is a crates.io user, or the release workflow of a RustCrypto repository through trusted publishing.
+  - Each entry in `supply-chain/audits.toml` names one crate and one publisher. It covers releases published from 2022-01-01 up to, but not including, 2027-10-24. Releases from that period stay trusted after it.
+  - Before 2027-10-24 the entries are checked again against crates.io and extended or removed, as tracked in #63. A release by any other publisher, or a crate outside the set, needs an audit.
+- **Trusted publishers of tooling dependencies.** Some third-party crates used only by the tooling crates are trusted for `safe-to-run`, never for `safe-to-deploy`.
+  - An entry names a crate and a crates.io user who published a version of it, the anchor.
+  - Audits imported from Mozilla or the Bytecode Alliance, full or delta, must lead from the anchor to the version in `Cargo.lock`. Often the anchor is that version itself.
+  - Mozilla or the Bytecode Alliance must trust that user for that crate, in an entry whose period covers the publication of the anchor.
+  - The entry starts with the period of that imported entry, but not before 2022-01-01. It ends on 2027-10-24 and is then checked again, as tracked in #63.
+- **Build-time dependencies.** Some crates trusted only at `safe-to-run` are also common proc-macro and build dependencies, such as `syn`, `proc-macro2` and `serde`. When a library crate first depends on them, they need `safe-to-deploy` coverage, through an audit, an import or a trusted publisher.
+- **Exemptions.** The remaining dependencies of the tooling crates are exempted at `safe-to-run` in `supply-chain/config.toml`. They were generated with `cargo vet regenerate exemptions`.
+  - Each exemption is reviewed before release 0.1, as tracked in #63. It is then audited, covered by an import or a trusted publisher, or kept with a recorded reason.
+  - No dependency of a published crate is exempted.
+- **Imported audits.** The audits published by Mozilla, Google and the Bytecode Alliance are imported, as listed in `supply-chain/config.toml`.
+  - Some imported entries are wildcard audits, which trust the releases of a crate by a given publisher within a period.
+  - `supply-chain/imports.lock` records the imported audits that apply. Continuous integration then runs `cargo vet --locked` without fetching them, so the result depends only on the committed files.
+- **Version.** Contributors use the version of `cargo vet` that `.github/workflows/cargo-vet.yml` pins. They install it with `cargo install cargo-vet --locked --version 0.10.3`.
+  - A newer version may rewrite the store in a format the pinned one rejects.
+  - When a new version changes the store format, `supply-chain/config.toml` is updated in the same pull request.
+- **Review.** The reviewer of a pull request checks every new audit, exemption, wildcard audit and publisher entry in `supply-chain/`.
+
+When a dependency is added or updated:
+
+1. The author runs `cargo vet` locally. It fetches the imported audits and updates `imports.lock`.
+2. If an imported audit covers the crate, the updated lock file is committed with the change.
+3. Otherwise the author reviews the crate, or the difference from an audited version, and records the review with `cargo vet certify`. The notes say what was checked.
+4. Where a review is not yet possible, the author records an exemption with `cargo vet add-exemption`. Its notes name the issue that tracks the review.
+
+Dependabot changes `Cargo.toml` and `Cargo.lock` but not `supply-chain/`, so its updates fail the check even when an imported audit covers the new version. The maintainer runs `cargo vet` on the Dependabot branch and pushes the refreshed `imports.lock`, with any audits or exemptions. The commit is signed and signed off, and Dependabot then stops rebasing that branch.
+
+Trusting another publisher, with `cargo vet trust`, or adding another source of audits is a decision recorded in the pull request that makes it.
 
 ## Author gates
 
@@ -53,6 +100,6 @@ The reviewer, and the author before requesting review, checks that:
 5. Cryptographic comparisons that involve secrets run in constant time.
 6. Unsupported input yields an explicit "not supported" result, never a pass.
 7. The public API is consistent with existing crates and with [ADR-0005](../design/adr/0005-two-step-signing.md) and [ADR-0006](../design/adr/0006-no-network-access-in-core.md).
-8. New dependencies are justified and pass `cargo deny`.
+8. New dependencies are justified and pass `cargo deny` and `cargo vet`.
 9. The provenance rule in [CONTRIBUTING.md](../../CONTRIBUTING.md) is respected: no code or test data under incompatible licences.
 10. Documentation and comments follow the [style guide](style-guide.md).
