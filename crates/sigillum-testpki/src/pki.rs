@@ -9,7 +9,10 @@
 //! signatures are deterministic, and RSASSA-PSS salts are derived from the
 //! signed data. Running the generator twice with the same validation time
 //! and the same `Cargo.lock` gives the same files, byte for byte.
+//!
+//! The CRLs of the issuing CAs are built by [`crl`] (ADR-0022).
 
+pub mod crl;
 pub mod hierarchy;
 pub mod issue;
 pub mod keys;
@@ -211,7 +214,7 @@ impl fmt::Display for GenerateError {
 
 impl std::error::Error for GenerateError {}
 
-/// What [`write_into_corpus`] did.
+/// What [`write_into_corpus`] or [`crl::write_into_corpus`] did.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Summary {
     /// The number of files written.
@@ -219,8 +222,9 @@ pub struct Summary {
     /// The identifiers of the manifest entries removed because the
     /// generator no longer produces them.
     pub removed: Vec<String>,
-    /// Files under the PKI directory that no manifest entry names, as
-    /// paths relative to the manifest's directory. They are left in place.
+    /// Files under the directory of the generator that no manifest entry
+    /// names, as paths relative to the manifest's directory. They are left
+    /// in place.
     pub unlisted: Vec<String>,
 }
 
@@ -235,12 +239,14 @@ fn generated_here(artefact: &Artefact) -> bool {
 /// `manifest_path`, writes each file under the manifest's directory, and
 /// records each in the manifest.
 ///
-/// Entries with the same identifiers are replaced. Certificate and private
-/// key entries under [`DIRECTORY`] that the generator no longer produces
-/// are removed; their files are not deleted. Other entries are kept. The
-/// manifest is written anew, without any comment added by hand, and last,
-/// through a temporary file renamed over it, after every other step that
-/// can fail, so that a failure leaves the previous manifest in place.
+/// Entries with the same identifiers are replaced, except for their
+/// `revocation` links, which `generate crls` and later generators own and
+/// which are kept. Certificate and private key entries under [`DIRECTORY`]
+/// that the generator no longer produces are removed; their files are not
+/// deleted. Other entries are kept. The manifest is written anew, without
+/// any comment added by hand, and last, through a temporary file renamed
+/// over it, after every other step that can fail, so that a failure leaves
+/// the previous manifest in place.
 ///
 /// # Errors
 ///
@@ -248,7 +254,6 @@ fn generated_here(artefact: &Artefact) -> bool {
 /// or a file cannot be generated or written.
 pub fn write_into_corpus(manifest_path: &Path) -> Result<Summary, GenerateError> {
     let mut manifest = Manifest::load(manifest_path).map_err(GenerateError::Manifest)?;
-    let root = manifest_path.parent().unwrap_or_else(|| Path::new("."));
     let files = generate(manifest.header.validation_time).map_err(GenerateError::Pki)?;
     let generated: Vec<&str> = files.iter().map(|f| f.artefact.id.as_str()).collect();
     let mut removed = Vec::new();
@@ -260,30 +265,58 @@ pub fn write_into_corpus(manifest_path: &Path) -> Result<Summary, GenerateError>
         !stale
     });
     for file in &files {
-        manifest.upsert(file.artefact.clone());
+        let mut artefact = file.artefact.clone();
+        if let Some(existing) = manifest.artefacts.iter().find(|a| a.id == artefact.id) {
+            artefact
+                .links
+                .revocation
+                .clone_from(&existing.links.revocation);
+        }
+        manifest.upsert(artefact);
     }
+    let unlisted = commit(manifest_path, &manifest, &files, DIRECTORY)?;
+    Ok(Summary {
+        written: files.len(),
+        removed,
+        unlisted,
+    })
+}
+
+/// Writes `files` under the directory of the manifest at `manifest_path`,
+/// then `manifest` over that file, and returns the files under `directory`
+/// that no entry names, as paths relative to the manifest's directory.
+///
+/// The updated manifest is checked before anything is written. The scan
+/// runs before the manifest is replaced, and the manifest is written
+/// through a temporary file renamed over it, so that every step that can
+/// fail leaves the previous manifest in place.
+pub(crate) fn commit(
+    manifest_path: &Path,
+    manifest: &Manifest,
+    files: &[GeneratedFile],
+    directory: &str,
+) -> Result<Vec<String>, GenerateError> {
+    let root = manifest_path.parent().unwrap_or_else(|| Path::new("."));
     let text = manifest.to_toml();
     // The updated manifest must itself be valid before anything is written.
     Manifest::parse(&text).map_err(GenerateError::Manifest)?;
     let io = |path: &Path, error: std::io::Error| {
         GenerateError::Io(format!("{}: {error}", path.display()))
     };
-    for file in &files {
+    for file in files {
         let path = root.join(&file.artefact.path);
         if let Some(parent) = path.parent() {
             std::fs::create_dir_all(parent).map_err(|e| io(parent, e))?;
         }
         std::fs::write(&path, &file.contents).map_err(|e| io(&path, e))?;
     }
-    // The scan runs before the manifest is replaced, so that every step
-    // that can fail leaves the previous manifest in place.
     let listed: Vec<String> = manifest
         .artefacts
         .iter()
         .map(|a| a.path.to_string_lossy().into_owned())
         .collect();
     let mut unlisted = Vec::new();
-    collect_files(root, Path::new(DIRECTORY), &mut unlisted).map_err(|e| io(root, e))?;
+    collect_files(root, Path::new(directory), &mut unlisted).map_err(|e| io(root, e))?;
     unlisted.retain(|path| !listed.contains(path) && !path.ends_with("/README.md"));
     unlisted.sort();
     let temporary = manifest_path.with_extension("toml.tmp");
@@ -292,11 +325,7 @@ pub fn write_into_corpus(manifest_path: &Path) -> Result<Summary, GenerateError>
         let _ = std::fs::remove_file(&temporary);
         return Err(io(manifest_path, error));
     }
-    Ok(Summary {
-        written: files.len(),
-        removed,
-        unlisted,
-    })
+    Ok(unlisted)
 }
 
 /// Collects the files under `root/relative`, as `/`-separated paths

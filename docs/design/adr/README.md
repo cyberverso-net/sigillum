@@ -58,3 +58,4 @@ When the lead maintainer accepts an ADR directly, without a *Proposed* stage, th
 | [0019](0019-divergence-classes-and-intentional-restrictions.md) | Divergence classes and intentional restrictions | Accepted |
 | [0020](0020-accepted-advisories-der-0-7.md) | Accepted advisories on the der 0.7 generation | Accepted |
 | [0021](0021-x509-cert-builder-for-test-certificates.md) | Assemble test certificates with the x509-cert builder only | Accepted |
+| [0022](0022-x509-cert-structures-for-test-crls.md) | Build test CRLs from x509-cert structures only | Accepted |

@@ -18,7 +18,7 @@ A dedicated, unpublished crate, `sigillum-testpki`, generates every PKI artefact
 - the `cms` SignedData builder for timestamp tokens, as SignedData over TSTInfo (RFC 3161);
 - the `x509-ocsp` response builder for OCSP responses (RFC 6960).
 
-The choice of tools for certificates is changed by [ADR-0021](0021-x509-cert-builder-for-test-certificates.md).
+The choice of tools for certificates is changed by [ADR-0021](0021-x509-cert-builder-for-test-certificates.md), and for CRLs by [ADR-0022](0022-x509-cert-structures-for-test-crls.md).
 
 Every time field (`notBefore`, `notAfter`, `thisUpdate`, `nextUpdate`, `producedAt`, `genTime`) is set explicitly from the fixed validation time. Where a primitive crate does not supply the algorithm identifier, as for P-521 and for SHA-3 with RSA PKCS#1 v1.5 or ECDSA, the generator uses a small signer wrapper. Timestamp tokens carry no signing-time attribute taken from the system clock, and the ESS signing-certificate attribute that RFC 3161 requires is built by the generator.
 

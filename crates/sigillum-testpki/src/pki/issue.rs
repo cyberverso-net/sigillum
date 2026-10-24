@@ -97,7 +97,7 @@ pub fn issue(
     )
 }
 
-fn spki_of(key: &KeyPair) -> Result<SubjectPublicKeyInfoOwned, PkiError> {
+pub(super) fn spki_of(key: &KeyPair) -> Result<SubjectPublicKeyInfoOwned, PkiError> {
     SubjectPublicKeyInfoOwned::from_der(&key.spki_der()?).map_err(|_| PkiError::Encoding)
 }
 
@@ -236,7 +236,7 @@ fn extensions(
     Ok(extensions)
 }
 
-fn extension(
+pub(super) fn extension(
     extn_id: ObjectIdentifier,
     critical: bool,
     value: &impl Encode,
@@ -255,14 +255,14 @@ fn uri(value: &str) -> Result<GeneralName, PkiError> {
 }
 
 /// The key identifier of RFC 7093, section 2, method 1.
-fn key_identifier(spki: &SubjectPublicKeyInfoOwned) -> Result<OctetString, PkiError> {
+pub(super) fn key_identifier(spki: &SubjectPublicKeyInfoOwned) -> Result<OctetString, PkiError> {
     let hash = Sha256::digest(spki.subject_public_key.raw_bytes());
     OctetString::new(hash.get(..20).unwrap_or_default()).map_err(|_| PkiError::Encoding)
 }
 
 /// The subject or issuer name: the organisation, then the common name,
 /// each a UTF8String in its own relative distinguished name.
-fn name(common_name: &str) -> Result<Name, PkiError> {
+pub(super) fn name(common_name: &str) -> Result<Name, PkiError> {
     let rdn = |oid, value: &str| -> Result<RelativeDistinguishedName, PkiError> {
         let value = der::asn1::Any::encode_from(
             &Utf8StringRef::new(value).map_err(|_| PkiError::Encoding)?,
@@ -279,7 +279,7 @@ fn name(common_name: &str) -> Result<Name, PkiError> {
 }
 
 /// A positive serial number of at most two octets (RFC 5280, section 4.1.2.2).
-fn serial_bytes(serial: u16) -> Vec<u8> {
+pub(super) fn serial_bytes(serial: u16) -> Vec<u8> {
     let bytes = serial.to_be_bytes();
     let start = usize::from(bytes[0] == 0);
     bytes.get(start..).unwrap_or_default().to_vec()

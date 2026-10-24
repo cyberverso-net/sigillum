@@ -22,18 +22,18 @@ use x509_cert::ext::pkix::{
     ExtendedKeyUsage, KeyUsage, KeyUsages, SubjectKeyIdentifier,
 };
 
-use super::hierarchy::{CERTIFICATES, CertSpec, Offset, Role, ca, chain, find, signer};
+use super::hierarchy::{CERTIFICATES, CertSpec, Offset, Role, ca, chain, find, revoked, signer};
 use super::issue::{ORGANISATION, TEST_ARC, UNKNOWN_CRITICAL_EXTENSION, URI_BASE, issue};
 use super::keys::{KeyPair, KeyType, RSA_PKCS1_SHA3_256, SignatureAlgorithm};
 use super::rng::TestRng;
 use super::*;
 use crate::manifest::{Indication, Manifest};
 
-type TestResult = Result<(), Box<dyn std::error::Error>>;
+pub(super) type TestResult = Result<(), Box<dyn std::error::Error>>;
 
-const VALIDATION_TIME: OffsetDateTime = datetime!(2030-01-15 10:00:00 UTC);
+pub(super) const VALIDATION_TIME: OffsetDateTime = datetime!(2030-01-15 10:00:00 UTC);
 
-fn generated() -> Result<&'static [GeneratedFile], PkiError> {
+pub(super) fn generated() -> Result<&'static [GeneratedFile], PkiError> {
     static FILES: OnceLock<Result<Vec<GeneratedFile>, PkiError>> = OnceLock::new();
     FILES
         .get_or_init(|| generate(VALIDATION_TIME))
@@ -48,7 +48,7 @@ fn file(id: &str) -> Result<&'static GeneratedFile, Box<dyn std::error::Error>> 
         .ok_or_else(|| format!("no artefact {id}").into())
 }
 
-fn certificate(name: &str) -> Result<Certificate, Box<dyn std::error::Error>> {
+pub(super) fn certificate(name: &str) -> Result<Certificate, Box<dyn std::error::Error>> {
     Ok(Certificate::from_pem(
         &file(&certificate_id(name))?.contents,
     )?)
@@ -58,7 +58,7 @@ fn spec(name: &str) -> Result<&'static CertSpec, Box<dyn std::error::Error>> {
     find(name).ok_or_else(|| format!("no specification {name}").into())
 }
 
-fn extension(certificate: &Certificate, oid: ObjectIdentifier) -> Option<&Extension> {
+pub(super) fn extension(certificate: &Certificate, oid: ObjectIdentifier) -> Option<&Extension> {
     certificate
         .tbs_certificate
         .extensions
@@ -73,7 +73,9 @@ fn key_usage(certificate: &Certificate) -> Result<KeyUsage, Box<dyn std::error::
     Ok(KeyUsage::from_der(ext.extn_value.as_bytes())?)
 }
 
-fn to_time(time: &x509_cert::time::Time) -> Result<OffsetDateTime, Box<dyn std::error::Error>> {
+pub(super) fn to_time(
+    time: &x509_cert::time::Time,
+) -> Result<OffsetDateTime, Box<dyn std::error::Error>> {
     let seconds = time.to_unix_duration().as_secs();
     Ok(OffsetDateTime::from_unix_timestamp(i64::try_from(
         seconds,
@@ -82,7 +84,7 @@ fn to_time(time: &x509_cert::time::Time) -> Result<OffsetDateTime, Box<dyn std::
 
 /// Verifies a signature with the RustCrypto verifiers, independently of
 /// the signing code.
-fn verifies(
+pub(super) fn verifies(
     algorithm: SignatureAlgorithm,
     spki: &[u8],
     message: &[u8],
@@ -1036,5 +1038,16 @@ fn the_constructors_give_the_documented_defaults() -> TestResult {
         (built.not_before, built.not_after),
         (Offset::years(-2), Offset::years(5))
     );
+    let revocation = spec("signer-p256-revoked")?
+        .revocation
+        .ok_or("not revoked")?;
+    let built = revoked(revocation, *spec("signer-p256")?);
+    assert_eq!(built.revocation, Some(revocation));
+    assert_eq!(
+        (built.expected_openssl, built.expected_dss.indication),
+        (OpensslResult::Rejected, Indication::Indeterminate)
+    );
+    assert_eq!(built.expected_dss.sub_indication, Some("REVOKED_NO_POE"));
+    assert_eq!(built.name, "signer-p256");
     Ok(())
 }
