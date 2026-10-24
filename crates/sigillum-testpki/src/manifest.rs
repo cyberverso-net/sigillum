@@ -680,6 +680,13 @@ impl RawHeader {
     }
 }
 
+/// Parses a time of the exact form of `validation-time`,
+/// `YYYY-MM-DDTHH:MM:SSZ`, or returns `None`. The `tsa` subcommand reads
+/// its `--time` with this rule.
+pub fn utc_time(value: &str) -> Option<OffsetDateTime> {
+    validation_time(value).ok()
+}
+
 /// Parses a time of the exact form `YYYY-MM-DDTHH:MM:SSZ`, in whole seconds
 /// and without leap seconds, as certificate times require (RFC 5280,
 /// section 4.1.2.5).

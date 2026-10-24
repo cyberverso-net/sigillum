@@ -1,0 +1,16 @@
+# Dictionary for the tsa_input fuzz target: algorithm names, identifiers,
+# time and PEM syntax.
+"SHA-256"
+"sha384"
+"SHA512"
+"2.16.840.1.101.3.4.2.1"
+"2.16.840.1.101.3.4.2."
+"-01-15T"
+":00:00Z"
+"-----BEGIN "
+"-----END "
+"PRIVATE KEY-----"
+"CERTIFICATE-----"
+"\xef\xbb\xbf"
+"\x00"
+"\x0b\x0c"

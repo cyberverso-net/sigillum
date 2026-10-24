@@ -1,17 +1,22 @@
 //! Command-line entry point of `sigillum-testpki`.
 //!
 //! Exit codes: 0 on success, 1 when the manifest cannot be read or is not
-//! valid or an artefact cannot be generated or written, 2 on a usage error,
-//! 3 when the subcommand is not implemented yet.
+//! valid or an artefact cannot be generated or written, or when `tsa`
+//! cannot read its key or certificate or issue the token, 2 on a usage
+//! error, 3 when the subcommand is not implemented yet.
 
-use std::path::PathBuf;
+mod tsa_cli;
+
+use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use clap::{Parser, Subcommand, ValueEnum};
 use sigillum_testpki::manifest::Manifest;
-use sigillum_testpki::pki;
+use sigillum_testpki::pki::{self, GenerateError, Summary};
+use sigillum_testpki::timestamp;
 use time::OffsetDateTime;
 use time::format_description::well_known::Rfc3339;
+use tsa_cli::TsaOptions;
 
 /// Generator and checker of the sigillum test PKI and corpus.
 #[derive(Parser)]
@@ -53,27 +58,11 @@ struct GenerateOptions {
 enum Target {
     /// The certificates and private keys of the test PKI, under pki/.
     Pki,
-}
-
-/// Options of `tsa`, which does not read the manifest.
-#[derive(clap::Args)]
-struct TsaOptions {
-    /// Time of the timestamp, as an RFC 3339 time.
-    #[arg(long, value_parser = rfc3339)]
-    time: OffsetDateTime,
-    /// Private key of the timestamping authority, in PKCS#8.
-    #[arg(long)]
-    tsa_key: PathBuf,
-    /// Certificate of the timestamping authority.
-    #[arg(long)]
-    tsa_cert: PathBuf,
+    /// The standalone timestamp tokens and the data they cover, under timestamps/.
+    Timestamps,
 }
 
 const NOT_IMPLEMENTED: u8 = 3;
-
-fn rfc3339(value: &str) -> Result<OffsetDateTime, String> {
-    OffsetDateTime::parse(value, &Rfc3339).map_err(|_| format!("not an RFC 3339 time: {value}"))
-}
 
 fn format_time(time: OffsetDateTime) -> String {
     time.format(&Rfc3339).unwrap_or_else(|_| time.to_string())
@@ -82,32 +71,14 @@ fn format_time(time: OffsetDateTime) -> String {
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let (name, time) = match &cli.command {
-        Command::Generate(GenerateOptions {
-            target: Target::Pki,
-            corpus,
-        }) => {
-            return match pki::write_into_corpus(&corpus.manifest) {
-                Ok(summary) => {
-                    println!(
-                        "sigillum-testpki generate pki: wrote {} files and updated {}",
-                        summary.written,
-                        corpus.manifest.display()
-                    );
-                    for id in &summary.removed {
-                        eprintln!(
-                            "sigillum-testpki generate pki: removed the manifest entry {id}, which is no longer generated"
-                        );
-                    }
-                    for path in &summary.unlisted {
-                        eprintln!("sigillum-testpki generate pki: no manifest entry names {path}");
-                    }
-                    ExitCode::SUCCESS
-                }
-                Err(error) => {
-                    eprintln!("sigillum-testpki: {error}");
-                    ExitCode::FAILURE
+        Command::Generate(GenerateOptions { target, corpus }) => {
+            let (name, result) = match target {
+                Target::Pki => ("pki", pki::write_into_corpus(&corpus.manifest)),
+                Target::Timestamps => {
+                    ("timestamps", timestamp::write_into_corpus(&corpus.manifest))
                 }
             };
+            return report(name, result, &corpus.manifest);
         }
         Command::Verify(options) => match Manifest::load(&options.manifest) {
             Ok(manifest) => ("verify", manifest.header.validation_time),
@@ -116,11 +87,38 @@ fn main() -> ExitCode {
                 return ExitCode::FAILURE;
             }
         },
-        Command::Tsa(options) => ("tsa", options.time),
+        Command::Tsa(options) => return tsa_cli::run(options),
     };
     eprintln!(
         "sigillum-testpki {name}: not implemented yet (time {})",
         format_time(time)
     );
     ExitCode::from(NOT_IMPLEMENTED)
+}
+
+/// Reports what `generate` did for the target `name`, and returns the exit
+/// code.
+fn report(name: &str, result: Result<Summary, GenerateError>, manifest: &Path) -> ExitCode {
+    match result {
+        Ok(summary) => {
+            println!(
+                "sigillum-testpki generate {name}: wrote {} files and updated {}",
+                summary.written,
+                manifest.display()
+            );
+            for id in &summary.removed {
+                eprintln!(
+                    "sigillum-testpki generate {name}: removed the manifest entry {id}, which is no longer generated"
+                );
+            }
+            for path in &summary.unlisted {
+                eprintln!("sigillum-testpki generate {name}: no manifest entry names {path}");
+            }
+            ExitCode::SUCCESS
+        }
+        Err(error) => {
+            eprintln!("sigillum-testpki: {error}");
+            ExitCode::FAILURE
+        }
+    }
 }

@@ -188,13 +188,16 @@ pub fn sha256_hex(data: &[u8]) -> String {
         .collect()
 }
 
-/// An error found while writing the test PKI into the corpus.
+/// An error found while writing generated artefacts, such as the test PKI
+/// or the timestamp tokens, into the corpus.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum GenerateError {
     /// The manifest cannot be read, or would not be valid once updated.
     Manifest(ManifestError),
     /// The test PKI cannot be generated.
     Pki(PkiError),
+    /// A timestamp token cannot be generated.
+    Timestamp(crate::timestamp::TsaError),
     /// A file cannot be written.
     Io(String),
 }
@@ -204,6 +207,7 @@ impl fmt::Display for GenerateError {
         match self {
             Self::Manifest(error) => error.fmt(f),
             Self::Pki(error) => error.fmt(f),
+            Self::Timestamp(error) => error.fmt(f),
             Self::Io(message) => write!(f, "a file cannot be written: {message}"),
         }
     }
@@ -219,7 +223,7 @@ pub struct Summary {
     /// The identifiers of the manifest entries removed because the
     /// generator no longer produces them.
     pub removed: Vec<String>,
-    /// Files under the PKI directory that no manifest entry names, as
+    /// Files under the generator's directory that no manifest entry names, as
     /// paths relative to the manifest's directory. They are left in place.
     pub unlisted: Vec<String>,
 }
@@ -247,13 +251,28 @@ fn generated_here(artefact: &Artefact) -> bool {
 /// Returns a [`GenerateError`] if the manifest cannot be read or updated,
 /// or a file cannot be generated or written.
 pub fn write_into_corpus(manifest_path: &Path) -> Result<Summary, GenerateError> {
+    write_generated(manifest_path, DIRECTORY, generated_here, |time| {
+        generate(time).map_err(GenerateError::Pki)
+    })
+}
+
+/// Writes the files that `generate` produces for the validation time of
+/// the manifest at `manifest_path`, as [`write_into_corpus`] describes.
+/// The entries for which `owned` holds belong to this generator, and the
+/// files under `directory` are scanned for unlisted ones.
+pub(crate) fn write_generated(
+    manifest_path: &Path,
+    directory: &str,
+    owned: fn(&Artefact) -> bool,
+    generate: impl FnOnce(OffsetDateTime) -> Result<Vec<GeneratedFile>, GenerateError>,
+) -> Result<Summary, GenerateError> {
     let mut manifest = Manifest::load(manifest_path).map_err(GenerateError::Manifest)?;
     let root = manifest_path.parent().unwrap_or_else(|| Path::new("."));
-    let files = generate(manifest.header.validation_time).map_err(GenerateError::Pki)?;
+    let files = generate(manifest.header.validation_time)?;
     let generated: Vec<&str> = files.iter().map(|f| f.artefact.id.as_str()).collect();
     let mut removed = Vec::new();
     manifest.artefacts.retain(|artefact| {
-        let stale = generated_here(artefact) && !generated.contains(&artefact.id.as_str());
+        let stale = owned(artefact) && !generated.contains(&artefact.id.as_str());
         if stale {
             removed.push(artefact.id.clone());
         }
@@ -283,7 +302,7 @@ pub fn write_into_corpus(manifest_path: &Path) -> Result<Summary, GenerateError>
         .map(|a| a.path.to_string_lossy().into_owned())
         .collect();
     let mut unlisted = Vec::new();
-    collect_files(root, Path::new(DIRECTORY), &mut unlisted).map_err(|e| io(root, e))?;
+    collect_files(root, Path::new(directory), &mut unlisted).map_err(|e| io(root, e))?;
     unlisted.retain(|path| !listed.contains(path) && !path.ends_with("/README.md"));
     unlisted.sort();
     let temporary = manifest_path.with_extension("toml.tmp");
