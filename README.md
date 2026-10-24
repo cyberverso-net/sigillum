@@ -43,6 +43,7 @@ The full documentation index is in [docs/README.md](docs/README.md). The main en
 | [Development process](docs/development/process.md) | How work is planned, tracked and accepted |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to contribute, including the provenance rule |
 | [SECURITY.md](SECURITY.md) | How to report vulnerabilities |
+| [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | Expected behaviour and how to report conduct issues |
 | [GOVERNANCE.md](GOVERNANCE.md) | How decisions are made |
 
 ## Licence
