@@ -9,6 +9,7 @@ The documentation is organised in three parts: what the project aims to do, how 
 | [Charter](project/charter.md) | Mission, goals with acceptance criteria, guiding principles |
 | [Scope](project/scope.md) | What is in scope, deferred and excluded |
 | [Roadmap](project/roadmap.md) | Phases, deliverables and exit criteria |
+| [Measurements](project/measurements.md) | Protocol and results of the measurements for goal G4 |
 
 ## Design
 
@@ -18,6 +19,7 @@ The documentation is organised in three parts: what the project aims to do, how 
 | [Architecture decision records](design/adr/README.md) | One record per significant decision |
 | [Conformance strategy](design/conformance.md) | How equivalence with DSS and the ETSI standards is demonstrated |
 | [Recorded divergences](design/divergences.md) | Intentional differences from DSS behaviour |
+| [Threat model](design/threat-model.md) | Security objectives, trust boundaries, attackers, threats and mitigations |
 
 ## Development
 

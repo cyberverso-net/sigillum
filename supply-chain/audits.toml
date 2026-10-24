@@ -1,0 +1,1090 @@
+
+# cargo-vet audits file
+
+[audits]
+
+[[trusted.aead]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.aead]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/traits"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.aes]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.aes]]
+criteria = "safe-to-deploy"
+user-id = 5059
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.aes]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/block-ciphers"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.aes-gcm]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.aes-gcm]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/AEADs"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.aes-kw]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.aes-kw]]
+criteria = "safe-to-deploy"
+user-id = 5059
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.aes-kw]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/key-wraps"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.ansi-x963-kdf]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.ansi-x963-kdf]]
+criteria = "safe-to-deploy"
+user-id = 5059
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.anstream]]
+criteria = "safe-to-run"
+user-id = 6743 # Ed Page (epage)
+start = "2023-03-16"
+end = "2027-10-24"
+
+[[trusted.anstyle]]
+criteria = "safe-to-run"
+user-id = 6743 # Ed Page (epage)
+start = "2022-05-18"
+end = "2027-10-24"
+
+[[trusted.anstyle-parse]]
+criteria = "safe-to-run"
+user-id = 6743 # Ed Page (epage)
+start = "2023-03-08"
+end = "2027-10-24"
+
+[[trusted.anstyle-query]]
+criteria = "safe-to-run"
+user-id = 6743 # Ed Page (epage)
+start = "2023-04-13"
+end = "2027-10-24"
+
+[[trusted.anstyle-wincon]]
+criteria = "safe-to-run"
+user-id = 6743 # Ed Page (epage)
+start = "2023-03-08"
+end = "2027-10-24"
+
+[[trusted.base16ct]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.base64ct]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.base64ct]]
+criteria = "safe-to-deploy"
+user-id = 5059
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.base64ct]]
+criteria = "safe-to-deploy"
+user-id = 11235
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.block-buffer]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.block-buffer]]
+criteria = "safe-to-deploy"
+user-id = 5059
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.block-buffer]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/utils"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.block-padding]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.block-padding]]
+criteria = "safe-to-deploy"
+user-id = 5059
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.cbc]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.cbc]]
+criteria = "safe-to-deploy"
+user-id = 5059
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.cbc]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/block-modes"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.cipher]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.cipher]]
+criteria = "safe-to-deploy"
+user-id = 5059
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.cipher]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/traits"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.cmov]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.cmov]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/utils"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.cmpv2]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.cmpv2]]
+criteria = "safe-to-deploy"
+user-id = 11235
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.cms]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.cms]]
+criteria = "safe-to-deploy"
+user-id = 11235
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.cms]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/formats"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.colorchoice]]
+criteria = "safe-to-run"
+user-id = 6743 # Ed Page (epage)
+start = "2023-04-13"
+end = "2027-10-24"
+
+[[trusted.const-oid]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.const-oid]]
+criteria = "safe-to-deploy"
+user-id = 11235
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.cpubits]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.cpubits]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/utils"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.cpufeatures]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.cpufeatures]]
+criteria = "safe-to-deploy"
+user-id = 5059
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.cpufeatures]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/utils"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.crmf]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.crmf]]
+criteria = "safe-to-deploy"
+user-id = 11235
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.crypto-bigint]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.crypto-bigint]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/crypto-bigint"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.crypto-common]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.crypto-common]]
+criteria = "safe-to-deploy"
+user-id = 5059
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.crypto-common]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/traits"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.ctr]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.ctr]]
+criteria = "safe-to-deploy"
+user-id = 5059
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.ctr]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/block-modes"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.ctutils]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.ctutils]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/utils"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.curve25519-dalek]]
+criteria = "safe-to-deploy"
+user-id = 6979
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.curve25519-dalek-derive]]
+criteria = "safe-to-deploy"
+user-id = 6979
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.der]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.der]]
+criteria = "safe-to-deploy"
+user-id = 11235
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.der]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/formats"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.der_derive]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.der_derive]]
+criteria = "safe-to-deploy"
+user-id = 11235
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.digest]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.digest]]
+criteria = "safe-to-deploy"
+user-id = 5059
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.digest]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/traits"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.ecdsa]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.ecdsa]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/signatures"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.ed25519]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.ed25519]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/signatures"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.ed25519-dalek]]
+criteria = "safe-to-deploy"
+user-id = 6979
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.elliptic-curve]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.elliptic-curve]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/traits"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.find-msvc-tools]]
+criteria = "safe-to-run"
+user-id = 539 # Josh Stone (cuviper)
+start = "2025-08-29"
+end = "2027-10-24"
+
+[[trusted.ghash]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.ghash]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/universal-hashes"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.hashbrown]]
+criteria = "safe-to-run"
+user-id = 2915 # Amanieu d'Antras (Amanieu)
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.hkdf]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.hkdf]]
+criteria = "safe-to-deploy"
+user-id = 5059
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.hkdf]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/KDFs"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.hmac]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.hmac]]
+criteria = "safe-to-deploy"
+user-id = 5059
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.hmac]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/MACs"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.hybrid-array]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.hybrid-array]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/hybrid-array"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.indexmap]]
+criteria = "safe-to-run"
+user-id = 539 # Josh Stone (cuviper)
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.inout]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.inout]]
+criteria = "safe-to-deploy"
+user-id = 5059
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.inout]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/utils"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.is_terminal_polyfill]]
+criteria = "safe-to-run"
+user-id = 6743 # Ed Page (epage)
+start = "2024-05-02"
+end = "2027-10-24"
+
+[[trusted.itoa]]
+criteria = "safe-to-run"
+user-id = 3618 # David Tolnay (dtolnay)
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.keccak]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.keccak]]
+criteria = "safe-to-deploy"
+user-id = 5059
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.keccak]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/sponges"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.memchr]]
+criteria = "safe-to-run"
+user-id = 189 # Andrew Gallant (BurntSushi)
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.once_cell_polyfill]]
+criteria = "safe-to-run"
+user-id = 6743 # Ed Page (epage)
+start = "2025-05-22"
+end = "2027-10-24"
+
+[[trusted.opaque-debug]]
+criteria = "safe-to-deploy"
+user-id = 5059
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.p256]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.p256]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/elliptic-curves"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.p384]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.p384]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/elliptic-curves"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.p521]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.p521]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/elliptic-curves"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.pem-rfc7468]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.pem-rfc7468]]
+criteria = "safe-to-deploy"
+user-id = 11235
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.pkcs1]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.pkcs1]]
+criteria = "safe-to-deploy"
+user-id = 11235
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.pkcs1]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/formats"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.pkcs8]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.pkcs8]]
+criteria = "safe-to-deploy"
+user-id = 11235
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.pkcs8]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/formats"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.polyval]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.polyval]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/universal-hashes"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.primefield]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.primefield]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/elliptic-curves"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.primeorder]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.primeorder]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/elliptic-curves"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.proc-macro2]]
+criteria = "safe-to-run"
+user-id = 3618 # David Tolnay (dtolnay)
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.regex-automata]]
+criteria = "safe-to-run"
+user-id = 189 # Andrew Gallant (BurntSushi)
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.rfc6979]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.rfc6979]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/signatures"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.rsa]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.rsa]]
+criteria = "safe-to-deploy"
+user-id = 3079
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.rsa]]
+criteria = "safe-to-deploy"
+user-id = 5059
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.rsa]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/RSA"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.sec1]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.sec1]]
+criteria = "safe-to-deploy"
+user-id = 11235
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.sec1]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/formats"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.serde]]
+criteria = "safe-to-run"
+user-id = 3618 # David Tolnay (dtolnay)
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.serde_core]]
+criteria = "safe-to-run"
+user-id = 3618 # David Tolnay (dtolnay)
+start = "2025-09-13"
+end = "2027-10-24"
+
+[[trusted.serde_derive]]
+criteria = "safe-to-run"
+user-id = 3618 # David Tolnay (dtolnay)
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.serde_spanned]]
+criteria = "safe-to-run"
+user-id = 6743 # Ed Page (epage)
+start = "2023-01-20"
+end = "2027-10-24"
+
+[[trusted.serdect]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.serdect]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/formats"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.sha1]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.sha1]]
+criteria = "safe-to-deploy"
+user-id = 5059
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.sha1]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/hashes"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.sha2]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.sha2]]
+criteria = "safe-to-deploy"
+user-id = 5059
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.sha2]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/hashes"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.sha3]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.sha3]]
+criteria = "safe-to-deploy"
+user-id = 5059
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.sha3]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/hashes"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.signature]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.signature]]
+criteria = "safe-to-deploy"
+user-id = 5059
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.signature]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/traits"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.spki]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.spki]]
+criteria = "safe-to-deploy"
+user-id = 11235
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.spki]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/formats"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.sponge-cursor]]
+criteria = "safe-to-deploy"
+user-id = 5059
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.sponge-cursor]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/utils"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.subtle]]
+criteria = "safe-to-deploy"
+user-id = 5289
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.syn]]
+criteria = "safe-to-run"
+user-id = 3618 # David Tolnay (dtolnay)
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.tls_codec]]
+criteria = "safe-to-deploy"
+user-id = 9765
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.tls_codec_derive]]
+criteria = "safe-to-deploy"
+user-id = 9765
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.toml]]
+criteria = "safe-to-run"
+user-id = 6743 # Ed Page (epage)
+start = "2022-12-14"
+end = "2027-10-24"
+
+[[trusted.toml_datetime]]
+criteria = "safe-to-run"
+user-id = 6743 # Ed Page (epage)
+start = "2022-10-21"
+end = "2027-10-24"
+
+[[trusted.toml_parser]]
+criteria = "safe-to-run"
+user-id = 6743 # Ed Page (epage)
+start = "2025-07-08"
+end = "2027-10-24"
+
+[[trusted.toml_writer]]
+criteria = "safe-to-run"
+user-id = 6743 # Ed Page (epage)
+start = "2025-07-08"
+end = "2027-10-24"
+
+[[trusted.unicode-ident]]
+criteria = "safe-to-run"
+user-id = 3618 # David Tolnay (dtolnay)
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.universal-hash]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.universal-hash]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/traits"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.walkdir]]
+criteria = "safe-to-run"
+user-id = 189 # Andrew Gallant (BurntSushi)
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.windows-link]]
+criteria = "safe-to-run"
+user-id = 64539 # Kenny Kerr (kennykerr)
+start = "2024-07-17"
+end = "2027-10-24"
+
+[[trusted.windows-sys]]
+criteria = "safe-to-run"
+user-id = 64539 # Kenny Kerr (kennykerr)
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.winnow]]
+criteria = "safe-to-run"
+user-id = 6743 # Ed Page (epage)
+start = "2023-02-22"
+end = "2027-10-24"
+
+[[trusted.wnaf]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.wnaf]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/elliptic-curves"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.x509-cert]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.x509-cert]]
+criteria = "safe-to-deploy"
+user-id = 11235
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.x509-cert]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/formats"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.x509-ocsp]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.x509-tsp]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.zeroize]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.zeroize]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/utils"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.zeroize_derive]]
+criteria = "safe-to-deploy"
+user-id = 267
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.zeroize_derive]]
+criteria = "safe-to-deploy"
+user-id = 5059
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.zeroize_derive]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:RustCrypto/utils"
+start = "2022-01-01"
+end = "2027-10-24"

@@ -14,7 +14,7 @@ As a result, mobile wallets, native desktop applications and browser-based tools
 
 ## What sigillum is
 
-- A **narrow core**: CAdES, PAdES and JAdES signature creation up to baseline -LT, CMS EnvelopedData, and, in a second stage, basic signature verification.
+- A **narrow core**: CAdES, PAdES and JAdES signature creation up to baseline -LT, CMS encryption (AuthEnvelopedData and EnvelopedData), and, in a second stage, basic signature verification.
 - **Portable**: one Rust code base for Android, iOS, macOS, Windows, Linux and `wasm32`, with bindings for Kotlin, Swift and JavaScript.
 - **Memory-safe**: no `unsafe` code outside the binding layer; every parser is fuzzed.
 - **Verified against DSS**: every signature sigillum produces is validated by DSS in continuous integration; DSS is used as an external test oracle, never linked or copied.

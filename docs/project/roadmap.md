@@ -24,7 +24,7 @@ Exit criteria:
 Deliverables:
 
 - `sigillum-pki`: certificates, path building to a supplied anchor, OCSP and CRL handling, RFC 3161 client, signer and fetcher interfaces.
-- `sigillum-cms`: CMS SignedData and EnvelopedData construction and parsing.
+- `sigillum-cms`: CMS SignedData, EnvelopedData and AuthEnvelopedData construction and parsing.
 - `sigillum-cades`: CAdES-BES and baseline B-B, B-T, B-LT, enveloping and detached.
 - `sigillum-pdf`: minimal PDF reader, append-only incremental-update writer and revision analysis ([ADR-0015](../design/adr/0015-pdf-reader-and-incremental-writer.md)).
 - `sigillum-pades`: PAdES-BES and baseline B-B, B-T, B-LT on top of `sigillum-pdf`: signature dictionary, document security store, invisible and simple visible appearance.
@@ -38,7 +38,7 @@ Exit criteria:
 - All parsers under continuous fuzzing, with no open crash.
 - Builds and tests pass on Android, iOS, macOS, Windows, Linux and `wasm32`.
 - The G4 targets set in phase 0 are met.
-- First release (0.1), covering at least CAdES, PAdES and CMS EnvelopedData, published on crates.io.
+- First release (0.1), covering at least CAdES, PAdES and CMS encryption (AuthEnvelopedData and EnvelopedData), published on crates.io.
 - The threat model has been reviewed and updated for the phase's deliverables.
 
 ## Phase 2: basic verification (indicative: about 6 months)

@@ -1,0 +1,27 @@
+[package]
+name = "sigillum-bench"
+description = "Benchmarks for sigillum, used to record performance baselines for goal G4"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+categories.workspace = true
+keywords.workspace = true
+publish = false
+
+[lib]
+# The library holds no benchmarks; this keeps the benchmark options of
+# criterion from reaching the default test harness.
+bench = false
+
+[dev-dependencies]
+criterion = { version = "0.8", default-features = false, features = ["cargo_bench_support"] }
+
+[[bench]]
+name = "placeholders"
+harness = false
+
+[lints]
+workspace = true

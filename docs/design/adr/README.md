@@ -53,3 +53,6 @@ When the lead maintainer accepts an ADR directly, without a *Proposed* stage, th
 | [0014](0014-test-pki-and-corpus.md) | Generate the test PKI and corpus, and verify them independently | Accepted |
 | [0015](0015-pdf-reader-and-incremental-writer.md) | Implement a minimal PDF reader and an incremental-update writer | Accepted |
 | [0016](0016-jades-implementation-basis.md) | Implement JAdES on sigillum's own foundations | Accepted |
+| [0017](0017-defensive-api-rules.md) | Apply defensive rules to the signing and verification API | Accepted |
+| [0018](0018-restrict-jades-payloads-and-detached-mechanisms.md) | Exclude unencoded JAdES payloads and restrict detached mechanisms | Accepted |
+| [0019](0019-divergence-classes-and-intentional-restrictions.md) | Divergence classes and intentional restrictions | Accepted |

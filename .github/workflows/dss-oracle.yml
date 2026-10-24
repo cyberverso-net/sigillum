@@ -1,0 +1,53 @@
+name: DSS oracle
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: DSS oracle build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: tools/dss-oracle
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: tools/dss-oracle/pom.xml
+      - name: Build and test
+        run: mvn -B -ntp verify
+      # The JAR contains DSS (LGPL-2.1) and is never uploaded as an artefact (ADR-0013).
+      - name: Check the JAR
+        run: |
+          unzip -p target/dss-oracle.jar META-INF/MANIFEST.MF | grep -F "Multi-Release: true"
+      # The tool is built with network access and run in a network namespace without it.
+      - name: Run the executable without network
+        run: |
+          offline() {
+            sudo unshare --net -- runuser -u "$(id -un)" -- env "PATH=$PATH" "JAVA_HOME=$JAVA_HOME" "$@"
+          }
+          offline true
+          for url in https://github.com https://1.1.1.1; do
+            if offline curl -sS --max-time 5 "$url" > /dev/null; then
+              echo "The network namespace still reaches $url."
+              exit 1
+            fi
+          done
+          offline java -jar target/dss-oracle.jar --version | grep -F "(DSS "
+          set +e
+          offline java -jar target/dss-oracle.jar sign
+          code=$?
+          set -e
+          test "$code" -eq 3

@@ -1,0 +1,188 @@
+
+# cargo-vet config file
+
+[cargo-vet]
+version = "0.10"
+
+[imports.bytecode-alliance]
+url = "https://raw.githubusercontent.com/bytecodealliance/wasmtime/main/supply-chain/audits.toml"
+
+[imports.google]
+url = "https://raw.githubusercontent.com/google/supply-chain/main/audits.toml"
+
+[imports.mozilla]
+url = "https://raw.githubusercontent.com/mozilla/supply-chain/main/audits.toml"
+
+[policy.sigillum-bench]
+criteria = "safe-to-run"
+
+[policy.sigillum-oracle]
+criteria = "safe-to-run"
+
+[policy.sigillum-testpki]
+criteria = "safe-to-run"
+
+[[exemptions.aho-corasick]]
+version = "1.1.5"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.alloca]]
+version = "0.4.0"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.autocfg]]
+version = "1.5.1"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.cc]]
+version = "1.10.0"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.cfg-if]]
+version = "1.0.5"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.clap]]
+version = "4.6.7"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.clap_builder]]
+version = "4.6.7"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.clap_derive]]
+version = "4.6.7"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.clap_lex]]
+version = "1.1.1"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.criterion]]
+version = "0.8.2"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.criterion-plot]]
+version = "0.8.2"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.crunchy]]
+version = "0.2.4"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.deranged]]
+version = "0.5.9"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.either]]
+version = "1.19.0"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.equivalent]]
+version = "1.0.3"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.half]]
+version = "2.7.1"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.itertools]]
+version = "0.13.0"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.libc]]
+version = "0.2.191"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.num-conv]]
+version = "0.2.2"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.page_size]]
+version = "0.6.0"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.powerfmt]]
+version = "0.2.1"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.regex]]
+version = "1.13.1"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.regex-syntax]]
+version = "0.8.11"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.serde_json]]
+version = "1.0.154"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.time]]
+version = "0.3.55"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.time-core]]
+version = "0.1.9"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.time-macros]]
+version = "0.2.32"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.winapi-i686-pc-windows-gnu]]
+version = "0.4.0"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.winapi-util]]
+version = "0.1.11"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.winapi-x86_64-pc-windows-gnu]]
+version = "0.4.0"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.zerocopy]]
+version = "0.8.63"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.zerocopy-derive]]
+version = "0.8.63"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
+
+[[exemptions.zmij]]
+version = "1.0.23"
+criteria = "safe-to-run"
+notes = "Tooling dependency, exempted until reviewed before release 0.1 (#63)."
