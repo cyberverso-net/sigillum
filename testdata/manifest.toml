@@ -5,3 +5,518 @@ format-version = 1
 validation-time = "2030-01-15T10:00:00Z"
 openssl-version = "3.0.13"
 dss-version = "6.5.1"
+
+[[artefact]]
+id = "pki/root-ca"
+path = "pki/root-ca.pem"
+sha256 = "59923f0be390469dee41b6783cb0413295e573e0f2dd19b6ff829eb7ca50aca0"
+kind = "certificate"
+purpose = "Self-signed root CA of the test PKI, with an RSA 3072-bit key, the trust anchor of every chain."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/keys/root-ca"
+path = "pki/keys/root-ca.test-key.pem"
+sha256 = "14c29f0ee4e170cd61162a15710ed89ae8b3fc57186a8f89bf1b90daf306f907"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/root-ca, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/ca-rsa"
+path = "pki/ca-rsa.pem"
+sha256 = "35bdc1ca9edc35115217ced298b117b2c76d620f9761bfab6be18b499c51c056"
+kind = "certificate"
+purpose = "Issuing CA of the RSA PKCS#1 v1.5 family, with an RSA 3072-bit key."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/root-ca", chain = ["pki/root-ca"] }
+
+[[artefact]]
+id = "pki/keys/ca-rsa"
+path = "pki/keys/ca-rsa.test-key.pem"
+sha256 = "164486ccc668cada9782659733a01ce6e87a6af8731df0bd7ee7976f40acd2b1"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/ca-rsa, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/ca-rsa-pss"
+path = "pki/ca-rsa-pss.pem"
+sha256 = "02f13abdade265620d8ae7e9c3d73fbf8edff141820821e3e6d6eee16143b04a"
+kind = "certificate"
+purpose = "Issuing CA of the RSASSA-PSS family, with an RSA 3072-bit key that signs with RSASSA-PSS."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/root-ca", chain = ["pki/root-ca"] }
+
+[[artefact]]
+id = "pki/keys/ca-rsa-pss"
+path = "pki/keys/ca-rsa-pss.test-key.pem"
+sha256 = "6e2b88d797bc01693f550e8eac0e4872746a97879eeb5eb871beb8f3e6d0e0d0"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/ca-rsa-pss, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/ca-ecdsa"
+path = "pki/ca-ecdsa.pem"
+sha256 = "fc4cb26f81f2d974fec956274bf20ad552e114aa20507da90741d1df241c0ed7"
+kind = "certificate"
+purpose = "Issuing CA of the ECDSA family, with a P-384 key that signs with ECDSA and SHA-384."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/root-ca", chain = ["pki/root-ca"] }
+
+[[artefact]]
+id = "pki/keys/ca-ecdsa"
+path = "pki/keys/ca-ecdsa.test-key.pem"
+sha256 = "5ffb9569b1d622a10d0e8a96d1d7ae98461705296138d8b837f2b8e30080b5aa"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/ca-ecdsa, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/ca-ecdsa-p521"
+path = "pki/ca-ecdsa-p521.pem"
+sha256 = "3805dbf5eb9cb96150db9683242ae72b129d622709f2ff342933232fd811eabd"
+kind = "certificate"
+purpose = "Second issuing CA of the ECDSA family, with a P-521 key that signs with ECDSA and SHA-512."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/root-ca", chain = ["pki/root-ca"] }
+
+[[artefact]]
+id = "pki/keys/ca-ecdsa-p521"
+path = "pki/keys/ca-ecdsa-p521.test-key.pem"
+sha256 = "ce0a5d11b339a90d7e7b4f5c93bedcc1b9e29566689b61cf414dd55352b7eb0d"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/ca-ecdsa-p521, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/ca-ed25519"
+path = "pki/ca-ed25519.pem"
+sha256 = "2dcbcf36138a7c22711ec77e4049bf33a9240e5b5a9b6294642973199cc32ee0"
+kind = "certificate"
+purpose = "Issuing CA of the Ed25519 family."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/root-ca", chain = ["pki/root-ca"] }
+
+[[artefact]]
+id = "pki/keys/ca-ed25519"
+path = "pki/keys/ca-ed25519.test-key.pem"
+sha256 = "aca3b6ed556555f2f14119ca8fd84ffa32b06ff06b08481f24fb48eaf5ba31fa"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/ca-ed25519, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/signer-rsa-2048"
+path = "pki/signer-rsa-2048.pem"
+sha256 = "8f4fe8be2b51a719325cc1a56495346dea66d8a3018908f3f15f9be26e6f2f56"
+kind = "certificate"
+purpose = "End-entity signing certificate with an RSA 2048-bit key, signed with RSA PKCS#1 v1.5 and SHA-256."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"] }
+
+[[artefact]]
+id = "pki/keys/signer-rsa-2048"
+path = "pki/keys/signer-rsa-2048.test-key.pem"
+sha256 = "f2f9da585acfedc25d0d699fa5e24e9a1d9349d647046c55ce86992a77e1cf4b"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/signer-rsa-2048, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/signer-rsa-3072"
+path = "pki/signer-rsa-3072.pem"
+sha256 = "156b6cbef091308d6533e53436df631e524fabdbb0dbc81a191c37829e2de49f"
+kind = "certificate"
+purpose = "End-entity signing certificate with an RSA 3072-bit key, signed with RSA PKCS#1 v1.5 and SHA-256."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"] }
+
+[[artefact]]
+id = "pki/keys/signer-rsa-3072"
+path = "pki/keys/signer-rsa-3072.test-key.pem"
+sha256 = "a8714191db384ac4df911e5a74903ad2f28190beb3990366fced5f430389aabc"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/signer-rsa-3072, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/signer-rsa-sha3-256"
+path = "pki/signer-rsa-sha3-256.pem"
+sha256 = "db627a4df436eb53945949ac0daf91fd40f2688e49ba96338d748951dc331b9a"
+kind = "certificate"
+purpose = "End-entity signing certificate with an RSA 2048-bit key, signed with RSA PKCS#1 v1.5 and SHA3-256."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"] }
+
+[[artefact]]
+id = "pki/keys/signer-rsa-sha3-256"
+path = "pki/keys/signer-rsa-sha3-256.test-key.pem"
+sha256 = "16fbd954d240b8b12cd3498503c7791cb205a1c1baa2357bac2f09f116fe056c"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/signer-rsa-sha3-256, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/signer-rsa-pss-sha256"
+path = "pki/signer-rsa-pss-sha256.pem"
+sha256 = "a06de8e3d3aea8d9bb3a8d469943b34dc8ab371543f0aff405ef17572da2b93f"
+kind = "certificate"
+purpose = "End-entity signing certificate with an RSA 3072-bit key, signed with RSASSA-PSS and SHA-256."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ca-rsa-pss", chain = ["pki/ca-rsa-pss", "pki/root-ca"] }
+
+[[artefact]]
+id = "pki/keys/signer-rsa-pss-sha256"
+path = "pki/keys/signer-rsa-pss-sha256.test-key.pem"
+sha256 = "64139fcec18b26b019af3b1a5d7aebcf038ef201cd2eca23fbb87c949d157a04"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/signer-rsa-pss-sha256, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/signer-rsa-pss-sha384"
+path = "pki/signer-rsa-pss-sha384.pem"
+sha256 = "953b4562736d41d25e36ccb8c5b8966803658f1ace8ce437c5077b853ed1707d"
+kind = "certificate"
+purpose = "End-entity signing certificate with an RSA 3072-bit key, signed with RSASSA-PSS and SHA-384."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ca-rsa-pss", chain = ["pki/ca-rsa-pss", "pki/root-ca"] }
+
+[[artefact]]
+id = "pki/keys/signer-rsa-pss-sha384"
+path = "pki/keys/signer-rsa-pss-sha384.test-key.pem"
+sha256 = "f6aa47d47144a98300e986d9393711a4170388b1a0e7c793065996ee63a5c486"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/signer-rsa-pss-sha384, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/signer-p256"
+path = "pki/signer-p256.pem"
+sha256 = "34f09872b8b45b5e0ec8ba3fb43dab5e2effa6f088652beba1f709b28da99f89"
+kind = "certificate"
+purpose = "End-entity signing certificate with an ECDSA P-256 key."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"] }
+
+[[artefact]]
+id = "pki/keys/signer-p256"
+path = "pki/keys/signer-p256.test-key.pem"
+sha256 = "61f93a582c08e015b99b0456396345bfb3d9d524ba8ef7630a2c7270ea3e1118"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/signer-p256, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/signer-p384"
+path = "pki/signer-p384.pem"
+sha256 = "5e6d5acdab987d0def3eef75e8e56e49c0d0caff13e841d2137240ef5af0a864"
+kind = "certificate"
+purpose = "End-entity signing certificate with an ECDSA P-384 key."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"] }
+
+[[artefact]]
+id = "pki/keys/signer-p384"
+path = "pki/keys/signer-p384.test-key.pem"
+sha256 = "d83d5c70e487dcd6f1e53f9aac856e9c4df139a6b535e25d71569171c31463b7"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/signer-p384, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/signer-p521"
+path = "pki/signer-p521.pem"
+sha256 = "84dbcce8d9f68146e12ffb13a3d0428c856c5c0f80bff05fe39bda0c98a064e5"
+kind = "certificate"
+purpose = "End-entity signing certificate with an ECDSA P-521 key, signed with ECDSA on P-521 and SHA-512."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ca-ecdsa-p521", chain = ["pki/ca-ecdsa-p521", "pki/root-ca"] }
+
+[[artefact]]
+id = "pki/keys/signer-p521"
+path = "pki/keys/signer-p521.test-key.pem"
+sha256 = "5dc7b6170c0dff3cdf69ed779d1e7d20e6c0b7b9fb7846c2c7809d350c6ec243"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/signer-p521, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/signer-ed25519"
+path = "pki/signer-ed25519.pem"
+sha256 = "2235b8c48ebb6f67e3204d482f64e61f26cb77481d787d5dbbdd8519af0bb471"
+kind = "certificate"
+purpose = "End-entity signing certificate with an Ed25519 key."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ca-ed25519", chain = ["pki/ca-ed25519", "pki/root-ca"] }
+
+[[artefact]]
+id = "pki/keys/signer-ed25519"
+path = "pki/keys/signer-ed25519.test-key.pem"
+sha256 = "42e9939639eabea686f17151182ade1f27287281e13c57b1f847d962bf8cd63d"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/signer-ed25519, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/tsa"
+path = "pki/tsa.pem"
+sha256 = "ca8a150ddd4a0a3c1cbfeea20c50180ec434af949943b892628c449d102fb9a6"
+kind = "certificate"
+purpose = "Timestamping authority certificate, with the critical extended key usage id-kp-timeStamping."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"] }
+
+[[artefact]]
+id = "pki/keys/tsa"
+path = "pki/keys/tsa.test-key.pem"
+sha256 = "d358ca97ac968a6c9cad5105fd1356e3f8fd3e9b42aec9f3671924197dfdc10e"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/tsa, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/ocsp-responder"
+path = "pki/ocsp-responder.pem"
+sha256 = "27dfd561a9eace25acc7b7bb3737316be094e699cd7373f50e4f5eebbb303b52"
+kind = "certificate"
+purpose = "Delegated OCSP responder of the ECDSA CA, with id-kp-OCSPSigning and id-pkix-ocsp-nocheck."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"] }
+
+[[artefact]]
+id = "pki/keys/ocsp-responder"
+path = "pki/keys/ocsp-responder.test-key.pem"
+sha256 = "a06c4ddd59cd74eb9de6faa32cd606802f9fd3df8c12ec4e4e6f5e93cd5636ba"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/ocsp-responder, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/signer-expired"
+path = "pki/signer-expired.pem"
+sha256 = "87c98149be74af0759464e455ce58ace0c3c4d49b916e9d70484ba4dc316820a"
+kind = "certificate"
+purpose = "End-entity signing certificate that expired one day before the validation time."
+expected-openssl = "rejected"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"] }
+
+[[artefact]]
+id = "pki/keys/signer-expired"
+path = "pki/keys/signer-expired.test-key.pem"
+sha256 = "5806b3b86a9ef2923f8bb6198848b8129f2aa1c0abfcd9dd70330936fcaaea33"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/signer-expired, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/signer-not-yet-valid"
+path = "pki/signer-not-yet-valid.pem"
+sha256 = "9eb291ec0cb12313a6a6db3dd0a68bbb00818587cdfff31f4b525dce5b8bd97c"
+kind = "certificate"
+purpose = "End-entity signing certificate that becomes valid one day after the validation time."
+expected-openssl = "rejected"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"] }
+
+[[artefact]]
+id = "pki/keys/signer-not-yet-valid"
+path = "pki/keys/signer-not-yet-valid.test-key.pem"
+sha256 = "0b60274d4f4975ad02067081a75ffb467a601350fe702151682726aa55c76cde"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/signer-not-yet-valid, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/ca-expired"
+path = "pki/ca-expired.pem"
+sha256 = "10f6565b6787f1c36a7d111537517b1300ab3feae33cbc774a7b80c472b797d5"
+kind = "certificate"
+purpose = "Intermediate CA that expired one day before the validation time."
+expected-openssl = "rejected"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
+links = { issuer = "pki/root-ca", chain = ["pki/root-ca"] }
+
+[[artefact]]
+id = "pki/keys/ca-expired"
+path = "pki/keys/ca-expired.test-key.pem"
+sha256 = "61dfaaa8d8888e3bf819d139352934cdbcc9570865a297d37d825e8d2ccec221"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/ca-expired, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/signer-under-expired-ca"
+path = "pki/signer-under-expired-ca.pem"
+sha256 = "e28f4eeca5ba64054f6242c0cddc7bec9aacca211ac179a85fc6a556a8eb03a4"
+kind = "certificate"
+purpose = "End-entity signing certificate, valid at the validation time, issued by an intermediate CA that has expired."
+expected-openssl = "rejected"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
+links = { issuer = "pki/ca-expired", chain = ["pki/ca-expired", "pki/root-ca"] }
+
+[[artefact]]
+id = "pki/keys/signer-under-expired-ca"
+path = "pki/keys/signer-under-expired-ca.test-key.pem"
+sha256 = "c1b230a78fd6ab4e8e27f07051bb822973f412893abbd1cd046032023273a2ef"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/signer-under-expired-ca, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/signer-without-non-repudiation"
+path = "pki/signer-without-non-repudiation.pem"
+sha256 = "00f0b3338b7464d9a35b33eb89bdecf76c7aa64dfb4216a53f4ec2e2fe9fe428"
+kind = "certificate"
+purpose = "End-entity signing certificate whose key usage lacks nonRepudiation."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"] }
+
+[[artefact]]
+id = "pki/keys/signer-without-non-repudiation"
+path = "pki/keys/signer-without-non-repudiation.test-key.pem"
+sha256 = "efdae88c4f083f401413a76fc342f748cd9ea22e49634f1866c3acd3c974e3d2"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/signer-without-non-repudiation, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/ca-without-ca-flag"
+path = "pki/ca-without-ca-flag.pem"
+sha256 = "4c4898b9c12cda38d9ab3247e7f15d863ef1cbff115b24366b79501186aeb15e"
+kind = "certificate"
+purpose = "CA certificate whose basic constraints do not assert cA."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/root-ca", chain = ["pki/root-ca"] }
+notes = "Basic constraints are present and leave cA at its default, FALSE, while the key usage asserts keyCertSign. OpenSSL rejects the certificate itself only with -x509_strict."
+
+[[artefact]]
+id = "pki/keys/ca-without-ca-flag"
+path = "pki/keys/ca-without-ca-flag.test-key.pem"
+sha256 = "f5bb2a74d94f53f5f4a29910e2a13d7fe00d61486668cee2c66352e466ac367b"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/ca-without-ca-flag, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/signer-under-ca-without-ca-flag"
+path = "pki/signer-under-ca-without-ca-flag.pem"
+sha256 = "1f9ae9ceb07ddc1d1c4acc906cf349e8aaa52c3fe5a9f67bd7dda450b8a78b84"
+kind = "certificate"
+purpose = "End-entity signing certificate issued by a CA certificate whose basic constraints do not assert cA."
+expected-openssl = "rejected"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
+links = { issuer = "pki/ca-without-ca-flag", chain = ["pki/ca-without-ca-flag", "pki/root-ca"] }
+
+[[artefact]]
+id = "pki/keys/signer-under-ca-without-ca-flag"
+path = "pki/keys/signer-under-ca-without-ca-flag.test-key.pem"
+sha256 = "75c24393ccfcd3d8025eace0e7c765e1ad2418a8af6e2bb687d0090575b56d6f"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/signer-under-ca-without-ca-flag, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/ca-without-basic-constraints"
+path = "pki/ca-without-basic-constraints.pem"
+sha256 = "1962fc6b078089b9d8f0dd9b6032921dd2870607c5414cda2a829a5c3414c856"
+kind = "certificate"
+purpose = "CA certificate without the basic constraints extension, while the key usage asserts keyCertSign."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/root-ca", chain = ["pki/root-ca"] }
+notes = "The basic constraints extension is absent (RFC 5280, section 4.2.1.9). OpenSSL rejects the certificate itself only with -x509_strict."
+
+[[artefact]]
+id = "pki/keys/ca-without-basic-constraints"
+path = "pki/keys/ca-without-basic-constraints.test-key.pem"
+sha256 = "cae46a790403e462e717d2a63ff9bbfba57f4b0d6a8acf98c4e11d3b6ca1ef24"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/ca-without-basic-constraints, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/signer-under-ca-without-basic-constraints"
+path = "pki/signer-under-ca-without-basic-constraints.pem"
+sha256 = "0529ac33eed2a3f0fa1ca98ef9f6a7df9d738c6a2b0795e533fc2b9ff4a67003"
+kind = "certificate"
+purpose = "End-entity signing certificate issued by a CA certificate without the basic constraints extension."
+expected-openssl = "rejected"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
+links = { issuer = "pki/ca-without-basic-constraints", chain = ["pki/ca-without-basic-constraints", "pki/root-ca"] }
+
+[[artefact]]
+id = "pki/keys/signer-under-ca-without-basic-constraints"
+path = "pki/keys/signer-under-ca-without-basic-constraints.test-key.pem"
+sha256 = "fd8409df0403641c27288434a07276c030f4c936b064015035f3568f401ee546"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/signer-under-ca-without-basic-constraints, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "pki/signer-unknown-critical-extension"
+path = "pki/signer-unknown-critical-extension.pem"
+sha256 = "30ef40579e737ac6ea946415fe8aabc8a3e977cdc4501c4ff73baec896dc8701"
+kind = "certificate"
+purpose = "End-entity signing certificate with a critical extension that no implementation recognises."
+expected-openssl = "rejected"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"] }
+notes = "The extension 1.3.6.1.4.1.32473.1.1 is critical and its value is a DER NULL."
+
+[[artefact]]
+id = "pki/keys/signer-unknown-critical-extension"
+path = "pki/keys/signer-unknown-critical-extension.test-key.pem"
+sha256 = "050affb613b915552fe4e28d12fbd2f2431040ca4ca37b16de05a8f52947a9a0"
+kind = "private-key"
+purpose = "PKCS#8 private key of pki/signer-unknown-critical-extension, a test key with no value."
+expected-openssl = "parsed"
+expected-dss = "not-applicable"

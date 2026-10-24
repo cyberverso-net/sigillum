@@ -6,6 +6,17 @@ all-features = true
 [advisories]
 version = 2
 yanked = "deny"
+ignore = [
+    # Library crates use `rsa` for public-key operations only, enforced by
+    # clippy.toml (ADR-0010). `sigillum-testpki` signs with test keys, to
+    # which timing attacks do not apply.
+    { id = "RUSTSEC-2023-0071", reason = "Marvin attack on RSA private-key operations; accepted under ADR-0020" },
+    # crypto-bigint 0.5, used by elliptic-curve 0.13 in the der 0.7
+    # generation of ADR-0011. The advisory reports secret-dependent
+    # branches in operations intended to be constant time; the fix is in
+    # 0.7.6 only.
+    { id = "RUSTSEC-2026-0387", reason = "Timing variability in crypto-bigint 0.5; accepted under ADR-0020" },
+]
 
 [licenses]
 version = 2
