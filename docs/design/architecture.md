@@ -7,7 +7,7 @@ This document gives an overview of the workspace, its dependencies and its main 
 | Component | Role | Published |
 | --- | --- | --- |
 | `sigillum-pki` | Cryptographic provider interface, certificates, path building and validation, OCSP, CRL, RFC 3161 timestamps, signer and fetcher interfaces | Yes |
-| `sigillum-cms` | CMS SignedData and EnvelopedData construction and parsing, CAdES signed and unsigned attributes | Yes |
+| `sigillum-cms` | CMS SignedData, EnvelopedData and AuthEnvelopedData construction and parsing, CAdES signed and unsigned attributes | Yes |
 | `sigillum-pdf` | Minimal PDF reader, append-only incremental-update writer, revision analysis (planned, [ADR-0015](adr/0015-pdf-reader-and-incremental-writer.md)) | Yes |
 | `sigillum-cades` | CAdES profiles: BES, baseline B-B, B-T, B-LT | Yes |
 | `sigillum-pades` | PAdES profiles: signature dictionary, document security store, visible appearance | Yes |
@@ -92,6 +92,8 @@ flowchart LR
 
 ## Design overview
 
+The security objectives, trust boundaries and threats that these choices address are described in the [threat model](threat-model.md).
+
 | Topic | Choice | Record |
 | --- | --- | --- |
 | Implementation language and bindings | Rust; UniFFI for Kotlin and Swift; `wasm-bindgen` for JavaScript | [ADR-0002](adr/0002-implement-in-rust.md) |
@@ -101,6 +103,7 @@ flowchart LR
 | Network access | None in the core; caller-supplied `Fetcher` | [ADR-0006](adr/0006-no-network-access-in-core.md) |
 | Scope and unsupported input | Baseline-first creation; explicit "not supported" results | [ADR-0007](adr/0007-asymmetric-scope.md) |
 | JAdES | Baseline B-B to B-LT in scope, after CAdES and PAdES | [ADR-0008](adr/0008-include-jades-baseline.md) |
+| Unencoded JAdES payloads | Excluded, with the `HttpHeaders` mechanism that requires them | [ADR-0018](adr/0018-exclude-unencoded-jades-payloads.md) |
 | XAdES | Deferred; reviewed once the phase 3 XML component for trusted lists exists | [ADR-0009](adr/0009-keep-xades-deferred.md) |
 | Cryptographic backend | RustCrypto behind a provider interface; `rsa` for public-key operations only, enforced by lint | [ADR-0010](adr/0010-cryptographic-backend.md) |
 | ASN.1, X.509 and CMS | RustCrypto formats crates, stable `der` 0.7 generation, not exposed in the public API | [ADR-0011](adr/0011-asn1-x509-cms-foundations.md) |
@@ -109,6 +112,7 @@ flowchart LR
 | Test PKI and corpus | PKI artefacts generated in Rust, signed documents by DSS; checked by OpenSSL and DSS in CI; committed with a manifest | [ADR-0014](adr/0014-test-pki-and-corpus.md) |
 | PDF | Own minimal reader and append-only incremental writer | [ADR-0015](adr/0015-pdf-reader-and-incremental-writer.md) |
 | JAdES implementation | Own implementation on `sigillum-pki`; duplicate header names rejected | [ADR-0016](adr/0016-jades-implementation-basis.md) |
+| Defensive API rules | Verify after signing; re-supplied document; restricted and bounded fetcher; explicit valid outcome with conformance findings; DocMDP respected; evidence checked before embedding; no B-LT on a revoked certificate | [ADR-0017](adr/0017-defensive-api-rules.md) |
 
 ### Errors, not panics
 
