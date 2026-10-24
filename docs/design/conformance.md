@@ -38,7 +38,11 @@ Every parser (ASN.1 structures, CMS, PDF objects and cross-reference sections, O
 
 ## Recording divergences
 
-sigillum may behave differently from DSS on purpose, because the ETSI text requires it or because DSS behaviour appears incorrect. Each such case is recorded in [divergences.md](divergences.md), with the clause of the standard concerned, a test vector, and a link to the report made to the DSS maintainers. An unrecorded divergence is a defect.
+sigillum may behave differently from DSS on purpose. Each such case is recorded in [divergences.md](divergences.md), with its class, a test vector, and the basis of the class. An unrecorded divergence is a defect. The three classes are defined in [ADR-0019](adr/0019-divergence-classes-and-intentional-restrictions.md):
+
+1. **Required or explicitly permitted by the cited standard.** The entry cites the clause. A report to the DSS maintainers is required when DSS accepts what the standard forbids, and optional when the standard permits both behaviours.
+2. **DSS behaviour appears incorrect.** The entry links the report made to the DSS maintainers.
+3. **Intentional restriction for security.** An ADR decides the restriction, affected signatures yield INDETERMINATE with "not supported", and a fixture exercises it as an expected divergence. An upstream report, to the DSS maintainers or to ETSI ESI, is optional.
 
 ## External evidence
 
