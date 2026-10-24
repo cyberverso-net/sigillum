@@ -11,12 +11,13 @@ Deliverables:
 - Repository, licences, contribution rules and continuous integration in place.
 - Differential test harness (`sigillum-oracle`) with the command-line tool `tools/dss-oracle` ([ADR-0013](../design/adr/0013-dss-oracle-command-line-tool.md)). It submits a signed object to a pinned DSS release running as a separate process and collects the reports. Validation uses a fixed time and offline certificate, revocation and timestamp sources.
 - Test PKI generator (`sigillum-testpki`) and initial corpus of test vectors under `testdata/`, with a manifest of expected results ([ADR-0014](../design/adr/0014-test-pki-and-corpus.md)).
-- Measurements of the reference points for goal G4, for at least DSS on a JVM and the PoDoFo-based stack used in current mobile wallets. They cover signing latency and memory on a mid-range Android device and an iPhone, and binary size.
+- Measurements of the reference points for goal G4, following the [measurement protocol](measurements.md). DSS is measured on a JVM on a desktop machine. The PoDoFo-based signing stack of the EUDI Wallet reference implementation is measured on a mid-range Android device and an iPhone. The measurements cover signing latency, memory and binary size.
 
 Exit criteria:
 
 - The harness runs in CI and reproduces DSS results deterministically.
 - Size and latency targets for G4 are written into the [charter](charter.md).
+- The threat model has been reviewed and updated for the phase's deliverables.
 
 ## Phase 1: creation (indicative: 6 to 9 months)
 
@@ -38,6 +39,7 @@ Exit criteria:
 - Builds and tests pass on Android, iOS, macOS, Windows, Linux and `wasm32`.
 - The G4 targets set in phase 0 are met.
 - First release (0.1), covering at least CAdES, PAdES and CMS encryption (AuthEnvelopedData and EnvelopedData), published on crates.io.
+- The threat model has been reviewed and updated for the phase's deliverables.
 
 ## Phase 2: basic verification (indicative: about 6 months)
 
@@ -51,6 +53,7 @@ Exit criteria:
 
 - Indications and sub-indications match DSS on the corpus for every case within scope; every out-of-scope case returns INDETERMINATE with a "not supported" reason.
 - Independent security review of the parsing and verification code commissioned or completed.
+- The threat model has been reviewed and updated for the phase's deliverables.
 
 ## Phase 3: validation engine (parallel track, indicative: 12 to 18 months)
 
@@ -65,6 +68,7 @@ Exit criteria:
 
 - Agreement with DSS on the corpus at the level of individual constraints.
 - Participation in an ETSI remote signature plugtest.
+- The threat model has been reviewed and updated for the phase's deliverables.
 
 ## Phase 4: extensions (only with a partner and funding)
 
