@@ -10,7 +10,7 @@ Every change must pass the gates below before it is merged. Continuous integrati
 | Linting | `cargo clippy --workspace --all-targets --all-features -- -D warnings` | No warnings |
 | Tests | `cargo test --workspace --all-features --exclude sigillum-oracle` and `cargo test -p sigillum-oracle` | All pass on Linux, macOS and Windows |
 | Documentation | `RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps` | No warnings; every public item documented |
-| Minimum Rust version | `cargo check` with the declared `rust-version` | Builds |
+| Minimum Rust version | `cargo check --workspace --all-features --all-targets` with the declared `rust-version` | Builds, including tests and benchmarks |
 | Portability | `cargo check` for `wasm32-unknown-unknown`, `aarch64-apple-ios`, `aarch64-linux-android` | Builds |
 | Dependencies | `cargo deny check` | No licence, advisory or source violations |
 | Sign-off | DCO check | Every commit signed off |

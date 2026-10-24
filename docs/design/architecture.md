@@ -14,6 +14,7 @@ This document gives an overview of the workspace, its dependencies and its main 
 | `sigillum-jades` | JAdES profiles: JWS serialisations, ETSI header parameters, unsigned properties | Yes |
 | `sigillum-ffi` | UniFFI bindings for Kotlin and Swift; `wasm-bindgen` bindings for JavaScript | Yes, from phase 1 |
 | `sigillum-testpki` | Generator of the test PKI and corpus in Rust, verified by OpenSSL and DSS (planned, [ADR-0014](adr/0014-test-pki-and-corpus.md)) | No |
+| `sigillum-bench` | Benchmarks for goal G4 (placeholders until the first operations exist) | No |
 | `sigillum-oracle` | Differential test harness comparing sigillum with DSS | No |
 | `tools/dss-oracle` | Java command-line tool that runs DSS to validate and sign for the harness and the test PKI (planned, [ADR-0013](adr/0013-dss-oracle-command-line-tool.md)) | No |
 
