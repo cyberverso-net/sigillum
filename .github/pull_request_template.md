@@ -15,6 +15,7 @@ Closes #
 - [ ] Intentional divergences from DSS recorded in `docs/design/divergences.md`
 - [ ] Changelog fragment added under `changelog.d/`, or not needed (reason given above)
 - [ ] Commits signed off
+- [ ] Maven dependency licences checked against `tools/dss-oracle/README.md`, or `tools/dss-oracle/pom.xml` unchanged
 
 ## Quality report
 

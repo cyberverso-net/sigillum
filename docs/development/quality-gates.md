@@ -16,8 +16,9 @@ Every change must pass the gates below before it is merged. Continuous integrati
 | Sign-off | DCO check | Every commit signed off |
 | Commit signatures | Verified commit signatures check | Every commit in the pull request has a verified signature |
 | Dependabot lists | `.github/scripts/check-dependabot-lists.sh` | The RustCrypto group and the ignore rules in `dependabot.yml` name the same crates |
-| Fixture verification (planned with the test PKI, phase 0) | `sigillum-testpki verify` with OpenSSL and `tools/dss-oracle`, Linux | Every artefact matches the result in its manifest |
-| Differential tests (planned with the harness, phase 0) | `cargo test -p sigillum-oracle --features dss` on Linux, with Java and Maven | Pass |
+| Fixture verification (planned with the test PKI, phase 0) | `sigillum-testpki verify` with OpenSSL and `tools/dss-oracle` run without network, Linux | Every artefact matches the result in its manifest |
+| DSS oracle build | `mvn -B verify` in `tools/dss-oracle`, Java 21, Linux; the tool then runs without network | Builds, its tests pass, and it runs offline |
+| Differential tests (planned with the harness, phase 0) | `cargo test -p sigillum-oracle --features dss` on Linux, with Java and Maven, running `tools/dss-oracle` without network | Pass |
 
 The `dss` feature of `sigillum-oracle` is excluded from the cross-platform test job, which tests `sigillum-oracle` with its default features only.
 
