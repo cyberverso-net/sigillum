@@ -513,37 +513,13 @@ fn generated_here(artefact: &Artefact) -> bool {
 /// for example because it lacks the certificates that the CRLs link, or a
 /// file cannot be generated or written.
 pub fn write_into_corpus(manifest_path: &Path) -> Result<Summary, GenerateError> {
-    let mut manifest = Manifest::load(manifest_path).map_err(GenerateError::Manifest)?;
-    let files = generate(manifest.header.validation_time).map_err(GenerateError::Pki)?;
-    let generated: Vec<String> = files.iter().map(|f| f.artefact.id.clone()).collect();
-    let mut removed = Vec::new();
-    manifest.artefacts.retain(|artefact| {
-        let stale = generated_here(artefact) && !generated.contains(&artefact.id);
-        if stale {
-            removed.push(artefact.id.clone());
-        }
-        !stale
-    });
-    for artefact in &mut manifest.artefacts {
-        artefact.links.revocation.retain(|id| !removed.contains(id));
-    }
-    for file in &files {
-        let mut artefact = file.artefact.clone();
-        if let Some(existing) = manifest.artefacts.iter().find(|a| a.id == artefact.id) {
-            artefact
-                .links
-                .revocation
-                .clone_from(&existing.links.revocation);
-        }
-        manifest.upsert(artefact);
-    }
-    link_certificates(&mut manifest, &generated);
-    let unlisted = super::commit(manifest_path, &manifest, &files, DIRECTORY)?;
-    Ok(Summary {
-        written: files.len(),
-        removed,
-        unlisted,
-    })
+    super::write_generated(
+        manifest_path,
+        DIRECTORY,
+        generated_here,
+        |manifest| generate(manifest.header.validation_time).map_err(GenerateError::Pki),
+        link_certificates,
+    )
 }
 
 /// Sets the `revocation` links of the certificate entries of the test PKI:

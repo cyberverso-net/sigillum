@@ -748,3 +748,56 @@ expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
 links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"] }
 notes = 'Covered certificate: pki/signer-p256. The issuer name is "O=sigillum test PKI, CN=sigillum test unknown CA", which no certificate has as subject. The CRL is signed with the key of pki/ca-ecdsa and carries its authority key identifier. DSS is likely to report TRY_LATER instead, from its check for acceptable revocation data.'
+
+[[artefact]]
+id = "timestamps/content"
+path = "timestamps/content.txt"
+sha256 = "7a35c004e4a3eb04b75372d51f5e762bf839bc6ef46c12fbafc7bb0df7aa20f5"
+kind = "document"
+purpose = "The data covered by the timestamp tokens under timestamps/."
+expected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "timestamps/valid"
+path = "timestamps/valid.tst"
+sha256 = "b4f9f0a74d62df660f3bab9559381d42ae43d0c3a3db009ca3500d56808741a5"
+kind = "timestamp-token"
+purpose = "Valid timestamp token over timestamps/content, issued by pki/tsa one day before the validation time."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/tsa", chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], content = "timestamps/content" }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, clause 5.4.4, to be confirmed when verify runs DSS. Step 1 runs the basic signature validation, whose X.509 validation checks revocation (clause 5.2.6.4, step 4) with the CRLs that the chain of pki/tsa links: crl/ca-ecdsa for pki/tsa and crl/root-ca for pki/ca-ecdsa. Neither CRL revokes a certificate of the chain."
+
+[[artefact]]
+id = "timestamps/signer-without-time-stamping"
+path = "timestamps/signer-without-time-stamping.tst"
+sha256 = "c62f4000bbac46c2e9d6f6c911d3568cff3a5e1d75c2a24e20d1ba14c0a12e84"
+kind = "timestamp-token"
+purpose = "Timestamp token over timestamps/content, signed by pki/signer-p256, whose certificate lacks the extended key usage id-kp-timeStamping."
+expected-openssl = "rejected"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "CHAIN_CONSTRAINTS_FAILURE" }
+links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], content = "timestamps/content" }
+notes = "RFC 3161, section 2.3, requires the critical extended key usage id-kp-timeStamping. The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, step 5, to be confirmed when verify runs DSS."
+
+[[artefact]]
+id = "timestamps/imprint-mismatch"
+path = "timestamps/imprint-mismatch.tst"
+sha256 = "8b1b8ef4b4275b425eec688f66cf1521735b183e918f2fb84ccb626d507a6299"
+kind = "timestamp-token"
+purpose = "Timestamp token issued by pki/tsa whose message imprint does not match timestamps/content."
+expected-openssl = "rejected"
+expected-dss = { indication = "FAILED", sub-indication = "HASH_FAILURE" }
+links = { issuer = "pki/tsa", chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], content = "timestamps/content" }
+notes = "The message imprint is the SHA-256 digest of timestamps/content with its last octet inverted. The token itself is intact. FAILED with HASH_FAILURE is the project's mapping for a message imprint that does not match the data supplied to the validation, as the validate-timestamp mode of tools/dss-oracle will compare it, and a prediction to be confirmed when verify runs DSS."
+
+[[artefact]]
+id = "timestamps/gen-time-after-validation-time"
+path = "timestamps/gen-time-after-validation-time.tst"
+sha256 = "aa989a2783256e743669556aedee0fd9351c798e6644198f8fc98823895e9ef8"
+kind = "timestamp-token"
+purpose = "Timestamp token over timestamps/content, issued by pki/tsa with a genTime one day after the validation time."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/tsa", chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], content = "timestamps/content" }
+notes = "openssl ts -verify does not compare genTime with the verification time. Neither does the time-stamp validation building block of ETSI EN 319 102-1 V1.4.1, clause 5.4.4, so the DSS result PASSED is a prediction, to be confirmed when verify runs DSS. As for timestamps/valid, revocation is checked (clause 5.2.6.4, step 4) with the CRLs that the chain of pki/tsa links, crl/ca-ecdsa and crl/root-ca, which revoke none of its certificates. A verifier that uses the token as time evidence must reject a genTime after the validation time."

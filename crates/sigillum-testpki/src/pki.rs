@@ -191,13 +191,16 @@ pub fn sha256_hex(data: &[u8]) -> String {
         .collect()
 }
 
-/// An error found while writing the test PKI into the corpus.
+/// An error found while writing generated artefacts, such as the test PKI
+/// or the timestamp tokens, into the corpus.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum GenerateError {
     /// The manifest cannot be read, or would not be valid once updated.
     Manifest(ManifestError),
     /// The test PKI cannot be generated.
     Pki(PkiError),
+    /// A timestamp token cannot be generated.
+    Timestamp(crate::timestamp::TsaError),
     /// A file cannot be written.
     Io(String),
 }
@@ -207,6 +210,7 @@ impl fmt::Display for GenerateError {
         match self {
             Self::Manifest(error) => error.fmt(f),
             Self::Pki(error) => error.fmt(f),
+            Self::Timestamp(error) => error.fmt(f),
             Self::Io(message) => write!(f, "a file cannot be written: {message}"),
         }
     }
@@ -214,7 +218,8 @@ impl fmt::Display for GenerateError {
 
 impl std::error::Error for GenerateError {}
 
-/// What [`write_into_corpus`] or [`crl::write_into_corpus`] did.
+/// What [`write_into_corpus`], [`crl::write_into_corpus`] or
+/// [`crate::timestamp::write_into_corpus`] did.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Summary {
     /// The number of files written.
@@ -253,17 +258,53 @@ fn generated_here(artefact: &Artefact) -> bool {
 /// Returns a [`GenerateError`] if the manifest cannot be read or updated,
 /// or a file cannot be generated or written.
 pub fn write_into_corpus(manifest_path: &Path) -> Result<Summary, GenerateError> {
+    write_generated(
+        manifest_path,
+        DIRECTORY,
+        generated_here,
+        |manifest| generate(manifest.header.validation_time).map_err(GenerateError::Pki),
+        |_, _| {},
+    )
+}
+
+/// The steps that every generator shares: [`write_into_corpus`],
+/// [`crl::write_into_corpus`] and [`crate::timestamp::write_into_corpus`].
+///
+/// 1. The manifest at `manifest_path` is loaded, and `generate` produces
+///    the files from it.
+/// 2. The entries for which `owned` holds and that `generate` no longer
+///    produces are removed, with every `revocation` link to them; their
+///    files are not deleted.
+/// 3. Each generated entry replaces the entry with its identifier, except
+///    for the `revocation` links of the entry it replaces, which are kept.
+/// 4. `link` updates the links of other entries, given the identifiers of
+///    the generated files.
+/// 5. [`commit`] writes the files and then the manifest, scanning
+///    `directory` for files that no entry names.
+///
+/// Nothing is written before step 5, and [`commit`] replaces the manifest
+/// last, so any failure leaves the previous manifest in place.
+pub(crate) fn write_generated(
+    manifest_path: &Path,
+    directory: &str,
+    owned: fn(&Artefact) -> bool,
+    generate: impl FnOnce(&Manifest) -> Result<Vec<GeneratedFile>, GenerateError>,
+    link: impl FnOnce(&mut Manifest, &[String]),
+) -> Result<Summary, GenerateError> {
     let mut manifest = Manifest::load(manifest_path).map_err(GenerateError::Manifest)?;
-    let files = generate(manifest.header.validation_time).map_err(GenerateError::Pki)?;
-    let generated: Vec<&str> = files.iter().map(|f| f.artefact.id.as_str()).collect();
+    let files = generate(&manifest)?;
+    let generated: Vec<String> = files.iter().map(|f| f.artefact.id.clone()).collect();
     let mut removed = Vec::new();
     manifest.artefacts.retain(|artefact| {
-        let stale = generated_here(artefact) && !generated.contains(&artefact.id.as_str());
+        let stale = owned(artefact) && !generated.contains(&artefact.id);
         if stale {
             removed.push(artefact.id.clone());
         }
         !stale
     });
+    for artefact in &mut manifest.artefacts {
+        artefact.links.revocation.retain(|id| !removed.contains(id));
+    }
     for file in &files {
         let mut artefact = file.artefact.clone();
         if let Some(existing) = manifest.artefacts.iter().find(|a| a.id == artefact.id) {
@@ -274,7 +315,8 @@ pub fn write_into_corpus(manifest_path: &Path) -> Result<Summary, GenerateError>
         }
         manifest.upsert(artefact);
     }
-    let unlisted = commit(manifest_path, &manifest, &files, DIRECTORY)?;
+    link(&mut manifest, &generated);
+    let unlisted = commit(manifest_path, &manifest, &files, directory)?;
     Ok(Summary {
         written: files.len(),
         removed,
