@@ -103,3 +103,4 @@ The reviewer, and the author before requesting review, checks that:
 8. New dependencies are justified and pass `cargo deny` and `cargo vet`.
 9. The provenance rule in [CONTRIBUTING.md](../../CONTRIBUTING.md) is respected: no code or test data under incompatible licences.
 10. Documentation and comments follow the [style guide](style-guide.md).
+11. The change is consistent with the [threat model](../design/threat-model.md); a new interface, format or dependency class updates it.

@@ -19,6 +19,7 @@ The documentation is organised in three parts: what the project aims to do, how 
 | [Architecture decision records](design/adr/README.md) | One record per significant decision |
 | [Conformance strategy](design/conformance.md) | How equivalence with DSS and the ETSI standards is demonstrated |
 | [Recorded divergences](design/divergences.md) | Intentional differences from DSS behaviour |
+| [Threat model](design/threat-model.md) | Security objectives, trust boundaries, attackers, threats and mitigations |
 
 ## Development
 

@@ -23,6 +23,8 @@ JAdES baseline is moved from *deferred* to *in scope*:
 
 The `HttpHeaders` mechanism of `sigD`, designed for signing HTTP messages in open banking APIs, remains deferred.
 
+The deferral of the `HttpHeaders` mechanism is changed, and the `ObjectIdByURI` mechanism is restricted to a single object, by [ADR-0018](0018-restrict-jades-payloads-and-detached-mechanisms.md).
+
 A new crate, `sigillum-jades`, holds the implementation. Whether to build on the existing `jades` crate (BSD-2-Clause, version 0.1.0, published June 2026) or to implement on top of `sigillum-pki` is decided by a separate ADR in phase 0.
 
 ## Alternatives considered

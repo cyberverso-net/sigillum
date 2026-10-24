@@ -7,7 +7,7 @@ This document gives an overview of the workspace, its dependencies and its main 
 | Component | Role | Published |
 | --- | --- | --- |
 | `sigillum-pki` | Cryptographic provider interface, certificates, path building and validation, OCSP, CRL, RFC 3161 timestamps, signer and fetcher interfaces | Yes |
-| `sigillum-cms` | CMS SignedData and EnvelopedData construction and parsing, CAdES signed and unsigned attributes | Yes |
+| `sigillum-cms` | CMS SignedData, EnvelopedData and AuthEnvelopedData construction and parsing, CAdES signed and unsigned attributes | Yes |
 | `sigillum-pdf` | Minimal PDF reader, append-only incremental-update writer, revision analysis (planned, [ADR-0015](adr/0015-pdf-reader-and-incremental-writer.md)) | Yes |
 | `sigillum-cades` | CAdES profiles: BES, baseline B-B, B-T, B-LT | Yes |
 | `sigillum-pades` | PAdES profiles: signature dictionary, document security store, visible appearance | Yes |
@@ -92,15 +92,19 @@ flowchart LR
 
 ## Design overview
 
+The security objectives, trust boundaries and threats that these choices address are described in the [threat model](threat-model.md).
+
 | Topic | Choice | Record |
 | --- | --- | --- |
 | Implementation language and bindings | Rust; UniFFI for Kotlin and Swift; `wasm-bindgen` for JavaScript | [ADR-0002](adr/0002-implement-in-rust.md) |
 | Licence and contributions | Apache-2.0 OR MIT; Developer Certificate of Origin | [ADR-0003](adr/0003-licence-and-contribution-terms.md) |
 | Relationship with DSS | External test oracle only; no DSS code or test data | [ADR-0004](adr/0004-dss-as-test-oracle.md) |
+| Divergences from DSS | Three classes: required or permitted by the standard, DSS defects, intentional restrictions decided in an ADR; Ed25519 public keys of small order restricted | [ADR-0019](adr/0019-divergence-classes-and-intentional-restrictions.md) |
 | Signing flow | Two steps, `prepare` and `assemble`; keys stay with an external signer | [ADR-0005](adr/0005-two-step-signing.md) |
 | Network access | None in the core; caller-supplied `Fetcher` | [ADR-0006](adr/0006-no-network-access-in-core.md) |
 | Scope and unsupported input | Baseline-first creation; explicit "not supported" results | [ADR-0007](adr/0007-asymmetric-scope.md) |
 | JAdES | Baseline B-B to B-LT in scope, after CAdES and PAdES | [ADR-0008](adr/0008-include-jades-baseline.md) |
+| JAdES payloads and detached mechanisms | Unencoded payloads and `HttpHeaders` excluded; `ObjectIdByURI` with one object only | [ADR-0018](adr/0018-restrict-jades-payloads-and-detached-mechanisms.md) |
 | XAdES | Deferred; reviewed once the phase 3 XML component for trusted lists exists | [ADR-0009](adr/0009-keep-xades-deferred.md) |
 | Cryptographic backend | RustCrypto behind a provider interface; `rsa` for public-key operations only, enforced by lint | [ADR-0010](adr/0010-cryptographic-backend.md) |
 | ASN.1, X.509 and CMS | RustCrypto formats crates, stable `der` 0.7 generation, not exposed in the public API | [ADR-0011](adr/0011-asn1-x509-cms-foundations.md) |
@@ -109,6 +113,7 @@ flowchart LR
 | Test PKI and corpus | PKI artefacts generated in Rust, signed documents by DSS; checked by OpenSSL and DSS in CI; committed with a manifest | [ADR-0014](adr/0014-test-pki-and-corpus.md) |
 | PDF | Own minimal reader and append-only incremental writer | [ADR-0015](adr/0015-pdf-reader-and-incremental-writer.md) |
 | JAdES implementation | Own implementation on `sigillum-pki`; duplicate header names rejected | [ADR-0016](adr/0016-jades-implementation-basis.md) |
+| Defensive API rules | Verify after signing; re-supplied document; restricted and bounded fetcher; explicit valid outcome with conformance findings; DocMDP respected; evidence checked before embedding; no B-LT on a revoked certificate | [ADR-0017](adr/0017-defensive-api-rules.md) |
 
 ### Errors, not panics
 
