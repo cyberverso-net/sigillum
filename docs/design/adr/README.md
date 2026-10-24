@@ -56,3 +56,5 @@ When the lead maintainer accepts an ADR directly, without a *Proposed* stage, th
 | [0017](0017-defensive-api-rules.md) | Apply defensive rules to the signing and verification API | Accepted |
 | [0018](0018-restrict-jades-payloads-and-detached-mechanisms.md) | Exclude unencoded JAdES payloads and restrict detached mechanisms | Accepted |
 | [0019](0019-divergence-classes-and-intentional-restrictions.md) | Divergence classes and intentional restrictions | Accepted |
+| [0020](0020-accepted-advisories-der-0-7.md) | Accepted advisories on the der 0.7 generation | Accepted |
+| [0021](0021-x509-cert-builder-for-test-certificates.md) | Assemble test certificates with the x509-cert builder only | Accepted |

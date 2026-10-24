@@ -1,0 +1,20 @@
+# ADR-0010: library crates use the `rsa` crate for public-key operations
+# only, because of the unpatched advisory RUSTSEC-2023-0071 on timing side
+# channels in private-key operations. Test code, `sigillum-testpki` and
+# examples may allow these lints locally, because timing attacks do not
+# apply to test keys.
+disallowed-types = [
+    { path = "rsa::RsaPrivateKey", reason = "RSA private-key operations are not constant time (ADR-0010)" },
+    { path = "rsa::pkcs1v15::SigningKey", reason = "RSA private-key operations are not constant time (ADR-0010)" },
+    { path = "rsa::pss::SigningKey", reason = "RSA private-key operations are not constant time (ADR-0010)" },
+    { path = "rsa::pss::BlindedSigningKey", reason = "RSA private-key operations are not constant time (ADR-0010)" },
+    { path = "rsa::pkcs1v15::DecryptingKey", reason = "RSA private-key operations are not constant time (ADR-0010)" },
+    { path = "rsa::oaep::DecryptingKey", reason = "RSA private-key operations are not constant time (ADR-0010)" },
+]
+# The `rsa::hazmat` module exists only with the crate's `hazmat` feature,
+# which no crate enables; `allow-invalid` keeps the entries in force for
+# the day one does.
+disallowed-methods = [
+    { path = "rsa::hazmat::rsa_decrypt", reason = "RSA private-key operations are not constant time (ADR-0010)", allow-invalid = true },
+    { path = "rsa::hazmat::rsa_decrypt_and_check", reason = "RSA private-key operations are not constant time (ADR-0010)", allow-invalid = true },
+]

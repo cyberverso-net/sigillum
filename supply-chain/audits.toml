@@ -5,7 +5,7 @@
 
 [[trusted.aead]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -17,13 +17,13 @@ end = "2027-10-24"
 
 [[trusted.aes]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.aes]]
 criteria = "safe-to-deploy"
-user-id = 5059
+user-id = 5059 # Artyom Pavlov (newpavlov)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -35,7 +35,7 @@ end = "2027-10-24"
 
 [[trusted.aes-gcm]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -47,13 +47,13 @@ end = "2027-10-24"
 
 [[trusted.aes-kw]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.aes-kw]]
 criteria = "safe-to-deploy"
-user-id = 5059
+user-id = 5059 # Artyom Pavlov (newpavlov)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -65,13 +65,13 @@ end = "2027-10-24"
 
 [[trusted.ansi-x963-kdf]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.ansi-x963-kdf]]
 criteria = "safe-to-deploy"
-user-id = 5059
+user-id = 5059 # Artyom Pavlov (newpavlov)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -107,37 +107,37 @@ end = "2027-10-24"
 
 [[trusted.base16ct]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.base64ct]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.base64ct]]
 criteria = "safe-to-deploy"
-user-id = 5059
+user-id = 5059 # Artyom Pavlov (newpavlov)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.base64ct]]
 criteria = "safe-to-deploy"
-user-id = 11235
+user-id = 11235 # Arthur Gautier (baloo)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.block-buffer]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.block-buffer]]
 criteria = "safe-to-deploy"
-user-id = 5059
+user-id = 5059 # Artyom Pavlov (newpavlov)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -149,25 +149,25 @@ end = "2027-10-24"
 
 [[trusted.block-padding]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.block-padding]]
 criteria = "safe-to-deploy"
-user-id = 5059
+user-id = 5059 # Artyom Pavlov (newpavlov)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.cbc]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.cbc]]
 criteria = "safe-to-deploy"
-user-id = 5059
+user-id = 5059 # Artyom Pavlov (newpavlov)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -179,13 +179,13 @@ end = "2027-10-24"
 
 [[trusted.cipher]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.cipher]]
 criteria = "safe-to-deploy"
-user-id = 5059
+user-id = 5059 # Artyom Pavlov (newpavlov)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -197,7 +197,7 @@ end = "2027-10-24"
 
 [[trusted.cmov]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -209,25 +209,25 @@ end = "2027-10-24"
 
 [[trusted.cmpv2]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.cmpv2]]
 criteria = "safe-to-deploy"
-user-id = 11235
+user-id = 11235 # Arthur Gautier (baloo)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.cms]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.cms]]
 criteria = "safe-to-deploy"
-user-id = 11235
+user-id = 11235 # Arthur Gautier (baloo)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -245,19 +245,19 @@ end = "2027-10-24"
 
 [[trusted.const-oid]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.const-oid]]
 criteria = "safe-to-deploy"
-user-id = 11235
+user-id = 11235 # Arthur Gautier (baloo)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.cpubits]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -269,13 +269,13 @@ end = "2027-10-24"
 
 [[trusted.cpufeatures]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.cpufeatures]]
 criteria = "safe-to-deploy"
-user-id = 5059
+user-id = 5059 # Artyom Pavlov (newpavlov)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -287,19 +287,19 @@ end = "2027-10-24"
 
 [[trusted.crmf]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.crmf]]
 criteria = "safe-to-deploy"
-user-id = 11235
+user-id = 11235 # Arthur Gautier (baloo)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.crypto-bigint]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -311,13 +311,13 @@ end = "2027-10-24"
 
 [[trusted.crypto-common]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.crypto-common]]
 criteria = "safe-to-deploy"
-user-id = 5059
+user-id = 5059 # Artyom Pavlov (newpavlov)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -329,13 +329,13 @@ end = "2027-10-24"
 
 [[trusted.ctr]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.ctr]]
 criteria = "safe-to-deploy"
-user-id = 5059
+user-id = 5059 # Artyom Pavlov (newpavlov)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -347,7 +347,7 @@ end = "2027-10-24"
 
 [[trusted.ctutils]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -359,25 +359,25 @@ end = "2027-10-24"
 
 [[trusted.curve25519-dalek]]
 criteria = "safe-to-deploy"
-user-id = 6979
+user-id = 6979 # Michael Rosenberg (rozbb)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.curve25519-dalek-derive]]
 criteria = "safe-to-deploy"
-user-id = 6979
+user-id = 6979 # Michael Rosenberg (rozbb)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.der]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.der]]
 criteria = "safe-to-deploy"
-user-id = 11235
+user-id = 11235 # Arthur Gautier (baloo)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -389,25 +389,25 @@ end = "2027-10-24"
 
 [[trusted.der_derive]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.der_derive]]
 criteria = "safe-to-deploy"
-user-id = 11235
+user-id = 11235 # Arthur Gautier (baloo)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.digest]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.digest]]
 criteria = "safe-to-deploy"
-user-id = 5059
+user-id = 5059 # Artyom Pavlov (newpavlov)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -419,7 +419,7 @@ end = "2027-10-24"
 
 [[trusted.ecdsa]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -431,7 +431,7 @@ end = "2027-10-24"
 
 [[trusted.ed25519]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -443,13 +443,13 @@ end = "2027-10-24"
 
 [[trusted.ed25519-dalek]]
 criteria = "safe-to-deploy"
-user-id = 6979
+user-id = 6979 # Michael Rosenberg (rozbb)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.elliptic-curve]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -467,7 +467,7 @@ end = "2027-10-24"
 
 [[trusted.ghash]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -485,13 +485,13 @@ end = "2027-10-24"
 
 [[trusted.hkdf]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.hkdf]]
 criteria = "safe-to-deploy"
-user-id = 5059
+user-id = 5059 # Artyom Pavlov (newpavlov)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -503,13 +503,13 @@ end = "2027-10-24"
 
 [[trusted.hmac]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.hmac]]
 criteria = "safe-to-deploy"
-user-id = 5059
+user-id = 5059 # Artyom Pavlov (newpavlov)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -521,7 +521,7 @@ end = "2027-10-24"
 
 [[trusted.hybrid-array]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -539,13 +539,13 @@ end = "2027-10-24"
 
 [[trusted.inout]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.inout]]
 criteria = "safe-to-deploy"
-user-id = 5059
+user-id = 5059 # Artyom Pavlov (newpavlov)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -569,13 +569,13 @@ end = "2027-10-24"
 
 [[trusted.keccak]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.keccak]]
 criteria = "safe-to-deploy"
-user-id = 5059
+user-id = 5059 # Artyom Pavlov (newpavlov)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -599,13 +599,13 @@ end = "2027-10-24"
 
 [[trusted.opaque-debug]]
 criteria = "safe-to-deploy"
-user-id = 5059
+user-id = 5059 # Artyom Pavlov (newpavlov)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.p256]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -617,7 +617,7 @@ end = "2027-10-24"
 
 [[trusted.p384]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -629,7 +629,7 @@ end = "2027-10-24"
 
 [[trusted.p521]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -641,25 +641,25 @@ end = "2027-10-24"
 
 [[trusted.pem-rfc7468]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.pem-rfc7468]]
 criteria = "safe-to-deploy"
-user-id = 11235
+user-id = 11235 # Arthur Gautier (baloo)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.pkcs1]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.pkcs1]]
 criteria = "safe-to-deploy"
-user-id = 11235
+user-id = 11235 # Arthur Gautier (baloo)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -671,13 +671,13 @@ end = "2027-10-24"
 
 [[trusted.pkcs8]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.pkcs8]]
 criteria = "safe-to-deploy"
-user-id = 11235
+user-id = 11235 # Arthur Gautier (baloo)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -689,7 +689,7 @@ end = "2027-10-24"
 
 [[trusted.polyval]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -701,7 +701,7 @@ end = "2027-10-24"
 
 [[trusted.primefield]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -713,7 +713,7 @@ end = "2027-10-24"
 
 [[trusted.primeorder]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -737,7 +737,7 @@ end = "2027-10-24"
 
 [[trusted.rfc6979]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -749,19 +749,19 @@ end = "2027-10-24"
 
 [[trusted.rsa]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.rsa]]
 criteria = "safe-to-deploy"
-user-id = 3079
+user-id = 3079 # Friedel Ziegelmayer (dignifiedquire)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.rsa]]
 criteria = "safe-to-deploy"
-user-id = 5059
+user-id = 5059 # Artyom Pavlov (newpavlov)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -773,13 +773,13 @@ end = "2027-10-24"
 
 [[trusted.sec1]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.sec1]]
 criteria = "safe-to-deploy"
-user-id = 11235
+user-id = 11235 # Arthur Gautier (baloo)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -815,7 +815,7 @@ end = "2027-10-24"
 
 [[trusted.serdect]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -827,13 +827,13 @@ end = "2027-10-24"
 
 [[trusted.sha1]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.sha1]]
 criteria = "safe-to-deploy"
-user-id = 5059
+user-id = 5059 # Artyom Pavlov (newpavlov)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -845,13 +845,13 @@ end = "2027-10-24"
 
 [[trusted.sha2]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.sha2]]
 criteria = "safe-to-deploy"
-user-id = 5059
+user-id = 5059 # Artyom Pavlov (newpavlov)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -863,13 +863,13 @@ end = "2027-10-24"
 
 [[trusted.sha3]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.sha3]]
 criteria = "safe-to-deploy"
-user-id = 5059
+user-id = 5059 # Artyom Pavlov (newpavlov)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -881,13 +881,13 @@ end = "2027-10-24"
 
 [[trusted.signature]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.signature]]
 criteria = "safe-to-deploy"
-user-id = 5059
+user-id = 5059 # Artyom Pavlov (newpavlov)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -899,13 +899,13 @@ end = "2027-10-24"
 
 [[trusted.spki]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.spki]]
 criteria = "safe-to-deploy"
-user-id = 11235
+user-id = 11235 # Arthur Gautier (baloo)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -917,7 +917,7 @@ end = "2027-10-24"
 
 [[trusted.sponge-cursor]]
 criteria = "safe-to-deploy"
-user-id = 5059
+user-id = 5059 # Artyom Pavlov (newpavlov)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -929,7 +929,7 @@ end = "2027-10-24"
 
 [[trusted.subtle]]
 criteria = "safe-to-deploy"
-user-id = 5289
+user-id = 5289 # isis agora lovecruft (isislovecruft)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -941,13 +941,13 @@ end = "2027-10-24"
 
 [[trusted.tls_codec]]
 criteria = "safe-to-deploy"
-user-id = 9765
+user-id = 9765 # Franziskus Kiefer (franziskuskiefer)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.tls_codec_derive]]
 criteria = "safe-to-deploy"
-user-id = 9765
+user-id = 9765 # Franziskus Kiefer (franziskuskiefer)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -983,7 +983,7 @@ end = "2027-10-24"
 
 [[trusted.universal-hash]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -1019,7 +1019,7 @@ end = "2027-10-24"
 
 [[trusted.wnaf]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -1031,13 +1031,13 @@ end = "2027-10-24"
 
 [[trusted.x509-cert]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.x509-cert]]
 criteria = "safe-to-deploy"
-user-id = 11235
+user-id = 11235 # Arthur Gautier (baloo)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -1049,19 +1049,19 @@ end = "2027-10-24"
 
 [[trusted.x509-ocsp]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.x509-tsp]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.zeroize]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -1073,13 +1073,13 @@ end = "2027-10-24"
 
 [[trusted.zeroize_derive]]
 criteria = "safe-to-deploy"
-user-id = 267
+user-id = 267 # Tony Arcieri (tarcieri)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.zeroize_derive]]
 criteria = "safe-to-deploy"
-user-id = 5059
+user-id = 5059 # Artyom Pavlov (newpavlov)
 start = "2022-01-01"
 end = "2027-10-24"
 

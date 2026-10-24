@@ -13,11 +13,26 @@ publish = false
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }
+const-oid = { version = "0.9.6", features = ["db"] }
+der = { version = "0.7.10", features = ["pem", "oid"] }
+ed25519-dalek = { version = "2.2.0", features = ["pkcs8", "pem", "rand_core"] }
+p256 = { version = "0.13.2", features = ["ecdsa", "pkcs8", "pem"] }
+p384 = { version = "0.13.1", features = ["ecdsa", "pkcs8", "pem"] }
+p521 = { version = "0.13.3", features = ["ecdsa", "pkcs8", "pem"] }
+pkcs8 = { version = "0.10.2", features = ["pem"] }
+rand_core = "0.6.4"
+rsa = { version = "0.9.10", features = ["sha2", "pem"] }
 serde = { version = "1", features = ["derive"] }
+sha2 = { version = "0.10.9", features = ["oid"] }
+sha3 = { version = "0.10.9", features = ["oid"] }
+signature = "2.2.0"
+spki = "0.7.3"
 time = { version = "0.3", features = ["formatting", "parsing"] }
 toml = "1"
+x509-cert = { version = "0.2.5", features = ["builder", "hazmat", "pem"] }
 
 [dev-dependencies]
+proptest = { version = "1.12.0", default-features = false, features = ["std"] }
 time = { version = "0.3", features = ["macros"] }
 
 [lints]

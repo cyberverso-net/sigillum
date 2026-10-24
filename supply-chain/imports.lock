@@ -36,12 +36,110 @@ user-id = 6743
 user-login = "epage"
 user-name = "Ed Page"
 
+[[publisher.base16ct]]
+version = "0.2.0"
+when = "2023-02-26"
+user-id = 267
+user-login = "tarcieri"
+user-name = "Tony Arcieri"
+
+[[publisher.base64ct]]
+version = "1.8.3"
+when = "2026-01-12"
+user-id = 267
+user-login = "tarcieri"
+user-name = "Tony Arcieri"
+
 [[publisher.colorchoice]]
 version = "1.0.5"
 when = "2026-03-13"
 user-id = 6743
 user-login = "epage"
 user-name = "Ed Page"
+
+[[publisher.const-oid]]
+version = "0.9.6"
+when = "2023-12-15"
+user-id = 11235
+user-login = "baloo"
+user-name = "Arthur Gautier"
+
+[[publisher.cpufeatures]]
+version = "0.2.17"
+when = "2025-01-25"
+user-id = 267
+user-login = "tarcieri"
+user-name = "Tony Arcieri"
+
+[[publisher.crypto-bigint]]
+version = "0.5.5"
+when = "2023-11-18"
+user-id = 267
+user-login = "tarcieri"
+user-name = "Tony Arcieri"
+
+[[publisher.crypto-common]]
+version = "0.1.7"
+when = "2025-11-12"
+user-id = 5059
+user-login = "newpavlov"
+user-name = "Artyom Pavlov"
+
+[[publisher.curve25519-dalek]]
+version = "4.1.3"
+when = "2024-06-18"
+user-id = 6979
+user-login = "rozbb"
+user-name = "Michael Rosenberg"
+
+[[publisher.curve25519-dalek-derive]]
+version = "0.1.1"
+when = "2023-10-31"
+user-id = 6979
+user-login = "rozbb"
+user-name = "Michael Rosenberg"
+
+[[publisher.der_derive]]
+version = "0.7.3"
+when = "2024-07-09"
+user-id = 11235
+user-login = "baloo"
+user-name = "Arthur Gautier"
+
+[[publisher.digest]]
+version = "0.10.7"
+when = "2023-05-19"
+user-id = 267
+user-login = "tarcieri"
+user-name = "Tony Arcieri"
+
+[[publisher.ecdsa]]
+version = "0.16.9"
+when = "2023-11-16"
+user-id = 267
+user-login = "tarcieri"
+user-name = "Tony Arcieri"
+
+[[publisher.ed25519]]
+version = "2.2.3"
+when = "2023-10-15"
+user-id = 267
+user-login = "tarcieri"
+user-name = "Tony Arcieri"
+
+[[publisher.ed25519-dalek]]
+version = "2.2.0"
+when = "2025-07-09"
+user-id = 6979
+user-login = "rozbb"
+user-name = "Michael Rosenberg"
+
+[[publisher.elliptic-curve]]
+version = "0.13.8"
+when = "2023-11-19"
+user-id = 267
+user-login = "tarcieri"
+user-name = "Tony Arcieri"
 
 [[publisher.find-msvc-tools]]
 version = "0.1.0"
@@ -56,6 +154,20 @@ when = "2024-11-25"
 user-id = 2915
 user-login = "Amanieu"
 user-name = "Amanieu d'Antras"
+
+[[publisher.hkdf]]
+version = "0.12.4"
+when = "2023-12-13"
+user-id = 5059
+user-login = "newpavlov"
+user-name = "Artyom Pavlov"
+
+[[publisher.hmac]]
+version = "0.12.1"
+when = "2022-02-17"
+user-id = 5059
+user-login = "newpavlov"
+user-name = "Artyom Pavlov"
 
 [[publisher.indexmap]]
 version = "2.14.2"
@@ -78,6 +190,13 @@ user-id = 3618
 user-login = "dtolnay"
 user-name = "David Tolnay"
 
+[[publisher.keccak]]
+version = "0.1.6"
+when = "2026-02-13"
+user-id = 5059
+user-login = "newpavlov"
+user-name = "Artyom Pavlov"
+
 [[publisher.memchr]]
 version = "2.8.3"
 when = "2026-07-08"
@@ -92,6 +211,48 @@ user-id = 6743
 user-login = "epage"
 user-name = "Ed Page"
 
+[[publisher.p256]]
+version = "0.13.2"
+when = "2023-04-15"
+user-id = 267
+user-login = "tarcieri"
+user-name = "Tony Arcieri"
+
+[[publisher.p384]]
+version = "0.13.1"
+when = "2025-02-07"
+user-id = 267
+user-login = "tarcieri"
+user-name = "Tony Arcieri"
+
+[[publisher.p521]]
+version = "0.13.3"
+when = "2023-11-11"
+user-id = 267
+user-login = "tarcieri"
+user-name = "Tony Arcieri"
+
+[[publisher.pkcs1]]
+version = "0.7.5"
+when = "2023-04-24"
+user-id = 267
+user-login = "tarcieri"
+user-name = "Tony Arcieri"
+
+[[publisher.pkcs8]]
+version = "0.10.2"
+when = "2023-04-05"
+user-id = 267
+user-login = "tarcieri"
+user-name = "Tony Arcieri"
+
+[[publisher.primeorder]]
+version = "0.13.6"
+when = "2023-11-16"
+user-id = 267
+user-login = "tarcieri"
+user-name = "Tony Arcieri"
+
 [[publisher.proc-macro2]]
 version = "1.0.107"
 when = "2026-07-19"
@@ -105,6 +266,27 @@ when = "2026-08-04"
 user-id = 189
 user-login = "BurntSushi"
 user-name = "Andrew Gallant"
+
+[[publisher.rfc6979]]
+version = "0.4.0"
+when = "2023-02-28"
+user-id = 267
+user-login = "tarcieri"
+user-name = "Tony Arcieri"
+
+[[publisher.rsa]]
+version = "0.9.10"
+when = "2026-01-06"
+user-id = 3079
+user-login = "dignifiedquire"
+user-name = "Friedel Ziegelmayer"
+
+[[publisher.sec1]]
+version = "0.7.3"
+when = "2023-07-16"
+user-id = 267
+user-login = "tarcieri"
+user-name = "Tony Arcieri"
 
 [[publisher.serde]]
 version = "1.0.229"
@@ -134,6 +316,46 @@ user-id = 6743
 user-login = "epage"
 user-name = "Ed Page"
 
+[[publisher.sha1]]
+version = "0.10.7"
+when = "2026-07-10"
+trusted-publisher = "github:RustCrypto/hashes"
+
+[[publisher.sha2]]
+version = "0.10.9"
+when = "2025-04-30"
+user-id = 5059
+user-login = "newpavlov"
+user-name = "Artyom Pavlov"
+
+[[publisher.sha3]]
+version = "0.10.9"
+when = "2026-04-19"
+user-id = 5059
+user-login = "newpavlov"
+user-name = "Artyom Pavlov"
+
+[[publisher.signature]]
+version = "2.2.0"
+when = "2023-11-12"
+user-id = 267
+user-login = "tarcieri"
+user-name = "Tony Arcieri"
+
+[[publisher.spki]]
+version = "0.7.3"
+when = "2023-11-28"
+user-id = 11235
+user-login = "baloo"
+user-name = "Arthur Gautier"
+
+[[publisher.subtle]]
+version = "2.6.1"
+when = "2024-06-24"
+user-id = 5289
+user-login = "isislovecruft"
+user-name = "isis agora lovecruft"
+
 [[publisher.syn]]
 version = "2.0.119"
 when = "2026-07-15"
@@ -147,6 +369,20 @@ when = "2026-10-12"
 user-id = 3618
 user-login = "dtolnay"
 user-name = "David Tolnay"
+
+[[publisher.tls_codec]]
+version = "0.4.2"
+when = "2025-02-10"
+user-id = 9765
+user-login = "franziskuskiefer"
+user-name = "Franziskus Kiefer"
+
+[[publisher.tls_codec_derive]]
+version = "0.4.2"
+when = "2025-02-10"
+user-id = 9765
+user-login = "franziskuskiefer"
+user-name = "Franziskus Kiefer"
 
 [[publisher.toml]]
 version = "1.1.8+spec-1.1.0"
@@ -211,11 +447,34 @@ user-id = 6743
 user-login = "epage"
 user-name = "Ed Page"
 
+[[publisher.x509-cert]]
+version = "0.2.5"
+when = "2023-12-24"
+user-id = 267
+user-login = "tarcieri"
+user-name = "Tony Arcieri"
+
+[[publisher.zeroize]]
+version = "1.9.1"
+when = "2026-10-06"
+trusted-publisher = "github:RustCrypto/utils"
+
+[[publisher.zeroize_derive]]
+version = "1.5.0"
+when = "2026-06-12"
+trusted-publisher = "github:RustCrypto/utils"
+
 [[audits.bytecode-alliance.audits.anes]]
 who = "Pat Hickey <phickey@fastly.com>"
 criteria = "safe-to-deploy"
 version = "0.1.6"
 notes = "Contains no unsafe code, no IO, no build.rs."
+
+[[audits.bytecode-alliance.audits.der]]
+who = "Chris Fallin <chris@cfallin.org>"
+criteria = "safe-to-deploy"
+version = "0.7.10"
+notes = "No unsafe code aside from transmutes for transparent newtypes."
 
 [[audits.bytecode-alliance.audits.find-msvc-tools]]
 who = "Alex Crichton <alex@alexcrichton.com>"
@@ -229,11 +488,38 @@ criteria = "safe-to-deploy"
 version = "0.2.19"
 notes = "As advertised: a numeric library. The only `unsafe` is from some float-to-int conversions, which seems expected."
 
+[[audits.bytecode-alliance.audits.pem-rfc7468]]
+who = "Chris Fallin <chris@cfallin.org>"
+criteria = "safe-to-deploy"
+version = "0.7.0"
+notes = "Only `unsafe` around a `from_utf8_unchecked`, and no IO."
+
+[[audits.bytecode-alliance.audits.rustc_version]]
+who = "Alex Crichton <alex@alexcrichton.com>"
+criteria = "safe-to-deploy"
+delta = "0.4.0 -> 0.4.1"
+notes = "Minor changes, nothing worrisome"
+
 [[audits.bytecode-alliance.audits.shlex]]
 who = "Alex Crichton <alex@alexcrichton.com>"
 criteria = "safe-to-deploy"
 version = "1.1.0"
 notes = "Only minor `unsafe` code blocks which look valid and otherwise does what it says on the tin."
+
+[[audits.bytecode-alliance.audits.unarray]]
+who = "Alex Crichton <alex@alexcrichton.com>"
+criteria = "safe-to-deploy"
+version = "0.1.4"
+notes = """
+Crate is sound, albeit leaky, and not actively malicious. Probably not the best
+crate to use in practice but it's suitable for testing dependencies.
+"""
+
+[[audits.google.audits.block-buffer]]
+who = "George Burgess IV <gbiv@google.com>"
+criteria = "safe-to-run"
+version = "0.10.4"
+aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
 
 [[audits.google.audits.cast]]
 who = "George Burgess IV <gbiv@google.com>"
@@ -259,11 +545,72 @@ criteria = "safe-to-run"
 version = "0.2.2"
 aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
 
+[[audits.google.audits.generic-array]]
+who = "George Burgess IV <gbiv@google.com>"
+criteria = "safe-to-run"
+version = "0.14.7"
+aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
+
+[[audits.google.audits.getrandom]]
+who = "Android Legacy"
+criteria = "safe-to-run"
+version = "0.2.2"
+aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
+
+[[audits.google.audits.getrandom]]
+who = "David Koloski <dkoloski@google.com>"
+criteria = "safe-to-deploy"
+delta = "0.2.2 -> 0.2.12"
+notes = "Audited at https://fxrev.dev/932979"
+aggregated-from = "https://fuchsia.googlesource.com/fuchsia/+/refs/heads/main/third_party/rust_crates/supply-chain/audits.toml?format=TEXT"
+
+[[audits.google.audits.getrandom]]
+who = "Adrian Taylor <adetaylor@chromium.org>"
+criteria = "safe-to-run"
+delta = "0.2.12 -> 0.2.14"
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
+[[audits.google.audits.getrandom]]
+who = "danakj <danakj@chromium.org>"
+criteria = "safe-to-run"
+delta = "0.2.14 -> 0.2.15"
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
 [[audits.google.audits.heck]]
 who = "Ying Hsu <yinghsu@chromium.org>"
 criteria = "safe-to-run"
 version = "0.5.0"
 aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
+
+[[audits.google.audits.ppv-lite86]]
+who = "danakj@chromium.org"
+criteria = "safe-to-run"
+version = "0.2.17"
+notes = """
+Reviewed in https://crrev.com/c/5171063
+
+Previously reviewed during security review and the audit is grandparented in.
+"""
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
+[[audits.google.audits.ppv-lite86]]
+who = "danakj <danakj@chromium.org>"
+criteria = "safe-to-run"
+delta = "0.2.17 -> 0.2.20"
+notes = "Using zerocopy to reduce unsafe usage."
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
+[[audits.google.audits.ppv-lite86]]
+who = "Lukasz Anforowicz <lukasza@chromium.org>"
+criteria = "safe-to-run"
+delta = "0.2.20 -> 0.2.21"
+notes = """
+The delta mostly corresponds to @joshlf's
+https://github.com/cryptocorrosion/cryptocorrosion/pull/85 which started
+using an undocumented API that `zerocopy` has provided specifically for
+`ppv-lite86` in https://github.com/google/zerocopy/pull/2418.
+"""
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
 
 [[audits.google.audits.quote]]
 who = "Ying Hsu <yinghsu@chromium.org>"
@@ -305,10 +652,39 @@ Still no `unsafe` anywhere.
 """
 aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
 
+[[audits.google.audits.rand_chacha]]
+who = "Android Legacy"
+criteria = "safe-to-run"
+version = "0.3.1"
+aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
+
+[[audits.google.audits.rand_core]]
+who = "Android Legacy"
+criteria = "safe-to-run"
+version = "0.6.4"
+aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
+
+[[audits.google.audits.rustc_version]]
+who = "danakj@chromium.org"
+criteria = "safe-to-run"
+version = "0.4.0"
+notes = """
+Reviewed in https://crrev.com/c/5171063
+
+Previously reviewed during security review and the audit is grandparented in.
+"""
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
 [[audits.google.audits.same-file]]
 who = "Android Legacy"
 criteria = "safe-to-run"
 version = "1.0.6"
+aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
+
+[[audits.google.audits.semver]]
+who = "George Burgess IV <gbiv@google.com>"
+criteria = "safe-to-run"
+version = "1.0.16"
 aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
 
 [[audits.google.audits.shlex]]
@@ -346,6 +722,21 @@ Previously reviewed during security review and the audit is grandparented in.
 """
 aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
 
+[[audits.mozilla.audits.core_detect]]
+who = "Henri Sivonen <hsivonen@hsivonen.fi>"
+criteria = "safe-to-deploy"
+version = "1.0.0"
+aggregated-from = "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/supply-chain/audits.toml"
+
+[[audits.mozilla.audits.cpufeatures]]
+who = "Alex Franchuk <afranchuk@mozilla.com>"
+criteria = "safe-to-deploy"
+version = "0.3.1"
+notes = """
+No dependencies aside from libc, and no use of std. Unsafe code is minimal and necessary.
+"""
+aggregated-from = "https://raw.githubusercontent.com/mozilla/cargo-vet/main/supply-chain/audits.toml"
+
 [[audits.mozilla.audits.find-msvc-tools]]
 who = "Jan-Erik Rediger <jrediger@mozilla.com>"
 criteria = "safe-to-deploy"
@@ -363,6 +754,12 @@ aggregated-from = "https://raw.githubusercontent.com/mozilla-firefox/firefox/mai
 who = "Alex Franchuk <afranchuk@mozilla.com>"
 criteria = "safe-to-deploy"
 delta = "0.1.12 -> 0.1.15"
+aggregated-from = "https://raw.githubusercontent.com/mozilla/cargo-vet/main/supply-chain/audits.toml"
+
+[[audits.mozilla.audits.getrandom]]
+who = "Alex Franchuk <afranchuk@mozilla.com>"
+criteria = "safe-to-deploy"
+delta = "0.2.15 -> 0.2.17"
 aggregated-from = "https://raw.githubusercontent.com/mozilla/cargo-vet/main/supply-chain/audits.toml"
 
 [[audits.mozilla.audits.hashbrown]]
@@ -413,6 +810,13 @@ who = "Jan-Erik Rediger <jrediger@mozilla.com>"
 criteria = "safe-to-deploy"
 delta = "1.0.45 -> 1.0.47"
 aggregated-from = "https://raw.githubusercontent.com/mozilla/glean/main/supply-chain/audits.toml"
+
+[[audits.mozilla.audits.semver]]
+who = "Ben Dean-Kawamura <bdk@mozilla.com>"
+criteria = "safe-to-deploy"
+delta = "1.0.16 -> 1.0.28"
+notes = "Very few changes, mostly removes support for older Rust versions.  Some unsafe code refactored, but it seemed to be functionally equivalent to me."
+aggregated-from = "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/supply-chain/audits.toml"
 
 [[audits.mozilla.audits.shlex]]
 who = "Emilio Cobos Álvarez <emilio@crisal.io>"

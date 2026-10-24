@@ -1,0 +1,3 @@
+# The manifest records the SHA-256 digest of every test artefact, so Git
+# must not convert their line endings on checkout.
+testdata/** -text

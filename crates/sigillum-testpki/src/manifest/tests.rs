@@ -812,3 +812,175 @@ fn the_committed_manifest_is_valid() -> Result<(), ManifestError> {
     );
     Ok(())
 }
+
+/// A manifest with every kind, result and link, and text that needs escaping.
+fn varied_manifest() -> Result<Manifest, ManifestError> {
+    let mut manifest = Manifest::parse(&with_artefacts(ROOT))?;
+    let kinds = [
+        Kind::Certificate,
+        Kind::PrivateKey,
+        Kind::Crl,
+        Kind::OcspResponse,
+        Kind::TimestampToken,
+        Kind::SignedDocument,
+        Kind::Document,
+    ];
+    let openssl = [
+        OpensslResult::Verified,
+        OpensslResult::Parsed,
+        OpensslResult::Rejected,
+        OpensslResult::NotApplicable,
+    ];
+    let dss = [
+        DssResult::Rejected,
+        DssResult::NotApplicable,
+        DssResult::Indication {
+            indication: Indication::TotalPassed,
+            sub_indication: None,
+        },
+        DssResult::Indication {
+            indication: Indication::TotalFailed,
+            sub_indication: Some("HASH_FAILURE".into()),
+        },
+        DssResult::Indication {
+            indication: Indication::Indeterminate,
+            sub_indication: Some("CUSTOM".into()),
+        },
+        DssResult::Indication {
+            indication: Indication::Passed,
+            sub_indication: None,
+        },
+        DssResult::Indication {
+            indication: Indication::Failed,
+            sub_indication: Some("REVOKED".into()),
+        },
+    ];
+    for (index, kind) in kinds.into_iter().enumerate() {
+        let id = format!("x/{}", kind.as_str());
+        let links = match kind {
+            Kind::Certificate => Links {
+                issuer: Some("pki/root".into()),
+                chain: vec!["pki/root".into()],
+                revocation: vec!["x/crl".into(), "x/ocsp-response".into()],
+                content: Some("x/document".into()),
+            },
+            _ => Links::default(),
+        };
+        manifest.upsert(Artefact {
+            path: PathBuf::from(format!("{id}.bin")),
+            id,
+            sha256: DIGEST.into(),
+            kind,
+            purpose: format!("Purpose with \"quotes\", a back\\slash, a tab\t, é and {index}."),
+            expected_openssl: openssl[index % openssl.len()],
+            expected_dss: dss[index % dss.len()].clone(),
+            links,
+            notes: (index % 2 == 0).then(|| "Line one.\nLine 'two'.".to_owned()),
+        });
+    }
+    Ok(manifest)
+}
+
+#[test]
+fn writing_and_reading_a_manifest_gives_it_back() -> Result<(), ManifestError> {
+    let manifest = varied_manifest()?;
+    let text = manifest.to_toml();
+    assert_eq!(Manifest::parse(&text)?, manifest);
+    assert!(text.starts_with(
+        "# Manifest of the test corpus. The format is described in README.md.\n\n[header]\nformat-version = 1\nvalidation-time = \"2030-01-15T10:00:00Z\"\n"
+    ));
+    let header_only = Manifest::parse(HEADER)?;
+    assert_eq!(Manifest::parse(&header_only.to_toml())?, header_only);
+    assert_eq!(header_only.to_toml().matches("[[artefact]]").count(), 0);
+    Ok(())
+}
+
+#[test]
+fn the_written_manifest_has_one_line_per_field() -> Result<(), ManifestError> {
+    let text = Manifest::parse(&with_artefacts(&format!(
+        "{ROOT}{}",
+        leaf("notes = \"n\"\nlinks = { issuer = \"pki/root\", chain = [\"pki/root\"] }")
+    )))?
+    .to_toml();
+    let expected = format!(
+        "\n[[artefact]]\nid = \"pki/leaf\"\npath = \"pki/leaf.pem\"\nsha256 = \"{DIGEST}\"\nkind = \"certificate\"\npurpose = \"End entity\"\nexpected-openssl = \"verified\"\nexpected-dss = {{ indication = \"PASSED\" }}\nlinks = {{ issuer = \"pki/root\", chain = [\"pki/root\"] }}\nnotes = \"n\"\n"
+    );
+    assert!(text.ends_with(&expected), "{text}");
+    let failed = Manifest::parse(&with_artefacts(&ROOT.replace(
+        "{ indication = \"PASSED\" }",
+        "{ indication = \"FAILED\", sub-indication = \"REVOKED\" }",
+    )))?
+    .to_toml();
+    assert!(
+        failed.contains(
+            "\nexpected-dss = { indication = \"FAILED\", sub-indication = \"REVOKED\" }\n"
+        )
+    );
+    Ok(())
+}
+
+#[test]
+fn upsert_replaces_by_identifier_or_appends() -> Result<(), ManifestError> {
+    let mut manifest = Manifest::parse(&with_artefacts(&format!("{ROOT}{}", leaf(""))))?;
+    let mut root = manifest.artefacts[0].clone();
+    root.purpose = "Replaced".into();
+    manifest.upsert(root);
+    assert_eq!(manifest.artefacts.len(), 2);
+    assert_eq!(manifest.artefacts[0].purpose, "Replaced");
+    assert_eq!(manifest.artefacts[1].id, "pki/leaf");
+    let mut other = manifest.artefacts[1].clone();
+    other.id = "pki/other".into();
+    manifest.upsert(other);
+    assert_eq!(manifest.artefacts.len(), 3);
+    assert_eq!(manifest.artefacts[2].id, "pki/other");
+    Ok(())
+}
+
+#[test]
+fn kinds_and_results_are_written_as_read() -> Result<(), ManifestError> {
+    for (kind, text) in [
+        (Kind::Certificate, "certificate"),
+        (Kind::PrivateKey, "private-key"),
+        (Kind::Crl, "crl"),
+        (Kind::OcspResponse, "ocsp-response"),
+        (Kind::TimestampToken, "timestamp-token"),
+        (Kind::SignedDocument, "signed-document"),
+        (Kind::Document, "document"),
+    ] {
+        assert_eq!(kind.as_str(), text);
+    }
+    for (result, text) in [
+        (OpensslResult::Verified, "verified"),
+        (OpensslResult::Parsed, "parsed"),
+        (OpensslResult::Rejected, "rejected"),
+        (OpensslResult::NotApplicable, "not-applicable"),
+    ] {
+        assert_eq!(result.as_str(), text);
+    }
+    Ok(())
+}
+
+proptest::proptest! {
+    /// Any purpose and notes, including quotes, backslashes, control
+    /// characters and non-ASCII text, survive writing and reading back.
+    #[test]
+    fn written_text_fields_read_back_unchanged(
+        purpose in "[\"'\\\\\n\r\t a-zé€😀\u{7f}\u{1}]*[a-z]",
+        notes in proptest::option::of("[\"'\\\\\n\r\t a-zé€😀\u{7f}\u{1}]*[a-z]"),
+        sub in proptest::option::of(proptest::sample::select(INDETERMINATE_SUB_INDICATIONS.to_vec())),
+    ) {
+        let mut manifest = Manifest::parse(&with_artefacts(ROOT))
+            .map_err(|e| proptest::test_runner::TestCaseError::fail(e.to_string()))?;
+        let mut artefact = manifest.artefacts[0].clone();
+        artefact.purpose = purpose;
+        artefact.notes = notes;
+        artefact.expected_dss = DssResult::Indication {
+            indication: Indication::Indeterminate,
+            sub_indication: sub.map(str::to_owned),
+        };
+        manifest.upsert(artefact);
+        let read = Manifest::parse(&manifest.to_toml())
+            .map_err(|e| proptest::test_runner::TestCaseError::fail(e.to_string()))?;
+        proptest::prop_assert_eq!(read, manifest);
+    }
+}

@@ -30,3 +30,12 @@ missing_docs = "warn"
 unwrap_used = "deny"
 expect_used = "deny"
 panic = "deny"
+# ADR-0010: the RSA private-key types and functions listed in clippy.toml.
+disallowed_types = "deny"
+disallowed_methods = "deny"
+
+# RSA key generation in sigillum-testpki takes minutes without optimisation
+# of the big-integer arithmetic. Optimising this one dependency keeps the
+# test PKI tests fast in debug builds.
+[profile.dev.package.num-bigint-dig]
+opt-level = 3

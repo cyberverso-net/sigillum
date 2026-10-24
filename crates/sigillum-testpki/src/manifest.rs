@@ -7,6 +7,9 @@
 //! ignoring letter case, malformed digests, sub-indications that do not
 //! belong to the indication, and links to unknown artefacts, to the artefact
 //! itself, to artefacts of the wrong kind or repeated in a list.
+//!
+//! [`Manifest::to_toml`] writes a manifest back in the same format, so that
+//! the generator can record the artefacts it writes.
 
 use std::collections::{HashMap, HashSet};
 use std::fmt;
@@ -136,6 +139,21 @@ pub enum Kind {
     Document,
 }
 
+impl Kind {
+    /// The kind as written in the manifest.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Certificate => "certificate",
+            Self::PrivateKey => "private-key",
+            Self::Crl => "crl",
+            Self::OcspResponse => "ocsp-response",
+            Self::TimestampToken => "timestamp-token",
+            Self::SignedDocument => "signed-document",
+            Self::Document => "document",
+        }
+    }
+}
+
 /// The result expected from OpenSSL.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -148,6 +166,18 @@ pub enum OpensslResult {
     Rejected,
     /// OpenSSL does not process this kind of artefact.
     NotApplicable,
+}
+
+impl OpensslResult {
+    /// The result as written in the manifest.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Verified => "verified",
+            Self::Parsed => "parsed",
+            Self::Rejected => "rejected",
+            Self::NotApplicable => "not-applicable",
+        }
+    }
 }
 
 /// The result expected from DSS.
@@ -392,6 +422,116 @@ impl Manifest {
             .map_err(|e| ManifestError::Io(format!("{}: {e}", path.display())))?;
         Self::parse(&text)
     }
+
+    /// Replaces the artefact that has the identifier of `artefact`, or
+    /// appends `artefact` if there is none.
+    pub fn upsert(&mut self, artefact: Artefact) {
+        match self.artefacts.iter_mut().find(|a| a.id == artefact.id) {
+            Some(existing) => *existing = artefact,
+            None => self.artefacts.push(artefact),
+        }
+    }
+
+    /// Writes the manifest in the format that [`Manifest::parse`] reads,
+    /// with the fields in the order of `testdata/README.md`, one line each,
+    /// and links and DSS results as inline tables.
+    pub fn to_toml(&self) -> String {
+        let mut out = String::from(
+            "# Manifest of the test corpus. The format is described in README.md.\n\n[header]\n",
+        );
+        let validation_time = self
+            .header
+            .validation_time
+            .format(&Rfc3339)
+            .unwrap_or_default();
+        push_field(
+            &mut out,
+            "format-version",
+            &self.header.format_version.to_string(),
+        );
+        push_field(&mut out, "validation-time", &quoted(&validation_time));
+        push_field(
+            &mut out,
+            "openssl-version",
+            &quoted(&self.header.openssl_version),
+        );
+        push_field(&mut out, "dss-version", &quoted(&self.header.dss_version));
+        for artefact in &self.artefacts {
+            out.push_str("\n[[artefact]]\n");
+            artefact.write_toml(&mut out);
+        }
+        out
+    }
+}
+
+impl Artefact {
+    fn write_toml(&self, out: &mut String) {
+        push_field(out, "id", &quoted(&self.id));
+        push_field(out, "path", &quoted(&self.path.to_string_lossy()));
+        push_field(out, "sha256", &quoted(&self.sha256));
+        push_field(out, "kind", &quoted(self.kind.as_str()));
+        push_field(out, "purpose", &quoted(&self.purpose));
+        push_field(
+            out,
+            "expected-openssl",
+            &quoted(self.expected_openssl.as_str()),
+        );
+        let dss = match &self.expected_dss {
+            DssResult::Rejected => quoted("rejected"),
+            DssResult::NotApplicable => quoted("not-applicable"),
+            DssResult::Indication {
+                indication,
+                sub_indication,
+            } => {
+                let mut fields = vec![format!("indication = {}", quoted(indication.as_str()))];
+                if let Some(sub_indication) = sub_indication {
+                    fields.push(format!("sub-indication = {}", quoted(sub_indication)));
+                }
+                inline_table(&fields)
+            }
+        };
+        push_field(out, "expected-dss", &dss);
+        let links = &self.links;
+        let list = |values: &[String]| {
+            let items: Vec<String> = values.iter().map(|v| quoted(v)).collect();
+            format!("[{}]", items.join(", "))
+        };
+        let mut fields = Vec::new();
+        if let Some(issuer) = &links.issuer {
+            fields.push(format!("issuer = {}", quoted(issuer)));
+        }
+        if !links.chain.is_empty() {
+            fields.push(format!("chain = {}", list(&links.chain)));
+        }
+        if !links.revocation.is_empty() {
+            fields.push(format!("revocation = {}", list(&links.revocation)));
+        }
+        if let Some(content) = &links.content {
+            fields.push(format!("content = {}", quoted(content)));
+        }
+        if !fields.is_empty() {
+            push_field(out, "links", &inline_table(&fields));
+        }
+        if let Some(notes) = &self.notes {
+            push_field(out, "notes", &quoted(notes));
+        }
+    }
+}
+
+fn push_field(out: &mut String, key: &str, value: &str) {
+    out.push_str(key);
+    out.push_str(" = ");
+    out.push_str(value);
+    out.push('\n');
+}
+
+fn inline_table(fields: &[String]) -> String {
+    format!("{{ {} }}", fields.join(", "))
+}
+
+/// A TOML basic string, with the escapes the TOML specification requires.
+fn quoted(value: &str) -> String {
+    toml::Value::String(value.to_owned()).to_string()
 }
 
 impl Artefact {
