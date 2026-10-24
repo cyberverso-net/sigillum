@@ -1,0 +1,25 @@
+[package]
+name = "sigillum-testpki-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+
+[dependencies.sigillum-testpki]
+path = ".."
+
+[[bin]]
+name = "manifest"
+path = "fuzz_targets/manifest.rs"
+test = false
+doc = false
+bench = false
+
+# The fuzz targets form their own workspace, built with the nightly toolchain.
+[workspace]
+members = ["."]

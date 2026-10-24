@@ -65,7 +65,7 @@ jobs:
         with:
           toolchain: stable
           targets: wasm32-unknown-unknown
-      - run: cargo check --workspace --exclude sigillum-oracle --target wasm32-unknown-unknown
+      - run: cargo check --workspace --exclude sigillum-oracle --exclude sigillum-testpki --target wasm32-unknown-unknown
 
   mobile:
     name: Mobile targets
@@ -76,8 +76,8 @@ jobs:
         with:
           toolchain: stable
           targets: aarch64-apple-ios, aarch64-linux-android
-      - run: cargo check --workspace --exclude sigillum-oracle --target aarch64-apple-ios
-      - run: cargo check --workspace --exclude sigillum-oracle --target aarch64-linux-android
+      - run: cargo check --workspace --exclude sigillum-oracle --exclude sigillum-testpki --target aarch64-apple-ios
+      - run: cargo check --workspace --exclude sigillum-oracle --exclude sigillum-testpki --target aarch64-linux-android
 
   deny:
     name: Licences and advisories
