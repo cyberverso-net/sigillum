@@ -10,6 +10,7 @@ import eu.europa.esig.dss.diagnostic.RevocationWrapper;
 import eu.europa.esig.dss.enumerations.TimestampType;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.InMemoryDocument;
+import eu.europa.esig.dss.model.x509.CertificateToken;
 import eu.europa.esig.dss.simplereport.SimpleReport;
 import eu.europa.esig.dss.spi.DSSUtils;
 import eu.europa.esig.dss.spi.validation.CommonCertificateVerifier;
@@ -17,6 +18,8 @@ import eu.europa.esig.dss.spi.x509.CommonCertificateSource;
 import eu.europa.esig.dss.spi.x509.CommonTrustedCertificateSource;
 import eu.europa.esig.dss.spi.x509.revocation.crl.ExternalResourcesCRLSource;
 import eu.europa.esig.dss.spi.x509.revocation.ocsp.ExternalResourcesOCSPSource;
+import eu.europa.esig.dss.validation.CertificateValidator;
+import eu.europa.esig.dss.validation.reports.CertificateReports;
 import eu.europa.esig.dss.validation.reports.Reports;
 import eu.europa.esig.dss.validation.timestamp.DetachedTimestampValidator;
 import java.io.ByteArrayOutputStream;
@@ -40,16 +43,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * The fuzz coverage of the input paths of validate-timestamp: inputs of the
- * corpus, mutated deterministically from a fixed seed, are run through the
- * mode in process. Every run must end with exit code 0 and the result
- * {@code validated} or {@code rejected}: never an exception, a failure of
- * the tool or a network attempt.
+ * The fuzz coverage of the input paths of validate-timestamp and
+ * validate-certificate: inputs of the corpus, mutated deterministically from
+ * a fixed seed, are run through each mode in process. Every run must end
+ * with exit code 0 and the result {@code validated} or {@code rejected}:
+ * never an exception, a failure of the tool or a network attempt.
  *
  * <p>Every rejection is checked against DSS alone, without any code of the
  * tool, so that the tool rejects only what DSS cannot use. A rejected token
  * must make DSS fail at the stage where the tool rejected it. A rejected
- * certificate, CRL or OCSP response must not be one that DSS uses in a
+ * certificate under validation must make DSS fail, since every validation
+ * of it uses it. Any other rejected certificate, CRL or OCSP response must
+ * not be one that DSS uses in a
  * validation that completes: DSS is run with the mutated file in the place
  * where the corpus uses it, and if the validation completes, the file must
  * not appear among the certificates or revocation data that DSS used. A
@@ -229,6 +234,205 @@ class MutationTest {
         assertEquals(RUNS, results.values().stream().mapToInt(Integer::intValue).sum());
     }
 
+    /** The number of mutated runs of validate-certificate. */
+    static final int CERTIFICATE_RUNS = 2000;
+    private static final long CERTIFICATE_SEED = 35;
+
+    /**
+     * The files that DSS alone validates a certificate with: the certificate,
+     * and the lists that replace the corpus files of each kind.
+     */
+    record CertificateSetup(byte[] certificate, List<byte[]> anchors, List<byte[]> certificates, List<byte[]> crls,
+            List<byte[]> responses) {
+
+        static CertificateSetup corpus() throws IOException {
+            return new CertificateSetup(der("pki/signer-p256.pem"), List.of(der("pki/root-ca.pem")),
+                    List.of(der("pki/ca-ecdsa.pem")), List.of(read("crl/ca-ecdsa.crl"), read("crl/root-ca.crl")),
+                    List.of());
+        }
+    }
+
+    /** The input of the OCSP response run without the CRL of pki/ca-ecdsa. */
+    private static final String OCSP_ALONE = "ocsp-signer-p256-alone";
+
+    private static List<String> certificateArguments(String certificate) {
+        return new ArrayList<>(List.of(
+                "validate-certificate",
+                "--certificate", certificate,
+                "--certificate", corpus("pki/ca-ecdsa.pem"),
+                "--trust-anchor", corpus("pki/root-ca.pem"),
+                "--crl", corpus("crl/ca-ecdsa.crl"),
+                "--crl", corpus("crl/root-ca.crl"),
+                "--validation-time", "2030-01-15T10:00:00Z"));
+    }
+
+    private static List<Input> certificateInputs() throws Exception {
+        List<Input> inputs = new ArrayList<>();
+        // The certificate under validation, in DER, in place of the PEM file of the corpus.
+        inputs.add(new Input("signer-p256.cer", "--certificate", corpus("pki/signer-p256.pem"),
+                der("pki/signer-p256.pem"), true, false));
+        for (String crl : List.of("ca-ecdsa", "root-ca")) {
+            inputs.add(new Input(crl + ".crl", "--crl", corpus("crl/" + crl + ".crl"), read("crl/" + crl + ".crl"),
+                    true, false));
+        }
+        // The response of the delegated responder, which holds the responder's certificate: once beside the
+        // CRL of pki/ca-ecdsa, and once alone, so that DSS takes the status of pki/signer-p256 from it.
+        inputs.add(new Input("ocsp-signer-p256", "--ocsp", null, read("ocsp/signer-p256.der"), true, false));
+        inputs.add(new Input(OCSP_ALONE, "--ocsp", null, read("ocsp/signer-p256.der"), true, false));
+        return inputs;
+    }
+
+    /** The setup of DSS alone for a mutated input of validate-certificate. */
+    private static CertificateSetup certificateSetup(Input input, byte[] mutated) throws IOException {
+        CertificateSetup corpus = CertificateSetup.corpus();
+        return switch (input.name()) {
+            case "signer-p256.cer" -> new CertificateSetup(mutated, corpus.anchors(), corpus.certificates(),
+                    corpus.crls(), List.of());
+            case "ca-ecdsa.crl" -> new CertificateSetup(corpus.certificate(), corpus.anchors(), corpus.certificates(),
+                    List.of(mutated, read("crl/root-ca.crl")), List.of());
+            case "root-ca.crl" -> new CertificateSetup(corpus.certificate(), corpus.anchors(), corpus.certificates(),
+                    List.of(read("crl/ca-ecdsa.crl"), mutated), List.of());
+            case OCSP_ALONE -> new CertificateSetup(corpus.certificate(), corpus.anchors(), corpus.certificates(),
+                    List.of(read("crl/root-ca.crl")), List.of(mutated));
+            default -> new CertificateSetup(corpus.certificate(), corpus.anchors(), corpus.certificates(),
+                    corpus.crls(), List.of(mutated));
+        };
+    }
+
+    @Test
+    void mutatedCertificateInputsAreValidatedOrRejected() throws Exception {
+        List<Input> inputs = certificateInputs();
+
+        // Controls: DSS alone validates the corpus, and uses the files whose use the cross-checks look for.
+        RawResult control = rawCertificateDss(CertificateSetup.corpus());
+        assertEquals("PASSED null", control.indication(), String.valueOf(control.failure()));
+        assertTrue(control.revocationIds().contains(CRLUtils.buildCRLBinary(read("crl/ca-ecdsa.crl")).asXmlId()));
+        assertTrue(control.revocationIds().contains(CRLUtils.buildCRLBinary(read("crl/root-ca.crl")).asXmlId()));
+        for (Input input : inputs.stream().filter(input -> input.option().equals("--ocsp")).toList()) {
+            RawResult withOcsp = rawCertificateDss(certificateSetup(input, input.content()));
+            assertEquals("PASSED null", withOcsp.indication(), input.name() + " " + withOcsp.failure());
+            assertTrue(withOcsp.revocationIds().containsAll(revocationIds("--ocsp", input.content())),
+                    input.name() + " " + withOcsp.revocationIds());
+        }
+
+
+        Random random = new Random(CERTIFICATE_SEED);
+        List<String> failures = new ArrayList<>();
+        Map<String, Integer> results = new java.util.TreeMap<>();
+        long start = System.nanoTime();
+        for (int run = 0; run < CERTIFICATE_RUNS; run++) {
+            Input input = inputs.get(random.nextInt(inputs.size()));
+            Mutation mutation = Mutation.random(random, input.content(), input.der());
+            byte[] mutated = mutation.apply(input.content());
+            Path directory = Files.createDirectories(temp.resolve("certificate-run-" + run));
+            Path file = Files.write(directory.resolve("input"), mutated);
+            Path out = directory.resolve("out");
+            List<String> args = certificateArguments(corpus("pki/signer-p256.pem"));
+            if (input.name().equals(OCSP_ALONE)) {
+                int crl = args.indexOf(corpus("crl/ca-ecdsa.crl"));
+                args.subList(crl - 1, crl + 1).clear();
+            }
+            if (input.original() == null) {
+                args.addAll(List.of(input.option(), file.toString()));
+            } else {
+                args.set(args.indexOf(input.original()), file.toString());
+            }
+            args.addAll(List.of("--out", out.toString()));
+            String label = "certificate run " + run + ", " + input.name() + ", " + mutation;
+            ByteArrayOutputStream err = new ByteArrayOutputStream();
+            int code;
+            try {
+                code = Main.run(args.toArray(String[]::new), Modes.RUNNER,
+                        new PrintStream(new ByteArrayOutputStream(), true, StandardCharsets.UTF_8),
+                        new PrintStream(err, true, StandardCharsets.UTF_8));
+            } catch (RuntimeException | Error e) {
+                failures.add(label + ": " + e);
+                continue;
+            }
+            if (code != ExitCodes.SUCCESS) {
+                failures.add(label + ": exit " + code + ": " + err.toString(StandardCharsets.UTF_8).strip());
+            } else {
+                Map<String, Object> summary = JsonReader.object(Files.readString(out.resolve("summary.json")));
+                Object result = summary.get("result");
+                results.merge(input.name() + " " + result, 1, Integer::sum);
+                if (!"validated".equals(result) && !"rejected".equals(result)) {
+                    failures.add(label + ": result " + result);
+                }
+                if ("rejected".equals(result)) {
+                    String problem = crossCheckCertificateInput(input, mutated, certificateSetup(input, mutated));
+                    if (problem != null) {
+                        failures.add(label + ": " + problem);
+                    }
+                }
+            }
+            delete(directory);
+        }
+        long seconds = (System.nanoTime() - start) / 1_000_000_000L;
+        System.out.println("MutationTest: " + CERTIFICATE_RUNS + " certificate runs in " + seconds + " s: " + results);
+        assertTrue(failures.isEmpty(), failures.size() + " failures:\n" + String.join("\n", failures));
+        assertEquals(CERTIFICATE_RUNS, results.values().stream().mapToInt(Integer::intValue).sum());
+    }
+
+    /**
+     * Checks an input of validate-certificate that the tool rejects. DSS
+     * alone must fail on a rejected certificate under validation, since every
+     * validation uses it. If DSS alone completes the validation with a
+     * rejected CRL or OCSP response in its place, it must not have used it.
+     *
+     * @return the problem, or {@code null}
+     */
+    private static String crossCheckCertificateInput(Input input, byte[] mutated, CertificateSetup setup) {
+        RawResult raw = rawCertificateDss(setup);
+        if (raw.failure() != null) {
+            return null;
+        }
+        if (input.option().equals("--certificate")) {
+            return "rejected, but DSS validates it: " + raw.indication();
+        }
+        boolean used = revocationIds(input.option(), mutated).stream().anyMatch(raw.revocationIds()::contains);
+        return used ? "rejected, but DSS uses it and validates: " + raw.indication() : null;
+    }
+
+    /**
+     * Validates a certificate with DSS alone, without any code of the tool,
+     * and returns the indication with the identifiers of the certificates and
+     * revocation data that DSS used, or the failure.
+     */
+    static RawResult rawCertificateDss(CertificateSetup setup) {
+        try {
+            CommonTrustedCertificateSource trusted = new CommonTrustedCertificateSource();
+            for (byte[] anchor : setup.anchors()) {
+                trusted.addCertificate(DSSUtils.loadCertificate(anchor));
+            }
+            CommonCertificateSource adjunct = new CommonCertificateSource();
+            for (byte[] certificate : setup.certificates()) {
+                adjunct.addCertificate(DSSUtils.loadCertificate(certificate));
+            }
+            CommonCertificateVerifier verifier = new CommonCertificateVerifier(true);
+            verifier.setTrustedCertSources(trusted);
+            verifier.setAdjunctCertSources(adjunct);
+            verifier.setCrlSource(new ExternalResourcesCRLSource(documents(setup.crls())));
+            verifier.setOcspSource(new ExternalResourcesOCSPSource(documents(setup.responses())));
+            CertificateToken certificate = DSSUtils.loadCertificate(setup.certificate());
+            CertificateValidator validator = CertificateValidator.fromCertificate(certificate);
+            validator.setCertificateVerifier(verifier);
+            validator.setValidationTime(Date.from(Instant.parse("2030-01-15T10:00:00Z")));
+            CertificateReports reports = validator.validate();
+            // The tool writes the reports; DSS alone must be able to as well.
+            reports.getXmlDiagnosticData();
+            reports.getXmlDetailedReport();
+            reports.getXmlSimpleReport();
+            String id = certificate.getDSSIdAsString();
+            DiagnosticData diagnostic = reports.getDiagnosticData();
+            return new RawResult(reports.getSimpleReport().getCertificateIndication(id) + " "
+                    + reports.getSimpleReport().getCertificateSubIndication(id), null,
+                    diagnostic.getUsedCertificates().stream().map(CertificateWrapper::getId).collect(Collectors.toSet()),
+                    usedRevocationIds(diagnostic));
+        } catch (RuntimeException | OutOfMemoryError e) {
+            return new RawResult(null, e, Set.of(), Set.of());
+        }
+    }
+
     /** The result of DSS alone: an indication and what it used, or the failure. */
     record RawResult(String indication, Throwable failure, Set<String> certificateIds,
             Set<String> revocationIds) {
@@ -350,13 +554,25 @@ class MutationTest {
             return new RawResult(id == null ? "no timestamp" : simple.getIndication(id) + " "
                     + simple.getSubIndication(id), null,
                     diagnostic.getUsedCertificates().stream().map(CertificateWrapper::getId).collect(Collectors.toSet()),
-                    diagnostic.getAllRevocationData().stream().map(RevocationWrapper::getId)
-                            .collect(Collectors.toSet()));
+                    usedRevocationIds(diagnostic));
         } catch (RuntimeException | OutOfMemoryError e) {
             // OutOfMemoryError: DSS alone, given a mutated CRL that declares a large length, has been observed
             // to use memory in proportion to it. The tool rejects such a CRL before DSS reads it.
             return new RawResult(null, e, Set.of(), Set.of());
         }
+    }
+
+    /**
+     * The identifiers of the revocation data whose signing certificate DSS
+     * found. The diagnostic data also lists revocation data whose signer DSS
+     * could not find, which it cannot have used. Data whose signature does
+     * not verify is kept, so that a wrong rejection of a readable file with
+     * a bad signature is still caught.
+     */
+    private static Set<String> usedRevocationIds(DiagnosticData diagnostic) {
+        return diagnostic.getAllRevocationData().stream()
+                .filter(revocation -> revocation.getSigningCertificate() != null)
+                .map(RevocationWrapper::getId).collect(Collectors.toSet());
     }
 
     private static DSSDocument[] documents(List<byte[]> contents) {

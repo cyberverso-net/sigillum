@@ -5,7 +5,6 @@ import eu.europa.esig.dss.diagnostic.TimestampWrapper;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlDigestMatcher;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.TimestampType;
-import eu.europa.esig.dss.jaxb.object.Message;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.model.DigestDocument;
@@ -431,19 +430,8 @@ public final class ValidateTimestamp implements Main.ModeRunner {
         imprint.put("data-found", timestamp.isMessageImprintDataFound());
         imprint.put("data-intact", timestamp.isMessageImprintDataIntact());
         details.put("message-imprint", imprint);
-        details.put("errors", messages(simple.getAdESValidationErrors(id)));
-        details.put("warnings", messages(simple.getAdESValidationWarnings(id)));
+        details.put("errors", ValidationOutput.messages(simple.getAdESValidationErrors(id)));
+        details.put("warnings", ValidationOutput.messages(simple.getAdESValidationWarnings(id)));
         return details;
-    }
-
-    private static List<Object> messages(List<Message> messages) {
-        List<Object> list = new ArrayList<>();
-        for (Message message : messages) {
-            Map<String, Object> entry = new LinkedHashMap<>();
-            entry.put("key", message.getKey());
-            entry.put("message", message.getValue());
-            list.add(entry);
-        }
-        return list;
     }
 }

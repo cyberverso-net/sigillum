@@ -2,6 +2,7 @@ package net.cyberverso.sigillum.dssoracle;
 
 import eu.europa.esig.dss.crl.CRLUtils;
 import eu.europa.esig.dss.model.DSSDocument;
+import eu.europa.esig.dss.enumerations.SignatureAlgorithm;
 import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.crl.CRLBinary;
 import eu.europa.esig.dss.model.InMemoryDocument;
@@ -22,9 +23,12 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.ocsp.BasicOCSPResp;
 
@@ -101,8 +105,9 @@ public final class OfflineSources {
      * <li>a CRL, when DSS cannot load it, when the CRL parser of DSS cannot
      * parse it, or when DSS fails while making revocation tokens from it;</li>
      * <li>an OCSP response, when DSS cannot load it, cannot decode its single
-     * responses, cannot convert or decode a certificate that it holds, or
-     * fails while making revocation tokens from it.</li>
+     * responses, does not support its signature algorithm, cannot convert or
+     * decode a certificate that it holds, or fails while making revocation
+     * tokens from it.</li>
      * </ul>
      *
      * Revocation tokens are made, as DSS makes them during a validation, for
@@ -176,6 +181,16 @@ public final class OfflineSources {
                     throw response.rejected(e);
                 }
                 try {
+                    // DSS resolves the signature algorithm so when it verifies the response or reports it.
+                    AlgorithmIdentifier algorithm = basic.getSignatureAlgorithmID();
+                    SignatureAlgorithm.forOidAndParams(algorithm.getAlgorithm().getId(),
+                            algorithm.getParameters() == null
+                                    ? null : DSSASN1Utils.getDEREncoded(algorithm.getParameters()));
+                } catch (DSSException | IllegalArgumentException e) {
+                    throw response.rejected(new IllegalArgumentException(
+                            "DSS does not support the signature algorithm of the OCSP response", e));
+                }
+                try {
                     holders = basic.getCerts();
                 } catch (IllegalArgumentException | IllegalStateException e) {
                     throw response.rejected(new IllegalArgumentException(
@@ -203,6 +218,42 @@ public final class OfflineSources {
         verifier.setOcspSource(new ExternalResourcesOCSPSource(
                 ocspResponses.stream().map(Input::document).toArray(DSSDocument[]::new)));
         return verifier;
+    }
+
+    /**
+     * Returns a certificate supplied with {@code --certificate}, as DSS loads
+     * it.
+     *
+     * @param index the position of the certificate among those supplied with
+     *        {@code --certificate}
+     * @return the certificate
+     * @throws RejectedInputException if DSS cannot use the file
+     */
+    public CertificateToken suppliedCertificate(int index) throws RejectedInputException {
+        return certificates.get(index).certificate();
+    }
+
+    /**
+     * Returns the CRL and OCSP files by the identifiers that DSS gives the
+     * revocation data they hold, such as {@code R-...} in its reports. A
+     * file that repeats revocation data of an earlier one does not replace
+     * it. Call it only after {@link #certificateVerifier(List)} has accepted
+     * the files.
+     *
+     * @return the files, by identifier
+     */
+    public Map<String, Input> revocationInputs() {
+        Map<String, Input> inputs = new LinkedHashMap<>();
+        for (Input crl : crls) {
+            inputs.putIfAbsent(CRLUtils.buildCRLBinary(crl.content()).asXmlId(), crl);
+        }
+        for (Input response : ocspResponses) {
+            for (EncapsulatedRevocationTokenIdentifier<OCSP> binary
+                    : new ExternalResourcesOCSPSource(response.document()).getAllRevocationBinaries()) {
+                inputs.putIfAbsent(binary.asXmlId(), response);
+            }
+        }
+        return inputs;
     }
 
     /** Makes the revocation tokens of a source for every pair of a certificate and its issuer. */

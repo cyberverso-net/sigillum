@@ -28,7 +28,7 @@ Usage: `dss-oracle <mode> [options]`, or `dss-oracle --version` or `--help` on t
 | `--ocsp <file>` | OCSP response supplied offline; repeatable |
 | `--out <directory>` | Output directory, which must not exist or be empty |
 
-Exit codes: 0 success, 1 failure, 2 usage error, 3 mode not implemented yet, 4 network access attempted. A missing or unreadable input file, or an output directory that is not empty, is a failure. Only `validate-timestamp` is implemented so far.
+Exit codes: 0 success, 1 failure, 2 usage error, 3 mode not implemented yet, 4 network access attempted. A missing or unreadable input file, or an output directory that is not empty, is a failure. Only `validate-certificate` and `validate-timestamp` are implemented so far.
 
 ## Network access
 
@@ -45,17 +45,42 @@ The first two layers record every attempt, and a run with any attempt fails with
 - connections to an IP address opened with an explicit `Proxy.NO_PROXY`;
 - a `java.net.http.HttpClient` built with its own proxy selector, or built before the guard, connecting to an IP address.
 
-Connections to a host name are caught by the second layer. The third layer covers the remaining gaps in the jobs that run the tool without network. The modes configure DSS with offline sources only, as described in the next section. A run of `validate-timestamp` on the timestamp corpus makes no name lookup, not even of the local host name, so the guard makes no exception.
+Connections to a host name are caught by the second layer. The third layer covers the remaining gaps in the jobs that run the tool without network. The modes configure DSS with offline sources only, as described in the next section. A run of `validate-timestamp` on the timestamp corpus, or of `validate-certificate` on the certificates, CRLs and OCSP responses of the corpus, makes no name lookup, not even of the local host name, so the guard makes no exception.
 
 ## Validation modes
 
-The validation modes run DSS at the fixed validation time, with the default validation policy of DSS 6.5.1 and English report messages. DSS sees only the files named on the command line:
+The validation modes run DSS at the fixed validation time, with the default validation policy of DSS 6.5.1 for their kind of validation and English report messages. DSS sees only the files named on the command line:
 
 - `--trust-anchor` gives the trust anchors;
 - `--certificate` gives other certificates, such as intermediate CAs, which DSS may use to build a chain;
 - `--crl` and `--ocsp` give revocation data, which DSS uses in place of retrieving any.
 
 DSS has no source that fetches certificates through the authority information access extension, CRLs or OCSP responses. Certificates and CRLs are read in DER or PEM, as DSS reads them. OCSP responses are read in DER only, because DSS does not read them in PEM.
+
+### validate-certificate
+
+```
+dss-oracle validate-certificate --certificate <file> [--certificate <file>]... --trust-anchor <file>
+    [--crl <file>] [--ocsp <file>] --validation-time <time> --out <directory>
+```
+
+It validates a certificate as DSS validates one on its own: the X.509 certificate validation of [ETSI EN 319 102-1 V1.4.1](https://www.etsi.org/deliver/etsi_en/319100_319199/31910201/01.04.01_60/en_31910201v010401p.pdf), clause 5.2.6, for the certificate and the chain that DSS builds to a trust anchor. DSS applies its default certificate validation policy, "Certificate policy TL based" (`policy/certificate-constraint.xml` in `dss-policy-jaxb`), not the policy it applies to signatures and timestamps. That policy also asks for the qualification of the certificate under the EU trusted lists. The tool supplies none, so the qualification process in the detailed report fails; `summary.json` does not report it.
+
+The first `--certificate` names the certificate to validate. Every further `--certificate` is supplied for its chain only, such as an intermediate CA. The certificate to validate may also be a trust anchor, as `pki/root-ca` is. `--certificate`, `--trust-anchor`, `--validation-time` and `--out` are required.
+
+DSS chooses the revocation data of each certificate in the chain among the CRLs and OCSP responses supplied. When an OCSP response covers a certificate, DSS 6.5.1 has been observed to take it and not to load the CRL, even when the response is not acceptable, for example because its signature does not verify or its status is unknown. DSS loads the CRL when no supplied OCSP response covers the certificate, for example when the CertID of the response names another issuer. `summary.json` names the file that DSS used for the certificate itself.
+
+For a certificate of the corpus, the chain is supplied as follows, with the CRL of its issuer and the CRL that its CA certificate links:
+
+```
+java -jar target/dss-oracle.jar validate-certificate \
+    --certificate ../../testdata/pki/signer-p256.pem --certificate ../../testdata/pki/ca-ecdsa.pem \
+    --trust-anchor ../../testdata/pki/root-ca.pem \
+    --crl ../../testdata/crl/ca-ecdsa.crl --crl ../../testdata/crl/root-ca.crl \
+    --validation-time 2030-01-15T10:00:00Z --out results/signer-p256
+```
+
+The expected DSS result of a CRL or an OCSP response in `testdata/manifest.toml` is a prediction of the result of this mode for the certificate that it covers, given that CRL or response and the revocation data that the CA certificates of the chain link, as `testdata/README.md` describes. The test `ValidateCertificateTest` runs every certificate, CRL and OCSP response of the corpus so, and pins the results of DSS 6.5.1. Those that differ from the prediction are tracked in issue #75.
 
 ### validate-timestamp
 
@@ -91,6 +116,8 @@ A validation mode writes the reports that DSS gives for its kind of validation, 
 | `etsi-validation-report.xml` | The validation report in the format of [ETSI TS 119 102-2 V1.4.1 (2023-06)](https://www.etsi.org/deliver/etsi_ts/119100_119199/11910202/01.04.01_60/ts_11910202v010401p.pdf), as DSS produces it |
 | `summary.json` | The summary described below, written last |
 
+`validate-certificate` writes `diagnostic-data.xml`, `detailed-report.xml`, `simple-report.xml`, which is the DSS simple certificate report, and `summary.json`. DSS gives a certificate validation no report in the format of ETSI TS 119 102-2.
+
 The reports are written as DSS produces them, unchanged. Their content is the same on every run with the same inputs. The namespace prefixes in `etsi-validation-report.xml` may differ from one run to the next, because the XML binding of DSS chooses them; the elements, attributes and values do not. Exclusive XML canonicalisation does not remove the difference, because it keeps the prefixes of the document. Comparisons therefore use `summary.json`. The tests compare that report by its content with the prefixes resolved.
 
 When DSS cannot use an input file, the mode writes only `summary.json`, with the result `rejected`, and exits with code 0. This is a result, as ADR-0013 requires, not a failure of the tool.
@@ -103,10 +130,10 @@ DSS loads the inputs before the validation but parses part of them only during i
 | --- | --- |
 | Certificate (`--trust-anchor`, `--certificate`) | DSS cannot load it, or cannot decode its public key, its extensions or the values of its subject name |
 | CRL (`--crl`) | DSS cannot load it; or an element declares a length beyond the remaining bytes by more than the size of the CRL (see below); or the CRL parser of DSS fails on it, an error that DSS itself catches before dropping the CRL; or DSS fails while making revocation tokens from it |
-| OCSP response (`--ocsp`) | DSS cannot load it; or cannot decode its single responses, an error that DSS itself catches before using none of them; or cannot convert or decode a certificate that it holds; or fails while making revocation tokens from it |
+| OCSP response (`--ocsp`) | DSS cannot load it; or cannot decode its single responses, an error that DSS itself catches before using none of them; or does not support its signature algorithm, which DSS resolves when it verifies or reports the response; or cannot convert or decode a certificate that it holds; or fails while making revocation tokens from it |
 | Timestamp token (`--timestamp`) | DSS cannot parse it, including a CMS structure without encapsulated content, on which Bouncy Castle fails; or it does not support the algorithm of the message imprint, or cannot compute it when `--data` is given; or a CMS structure that lacks members; or an ESS signing certificate reference makes DSS fail (see below); or DSS cannot decode a certificate that it holds, as for `--certificate`; or DSS cannot decode its signature value or algorithm with a certificate that it tries as the signer |
 
-DSS makes revocation tokens, as it does during the validation, for every pair of a certificate and an issuer whose subject is the issuer name of that certificate. The certificates are the supplied ones and those of the timestamp token. DSS tries as the signer of a token the best candidate found in the token. When the token does not hold it, DSS tries the supplied certificates that match the signer identifier.
+DSS makes revocation tokens, as it does during the validation, for every pair of a certificate and an issuer whose subject is the issuer name of that certificate. The certificates are the supplied ones, which include the certificate under validation, and those of the timestamp token. DSS tries as the signer of a token the best candidate found in the token. When the token does not hold it, DSS tries the supplied certificates that match the signer identifier.
 
 **Declared lengths in CRLs.** DSS 6.5.1 has been observed to use memory in proportion to the length that a CRL element declares, several times over, whatever the size of the file. When the bytes run out before the declared length, it treats the missing ones as zeros and continues. That is why it uses a CRL whose signature lacks its last, zero, octet. A length that the file cannot come close to filling, however, leaves DSS with a CRL whose signature does not verify, and so with no usable token, after it has used memory that the length decides. Such a CRL is therefore rejected: DSS's parsing of it depends on the heap and yields no usable token.
 
@@ -143,7 +170,7 @@ The catches are limited to the exceptions that DSS and Bouncy Castle throw for m
 
 ### Fuzz coverage
 
-The test `MutationTest` is the fuzz coverage of the Java tool. From a fixed seed, it applies 2000 deterministic mutations to inputs of the corpus:
+The test `MutationTest` is the fuzz coverage of the Java tool. It runs each validation mode on inputs of the corpus with deterministic mutations, 2000 per mode, each mode from its own fixed seed. The inputs of `validate-timestamp` are:
 
 - the four timestamp tokens and their content;
 - the CRLs of `pki/ca-ecdsa` and `pki/root-ca`;
@@ -151,14 +178,21 @@ The test `MutationTest` is the fuzz coverage of the Java tool. From a fixed seed
 - the certificate of `pki/tsa`, supplied with `--certificate` for the valid token without its certificates, so that DSS takes it as the signer;
 - the trust anchor `pki/root-ca`.
 
-The mutations are bit flips, byte replacements, truncations, insertions and changes to DER length octets. The test runs each through `validate-timestamp` in process and requires exit code 0 with the result `validated` or `rejected`: no exception, no failure of the tool and no network attempt.
+The inputs of `validate-certificate`, which validates `pki/signer-p256` with the chain of `pki/ca-ecdsa`, are:
+
+- the certificate under validation, `pki/signer-p256`, in DER;
+- the CRLs of `pki/ca-ecdsa` and `pki/root-ca`;
+- the OCSP response `ocsp/signer-p256`, signed by `pki/ocsp-responder`, which holds the certificate of the responder. It is mutated in two runs: beside the CRL of `pki/ca-ecdsa`, which DSS loads only when the mutated response no longer covers `pki/signer-p256`, and without that CRL, where the response is the only revocation data for `pki/signer-p256`.
+
+The mutations are bit flips, byte replacements, truncations, insertions and changes to DER length octets. The test runs each through its mode in process and requires exit code 0 with the result `validated` or `rejected`: no exception, no failure of the tool and no network attempt.
 
 It also checks every rejection against DSS alone, without any code of the tool, so that the tool rejects only what DSS cannot use:
 
 - a rejected token must make DSS fail, at the stage where the tool rejected it;
-- a rejected certificate, CRL or OCSP response is put where the corpus uses it, and DSS validates the token with it. If that validation completes, the file must not be among the certificates or revocation data that DSS used.
+- a rejected certificate under validation must make DSS fail, since every validation of that certificate uses it;
+- any other rejected certificate, CRL or OCSP response is put where the corpus uses it, and DSS validates the token or the certificate with it. If that validation completes, the file must not be among the certificates that DSS used, or among the revocation data whose signing certificate DSS found, whether or not the signature verifies.
 
-As controls, DSS alone must validate the corpus as PASSED, and must use the corpus files that the cross-checks look for. The test takes under a minute in `mvn -B verify` and needs no dependency of its own.
+As controls, DSS alone must validate the corpus as PASSED, and must use the corpus files that the cross-checks look for. The test takes about a minute in `mvn -B verify` and needs no dependency of its own.
 
 ### summary.json
 
@@ -167,7 +201,7 @@ As controls, DSS alone must validate the corpus as PASSED, and must use the corp
 | Member | Content |
 | --- | --- |
 | `format-version` | `1`, the version of this schema |
-| `mode` | The mode, such as `"validate-timestamp"` |
+| `mode` | The mode, such as `"validate-certificate"` or `"validate-timestamp"` |
 | `validation-time` | The validation time, in UTC, such as `"2030-01-15T10:00:00Z"` |
 | `result` | `"validated"` when DSS ran the validation, `"rejected"` when it could not parse an input |
 
@@ -175,7 +209,7 @@ When the result is `validated`:
 
 | Member | Content |
 | --- | --- |
-| `indication` | The indication of the validated token as DSS names it, such as `"PASSED"`, `"FAILED"`, `"INDETERMINATE"` or `"TOTAL_PASSED"`. DSS writes indications with underscores where ETSI EN 319 102-1 V1.4.1 uses hyphens |
+| `indication` | The indication of the validated token or certificate as DSS names it, such as `"PASSED"`, `"FAILED"`, `"INDETERMINATE"` or `"TOTAL_PASSED"`. DSS writes indications with underscores where ETSI EN 319 102-1 V1.4.1 uses hyphens. For a certificate, it is the conclusion of the X.509 certificate validation block (XCV) of the certificate in the detailed report, which covers the whole chain (see below) |
 | `sub-indication` | The sub-indication as DSS names it, such as `"HASH_FAILURE"`, or `null` |
 | `details` | An object with the details of the mode |
 
@@ -189,6 +223,29 @@ The details of `validate-timestamp` are:
 | `message-imprint` | An object: `digest-algorithm`, the DSS name of the algorithm of the message imprint; `data-found`, whether data or a digest was supplied; `data-intact`, whether the message imprint matches it |
 | `errors` | The errors of the validation in the simple report, as a list of objects with the message `key` of DSS and its English `message` |
 | `warnings` | The warnings, in the same form |
+
+The details of `validate-certificate` are:
+
+| Member | Content |
+| --- | --- |
+| `certificate-id` | The identifier of the certificate in the DSS reports |
+| `common-name` | The common name of its subject, or `null` |
+| `simple-report` | An object: `indication` and `sub-indication`, the result that the simple certificate report gives the certificate (see below) |
+| `revocation` | The revocation data that DSS used for the certificate, described below, or `null` when it used none: for a trust anchor, or when no supplied revocation data is acceptable |
+| `errors` | The errors of the X.509 validation in the simple certificate report, as a list of objects with the message `key` of DSS and its English `message` |
+| `warnings` | The warnings, in the same form |
+
+`revocation` is the latest acceptable revocation data that the certificate revocation data selector of DSS chose for the certificate, in the detailed report. It is an object:
+
+| Member | Content |
+| --- | --- |
+| `status` | The status that it gives the certificate, as DSS names it: `"GOOD"`, `"REVOKED"` or `"UNKNOWN"` |
+| `revocation-time` | The revocation time, in UTC, or `null` |
+| `reason` | The reason for revocation as DSS names it, such as `"KEY_COMPROMISE"`, or `null` |
+| `this-update` | The `thisUpdate` of the CRL or of the single response, in UTC |
+| `source` | An object: `type`, `"CRL"` or `"OCSP"`; `input`, the option that named the file, `"--crl"` or `"--ocsp"`; `file`, the file as named on the command line; `revocation-id`, the identifier of the revocation data in the DSS reports. When two files hold the same revocation data, the first is named |
+
+DSS 6.5.1 gives the certificate, in the simple certificate report, the conclusion of the checks of the certificate itself only, not those of the certificates above it. A certificate issued by a CA certificate without the `cA` flag, for example, is PASSED there, while its XCV block concludes INDETERMINATE with CERTIFICATE_CHAIN_GENERAL_FAILURE. `indication` and `sub-indication` therefore give the conclusion of the X.509 certificate validation block (XCV) of the certificate, which is the result of clause 5.2.6 for the chain, and `simple-report` keeps the other for comparison.
 
 When the result is `rejected`:
 

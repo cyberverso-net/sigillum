@@ -63,3 +63,29 @@ jobs:
             --out "$out"
           grep -F '"result": "validated"' "$out/summary.json"
           grep -F '"indication": "PASSED"' "$out/summary.json"
+          out="$RUNNER_TEMP/validate-certificate"
+          offline java -jar target/dss-oracle.jar validate-certificate \
+            --certificate ../../testdata/pki/signer-p256.pem \
+            --certificate ../../testdata/pki/ca-ecdsa.pem \
+            --trust-anchor ../../testdata/pki/root-ca.pem \
+            --crl ../../testdata/crl/ca-ecdsa.crl \
+            --crl ../../testdata/crl/root-ca.crl \
+            --validation-time 2030-01-15T10:00:00Z \
+            --out "$out"
+          grep -Fx '  "result": "validated",' "$out/summary.json"
+          grep -Fx '  "indication": "PASSED",' "$out/summary.json"
+          grep -Fx '      "status": "GOOD",' "$out/summary.json"
+          grep -F '"file": "../../testdata/crl/ca-ecdsa.crl"' "$out/summary.json"
+          out="$RUNNER_TEMP/validate-certificate-ocsp"
+          offline java -jar target/dss-oracle.jar validate-certificate \
+            --certificate ../../testdata/pki/signer-p256.pem \
+            --certificate ../../testdata/pki/ca-ecdsa.pem \
+            --trust-anchor ../../testdata/pki/root-ca.pem \
+            --ocsp ../../testdata/ocsp/signer-p256.der \
+            --crl ../../testdata/crl/root-ca.crl \
+            --validation-time 2030-01-15T10:00:00Z \
+            --out "$out"
+          grep -Fx '  "result": "validated",' "$out/summary.json"
+          grep -Fx '  "indication": "PASSED",' "$out/summary.json"
+          grep -Fx '      "status": "GOOD",' "$out/summary.json"
+          grep -F '"file": "../../testdata/ocsp/signer-p256.der"' "$out/summary.json"
