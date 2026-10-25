@@ -809,6 +809,113 @@ fn validity_cases_are_tied_to_the_validation_time() -> TestResult {
     Ok(())
 }
 
+/// The predictions of the validity cases, from ETSI EN 319 102-1 V1.4.1,
+/// clause 5.2.6.4 (issue #75). The revocation data that each certificate
+/// links is issued one day before the validation time: at the `notAfter`
+/// of the expired certificates, which shows them not revoked over their
+/// whole validity (step 7), and before the `notBefore` of the certificate
+/// not yet valid, which it cannot cover (step 4 e)).
+#[test]
+fn validity_cases_have_the_predictions_of_the_standard() -> TestResult {
+    let result = |name: &str| -> Result<(Indication, Option<&str>), Box<dyn std::error::Error>> {
+        let spec = spec(name)?;
+        Ok((
+            spec.expected_dss.indication,
+            spec.expected_dss.sub_indication,
+        ))
+    };
+    // Step 7 and its NOTE 8: the revocation data of the expired
+    // certificates were issued at their notAfter, so they show no status
+    // after expiry.
+    for name in ["signer-expired", "ca-expired"] {
+        assert_eq!(
+            result(name)?,
+            (Indication::Indeterminate, Some("OUT_OF_BOUNDS_NO_POE")),
+            "{name}"
+        );
+        assert!(
+            spec(name)?
+                .notes
+                .is_some_and(|notes| notes.contains("NOTE 8") && notes.contains("DIV-5")),
+            "{name}"
+        );
+    }
+    let response = ocsp::responses(VALIDATION_TIME)?
+        .into_iter()
+        .find(|spec| spec.name == "signer-expired")
+        .and_then(|spec| spec.notes)
+        .ok_or("no notes for ocsp/signer-expired")?;
+    assert!(
+        response.contains("NOTE 8") && response.contains("DIV-5"),
+        "{response}"
+    );
+    // Step 4 excludes the validity of the issuer of the revocation data,
+    // which NOTE 6 defers to step 8.
+    assert_eq!(
+        result("signer-under-expired-ca")?,
+        (
+            Indication::Indeterminate,
+            Some("REVOCATION_OUT_OF_BOUNDS_NO_POE")
+        )
+    );
+    assert!(
+        spec("signer-under-expired-ca")?
+            .notes
+            .is_some_and(|notes| notes.contains("NOTE 6") && notes.contains("step 8"))
+    );
+    assert_eq!(
+        result("signer-not-yet-valid")?,
+        (
+            Indication::Indeterminate,
+            Some("CERTIFICATE_CHAIN_GENERAL_FAILURE")
+        )
+    );
+    assert!(
+        spec("signer-not-yet-valid")?
+            .notes
+            .is_some_and(|notes| notes.contains("step 4 e)")
+                && notes.contains("known to contain revocation status information")
+                && notes.contains("RevocationAfterCertificateIssuance"))
+    );
+    Ok(())
+}
+
+/// No note of a CRL or an OCSP response guesses a DSS result: each states
+/// what DSS 6.5.1 gives under the aligned policy of ADR-0023 (issue #75).
+#[test]
+fn notes_state_the_results_of_dss_rather_than_guess_them() -> TestResult {
+    let mut notes: Vec<String> = crl::CRLS
+        .iter()
+        .filter_map(|spec| spec.notes.map(str::to_owned))
+        .collect();
+    notes.extend(
+        ocsp::responses(VALIDATION_TIME)?
+            .into_iter()
+            .filter_map(|spec| spec.notes),
+    );
+    assert!(notes.len() > 10);
+    for note in &notes {
+        assert!(!note.contains("likely to report"), "{note}");
+        assert!(!note.contains("ignores it instead"), "{note}");
+    }
+    for name in ["try-later", "unauthorized"] {
+        let note = ocsp::responses(VALIDATION_TIME)?
+            .into_iter()
+            .find(|spec| spec.name == name)
+            .and_then(|spec| spec.notes)
+            .ok_or("no notes")?;
+        assert!(note.contains("the oracle gives rejected"), "{note}");
+    }
+    let responder = ocsp::responses(VALIDATION_TIME)?
+        .into_iter()
+        .find(|spec| spec.name == "responder-without-ocsp-signing")
+        .and_then(|spec| spec.notes)
+        .ok_or("no notes for responder-without-ocsp-signing")?;
+    assert!(responder.contains("DIV-3"), "{responder}");
+    assert!(responder.contains("crl/ca-ecdsa"), "{responder}");
+    Ok(())
+}
+
 /// Acceptance criterion 4.
 #[test]
 fn misconfiguration_cases_have_their_defect() -> TestResult {

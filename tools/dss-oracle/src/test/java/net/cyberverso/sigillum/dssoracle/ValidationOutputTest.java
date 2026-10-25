@@ -32,7 +32,7 @@ class ValidationOutputTest {
     @Test
     void writesTheReportsOfTheModeUnchangedAndTheSummary() throws Exception {
         Path out = temp.resolve("out");
-        ValidationOutput output = ValidationOutput.check(out, Mode.VALIDATE_CERTIFICATE, TIME);
+        ValidationOutput output = ValidationOutput.check(out, Mode.VALIDATE_CERTIFICATE, TIME, PolicySelection.named(OraclePolicy.DEFAULT));
         output.writeValidated(List.of(
                 new ValidationOutput.Report("simple-certificate-report.xml", "<a>é</a>"),
                 new ValidationOutput.Report("diagnostic-data.xml", "<b/>")),
@@ -42,6 +42,9 @@ class ValidationOutputTest {
                 StandardCharsets.UTF_8));
         Map<String, Object> summary = JsonReader.object(Files.readString(out.resolve("summary.json")));
         assertEquals("validate-certificate", summary.get("mode"));
+        assertEquals("default", summary.get("policy"));
+        assertEquals(List.of("format-version", "mode", "validation-time", "policy", "result", "indication",
+                "sub-indication", "details"), List.copyOf(summary.keySet()));
         assertEquals("INDETERMINATE", summary.get("indication"));
         assertEquals("TRY_LATER", summary.get("sub-indication"));
     }
@@ -49,7 +52,7 @@ class ValidationOutputTest {
     @Test
     void refusesAReportNamedLikeTheSummaryOrTwice() throws Exception {
         Path out = temp.resolve("refused");
-        ValidationOutput output = ValidationOutput.check(out, Mode.VALIDATE_TIMESTAMP, TIME);
+        ValidationOutput output = ValidationOutput.check(out, Mode.VALIDATE_TIMESTAMP, TIME, PolicySelection.named(OraclePolicy.ALIGNED));
         assertThrows(IllegalArgumentException.class, () -> output.writeValidated(
                 List.of(new ValidationOutput.Report("summary.json", "<a/>")), Indication.PASSED, null, Map.of()));
         assertThrows(IllegalArgumentException.class, () -> output.writeValidated(List.of(

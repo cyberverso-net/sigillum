@@ -762,7 +762,7 @@ fn generate_crls_writes_the_crls_and_links_the_certificates()
     assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
     let output = run(&["generate", "crls", "--manifest", &path])?;
     assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
-    assert!(text(&output.stdout).contains("generate crls: wrote 12 files"));
+    assert!(text(&output.stdout).contains("generate crls: wrote 13 files"));
     assert!(text(&output.stderr).is_empty(), "{}", text(&output.stderr));
     let written = std::fs::read_to_string(&manifest)?;
     // The entries are those of the committed corpus, which also holds
@@ -959,7 +959,7 @@ fn generate_ocsp_writes_the_responses_and_links_the_certificates()
         .iter()
         .filter(|a| a.id.starts_with("ocsp/"))
         .collect();
-    assert_eq!(responses.len(), 30);
+    assert_eq!(responses.len(), 31);
     for artefact in &parsed.artefacts {
         assert!(dir.join(&artefact.path).is_file(), "{}", artefact.id);
         if artefact.id.starts_with("ocsp/") {
@@ -1053,7 +1053,7 @@ fn generate_ocsp_prunes_stale_responses_and_the_links_to_them()
     std::fs::write(dir.join("ocsp/stray.der"), "")?;
     let output = run(&["generate", "ocsp", "--manifest", &path])?;
     assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
-    assert!(text(&output.stdout).contains("generate ocsp: wrote 30 files"));
+    assert!(text(&output.stdout).contains("generate ocsp: wrote 31 files"));
     let stderr = text(&output.stderr);
     assert!(
         stderr.contains("generate ocsp: removed the manifest entry ocsp/old"),

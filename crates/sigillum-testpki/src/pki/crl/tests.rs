@@ -155,7 +155,10 @@ fn every_crl_matches_its_specification() -> TestResult {
             assert!(matches!(time, Time::UtcTime(_)), "{}", spec.name);
         }
         let extensions = tbs.crl_extensions.as_ref().ok_or("no extensions")?;
-        assert_eq!(extensions.len(), 2, "{}", spec.name);
+        // The authority key identifier and the CRL number, and
+        // expiredCertsOnCRL where the specification asks for it.
+        let expected = 2 + usize::from(spec.expired_certs_on_crl.is_some());
+        assert_eq!(extensions.len(), expected, "{}", spec.name);
         assert!(extensions.iter().all(|e| !e.critical), "{}", spec.name);
         let aki = AuthorityKeyIdentifier::from_der(
             crl_extension(&crl, rfc5280::ID_CE_AUTHORITY_KEY_IDENTIFIER)
@@ -347,13 +350,17 @@ fn the_defective_crls_have_their_defect() -> TestResult {
         // usable but not fresh, so step 4 a) gives TRY_LATER. A CRL that
         // fails RFC 5280, section 6.3.3, step (b) or (g), cannot show that
         // the certificate is not revoked, so path validation fails and
-        // step 4 e) gives CERTIFICATE_CHAIN_GENERAL_FAILURE. The notes name
-        // TRY_LATER as the likely DSS result.
+        // step 4 e) gives CERTIFICATE_CHAIN_GENERAL_FAILURE. The notes say
+        // that DSS 6.5.1 gives that result.
         let sub_indication = if spec.defect.is_none() {
             "TRY_LATER"
         } else {
             let notes = spec.notes.ok_or("no notes")?;
-            assert!(notes.contains("TRY_LATER"), "{}", spec.name);
+            assert!(
+                notes.contains("DSS 6.5.1 gives this result"),
+                "{}",
+                spec.name
+            );
             "CERTIFICATE_CHAIN_GENERAL_FAILURE"
         };
         assert_eq!(
@@ -749,6 +756,56 @@ fn the_planned_signing_time_is_inside_the_validity_of_the_signers() -> TestResul
             let date = revocation.date.from(VALIDATION_TIME)?;
             assert_ne!(date, signing_time, "{}", spec.name);
         }
+    }
+    Ok(())
+}
+
+/// Issue #75: a CRL of `pki/ca-ecdsa` issued after `pki/signer-expired`
+/// expired, with the extension expiredCertsOnCRL of ITU-T X.509 (10/2019),
+/// clause 9.5.2.8, whose date precedes that expiry. Its scope then covers
+/// the expired certificate, which it shows not revoked, so ETSI EN 319
+/// 102-1 V1.4.1, clause 5.2.6.4, step 7, gives OUT_OF_BOUNDS_NOT_REVOKED.
+#[test]
+fn the_crl_with_expired_certificates_covers_the_expired_signer() -> TestResult {
+    let spec = crl_spec("ca-ecdsa-expired-certs")?;
+    assert_eq!(
+        (spec.issuer, spec.covered, spec.defect),
+        ("ca-ecdsa", "signer-expired", None)
+    );
+    // A later CRL than the current one, with a higher number.
+    let current = crl_spec("ca-ecdsa")?;
+    assert!(spec.number > current.number);
+    let expired = spec_of("signer-expired")?;
+    let not_after = expired.not_after.from(VALIDATION_TIME)?;
+    let this_update = spec.this_update.from(VALIDATION_TIME)?;
+    assert!(this_update > not_after);
+    assert!(this_update <= VALIDATION_TIME);
+    assert!(spec.next_update.from(VALIDATION_TIME)? > VALIDATION_TIME);
+    let since = spec.expired_certs_on_crl.ok_or("no expiredCertsOnCRL")?;
+    assert!(since.from(VALIDATION_TIME)? <= not_after);
+    assert_eq!(
+        spec.expected_dss,
+        ExpectedDss {
+            indication: Indication::Indeterminate,
+            sub_indication: Some("OUT_OF_BOUNDS_NOT_REVOKED"),
+        }
+    );
+    let (_, crl) = decoded("ca-ecdsa-expired-certs")?;
+    let oid = der::asn1::ObjectIdentifier::new_unwrap("2.5.29.60");
+    let extension = crl_extension(&crl, oid).ok_or("no extension")?;
+    // X.509, clause 9.5.2.8: always non-critical; the value is a
+    // GeneralizedTime.
+    assert!(!extension.critical);
+    let value = der::asn1::GeneralizedTime::from_der(extension.extn_value.as_bytes())?;
+    assert_eq!(
+        value.to_unix_duration().as_secs(),
+        u64::try_from(since.from(VALIDATION_TIME)?.unix_timestamp())?
+    );
+    // The other CRLs carry no such extension.
+    for other in CRLS.iter().filter(|c| c.name != spec.name) {
+        assert_eq!(other.expired_certs_on_crl, None, "{}", other.name);
+        let (_, decoded) = decoded(other.name)?;
+        assert!(crl_extension(&decoded, oid).is_none(), "{}", other.name);
     }
     Ok(())
 }

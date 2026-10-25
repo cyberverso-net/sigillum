@@ -1211,3 +1211,18 @@ fn rsa_moduli_and_primes_have_bounded_sizes() {
         assert!(!supported_rsa_form(modulus, primes), "{modulus} {primes:?}");
     }
 }
+
+/// Issue #75: the notes state the results that the validate-timestamp mode
+/// of tools/dss-oracle gives under the aligned policy of ADR-0023, rather
+/// than leave them to be confirmed.
+#[test]
+fn notes_state_the_results_of_dss() {
+    for token in &TOKENS {
+        assert!(!token.notes.contains("to be confirmed"), "{}", token.name);
+        assert!(
+            token.notes.contains("DSS 6.5.1 gives this result"),
+            "{}",
+            token.name
+        );
+    }
+}

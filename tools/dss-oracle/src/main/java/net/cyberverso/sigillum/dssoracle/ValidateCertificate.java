@@ -25,7 +25,8 @@ import java.util.Map;
  * a fixed time, with offline sources only. The first {@code --certificate}
  * is the certificate to validate; the others are supplied for its chain.
  * DSS runs the X.509 certificate validation of ETSI EN 319 102-1 V1.4.1,
- * clause 5.2.6, with its default certificate validation policy.
+ * clause 5.2.6, with the policy that {@code --policy} selects
+ * (ADR-0023).
  */
 public final class ValidateCertificate implements Main.ModeRunner {
 
@@ -40,10 +41,10 @@ public final class ValidateCertificate implements Main.ModeRunner {
     @Override
     public int run(Arguments arguments, PrintStream out, PrintStream err) throws Exception {
         Options options = check(arguments);
-        ValidationOutput output = ValidationOutput.check(options.out(), Mode.VALIDATE_CERTIFICATE,
-                options.validationTime());
-
         // Read every file first: a missing file is a failure of the tool, whatever else is wrong.
+        PolicySelection policy = PolicySelection.of(arguments);
+        ValidationOutput output = ValidationOutput.check(options.out(), Mode.VALIDATE_CERTIFICATE,
+                options.validationTime(), policy);
         OfflineSources sources = OfflineSources.read(arguments);
 
         try {
@@ -54,7 +55,8 @@ public final class ValidateCertificate implements Main.ModeRunner {
             validator.setCertificateVerifier(verifier);
             validator.setValidationTime(Date.from(options.validationTime()));
             validator.setLocale(Locale.ENGLISH);
-            CertificateReports reports = validator.validate();
+            // ADR-0023: the aligned policy, the default certificate policy of DSS, or a policy file.
+            CertificateReports reports = policy.validate(PolicySelection.Kind.CERTIFICATE, validator::validate);
 
             String id = certificate.getDSSIdAsString();
             XmlBasicBuildingBlocks blocks = reports.getDetailedReport().getBasicBuildingBlockById(id);

@@ -31,6 +31,9 @@ import java.util.Optional;
  *        (validate-timestamp only)
  * @param digestAlgorithm the name of the algorithm of {@code digest}, if given
  *        (validate-timestamp only)
+ * @param policy the validation policy, a built-in one or a file, if given
+ *        (validation modes only); the modes use {@link OraclePolicy#ALIGNED}
+ *        without it
  */
 public record Arguments(
         Mode mode,
@@ -43,7 +46,8 @@ public record Arguments(
         Optional<Path> timestamp,
         Optional<Path> data,
         Optional<String> digest,
-        Optional<String> digestAlgorithm) {
+        Optional<String> digestAlgorithm,
+        Optional<PolicyOption> policy) {
 
     /**
      * Parses the arguments that follow the program name.
@@ -66,6 +70,7 @@ public record Arguments(
         Path data = null;
         String digest = null;
         String digestAlgorithm = null;
+        PolicyOption policy = null;
         List<Path> trustAnchors = new ArrayList<>();
         List<Path> certificates = new ArrayList<>();
         List<Path> crls = new ArrayList<>();
@@ -90,6 +95,15 @@ public record Arguments(
                 case "--data" -> data = Path.of(once(data, option, mode, value));
                 case "--digest" -> digest = once(digest, option, mode, value);
                 case "--digest-algorithm" -> digestAlgorithm = once(digestAlgorithm, option, mode, value);
+                case "--policy" -> {
+                    if (mode == Mode.SIGN) {
+                        throw new UsageException("--policy is valid only in the validation modes.");
+                    }
+                    if (policy != null) {
+                        throw new UsageException("--policy is given more than once.");
+                    }
+                    policy = PolicyOption.parse(value);
+                }
                 case "--trust-anchor" -> trustAnchors.add(Path.of(value));
                 case "--certificate" -> certificates.add(Path.of(value));
                 case "--crl" -> crls.add(Path.of(value));
@@ -100,7 +114,7 @@ public record Arguments(
         return new Arguments(mode, Optional.ofNullable(validationTime), List.copyOf(trustAnchors),
                 List.copyOf(certificates), List.copyOf(crls), List.copyOf(ocspResponses), Optional.ofNullable(out),
                 Optional.ofNullable(timestamp), Optional.ofNullable(data), Optional.ofNullable(digest),
-                Optional.ofNullable(digestAlgorithm));
+                Optional.ofNullable(digestAlgorithm), Optional.ofNullable(policy));
     }
 
     /**

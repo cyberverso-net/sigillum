@@ -158,10 +158,19 @@ const PASSED: ExpectedDss = ExpectedDss {
 };
 
 /// ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, step 7: the validation time is
-/// outside the validity period of the certificate.
+/// after the validity period of the certificate, and no revocation data
+/// shows its status after it expired (NOTE 8).
 const OUT_OF_BOUNDS: ExpectedDss = ExpectedDss {
     indication: Indication::Indeterminate,
     sub_indication: Some("OUT_OF_BOUNDS_NO_POE"),
+};
+
+/// ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, step 8: the issuer of the
+/// revocation data has expired at the validation time. Step 4 does not
+/// check its validity at that time (NOTE 6).
+const REVOCATION_OUT_OF_BOUNDS: ExpectedDss = ExpectedDss {
+    indication: Indication::Indeterminate,
+    sub_indication: Some("REVOCATION_OUT_OF_BOUNDS_NO_POE"),
 };
 
 /// ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, step 4 e): the path validation
@@ -403,6 +412,9 @@ pub const CERTIFICATES: [CertSpec; 32] = [
         not_after: Offset::days(-1),
         expected_openssl: OpensslResult::Rejected,
         expected_dss: OUT_OF_BOUNDS,
+        notes: Some(
+            "Its revocation data, crl/ca-ecdsa and ocsp/signer-expired, were issued at the instant it expired, within its validity, because notAfter is inclusive (RFC 5280, section 4.1.2.5). Neither carries expiredCertsOnCRL or archiveCutoff, so neither shows its status after it expired, as ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, NOTE 8, describes for a certificate known not to have been revoked. Step 7 then gives OUT_OF_BOUNDS_NO_POE. DSS 6.5.1 gives OUT_OF_BOUNDS_NOT_REVOKED, a class 2 divergence recorded as DIV-5 in docs/design/divergences.md.",
+        ),
         ..signer(
             "signer-expired",
             "sigillum test signer expired",
@@ -417,7 +429,15 @@ pub const CERTIFICATES: [CertSpec; 32] = [
         not_before: Offset::days(1),
         not_after: Offset::years(1),
         expected_openssl: OpensslResult::Rejected,
-        expected_dss: OUT_OF_BOUNDS,
+        // Revocation data issued before notBefore, the issuance date of the
+        // certificate (ETSI EN 319 102-1 V1.4.1, clauses 5.5.4 and
+        // 5.6.2.4.4), is not known to contain revocation status information
+        // about it (clause 5.2.6.4, step 4), so step 4 e) applies before the
+        // validity period is checked in step 7.
+        expected_dss: CHAIN_FAILURE,
+        notes: Some(
+            "Its revocation data, crl/ca-ecdsa and ocsp/signer-not-yet-valid, were issued two days before its notBefore, which ETSI EN 319 102-1 V1.4.1 takes as its issuance date (clauses 5.5.4 and 5.6.2.4.4). Neither is known to contain revocation status information about the certificate, which clause 5.2.6.4, step 4, requires of the revocation data it uses. The path validation therefore cannot show that the certificate is not revoked (RFC 5280, section 6.1.3, step (a)(3)), and step 4 e) gives CERTIFICATE_CHAIN_GENERAL_FAILURE before step 7 checks the validity period. DSS 6.5.1 gives this result through its RevocationAfterCertificateIssuance constraint: the revocation data was issued before the issuance time of the certificate.",
+        ),
         ..signer(
             "signer-not-yet-valid",
             "sigillum test signer not yet valid",
@@ -433,6 +453,9 @@ pub const CERTIFICATES: [CertSpec; 32] = [
         not_after: Offset::days(-1),
         expected_openssl: OpensslResult::Rejected,
         expected_dss: OUT_OF_BOUNDS,
+        notes: Some(
+            "Its revocation data, crl/root-ca, was issued at the instant it expired, within its validity, because notAfter is inclusive (RFC 5280, section 4.1.2.5). The CRL carries no expiredCertsOnCRL, so it does not show its status after it expired, as ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, NOTE 8, describes for a certificate known not to have been revoked. Step 7 then gives OUT_OF_BOUNDS_NO_POE. DSS 6.5.1 gives OUT_OF_BOUNDS_NOT_REVOKED, a class 2 divergence recorded as DIV-5 in docs/design/divergences.md.",
+        ),
         ..ca(
             "ca-expired",
             "sigillum test expired CA",
@@ -443,7 +466,10 @@ pub const CERTIFICATES: [CertSpec; 32] = [
     },
     CertSpec {
         expected_openssl: OpensslResult::Rejected,
-        expected_dss: CHAIN_FAILURE,
+        expected_dss: REVOCATION_OUT_OF_BOUNDS,
+        notes: Some(
+            "Its issuer pki/ca-expired, which also issued its revocation data, expired one day before the validation time. ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4: step 4 does not check the validity of the issuer of the revocation data at the validation time, which NOTE 6 defers to step 8, and step 8 gives REVOCATION_OUT_OF_BOUNDS_NO_POE. Clause 5.6.2.4.4 handles that result with proofs of existence.",
+        ),
         ..signer(
             "signer-under-expired-ca",
             "sigillum test signer under expired CA",

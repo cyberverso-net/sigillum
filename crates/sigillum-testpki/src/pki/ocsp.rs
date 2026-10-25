@@ -76,6 +76,11 @@ pub const THIS_UPDATE: Offset = Offset::days(-1);
 /// for the current CRLs.
 pub const NEXT_UPDATE: Offset = Offset::days(6);
 
+/// `producedAt` and `thisUpdate` of `ocsp/signer-expired-before-expiry`:
+/// two days before the validation time, before `pki/signer-expired`
+/// expired.
+pub const BEFORE_EXPIRY: Offset = Offset::days(-2);
+
 /// `producedAt` of `ocsp/produced-at-after-validation-time`: one day after
 /// the validation time.
 pub const LATE_PRODUCED_AT: Offset = Offset::days(1);
@@ -275,12 +280,16 @@ fn regular(spec: &CertSpec, validation_time: OffsetDateTime) -> Result<OcspSpec,
             indication: spec.expected_dss.indication,
             sub_indication: spec.expected_dss.sub_indication.map(str::to_owned),
         },
-        notes: signer_expired.then(|| {
+        notes: if spec.name == "signer-expired" {
+            Some("thisUpdate equals the notAfter of pki/signer-expired, and the response carries no archiveCutoff, so it shows no status after the certificate expired, as ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, NOTE 8, describes for a certificate known not to have been revoked. Step 7 then gives OUT_OF_BOUNDS_NO_POE. DSS 6.5.1 gives OUT_OF_BOUNDS_NOT_REVOKED, a class 2 divergence recorded as DIV-5 in docs/design/divergences.md.".to_owned())
+        } else {
+            signer_expired.then(|| {
             format!(
                 "Signed by {}, which expired one day before the validation time, at the instant it signed, so within its validity, because notAfter is inclusive (RFC 5280, section 4.1.2.5). openssl ocsp checks the signer at the validation time given with -attime, when it has expired, and rejects the response with \"certificate has expired\".",
                 certificate_id(responder)
             )
-        }),
+            })
+        },
     })
 }
 
@@ -307,13 +316,14 @@ fn case(
 /// `hash` of the `CertID` is altered.
 fn k10_notes(hash: &str) -> String {
     format!(
-        "A fixture for threat K10 of the threat model. The {hash} of the CertID is that of pki/ca-ecdsa with its last octet inverted; the other fields are those of ocsp/signer-p256. RFC 6960, sections 3.2 and 4.1.1: the CertID does not identify the certificate, so the response does not apply to it, and openssl ocsp finds no status for it. OpenSSL also fails to verify the response, because pki/ocsp-responder is not a delegated responder of the CA that the CertID names (RFC 6960, section 4.2.2.2); a test of sigillum should assert the first reason, that the response does not apply to the certificate. The DSS result is a prediction: without a response that applies to the certificate, the path validation cannot show that it is not revoked (RFC 5280, section 6.1.3, step (a)(3)), and step 4 e) of ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, applies. DSS is likely to report TRY_LATER instead, from its check for acceptable revocation data."
+        "A fixture for threat K10 of the threat model. The {hash} of the CertID is that of pki/ca-ecdsa with its last octet inverted; the other fields are those of ocsp/signer-p256. RFC 6960, sections 3.2 and 4.1.1: the CertID does not identify the certificate, so the response does not apply to it, and openssl ocsp finds no status for it. OpenSSL also fails to verify the response, because pki/ocsp-responder is not a delegated responder of the CA that the CertID names (RFC 6960, section 4.2.2.2); a test of sigillum should assert the first reason, that the response does not apply to the certificate. The DSS result is a prediction: without a response that applies to the certificate, the path validation cannot show that it is not revoked (RFC 5280, section 6.1.3, step (a)(3)), and step 4 e) of ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, applies. DSS 6.5.1 gives this result."
     )
 }
 
 /// Every OCSP response at `validation_time`: one for each end entity other
 /// than the responder, in the order of [`CERTIFICATES`], then the six
-/// cases of acceptance criterion 2 and the two of threat K10.
+/// cases of acceptance criterion 2, the two of threat K10, and a response
+/// for `pki/signer-expired` issued before it expired (issue #75).
 ///
 /// # Errors
 ///
@@ -337,7 +347,7 @@ pub fn responses(validation_time: OffsetDateTime) -> Result<Vec<OcspSpec>, PkiEr
             }),
             "OCSP response of pki/ocsp-responder for pki/signer-p256 whose status is unknown.",
             (OpensslResult::Verified, chain_failure()),
-            "RFC 6960, section 2.2: unknown means that the responder does not know the certificate. The response verifies, so OpenSSL accepts it and reports the status. The DSS result is a prediction: the response shows neither good nor revoked, so the path validation cannot show that the certificate is not revoked (RFC 5280, section 6.1.3, step (a)(3)), and step 4 e) of ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, applies. DSS is likely to report TRY_LATER instead, from its check for acceptable revocation data.",
+            "RFC 6960, section 2.2: unknown means that the responder does not know the certificate. The response verifies, so OpenSSL accepts it and reports the status. The DSS result is a prediction: the response shows neither good nor revoked, so the path validation cannot show that the certificate is not revoked (RFC 5280, section 6.1.3, step (a)(3)), and step 4 e) of ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, applies. DSS 6.5.1 gives this result.",
         ),
         case(
             "responder-without-ocsp-signing",
@@ -347,7 +357,7 @@ pub fn responses(validation_time: OffsetDateTime) -> Result<Vec<OcspSpec>, PkiEr
             }),
             "OCSP response for pki/signer-p256, whose status is good, signed by pki/signer-p384, which pki/ca-ecdsa issued without the extended key usage id-kp-OCSPSigning.",
             (OpensslResult::Rejected, chain_failure()),
-            "RFC 6960, section 4.2.2.2: a client must reject a response whose signer is neither the CA, nor a certificate of the CA with id-kp-OCSPSigning, nor a locally configured responder. The status is good. The DSS result is a prediction: without a usable response the path validation cannot show that the certificate is not revoked (RFC 5280, section 6.1.3, step (a)(3)), and step 4 e) of ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, applies. DSS is likely to report TRY_LATER instead, from its check for acceptable revocation data.",
+            "RFC 6960, section 4.2.2.2: a client must reject a response whose signer is neither the CA, nor a certificate of the CA with id-kp-OCSPSigning, nor a locally configured responder. The status is good. The DSS result is a prediction: without a usable response the path validation cannot show that the certificate is not revoked (RFC 5280, section 6.1.3, step (a)(3)), and step 4 e) of ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, applies. DSS 6.5.1 gives this result for another reason: it finds no revocation data for pki/signer-p384, the signer of the response, and does not check id-kp-OCSPSigning. Given crl/ca-ecdsa as well, which covers pki/signer-p384, DSS accepts the response and gives PASSED, a class 1 divergence recorded as DIV-3 in docs/design/divergences.md.",
         ),
         case(
             "produced-at-after-validation-time",
@@ -357,7 +367,7 @@ pub fn responses(validation_time: OffsetDateTime) -> Result<Vec<OcspSpec>, PkiEr
             }),
             "OCSP response of pki/ocsp-responder for pki/signer-p256, whose status is good, produced one day after the validation time.",
             (OpensslResult::Verified, passed()),
-            "thisUpdate and nextUpdate are those of the other responses. openssl ocsp does not compare producedAt with the verification time. The DSS result PASSED is a prediction from ETSI EN 319 102-1 V1.4.1: the revocation freshness checker of clause 5.2.5.4 uses thisUpdate (NOTE 3), and clause 5.2.6.4, step 4, checks only that producedAt falls within the validity of the responder certificate. DSS may reject revocation data produced after the validation time. A verifier that uses the response as evidence at the validation time must reject it, because it did not exist then.",
+            "thisUpdate and nextUpdate are those of the other responses. openssl ocsp does not compare producedAt with the verification time. The DSS result PASSED is a prediction from ETSI EN 319 102-1 V1.4.1: the revocation freshness checker of clause 5.2.5.4 uses thisUpdate (NOTE 3), and clause 5.2.6.4, step 4, checks only that producedAt falls within the validity of the responder certificate. DSS 6.5.1 gives this result. A verifier that uses the response as evidence at the validation time must reject it, because it did not exist then.",
         ),
         case(
             "nonce",
@@ -374,14 +384,14 @@ pub fn responses(validation_time: OffsetDateTime) -> Result<Vec<OcspSpec>, PkiEr
             Body::Unsuccessful(OcspResponseStatus::TryLater),
             "OCSP response with the status tryLater and no response bytes.",
             (OpensslResult::Rejected, DssResult::Rejected),
-            "RFC 6960, section 4.2.1: a response whose status is not successful has no responseBytes, and so no certificate status. The covered certificate is the one that a request would have named. The DSS result is a prediction: DSS cannot load the response as revocation data. If the validate-certificate mode of tools/dss-oracle loads it and ignores it instead, the result is that of the covered certificate without revocation data.",
+            "RFC 6960, section 4.2.1: a response whose status is not successful has no responseBytes, and so no certificate status. The covered certificate is the one that a request would have named. DSS 6.5.1 cannot load the response as revocation data, so the validate-certificate mode of tools/dss-oracle rejects it: the oracle gives rejected.",
         ),
         case(
             "unauthorized",
             Body::Unsuccessful(OcspResponseStatus::Unauthorized),
             "OCSP response with the status unauthorized and no response bytes.",
             (OpensslResult::Rejected, DssResult::Rejected),
-            "RFC 6960, section 4.2.1: a response whose status is not successful has no responseBytes, and so no certificate status. The covered certificate is the one that a request would have named. The DSS result is a prediction: DSS cannot load the response as revocation data. If the validate-certificate mode of tools/dss-oracle loads it and ignores it instead, the result is that of the covered certificate without revocation data.",
+            "RFC 6960, section 4.2.1: a response whose status is not successful has no responseBytes, and so no certificate status. The covered certificate is the one that a request would have named. DSS 6.5.1 cannot load the response as revocation data, so the validate-certificate mode of tools/dss-oracle rejects it: the oracle gives rejected.",
         ),
         case(
             "cert-id-wrong-issuer-name-hash",
@@ -403,6 +413,26 @@ pub fn responses(validation_time: OffsetDateTime) -> Result<Vec<OcspSpec>, PkiEr
             (OpensslResult::Rejected, chain_failure()),
             &k10_notes("issuer key hash"),
         ),
+        OcspSpec {
+            name: "signer-expired-before-expiry".to_owned(),
+            covered: "signer-expired",
+            body: Body::Signed(Signed {
+                produced_at: BEFORE_EXPIRY,
+                this_update: BEFORE_EXPIRY,
+                next_update: Offset::days(5),
+                ..REGULAR
+            }),
+            purpose: "OCSP response of pki/ocsp-responder for pki/signer-expired, whose status is good, issued two days before the validation time, before the certificate expired.".to_owned(),
+            expected_openssl: OpensslResult::Verified,
+            // ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, step 7 and NOTE 8:
+            // the response is fresh (clause 5.2.5.4) but shows no status
+            // after the certificate expired.
+            expected_dss: DssResult::Indication {
+                indication: Indication::Indeterminate,
+                sub_indication: Some("OUT_OF_BOUNDS_NO_POE".to_owned()),
+            },
+            notes: Some("thisUpdate is two days and nextUpdate five days from the validation time, so the response is fresh under clause 5.2.5.4 of ETSI EN 319 102-1 V1.4.1. It was issued one day before pki/signer-expired expired, so it shows no status after expiry, as clause 5.2.6.4, NOTE 8, describes for a certificate known not to have been revoked, and step 7 gives OUT_OF_BOUNDS_NO_POE. DIV-5 in docs/design/divergences.md records the result of DSS 6.5.1.".to_owned()),
+        },
     ]);
     Ok(specs)
 }
