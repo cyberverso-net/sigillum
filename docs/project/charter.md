@@ -6,7 +6,7 @@ To provide a portable, memory-safe and verifiably interoperable implementation o
 
 ## Context
 
-The European framework for electronic signatures rests on the eIDAS Regulation (Regulation (EU) No 910/2014, as amended by Regulation (EU) 2024/1183) and on the ETSI standards for signature formats (EN 319 122, EN 319 142 and related parts) and for validation (EN 319 102-1, TS 119 102-2, TS 119 172-4, TS 119 615). The European Commission's DSS library implements these standards in Java and is the de facto reference implementation.
+The European framework for electronic signatures rests on the eIDAS Regulation, [Regulation (EU) No 910/2014](http://data.europa.eu/eli/reg/2014/910/oj) of 23 July 2014 as amended by [Regulation (EU) 2024/1183](http://data.europa.eu/eli/reg/2024/1183/oj) of 11 April 2024, and on the ETSI standards for signature formats (EN 319 122, EN 319 142 and related parts) and for validation (EN 319 102-1, TS 119 102-2, TS 119 172-4, TS 119 615). The European Commission's DSS library implements these standards in Java and is the de facto reference implementation.
 
 The European Digital Identity Wallet brings qualified electronic signatures to mobile devices at scale. Existing mobile stacks cover signature creation at the most basic level and do not validate. Native desktop applications either bundle a Java runtime or implement signature formats ad hoc. There is no portable, standards-complete alternative.
 

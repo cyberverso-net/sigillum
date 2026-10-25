@@ -17,7 +17,7 @@ The [threat model](../threat-model.md) identifies threats that the public API it
 - **G7.** The signing certificate may already be revoked, or its status unknown, when a B-LT signature is produced.
 - **F1.** A fetcher may return a response of any size, which the library would then have to hold and parse.
 
-For JAdES, threat J4 requires that a signature without the `x5c` header parameter be reported as not meeting Annex I of Commission Implementing Regulation (EU) 2026/248. Its indication does not change.
+For JAdES, threat J4 requires that a signature without the `x5c` header parameter be reported as not meeting Annex I of [Commission Implementing Regulation (EU) 2026/248](http://data.europa.eu/eli/reg_impl/2026/248/oj) of 2 February 2026. Its indication does not change.
 
 ## Decision
 
