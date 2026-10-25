@@ -82,7 +82,7 @@ Evidence column: *fuzz* means a fuzz target required by the quality gates; *fixt
 | Id | Threat | Mitigation | Evidence |
 | --- | --- | --- | --- |
 | P1 | A1 corrupts memory through malformed input | Rust, `unsafe` forbidden outside the binding layer ([ADR-0002](adr/0002-implement-in-rust.md)) | Lint configuration; fuzz |
-| P2 | A1 exhausts memory or time: deep nesting of ASN.1, PDF or JSON; huge declared lengths; cycles in PDF references or `/Prev` chains; decompression bombs in PDF streams | Explicit limits on nesting depth, declared and decompressed sizes, object count and revision count; cycle detection; limits documented and configurable within safe maxima | Fuzz with memory and time limits; unit tests at each limit |
+| P2 | A1 exhausts memory or time: deep nesting of ASN.1, PDF or JSON; huge declared lengths; cycles in PDF references or `/Prev` chains; decompression bombs in PDF streams | Explicit limits on nesting depth, declared and decompressed sizes, object count and revision count; cycle detection; limits documented and configurable within safe maxima. Every public decoding entry point has an input size limit. For DER, a length walk precedes any allocating decode ([ADR-0024](adr/0024-bounded-decoding-of-untrusted-input.md)) | Fuzz with memory and time limits, with a target for every public decoding entry point; unit tests at each limit |
 | P3 | A1 exploits a parser differential: two components, or sigillum and other verifiers, read different content from the same bytes (BER instead of DER, duplicate JSON members, lenient PDF repair) | DER required where the standards require it, with re-encoding checks on signed attributes; duplicate JOSE header names rejected ([ADR-0016](adr/0016-jades-implementation-basis.md)); no repair mode in verification | Fixtures; differential tests against DSS |
 | P4 | A1 triggers a panic | Typed errors; `unwrap`, `expect` and `panic` denied in library code. Panics from indexing or arithmetic overflow are not caught by these lints | Lint configuration; fuzz, which is the only evidence for indexing and overflow |
 
@@ -205,7 +205,7 @@ The attack classes below are documented in *1 Trillion Dollar Refund: How To Spo
 
 ## Decisions
 
-[ADR-0017](adr/0017-defensive-api-rules.md) records the rules that shape the public API in response to threats G1, G2, F2, R1, D12, G5, G6, G7 and F1. It also records the conformance findings of J4. The exclusion of unencoded JAdES payloads and of the `HttpHeaders` mechanism, and the restriction of `ObjectIdByURI` to one object (J5, J6), are recorded in [ADR-0018](adr/0018-restrict-jades-payloads-and-detached-mechanisms.md). The exclusion of encrypted PDF documents (D7) and the default to authenticated encryption (E2) are recorded in [scope.md](../project/scope.md).
+[ADR-0017](adr/0017-defensive-api-rules.md) records the rules that shape the public API in response to threats G1, G2, F2, R1, D12, G5, G6, G7 and F1. It also records the conformance findings of J4. The exclusion of unencoded JAdES payloads and of the `HttpHeaders` mechanism, and the restriction of `ObjectIdByURI` to one object (J5, J6), are recorded in [ADR-0018](adr/0018-restrict-jades-payloads-and-detached-mechanisms.md). The rules for decoding untrusted input (P2) are recorded in [ADR-0024](adr/0024-bounded-decoding-of-untrusted-input.md). The exclusion of encrypted PDF documents (D7) and the default to authenticated encryption (E2) are recorded in [scope.md](../project/scope.md).
 
 ## References
 
