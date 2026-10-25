@@ -63,7 +63,7 @@ These are not planned. Proposals to include them need to explain why the reasons
 | --- | --- |
 | Creation of legacy forms (-C, -X, -XL, -A, PAdES-LTV) | Obsolete for new signatures |
 | XAdES namespaces 1.1.1 and 1.2.2 | Predate the current XAdES standard |
-| Creation with MD2, MD5, SHA-1, RIPEMD-160, Whirlpool, DSA | Insecure or obsolete; on verification these are recognised and rejected under the cryptographic policy, without being implemented |
+| Creation with MD2, MD5, SHA-1, RIPEMD-160, Whirlpool, DSA | Insecure or obsolete; on verification these are recognised and rejected under the cryptographic policy, without being implemented. SHA-1 is the one exception, implemented for one purpose only: a lookup identifier where a standard specifies or permits SHA-1 for that identifier. It is never accepted for integrity or signatures. The only cases are the hash algorithm of an OCSP `CertID` ([RFC 6960](https://www.rfc-editor.org/rfc/rfc6960), section 4.1.1) and the `byKey` responder identifier (RFC 6960, sections 4.2.1 and 4.2.2.3). Key identifiers computed with method 1 of [RFC 5280](https://www.rfc-editor.org/rfc/rfc5280), section 4.2.1.2, are the third case. Threat K10 of the [threat model](../design/threat-model.md) gives the reason |
 | Explicit signature policies (EPES policy documents and policy stores) | Rarely used; verification checks presence and digest only |
 | OpenDocument signatures | Niche format |
 | PDF/A conformance checking | Outside the signature domain |
