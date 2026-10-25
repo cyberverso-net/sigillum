@@ -243,13 +243,33 @@ class MutationTest {
      * and the lists that replace the corpus files of each kind.
      */
     record CertificateSetup(byte[] certificate, List<byte[]> anchors, List<byte[]> certificates, List<byte[]> crls,
-            List<byte[]> responses) {
+            List<byte[]> responses, byte[] policy) {
+
+        CertificateSetup(byte[] certificate, List<byte[]> anchors, List<byte[]> certificates, List<byte[]> crls,
+                List<byte[]> responses) {
+            this(certificate, anchors, certificates, crls, responses, null);
+        }
 
         static CertificateSetup corpus() throws IOException {
             return new CertificateSetup(der("pki/signer-p256.pem"), List.of(der("pki/root-ca.pem")),
                     List.of(der("pki/ca-ecdsa.pem")), List.of(read("crl/ca-ecdsa.crl"), read("crl/root-ca.crl")),
                     List.of());
         }
+    }
+
+    /** The input of the policy file: the aligned certificate policy, as a DSS policy file. */
+    private static final String POLICY = "policy.xml";
+    /**
+     * The input of a policy file that DSS loads but cannot validate with: the
+     * aligned certificate policy with the date format of AlgoExpirationDate
+     * replaced by one that DSS cannot use.
+     */
+    private static final String POLICY_BAD_FORMAT = "policy-bad-format.xml";
+
+    private static byte[] alignedPolicyFile() throws Exception {
+        return eu.europa.esig.dss.policy.ValidationPolicyFacade.newFacade().marshall(
+                AlignedPolicy.apply(AlignedPolicy.base(AlignedPolicy.CERTIFICATE_BASE)))
+                .getBytes(StandardCharsets.UTF_8);
     }
 
     /** The input of the OCSP response run without the CRL of pki/ca-ecdsa. */
@@ -279,6 +299,10 @@ class MutationTest {
         // CRL of pki/ca-ecdsa, and once alone, so that DSS takes the status of pki/signer-p256 from it.
         inputs.add(new Input("ocsp-signer-p256", "--ocsp", null, read("ocsp/signer-p256.der"), true, false));
         inputs.add(new Input(OCSP_ALONE, "--ocsp", null, read("ocsp/signer-p256.der"), true, false));
+        // A policy file (ADR-0023), which DSS loads with its policy schema.
+        inputs.add(new Input(POLICY, "--policy", null, alignedPolicyFile(), false, false));
+        inputs.add(new Input(POLICY_BAD_FORMAT, "--policy", null, new String(alignedPolicyFile(), StandardCharsets.UTF_8)
+                .replace("Format=\"yyyy-MM-dd\"", "Format=\"nonsense\"").getBytes(StandardCharsets.UTF_8), false, false));
         return inputs;
     }
 
@@ -294,6 +318,8 @@ class MutationTest {
                     List.of(read("crl/ca-ecdsa.crl"), mutated), List.of());
             case OCSP_ALONE -> new CertificateSetup(corpus.certificate(), corpus.anchors(), corpus.certificates(),
                     List.of(read("crl/root-ca.crl")), List.of(mutated));
+            case POLICY, POLICY_BAD_FORMAT -> new CertificateSetup(corpus.certificate(), corpus.anchors(),
+                    corpus.certificates(), corpus.crls(), List.of(), mutated);
             default -> new CertificateSetup(corpus.certificate(), corpus.anchors(), corpus.certificates(),
                     corpus.crls(), List.of(mutated));
         };
@@ -308,6 +334,13 @@ class MutationTest {
         assertEquals("PASSED null", control.indication(), String.valueOf(control.failure()));
         assertTrue(control.revocationIds().contains(CRLUtils.buildCRLBinary(read("crl/ca-ecdsa.crl")).asXmlId()));
         assertTrue(control.revocationIds().contains(CRLUtils.buildCRLBinary(read("crl/root-ca.crl")).asXmlId()));
+        Input policy = inputs.stream().filter(input -> input.name().equals(POLICY)).findFirst().orElseThrow();
+        RawResult withPolicy = rawCertificateDss(certificateSetup(policy, policy.content()));
+        assertEquals("PASSED null", withPolicy.indication(), String.valueOf(withPolicy.failure()));
+        Input badFormat = inputs.stream().filter(input -> input.name().equals(POLICY_BAD_FORMAT)).findFirst()
+                .orElseThrow();
+        assertTrue(rawCertificateDss(certificateSetup(badFormat, badFormat.content())).failure() != null,
+                "DSS validates with the policy whose date format it cannot use");
         for (Input input : inputs.stream().filter(input -> input.option().equals("--ocsp")).toList()) {
             RawResult withOcsp = rawCertificateDss(certificateSetup(input, input.content()));
             assertEquals("PASSED null", withOcsp.indication(), input.name() + " " + withOcsp.failure());
@@ -386,7 +419,7 @@ class MutationTest {
         if (raw.failure() != null) {
             return null;
         }
-        if (input.option().equals("--certificate")) {
+        if (input.option().equals("--certificate") || input.option().equals("--policy")) {
             return "rejected, but DSS validates it: " + raw.indication();
         }
         boolean used = revocationIds(input.option(), mutated).stream().anyMatch(raw.revocationIds()::contains);
@@ -417,7 +450,9 @@ class MutationTest {
             CertificateValidator validator = CertificateValidator.fromCertificate(certificate);
             validator.setCertificateVerifier(verifier);
             validator.setValidationTime(Date.from(Instant.parse("2030-01-15T10:00:00Z")));
-            CertificateReports reports = validator.validate();
+            CertificateReports reports = setup.policy() == null ? validator.validate()
+                    : validator.validate(eu.europa.esig.dss.validation.policy.ValidationPolicyLoader.fromValidationPolicy(
+                            new eu.europa.esig.dss.model.InMemoryDocument(setup.policy())).create());
             // The tool writes the reports; DSS alone must be able to as well.
             reports.getXmlDiagnosticData();
             reports.getXmlDetailedReport();

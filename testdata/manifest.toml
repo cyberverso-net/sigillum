@@ -337,6 +337,7 @@ purpose = "End-entity signing certificate that expired one day before the valida
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
 links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa", "ocsp/signer-expired"] }
+notes = "Its revocation data, crl/ca-ecdsa and ocsp/signer-expired, were issued at the instant it expired, within its validity, because notAfter is inclusive (RFC 5280, section 4.1.2.5). Neither carries expiredCertsOnCRL or archiveCutoff, so neither shows its status after it expired, as ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, NOTE 8, describes for a certificate known not to have been revoked. Step 7 then gives OUT_OF_BOUNDS_NO_POE. DSS 6.5.1 gives OUT_OF_BOUNDS_NOT_REVOKED, a class 2 divergence recorded as DIV-5 in docs/design/divergences.md."
 
 [[artefact]]
 id = "pki/keys/signer-expired"
@@ -354,8 +355,9 @@ sha256 = "9eb291ec0cb12313a6a6db3dd0a68bbb00818587cdfff31f4b525dce5b8bd97c"
 kind = "certificate"
 purpose = "End-entity signing certificate that becomes valid one day after the validation time."
 expected-openssl = "rejected"
-expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
+expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
 links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa", "ocsp/signer-not-yet-valid"] }
+notes = "Its revocation data, crl/ca-ecdsa and ocsp/signer-not-yet-valid, were issued two days before its notBefore, which ETSI EN 319 102-1 V1.4.1 takes as its issuance date (clauses 5.5.4 and 5.6.2.4.4). Neither is known to contain revocation status information about the certificate, which clause 5.2.6.4, step 4, requires of the revocation data it uses. The path validation therefore cannot show that the certificate is not revoked (RFC 5280, section 6.1.3, step (a)(3)), and step 4 e) gives CERTIFICATE_CHAIN_GENERAL_FAILURE before step 7 checks the validity period. DSS 6.5.1 gives this result through its RevocationAfterCertificateIssuance constraint: the revocation data was issued before the issuance time of the certificate."
 
 [[artefact]]
 id = "pki/keys/signer-not-yet-valid"
@@ -375,6 +377,7 @@ purpose = "Intermediate CA that expired one day before the validation time."
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
 links = { issuer = "pki/root-ca", chain = ["pki/root-ca"], revocation = ["crl/root-ca"] }
+notes = "Its revocation data, crl/root-ca, was issued at the instant it expired, within its validity, because notAfter is inclusive (RFC 5280, section 4.1.2.5). The CRL carries no expiredCertsOnCRL, so it does not show its status after it expired, as ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, NOTE 8, describes for a certificate known not to have been revoked. Step 7 then gives OUT_OF_BOUNDS_NO_POE. DSS 6.5.1 gives OUT_OF_BOUNDS_NOT_REVOKED, a class 2 divergence recorded as DIV-5 in docs/design/divergences.md."
 
 [[artefact]]
 id = "pki/keys/ca-expired"
@@ -392,8 +395,9 @@ sha256 = "e28f4eeca5ba64054f6242c0cddc7bec9aacca211ac179a85fc6a556a8eb03a4"
 kind = "certificate"
 purpose = "End-entity signing certificate, valid at the validation time, issued by an intermediate CA that has expired."
 expected-openssl = "rejected"
-expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
+expected-dss = { indication = "INDETERMINATE", sub-indication = "REVOCATION_OUT_OF_BOUNDS_NO_POE" }
 links = { issuer = "pki/ca-expired", chain = ["pki/ca-expired", "pki/root-ca"], revocation = ["crl/ca-expired", "ocsp/signer-under-expired-ca"] }
+notes = "Its issuer pki/ca-expired, which also issued its revocation data, expired one day before the validation time. ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4: step 4 does not check the validity of the issuer of the revocation data at the validation time, which NOTE 6 defers to step 8, and step 8 gives REVOCATION_OUT_OF_BOUNDS_NO_POE. Clause 5.6.2.4.4 handles that result with proofs of existence."
 
 [[artefact]]
 id = "pki/keys/signer-under-expired-ca"
@@ -690,9 +694,9 @@ sha256 = "f593bdcee1608d10db6ede7420b8cb8e1ef349596bd63936ae168b74bcb382cf"
 kind = "crl"
 purpose = "Current CRL of the expired intermediate CA, which revokes no certificate."
 expected-openssl = "verified"
-expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
+expected-dss = { indication = "INDETERMINATE", sub-indication = "REVOCATION_OUT_OF_BOUNDS_NO_POE" }
 links = { issuer = "pki/ca-expired", chain = ["pki/ca-expired", "pki/root-ca"] }
-notes = "Covered certificate: pki/signer-under-expired-ca. Issued one day before the validation time, at the instant the CA expires, so within its validity, because notAfter is inclusive (RFC 5280, section 4.1.2.5). The covered certificate fails because its CA has expired, not for want of revocation data."
+notes = "Covered certificate: pki/signer-under-expired-ca. Issued one day before the validation time, at the instant the CA expires, so within its validity, because notAfter is inclusive (RFC 5280, section 4.1.2.5). ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4: step 4 does not check the validity of the issuer of the revocation data at the validation time, which NOTE 6 defers to step 8, and step 8 gives REVOCATION_OUT_OF_BOUNDS_NO_POE because the CA has expired."
 
 [[artefact]]
 id = "crl/ca-without-ca-flag"
@@ -736,7 +740,7 @@ purpose = "CRL of the ECDSA CA signed with another key than the CA's."
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
 links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"] }
-notes = "Covered certificate: pki/signer-p256. Signed with the P-384 key of pki/signer-p384. The issuer name and the authority key identifier are those of pki/ca-ecdsa. DSS is likely to report TRY_LATER instead, from its check for acceptable revocation data."
+notes = "Covered certificate: pki/signer-p256. Signed with the P-384 key of pki/signer-p384. The issuer name and the authority key identifier are those of pki/ca-ecdsa. DSS 6.5.1 gives this result."
 
 [[artefact]]
 id = "crl/ca-ecdsa-wrong-issuer"
@@ -747,7 +751,18 @@ purpose = "CRL of the ECDSA CA whose issuer name is not the CA's."
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
 links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"] }
-notes = 'Covered certificate: pki/signer-p256. The issuer name is "O=sigillum test PKI, CN=sigillum test unknown CA", which no certificate has as subject. The CRL is signed with the key of pki/ca-ecdsa and carries its authority key identifier. DSS is likely to report TRY_LATER instead, from its check for acceptable revocation data.'
+notes = 'Covered certificate: pki/signer-p256. The issuer name is "O=sigillum test PKI, CN=sigillum test unknown CA", which no certificate has as subject. The CRL is signed with the key of pki/ca-ecdsa and carries its authority key identifier. DSS 6.5.1 gives this result.'
+
+[[artefact]]
+id = "crl/ca-ecdsa-expired-certs"
+path = "crl/ca-ecdsa-expired-certs.crl"
+sha256 = "65eebf594b0b87df7478a540d02db8df6c41c8c6c1d2a97a68009b617d5abaf5"
+kind = "crl"
+purpose = "CRL of the ECDSA CA issued after pki/signer-expired expired, with the extension expiredCertsOnCRL."
+expected-openssl = "verified"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NOT_REVOKED" }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-expired. A later CRL of pki/ca-ecdsa, issued at the validation time, after pki/signer-expired expired, with the non-critical extension expiredCertsOnCRL (ITU-T X.509 (10/2019), clause 9.5.2.8; RFC 5280 does not define it) set one year before the validation time. Its scope covers the certificates that expired on or after that date, so it shows the status of pki/signer-expired after expiry: not revoked. ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, step 7 and NOTE 8, give OUT_OF_BOUNDS_NOT_REVOKED."
 
 [[artefact]]
 id = "timestamps/content"
@@ -767,7 +782,7 @@ purpose = "Valid timestamp token over timestamps/content, issued by pki/tsa one 
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
 links = { issuer = "pki/tsa", chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], content = "timestamps/content" }
-notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, clause 5.4.4, to be confirmed when verify runs DSS. Step 1 runs the basic signature validation, whose X.509 validation checks revocation (clause 5.2.6.4, step 4) with the CRLs that the chain of pki/tsa links: crl/ca-ecdsa for pki/tsa and crl/root-ca for pki/ca-ecdsa. Neither CRL revokes a certificate of the chain."
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, clause 5.4.4. DSS 6.5.1 gives this result in the validate-timestamp mode of tools/dss-oracle, under the aligned policy of ADR-0023. Step 1 runs the basic signature validation, whose X.509 validation checks revocation (clause 5.2.6.4, step 4) with the CRLs that the chain of pki/tsa links: crl/ca-ecdsa for pki/tsa and crl/root-ca for pki/ca-ecdsa. Neither CRL revokes a certificate of the chain."
 
 [[artefact]]
 id = "timestamps/signer-without-time-stamping"
@@ -778,7 +793,7 @@ purpose = "Timestamp token over timestamps/content, signed by pki/signer-p256, w
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "CHAIN_CONSTRAINTS_FAILURE" }
 links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], content = "timestamps/content" }
-notes = "RFC 3161, section 2.3, requires the critical extended key usage id-kp-timeStamping. The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, step 5, to be confirmed when verify runs DSS."
+notes = "RFC 3161, section 2.3, requires the critical extended key usage id-kp-timeStamping. The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, step 5. DSS 6.5.1 gives this result in the validate-timestamp mode of tools/dss-oracle, under the aligned policy of ADR-0023."
 
 [[artefact]]
 id = "timestamps/imprint-mismatch"
@@ -789,7 +804,7 @@ purpose = "Timestamp token issued by pki/tsa whose message imprint does not matc
 expected-openssl = "rejected"
 expected-dss = { indication = "FAILED", sub-indication = "HASH_FAILURE" }
 links = { issuer = "pki/tsa", chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], content = "timestamps/content" }
-notes = "The message imprint is the SHA-256 digest of timestamps/content with its last octet inverted. The token itself is intact. FAILED with HASH_FAILURE is the project's mapping for a message imprint that does not match the data supplied to the validation, as the validate-timestamp mode of tools/dss-oracle will compare it, and a prediction to be confirmed when verify runs DSS."
+notes = "The message imprint is the SHA-256 digest of timestamps/content with its last octet inverted. The token itself is intact. FAILED with HASH_FAILURE is the project's mapping for a message imprint that does not match the data supplied to the validation, as the validate-timestamp mode of tools/dss-oracle compares it. It is a prediction, and DSS 6.5.1 gives this result in that mode, under the aligned policy of ADR-0023."
 
 [[artefact]]
 id = "timestamps/gen-time-after-validation-time"
@@ -800,7 +815,7 @@ purpose = "Timestamp token over timestamps/content, issued by pki/tsa with a gen
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
 links = { issuer = "pki/tsa", chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], content = "timestamps/content" }
-notes = "openssl ts -verify does not compare genTime with the verification time. Neither does the time-stamp validation building block of ETSI EN 319 102-1 V1.4.1, clause 5.4.4, so the DSS result PASSED is a prediction, to be confirmed when verify runs DSS. As for timestamps/valid, revocation is checked (clause 5.2.6.4, step 4) with the CRLs that the chain of pki/tsa links, crl/ca-ecdsa and crl/root-ca, which revoke none of its certificates. A verifier that uses the token as time evidence must reject a genTime after the validation time."
+notes = "openssl ts -verify does not compare genTime with the verification time. Neither does the time-stamp validation building block of ETSI EN 319 102-1 V1.4.1, clause 5.4.4, so the DSS result PASSED is a prediction. DSS 6.5.1 gives this result in the validate-timestamp mode of tools/dss-oracle, under the aligned policy of ADR-0023. As for timestamps/valid, revocation is checked (clause 5.2.6.4, step 4) with the CRLs that the chain of pki/tsa links, crl/ca-ecdsa and crl/root-ca, which revoke none of its certificates. A verifier that uses the token as time evidence must reject a genTime after the validation time."
 
 [[artefact]]
 id = "ocsp/signer-rsa-2048"
@@ -921,7 +936,7 @@ purpose = "OCSP response of pki/ocsp-responder for pki/signer-expired, whose sta
 expected-openssl = "verified"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
 links = { issuer = "pki/ocsp-responder", chain = ["pki/ocsp-responder", "pki/ca-ecdsa", "pki/root-ca"] }
-notes = "Covered certificate: pki/signer-expired."
+notes = "Covered certificate: pki/signer-expired. thisUpdate equals the notAfter of pki/signer-expired, and the response carries no archiveCutoff, so it shows no status after the certificate expired, as ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, NOTE 8, describes for a certificate known not to have been revoked. Step 7 then gives OUT_OF_BOUNDS_NO_POE. DSS 6.5.1 gives OUT_OF_BOUNDS_NOT_REVOKED, a class 2 divergence recorded as DIV-5 in docs/design/divergences.md."
 
 [[artefact]]
 id = "ocsp/signer-not-yet-valid"
@@ -930,7 +945,7 @@ sha256 = "265c97c710429194ff50d833b0d315870b7fae0094d4062e50dab273ca9fd0ec"
 kind = "ocsp-response"
 purpose = "OCSP response of pki/ocsp-responder for pki/signer-not-yet-valid, whose status is good."
 expected-openssl = "verified"
-expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
+expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
 links = { issuer = "pki/ocsp-responder", chain = ["pki/ocsp-responder", "pki/ca-ecdsa", "pki/root-ca"] }
 notes = "Covered certificate: pki/signer-not-yet-valid."
 
@@ -941,7 +956,7 @@ sha256 = "353c5d91e3ccf285c35c9f740bf0a44fe57ed77c69e2a72f55db686e1eca4b94"
 kind = "ocsp-response"
 purpose = "OCSP response of pki/ca-expired for pki/signer-under-expired-ca, whose status is good."
 expected-openssl = "rejected"
-expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
+expected-dss = { indication = "INDETERMINATE", sub-indication = "REVOCATION_OUT_OF_BOUNDS_NO_POE" }
 links = { issuer = "pki/ca-expired", chain = ["pki/ca-expired", "pki/root-ca"] }
 notes = 'Covered certificate: pki/signer-under-expired-ca. Signed by pki/ca-expired, which expired one day before the validation time, at the instant it signed, so within its validity, because notAfter is inclusive (RFC 5280, section 4.1.2.5). openssl ocsp checks the signer at the validation time given with -attime, when it has expired, and rejects the response with "certificate has expired".'
 
@@ -1053,7 +1068,7 @@ purpose = "OCSP response of pki/ocsp-responder for pki/signer-p256 whose status 
 expected-openssl = "verified"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
 links = { issuer = "pki/ocsp-responder", chain = ["pki/ocsp-responder", "pki/ca-ecdsa", "pki/root-ca"] }
-notes = "Covered certificate: pki/signer-p256. RFC 6960, section 2.2: unknown means that the responder does not know the certificate. The response verifies, so OpenSSL accepts it and reports the status. The DSS result is a prediction: the response shows neither good nor revoked, so the path validation cannot show that the certificate is not revoked (RFC 5280, section 6.1.3, step (a)(3)), and step 4 e) of ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, applies. DSS is likely to report TRY_LATER instead, from its check for acceptable revocation data."
+notes = "Covered certificate: pki/signer-p256. RFC 6960, section 2.2: unknown means that the responder does not know the certificate. The response verifies, so OpenSSL accepts it and reports the status. The DSS result is a prediction: the response shows neither good nor revoked, so the path validation cannot show that the certificate is not revoked (RFC 5280, section 6.1.3, step (a)(3)), and step 4 e) of ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, applies. DSS 6.5.1 gives this result."
 
 [[artefact]]
 id = "ocsp/responder-without-ocsp-signing"
@@ -1064,7 +1079,7 @@ purpose = "OCSP response for pki/signer-p256, whose status is good, signed by pk
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
 links = { issuer = "pki/signer-p384", chain = ["pki/signer-p384", "pki/ca-ecdsa", "pki/root-ca"] }
-notes = "Covered certificate: pki/signer-p256. RFC 6960, section 4.2.2.2: a client must reject a response whose signer is neither the CA, nor a certificate of the CA with id-kp-OCSPSigning, nor a locally configured responder. The status is good. The DSS result is a prediction: without a usable response the path validation cannot show that the certificate is not revoked (RFC 5280, section 6.1.3, step (a)(3)), and step 4 e) of ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, applies. DSS is likely to report TRY_LATER instead, from its check for acceptable revocation data."
+notes = "Covered certificate: pki/signer-p256. RFC 6960, section 4.2.2.2: a client must reject a response whose signer is neither the CA, nor a certificate of the CA with id-kp-OCSPSigning, nor a locally configured responder. The status is good. The DSS result is a prediction: without a usable response the path validation cannot show that the certificate is not revoked (RFC 5280, section 6.1.3, step (a)(3)), and step 4 e) of ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, applies. DSS 6.5.1 gives this result for another reason: it finds no revocation data for pki/signer-p384, the signer of the response, and does not check id-kp-OCSPSigning. Given crl/ca-ecdsa as well, which covers pki/signer-p384, DSS accepts the response and gives PASSED, a class 1 divergence recorded as DIV-3 in docs/design/divergences.md."
 
 [[artefact]]
 id = "ocsp/produced-at-after-validation-time"
@@ -1075,7 +1090,7 @@ purpose = "OCSP response of pki/ocsp-responder for pki/signer-p256, whose status
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
 links = { issuer = "pki/ocsp-responder", chain = ["pki/ocsp-responder", "pki/ca-ecdsa", "pki/root-ca"] }
-notes = "Covered certificate: pki/signer-p256. thisUpdate and nextUpdate are those of the other responses. openssl ocsp does not compare producedAt with the verification time. The DSS result PASSED is a prediction from ETSI EN 319 102-1 V1.4.1: the revocation freshness checker of clause 5.2.5.4 uses thisUpdate (NOTE 3), and clause 5.2.6.4, step 4, checks only that producedAt falls within the validity of the responder certificate. DSS may reject revocation data produced after the validation time. A verifier that uses the response as evidence at the validation time must reject it, because it did not exist then."
+notes = "Covered certificate: pki/signer-p256. thisUpdate and nextUpdate are those of the other responses. openssl ocsp does not compare producedAt with the verification time. The DSS result PASSED is a prediction from ETSI EN 319 102-1 V1.4.1: the revocation freshness checker of clause 5.2.5.4 uses thisUpdate (NOTE 3), and clause 5.2.6.4, step 4, checks only that producedAt falls within the validity of the responder certificate. DSS 6.5.1 gives this result. A verifier that uses the response as evidence at the validation time must reject it, because it did not exist then."
 
 [[artefact]]
 id = "ocsp/nonce"
@@ -1096,7 +1111,7 @@ kind = "ocsp-response"
 purpose = "OCSP response with the status tryLater and no response bytes."
 expected-openssl = "rejected"
 expected-dss = "rejected"
-notes = "Covered certificate: pki/signer-p256. RFC 6960, section 4.2.1: a response whose status is not successful has no responseBytes, and so no certificate status. The covered certificate is the one that a request would have named. The DSS result is a prediction: DSS cannot load the response as revocation data. If the validate-certificate mode of tools/dss-oracle loads it and ignores it instead, the result is that of the covered certificate without revocation data."
+notes = "Covered certificate: pki/signer-p256. RFC 6960, section 4.2.1: a response whose status is not successful has no responseBytes, and so no certificate status. The covered certificate is the one that a request would have named. DSS 6.5.1 cannot load the response as revocation data, so the validate-certificate mode of tools/dss-oracle rejects it: the oracle gives rejected."
 
 [[artefact]]
 id = "ocsp/unauthorized"
@@ -1106,7 +1121,7 @@ kind = "ocsp-response"
 purpose = "OCSP response with the status unauthorized and no response bytes."
 expected-openssl = "rejected"
 expected-dss = "rejected"
-notes = "Covered certificate: pki/signer-p256. RFC 6960, section 4.2.1: a response whose status is not successful has no responseBytes, and so no certificate status. The covered certificate is the one that a request would have named. The DSS result is a prediction: DSS cannot load the response as revocation data. If the validate-certificate mode of tools/dss-oracle loads it and ignores it instead, the result is that of the covered certificate without revocation data."
+notes = "Covered certificate: pki/signer-p256. RFC 6960, section 4.2.1: a response whose status is not successful has no responseBytes, and so no certificate status. The covered certificate is the one that a request would have named. DSS 6.5.1 cannot load the response as revocation data, so the validate-certificate mode of tools/dss-oracle rejects it: the oracle gives rejected."
 
 [[artefact]]
 id = "ocsp/cert-id-wrong-issuer-name-hash"
@@ -1117,7 +1132,7 @@ purpose = "OCSP response of pki/ocsp-responder, whose status is good, whose Cert
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
 links = { issuer = "pki/ocsp-responder", chain = ["pki/ocsp-responder", "pki/ca-ecdsa", "pki/root-ca"] }
-notes = "Covered certificate: pki/signer-p256. A fixture for threat K10 of the threat model. The issuer name hash of the CertID is that of pki/ca-ecdsa with its last octet inverted; the other fields are those of ocsp/signer-p256. RFC 6960, sections 3.2 and 4.1.1: the CertID does not identify the certificate, so the response does not apply to it, and openssl ocsp finds no status for it. OpenSSL also fails to verify the response, because pki/ocsp-responder is not a delegated responder of the CA that the CertID names (RFC 6960, section 4.2.2.2); a test of sigillum should assert the first reason, that the response does not apply to the certificate. The DSS result is a prediction: without a response that applies to the certificate, the path validation cannot show that it is not revoked (RFC 5280, section 6.1.3, step (a)(3)), and step 4 e) of ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, applies. DSS is likely to report TRY_LATER instead, from its check for acceptable revocation data."
+notes = "Covered certificate: pki/signer-p256. A fixture for threat K10 of the threat model. The issuer name hash of the CertID is that of pki/ca-ecdsa with its last octet inverted; the other fields are those of ocsp/signer-p256. RFC 6960, sections 3.2 and 4.1.1: the CertID does not identify the certificate, so the response does not apply to it, and openssl ocsp finds no status for it. OpenSSL also fails to verify the response, because pki/ocsp-responder is not a delegated responder of the CA that the CertID names (RFC 6960, section 4.2.2.2); a test of sigillum should assert the first reason, that the response does not apply to the certificate. The DSS result is a prediction: without a response that applies to the certificate, the path validation cannot show that it is not revoked (RFC 5280, section 6.1.3, step (a)(3)), and step 4 e) of ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, applies. DSS 6.5.1 gives this result."
 
 [[artefact]]
 id = "ocsp/cert-id-wrong-issuer-key-hash"
@@ -1128,4 +1143,15 @@ purpose = "OCSP response of pki/ocsp-responder, whose status is good, whose Cert
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
 links = { issuer = "pki/ocsp-responder", chain = ["pki/ocsp-responder", "pki/ca-ecdsa", "pki/root-ca"] }
-notes = "Covered certificate: pki/signer-p256. A fixture for threat K10 of the threat model. The issuer key hash of the CertID is that of pki/ca-ecdsa with its last octet inverted; the other fields are those of ocsp/signer-p256. RFC 6960, sections 3.2 and 4.1.1: the CertID does not identify the certificate, so the response does not apply to it, and openssl ocsp finds no status for it. OpenSSL also fails to verify the response, because pki/ocsp-responder is not a delegated responder of the CA that the CertID names (RFC 6960, section 4.2.2.2); a test of sigillum should assert the first reason, that the response does not apply to the certificate. The DSS result is a prediction: without a response that applies to the certificate, the path validation cannot show that it is not revoked (RFC 5280, section 6.1.3, step (a)(3)), and step 4 e) of ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, applies. DSS is likely to report TRY_LATER instead, from its check for acceptable revocation data."
+notes = "Covered certificate: pki/signer-p256. A fixture for threat K10 of the threat model. The issuer key hash of the CertID is that of pki/ca-ecdsa with its last octet inverted; the other fields are those of ocsp/signer-p256. RFC 6960, sections 3.2 and 4.1.1: the CertID does not identify the certificate, so the response does not apply to it, and openssl ocsp finds no status for it. OpenSSL also fails to verify the response, because pki/ocsp-responder is not a delegated responder of the CA that the CertID names (RFC 6960, section 4.2.2.2); a test of sigillum should assert the first reason, that the response does not apply to the certificate. The DSS result is a prediction: without a response that applies to the certificate, the path validation cannot show that it is not revoked (RFC 5280, section 6.1.3, step (a)(3)), and step 4 e) of ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, applies. DSS 6.5.1 gives this result."
+
+[[artefact]]
+id = "ocsp/signer-expired-before-expiry"
+path = "ocsp/signer-expired-before-expiry.der"
+sha256 = "7b9be481083bed4f5da8bf8a4fbe20dfeb38ec0b1db1a691ab3a7dfde438f638"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ocsp-responder for pki/signer-expired, whose status is good, issued two days before the validation time, before the certificate expired."
+expected-openssl = "verified"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
+links = { issuer = "pki/ocsp-responder", chain = ["pki/ocsp-responder", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-expired. thisUpdate is two days and nextUpdate five days from the validation time, so the response is fresh under clause 5.2.5.4 of ETSI EN 319 102-1 V1.4.1. It was issued one day before pki/signer-expired expired, so it shows no status after expiry, as clause 5.2.6.4, NOTE 8, describes for a certificate known not to have been revoked, and step 7 gives OUT_OF_BOUNDS_NO_POE. DIV-5 in docs/design/divergences.md records the result of DSS 6.5.1."

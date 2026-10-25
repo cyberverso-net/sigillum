@@ -54,6 +54,11 @@ pub const NEXT_UPDATE: Offset = Offset::days(6);
 /// certificate of the test PKI has it in its subject.
 pub const UNKNOWN_ISSUER: &str = "sigillum test unknown CA";
 
+/// id-ce-expiredCertsOnCRL (ITU-T X.509 (10/2019), clause 9.5.2.8), which
+/// RFC 5280 does not define.
+pub const ID_CE_EXPIRED_CERTS_ON_CRL: der::asn1::ObjectIdentifier =
+    der::asn1::ObjectIdentifier::new_unwrap("2.5.29.60");
+
 /// A defect built into a CRL on purpose.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Defect {
@@ -81,6 +86,9 @@ pub struct CrlSpec {
     pub number: u8,
     /// The defect built into the CRL, if any.
     pub defect: Option<Defect>,
+    /// The date of the extension expiredCertsOnCRL (ITU-T X.509 (10/2019),
+    /// clause 9.5.2.8), from the validation time, or `None` without it.
+    pub expired_certs_on_crl: Option<Offset>,
     /// The name of the covered certificate: a certificate of the issuer,
     /// not revoked, whose validation with this CRL gives the expected DSS
     /// result. The manifest notes name it first.
@@ -113,6 +121,21 @@ const CHAIN_FAILURE: ExpectedDss = ExpectedDss {
     sub_indication: Some("CERTIFICATE_CHAIN_GENERAL_FAILURE"),
 };
 
+/// The issuer of the revocation data of the covered certificate has
+/// expired at the validation time (ETSI EN 319 102-1 V1.4.1, clause
+/// 5.2.6.4, step 8, which NOTE 6 defers from step 4).
+const REVOCATION_OUT_OF_BOUNDS: ExpectedDss = ExpectedDss {
+    indication: Indication::Indeterminate,
+    sub_indication: Some("REVOCATION_OUT_OF_BOUNDS_NO_POE"),
+};
+
+/// The covered certificate has expired and is known not to have been
+/// revoked (ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, step 7).
+const OUT_OF_BOUNDS_NOT_REVOKED: ExpectedDss = ExpectedDss {
+    indication: Indication::Indeterminate,
+    sub_indication: Some("OUT_OF_BOUNDS_NOT_REVOKED"),
+};
+
 /// The revocation data of the covered certificate is usable but not fresh
 /// (ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, step 4 a)).
 const TRY_LATER: ExpectedDss = ExpectedDss {
@@ -136,6 +159,7 @@ const fn current(
         next_update: NEXT_UPDATE,
         number: 2,
         defect: None,
+        expired_certs_on_crl: None,
         covered,
         purpose,
         expected_openssl: OpensslResult::Verified,
@@ -146,7 +170,7 @@ const fn current(
 
 /// Every CRL of the test PKI: the current CRL of each CA that issues
 /// certificates, then the defective CRLs of `pki/ca-ecdsa`.
-pub const CRLS: [CrlSpec; 12] = [
+pub const CRLS: [CrlSpec; 13] = [
     current(
         "root-ca",
         Sig::RsaPkcs1Sha256,
@@ -184,9 +208,9 @@ pub const CRLS: [CrlSpec; 12] = [
         "Current CRL of the Ed25519 CA, which revokes pki/signer-ed25519-revoked.",
     ),
     CrlSpec {
-        expected_dss: CHAIN_FAILURE,
+        expected_dss: REVOCATION_OUT_OF_BOUNDS,
         notes: Some(
-            "Issued one day before the validation time, at the instant the CA expires, so within its validity, because notAfter is inclusive (RFC 5280, section 4.1.2.5). The covered certificate fails because its CA has expired, not for want of revocation data.",
+            "Issued one day before the validation time, at the instant the CA expires, so within its validity, because notAfter is inclusive (RFC 5280, section 4.1.2.5). ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4: step 4 does not check the validity of the issuer of the revocation data at the validation time, which NOTE 6 defers to step 8, and step 8 gives REVOCATION_OUT_OF_BOUNDS_NO_POE because the CA has expired.",
         ),
         ..current(
             "ca-expired",
@@ -252,7 +276,7 @@ pub const CRLS: [CrlSpec; 12] = [
         // of clause 5.2.6.4 of ETSI EN 319 102-1 V1.4.1 reports.
         expected_dss: CHAIN_FAILURE,
         notes: Some(
-            "Signed with the P-384 key of pki/signer-p384. The issuer name and the authority key identifier are those of pki/ca-ecdsa. DSS is likely to report TRY_LATER instead, from its check for acceptable revocation data.",
+            "Signed with the P-384 key of pki/signer-p384. The issuer name and the authority key identifier are those of pki/ca-ecdsa. DSS 6.5.1 gives this result.",
         ),
         ..current(
             "ca-ecdsa",
@@ -273,13 +297,35 @@ pub const CRLS: [CrlSpec; 12] = [
         // EN 319 102-1 V1.4.1 reports.
         expected_dss: CHAIN_FAILURE,
         notes: Some(
-            "The issuer name is \"O=sigillum test PKI, CN=sigillum test unknown CA\", which no certificate has as subject. The CRL is signed with the key of pki/ca-ecdsa and carries its authority key identifier. DSS is likely to report TRY_LATER instead, from its check for acceptable revocation data.",
+            "The issuer name is \"O=sigillum test PKI, CN=sigillum test unknown CA\", which no certificate has as subject. The CRL is signed with the key of pki/ca-ecdsa and carries its authority key identifier. DSS 6.5.1 gives this result.",
         ),
         ..current(
             "ca-ecdsa",
             Sig::EcdsaSha384,
             "signer-p256",
             "CRL of the ECDSA CA whose issuer name is not the CA's.",
+        )
+    },
+    CrlSpec {
+        name: "ca-ecdsa-expired-certs",
+        this_update: Offset::days(0),
+        next_update: Offset::days(7),
+        number: 3,
+        // ITU-T X.509 (10/2019), clause 9.5.2.8: the scope of the CRL
+        // covers the certificates that expired on or after this date.
+        expired_certs_on_crl: Some(Offset::years(-1)),
+        // The CRL shows that pki/signer-expired, which expired before it
+        // was issued but within its scope, was not revoked: step 7 of
+        // clause 5.2.6.4 of ETSI EN 319 102-1 V1.4.1.
+        expected_dss: OUT_OF_BOUNDS_NOT_REVOKED,
+        notes: Some(
+            "A later CRL of pki/ca-ecdsa, issued at the validation time, after pki/signer-expired expired, with the non-critical extension expiredCertsOnCRL (ITU-T X.509 (10/2019), clause 9.5.2.8; RFC 5280 does not define it) set one year before the validation time. Its scope covers the certificates that expired on or after that date, so it shows the status of pki/signer-expired after expiry: not revoked. ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, step 7 and NOTE 8, give OUT_OF_BOUNDS_NOT_REVOKED.",
+        ),
+        ..current(
+            "ca-ecdsa",
+            Sig::EcdsaSha384,
+            "signer-expired",
+            "CRL of the ECDSA CA issued after pki/signer-expired expired, with the extension expiredCertsOnCRL.",
         )
     },
 ];
@@ -357,7 +403,7 @@ pub fn build(
     // RFC 5280, section 5.2.1: the authority key identifier, the key
     // identifier of the issuer, as in the certificates it issues; and
     // section 5.2.3: the CRL number. Both are non-critical.
-    let extensions = vec![
+    let mut extensions = vec![
         issue::extension(
             rfc5280::ID_CE_AUTHORITY_KEY_IDENTIFIER,
             false,
@@ -373,6 +419,15 @@ pub fn build(
             &CrlNumber(Uint::new(&[spec.number]).map_err(|_| PkiError::Encoding)?),
         )?,
     ];
+    if let Some(since) = spec.expired_certs_on_crl {
+        // ITU-T X.509 (10/2019), clause 9.5.2.8: always non-critical; the
+        // value is a GeneralizedTime.
+        extensions.push(issue::extension(
+            ID_CE_EXPIRED_CERTS_ON_CRL,
+            false,
+            &generalized_time(since.from(validation_time)?)?,
+        )?);
+    }
     // RFC 5280, section 5.1.1.2: signatureAlgorithm repeats the signature
     // field of the TBSCertList.
     let algorithm = spec.algorithm.identifier()?;
@@ -428,6 +483,14 @@ fn revoked_certificates(
     }
     revoked.sort_by_key(|(serial, _)| *serial);
     Ok(revoked.into_iter().map(|(_, entry)| entry).collect())
+}
+
+/// A GeneralizedTime at `at`, to the second.
+fn generalized_time(at: OffsetDateTime) -> Result<GeneralizedTime, PkiError> {
+    let seconds = u64::try_from(at.unix_timestamp()).map_err(|_| PkiError::Time)?;
+    let date_time = DateTime::from_unix_duration(std::time::Duration::from_secs(seconds))
+        .map_err(|_| PkiError::Time)?;
+    Ok(GeneralizedTime::from_date_time(date_time))
 }
 
 /// A CRL time: UTCTime through 2049 and GeneralizedTime from 2050 (RFC 5280,

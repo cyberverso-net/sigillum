@@ -114,10 +114,16 @@ class ValidateTimestampTest {
     }
 
     private void assertValidated(Path directory, String indication, String subIndication) throws Exception {
+        assertValidated(directory, "aligned-1", indication, subIndication);
+    }
+
+    private void assertValidated(Path directory, String policy, String indication, String subIndication)
+            throws Exception {
         Map<String, Object> summary = summary(directory);
-        assertEquals(1L, summary.get("format-version"));
+        assertEquals(2L, summary.get("format-version"));
         assertEquals("validate-timestamp", summary.get("mode"));
         assertEquals(VALIDATION_TIME, summary.get("validation-time"));
+        assertEquals(policy, summary.get("policy"), summary.toString());
         assertEquals("validated", summary.get("result"), summary.toString());
         assertEquals(indication, summary.get("indication"), summary.toString());
         assertEquals(subIndication, summary.get("sub-indication"), summary.toString());
@@ -128,6 +134,44 @@ class ValidateTimestampTest {
         for (String report : REPORTS) {
             assertWellFormedXml(directory.resolve(report));
         }
+    }
+
+    // ADR-0023: the validation policy.
+
+    @Test
+    void theAlignedPolicyChecksTheFreshnessOfTheRevocationDataOfTheTsa() throws Exception {
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"));
+        args.set(args.indexOf(corpus("crl/ca-ecdsa.crl")), corpus("crl/ca-ecdsa-expired.crl"));
+        Path aligned = temp.resolve("stale");
+        List<String> withOut = new ArrayList<>(args);
+        withOut.addAll(List.of("--out", aligned.toString()));
+        assertEquals(ExitCodes.SUCCESS, run(withOut), stderr());
+        assertValidated(aligned, "INDETERMINATE", "TRY_LATER");
+        Path dss = temp.resolve("stale-default");
+        withOut = new ArrayList<>(args);
+        withOut.addAll(List.of("--policy", "default", "--out", dss.toString()));
+        assertEquals(ExitCodes.SUCCESS, run(withOut), stderr());
+        assertValidated(dss, "default", "PASSED", null);
+    }
+
+    @Test
+    void aPolicyFileIsUsedAndRecorded() throws Exception {
+        Path policy = Files.writeString(temp.resolve("document-policy.xml"),
+                eu.europa.esig.dss.policy.ValidationPolicyFacade.newFacade().marshall(
+                        AlignedPolicy.apply(AlignedPolicy.base(AlignedPolicy.DOCUMENT_BASE))),
+                StandardCharsets.UTF_8);
+        Path result = temp.resolve("policy-file");
+        assertEquals(ExitCodes.SUCCESS, run(arguments("valid", "--data", corpus("timestamps/content.txt"),
+                "--policy", policy.toString(), "--out", result.toString())), stderr());
+        Map<String, Object> summary = summary(result);
+        assertEquals(policy.toString(), ((Map<?, ?>) summary.get("policy")).get("file"), summary.toString());
+        assertEquals("PASSED", summary.get("indication"), summary.toString());
+        Path rejected = temp.resolve("policy-rejected");
+        Files.writeString(policy, "<ConstraintsParameters/>", StandardCharsets.UTF_8);
+        assertEquals(ExitCodes.SUCCESS, run(arguments("valid", "--data", corpus("timestamps/content.txt"),
+                "--policy", policy.toString(), "--out", rejected.toString())), stderr());
+        assertEquals("rejected", summary(rejected).get("result"));
+        assertEquals("--policy", summary(rejected).get("input"));
     }
 
     // Acceptance criterion 1: the token and its message imprint are validated.

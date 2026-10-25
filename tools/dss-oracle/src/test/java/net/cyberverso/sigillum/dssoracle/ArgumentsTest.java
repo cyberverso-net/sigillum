@@ -145,6 +145,33 @@ class ArgumentsTest {
     }
 
     @Test
+    void parsesThePolicyOfTheValidationModes() throws UsageException {
+        for (Mode mode : List.of(Mode.VALIDATE_DOCUMENT, Mode.VALIDATE_CERTIFICATE, Mode.VALIDATE_TIMESTAMP)) {
+            assertEquals(Optional.of(PolicyOption.named(OraclePolicy.ALIGNED)),
+                    Arguments.parse(List.of(mode.commandName(), "--policy", "aligned")).policy(), mode.commandName());
+            assertEquals(Optional.of(PolicyOption.named(OraclePolicy.DEFAULT)),
+                    Arguments.parse(List.of(mode.commandName(), "--policy", "default")).policy(), mode.commandName());
+            assertEquals(Optional.of(PolicyOption.file(Path.of("policies/strict.xml"))),
+                    Arguments.parse(List.of(mode.commandName(), "--policy", "policies/strict.xml")).policy(),
+                    mode.commandName());
+            assertEquals(Optional.empty(), Arguments.parse(List.of(mode.commandName())).policy(), mode.commandName());
+        }
+        // The names come first; a file with such a name is given with a path.
+        assertEquals(Optional.of(PolicyOption.file(Path.of("./aligned"))),
+                Arguments.parse(List.of("validate-certificate", "--policy", "./aligned")).policy());
+    }
+
+    @Test
+    void rejectsAPolicyGivenTwiceAndAPolicyInSignMode() {
+        UsageException twice = assertThrows(UsageException.class, () -> Arguments.parse(
+                List.of("validate-certificate", "--policy", "aligned", "--policy", "default")));
+        assertTrue(twice.getMessage().contains("--policy"), twice.getMessage());
+        UsageException sign = assertThrows(UsageException.class,
+                () -> Arguments.parse(List.of("sign", "--policy", "aligned")));
+        assertTrue(sign.getMessage().contains("--policy"), sign.getMessage());
+    }
+
+    @Test
     void rejectsATimeThatIsNotRfc3339() {
         for (String value : List.of("2030-01-15", "2030-01-15T10:00:00", "soon", "2030-01-15T10:00Z",
                 "2030-01-15T10:00:00+01:00:30", "+12030-01-15T10:00:00Z", "2030-02-30T10:00:00Z",

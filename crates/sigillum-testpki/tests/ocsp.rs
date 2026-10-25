@@ -23,7 +23,7 @@ fn testdata() -> PathBuf {
 fn the_committed_responses_are_reproduced_byte_for_byte() -> TestResult {
     let manifest = Manifest::load(&testdata().join("manifest.toml"))?;
     let files = ocsp::generate(manifest.header.validation_time)?;
-    assert_eq!(files.len(), 30);
+    assert_eq!(files.len(), 31);
     for file in &files {
         let committed = std::fs::read(testdata().join(&file.artefact.path))?;
         assert!(
@@ -50,7 +50,7 @@ fn every_file_under_ocsp_is_in_the_manifest() -> TestResult {
         .filter(|a| a.kind == Kind::OcspResponse)
         .map(|a| a.path.clone())
         .collect();
-    assert_eq!(listed.len(), 30);
+    assert_eq!(listed.len(), 31);
     let mut found = HashSet::new();
     for entry in std::fs::read_dir(testdata().join(ocsp::DIRECTORY))? {
         let path = PathBuf::from(format!(
@@ -178,13 +178,20 @@ fn each_response_agrees_with_its_manifest_entry() -> TestResult {
                 (time + time::Duration::days(days)).unix_timestamp(),
             )?)
         };
+        // ocsp/signer-expired-before-expiry is issued two days before the
+        // validation time, before pki/signer-expired expired, and is fresh.
         let late = artefact.id == "ocsp/produced-at-after-validation-time";
+        let early = artefact.id == "ocsp/signer-expired-before-expiry";
+        let issued = if early { -2 } else { -1 };
         assert_eq!(
             seconds(&data.produced_at),
-            offset(if late { 1 } else { -1 })?
+            offset(if late { 1 } else { issued })?
         );
-        assert_eq!(seconds(&single.this_update), offset(-1)?);
-        assert_eq!(single.next_update.as_ref().map(seconds), Some(offset(6)?));
+        assert_eq!(seconds(&single.this_update), offset(issued)?);
+        assert_eq!(
+            single.next_update.as_ref().map(seconds),
+            Some(offset(if early { 5 } else { 6 })?)
+        );
         // The status: unknown for ocsp/unknown, otherwise revoked exactly
         // when the purpose says so, and only for a revoked certificate.
         // A revocation counts when it is on or before thisUpdate, as in

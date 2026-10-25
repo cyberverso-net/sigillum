@@ -27,13 +27,14 @@ import java.util.stream.Stream;
 public final class ValidationOutput {
 
     /** The version of the schema of {@code summary.json}. */
-    public static final int FORMAT_VERSION = 1;
+    public static final int FORMAT_VERSION = 2;
     /** The file name of the summary. */
     public static final String SUMMARY = "summary.json";
 
     private final Path directory;
     private final Mode mode;
     private final Instant validationTime;
+    private final PolicySelection policy;
 
     /**
      * Checks the output directory before a run. It must not exist yet, or be
@@ -43,10 +44,12 @@ public final class ValidationOutput {
      * @param directory the output directory
      * @param mode the mode that writes it
      * @param validationTime the validation time of the run
+     * @param policy the validation policy of the run, which the summary names
      * @return the output, not yet created
      * @throws IOException if the path is a file or a directory that is not empty
      */
-    public static ValidationOutput check(Path directory, Mode mode, Instant validationTime) throws IOException {
+    public static ValidationOutput check(Path directory, Mode mode, Instant validationTime, PolicySelection policy)
+            throws IOException {
         if (Files.exists(directory)) {
             if (!Files.isDirectory(directory)) {
                 throw new IOException("--out " + directory + ": not a directory");
@@ -57,13 +60,14 @@ public final class ValidationOutput {
                 }
             }
         }
-        return new ValidationOutput(directory, mode, validationTime);
+        return new ValidationOutput(directory, mode, validationTime, policy);
     }
 
-    private ValidationOutput(Path directory, Mode mode, Instant validationTime) {
+    private ValidationOutput(Path directory, Mode mode, Instant validationTime, PolicySelection policy) {
         this.directory = directory;
         this.mode = mode;
         this.validationTime = validationTime;
+        this.policy = policy;
     }
 
     /**
@@ -162,6 +166,7 @@ public final class ValidationOutput {
         summary.put("format-version", FORMAT_VERSION);
         summary.put("mode", mode.commandName());
         summary.put("validation-time", format(validationTime));
+        summary.put("policy", policy.summary());
         summary.put("result", result);
         return summary;
     }

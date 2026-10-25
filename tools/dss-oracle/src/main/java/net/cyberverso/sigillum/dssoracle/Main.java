@@ -109,6 +109,7 @@ public final class Main {
                 "  --crl <file>                       CRL supplied offline (repeatable)",
                 "  --ocsp <file>                      OCSP response supplied offline (repeatable)",
                 "  --out <directory>                  output directory, absent or empty",
+                "  --policy aligned|default|<file>    validation policy of a validation mode (default: aligned)",
                 "validate-certificate: the first --certificate is the certificate to validate;",
                 "  the others are supplied for its chain.",
                 "validate-timestamp options:",

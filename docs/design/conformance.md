@@ -10,7 +10,8 @@ Every comparison runs with:
 
 - a **fixed validation time**, so results do not change with the calendar;
 - **offline sources** for certificates, OCSP responses, CRLs and timestamps, so both implementations see identical inputs;
-- a **pinned DSS release**, upgraded deliberately, with any change in results reviewed.
+- a **pinned DSS release**, upgraded deliberately, with any change in results reviewed;
+- an **aligned validation policy**: the default policy of DSS with documented deltas on parameters that ETSI EN 319 102-1 V1.4.1 leaves to the policy ([ADR-0023](adr/0023-validation-policy-of-the-dss-oracle.md)). Results under the default policy of DSS are recorded for information only.
 
 ## Three seams
 

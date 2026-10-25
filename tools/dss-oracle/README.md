@@ -27,6 +27,7 @@ Usage: `dss-oracle <mode> [options]`, or `dss-oracle --version` or `--help` on t
 | `--crl <file>` | CRL supplied offline; repeatable |
 | `--ocsp <file>` | OCSP response supplied offline; repeatable |
 | `--out <directory>` | Output directory, which must not exist or be empty |
+| `--policy aligned\|default\|<file>` | Validation policy of a validation mode, described below; `aligned` when absent. Refused in `sign` |
 
 Exit codes: 0 success, 1 failure, 2 usage error, 3 mode not implemented yet, 4 network access attempted. A missing or unreadable input file, or an output directory that is not empty, is a failure. Only `validate-certificate` and `validate-timestamp` are implemented so far.
 
@@ -49,7 +50,7 @@ Connections to a host name are caught by the second layer. The third layer cover
 
 ## Validation modes
 
-The validation modes run DSS at the fixed validation time, with the default validation policy of DSS 6.5.1 for their kind of validation and English report messages. DSS sees only the files named on the command line:
+The validation modes run DSS at the fixed validation time, with the validation policy chosen by `--policy` (see [Validation policy](#validation-policy)) and English report messages. DSS sees only the files named on the command line:
 
 - `--trust-anchor` gives the trust anchors;
 - `--certificate` gives other certificates, such as intermediate CAs, which DSS may use to build a chain;
@@ -64,11 +65,11 @@ dss-oracle validate-certificate --certificate <file> [--certificate <file>]... -
     [--crl <file>] [--ocsp <file>] --validation-time <time> --out <directory>
 ```
 
-It validates a certificate as DSS validates one on its own: the X.509 certificate validation of [ETSI EN 319 102-1 V1.4.1](https://www.etsi.org/deliver/etsi_en/319100_319199/31910201/01.04.01_60/en_31910201v010401p.pdf), clause 5.2.6, for the certificate and the chain that DSS builds to a trust anchor. DSS applies its default certificate validation policy, "Certificate policy TL based" (`policy/certificate-constraint.xml` in `dss-policy-jaxb`), not the policy it applies to signatures and timestamps. That policy also asks for the qualification of the certificate under the EU trusted lists. The tool supplies none, so the qualification process in the detailed report fails; `summary.json` does not report it.
+It validates a certificate as DSS validates one on its own: the X.509 certificate validation of [ETSI EN 319 102-1 V1.4.1](https://www.etsi.org/deliver/etsi_en/319100_319199/31910201/01.04.01_60/en_31910201v010401p.pdf), clause 5.2.6, for the certificate and the chain that DSS builds to a trust anchor. The policy derives from the default certificate validation policy of DSS, "Certificate policy TL based" (`policy/certificate-constraint.xml` in `dss-policy-jaxb`), not from the policy it applies to signatures and timestamps. That policy also asks for the qualification of the certificate under the EU trusted lists. The tool supplies none, so the qualification process in the detailed report fails; `summary.json` does not report it.
 
 The first `--certificate` names the certificate to validate. Every further `--certificate` is supplied for its chain only, such as an intermediate CA. The certificate to validate may also be a trust anchor, as `pki/root-ca` is. `--certificate`, `--trust-anchor`, `--validation-time` and `--out` are required.
 
-DSS chooses the revocation data of each certificate in the chain among the CRLs and OCSP responses supplied. When an OCSP response covers a certificate, DSS 6.5.1 has been observed to take it and not to load the CRL, even when the response is not acceptable, for example because its signature does not verify or its status is unknown. DSS loads the CRL when no supplied OCSP response covers the certificate, for example when the CertID of the response names another issuer. `summary.json` names the file that DSS used for the certificate itself.
+DSS chooses the revocation data of each certificate in the chain among the CRLs and OCSP responses supplied. When an OCSP response covers a certificate, DSS 6.5.1 has been observed to take it and not to load the CRL in two cases where the response is not acceptable: when its status is unknown, and when its signer cannot be validated because the certificate of the responder carried in the response has an altered signature. When the response's own signature does not verify, DSS sets it aside and uses the CRL. DSS loads the CRL when no supplied OCSP response covers the certificate, for example when the CertID of the response names another issuer. The missing fallback is recorded as the divergence DIV-4 in [divergences.md](../../docs/design/divergences.md). `summary.json` names the file that DSS used for the certificate itself.
 
 For a certificate of the corpus, the chain is supplied as follows, with the CRL of its issuer and the CRL that its CA certificate links:
 
@@ -80,7 +81,28 @@ java -jar target/dss-oracle.jar validate-certificate \
     --validation-time 2030-01-15T10:00:00Z --out results/signer-p256
 ```
 
-The expected DSS result of a CRL or an OCSP response in `testdata/manifest.toml` is a prediction of the result of this mode for the certificate that it covers, given that CRL or response and the revocation data that the CA certificates of the chain link, as `testdata/README.md` describes. The test `ValidateCertificateTest` runs every certificate, CRL and OCSP response of the corpus so, and pins the results of DSS 6.5.1. Those that differ from the prediction are tracked in issue #75.
+The expected DSS result of a CRL or an OCSP response in `testdata/manifest.toml` is a prediction of the result of this mode for the certificate that it covers, given that CRL or response and the revocation data that the CA certificates of the chain link, as `testdata/README.md` describes. The test `ValidateCertificateTest` runs every certificate, CRL and OCSP response of the corpus so, under the aligned policy, and requires the predicted result. The only exceptions are the divergences recorded in [divergences.md](../../docs/design/divergences.md), whose results the test pins. It also runs `ocsp/responder-without-ocsp-signing` with the CRL of `pki/ca-ecdsa`, which covers the signer of the response: DSS then uses the response, the divergence DIV-3.
+
+### Validation policy
+
+The validation policy is decided in [ADR-0023](../../docs/design/adr/0023-validation-policy-of-the-dss-oracle.md). `--policy` takes one of two names, or the path of a policy file:
+
+- `aligned`, the default: the default policy of DSS 6.5.1 for the kind of validation, with four deltas that ETSI EN 319 102-1 V1.4.1 leaves to the policy. The class `AlignedPolicy` builds it at run time from the policy that DSS ships, which is not copied into the repository. It accepts Ed25519, checks revocation freshness against `nextUpdate` (clause 5.2.5.4), fails on a critical extension that DSS does not support (RFC 5280, section 6.1.5 (f)), and skips revocation checking of a signing certificate with `id-pkix-ocsp-nocheck` (RFC 6960, section 4.2.2.2.1). Its version is 1, and `summary.json` names it `aligned-1`. Two limits follow from the policies of DSS. The list of supported critical extensions lacks policyMappings (2.5.29.33), which DSS does not process, so a CA certificate with that extension critical fails. In the policy for signatures and timestamps, the signing certificates forbid `id-pkix-ocsp-nocheck` at level FAIL, so the fourth delta has no effect there; in the certificate policy it applies to any certificate under validation that carries the extension, not only to OCSP responders.
+- `default`: the default policy of DSS 6.5.1, unchanged, named `default` in `summary.json`.
+- any other value: a DSS policy file, in the format of the policy schema of DSS (`xsd/policy.xsd` in `dss-policy-jaxb`). A file named `aligned` or `default` is given with a path, such as `./aligned`. `summary.json` names the file and the SHA-256 digest of its content.
+
+The class `PolicySelection` selects the policy for every validation mode, so that a mode only states its kind of validation, certificate or document, and passes its validation to `PolicySelection.validate`. A new mode, such as `validate-document`, uses it the same way.
+
+A policy file is an input. A missing or unreadable file is a failure of the tool. DSS loads the file through `ValidationPolicyLoader`, which checks it against the policy schema; a file that it cannot load is rejected, with the message of DSS. DSS reports such a file with unchecked exceptions, so the tool catches every exception at that call, as it does for the CRL parser. If the validation then fails with the file, the tool runs it again with the aligned policy: when that run succeeds, the failure belongs to the file, which is rejected; otherwise the first failure is a failure of the tool, with the second suppressed. A file whose `AlgoExpirationDate` has a date `Format` that DSS cannot use is valid against the schema but makes the validation fail, and is rejected so.
+
+Comparisons with the corpus predictions and with sigillum use the aligned policy. The default policy is run for information only. `ValidateCertificateTest` runs the corpus under both and prints the results. Under the default policy of DSS 6.5.1, these cases give another result than under the aligned policy; every other case gives the same result under both:
+
+| Case | Aligned policy | Default policy |
+| --- | --- | --- |
+| `pki/signer-ed25519`, `crl/ca-ed25519`, `ocsp/signer-ed25519` | PASSED | INDETERMINATE with CRYPTO_CONSTRAINTS_FAILURE_NO_POE |
+| `crl/ca-ecdsa-expired` | INDETERMINATE with TRY_LATER | PASSED |
+| `pki/signer-unknown-critical-extension`, `ocsp/signer-unknown-critical-extension` | INDETERMINATE with CERTIFICATE_CHAIN_GENERAL_FAILURE | PASSED, with a warning |
+| `pki/ocsp-responder` | PASSED | INDETERMINATE with CERTIFICATE_CHAIN_GENERAL_FAILURE |
 
 ### validate-timestamp
 
@@ -182,13 +204,15 @@ The inputs of `validate-certificate`, which validates `pki/signer-p256` with the
 
 - the certificate under validation, `pki/signer-p256`, in DER;
 - the CRLs of `pki/ca-ecdsa` and `pki/root-ca`;
-- the OCSP response `ocsp/signer-p256`, signed by `pki/ocsp-responder`, which holds the certificate of the responder. It is mutated in two runs: beside the CRL of `pki/ca-ecdsa`, which DSS loads only when the mutated response no longer covers `pki/signer-p256`, and without that CRL, where the response is the only revocation data for `pki/signer-p256`.
+- the OCSP response `ocsp/signer-p256`, signed by `pki/ocsp-responder`, which holds the certificate of the responder. It is mutated in two runs: beside the CRL of `pki/ca-ecdsa`, which DSS loads only when the mutated response no longer covers `pki/signer-p256`, and without that CRL, where the response is the only revocation data for `pki/signer-p256`;
+- two policy files given with `--policy`: the aligned certificate policy, written as a DSS policy file by the test, and the same policy with a date `Format` in `AlgoExpirationDate` that DSS cannot use. They are not DER, so their mutations do not include changes to DER length octets.
 
 The mutations are bit flips, byte replacements, truncations, insertions and changes to DER length octets. The test runs each through its mode in process and requires exit code 0 with the result `validated` or `rejected`: no exception, no failure of the tool and no network attempt.
 
 It also checks every rejection against DSS alone, without any code of the tool, so that the tool rejects only what DSS cannot use:
 
 - a rejected token must make DSS fail, at the stage where the tool rejected it;
+- a rejected policy file must make DSS alone fail, when it loads the file or validates `pki/signer-p256` with it;
 - a rejected certificate under validation must make DSS fail, since every validation of that certificate uses it;
 - any other rejected certificate, CRL or OCSP response is put where the corpus uses it, and DSS validates the token or the certificate with it. If that validation completes, the file must not be among the certificates that DSS used, or among the revocation data whose signing certificate DSS found, whether or not the signature verifies.
 
@@ -200,10 +224,11 @@ As controls, DSS alone must validate the corpus as PASSED, and must use the corp
 
 | Member | Content |
 | --- | --- |
-| `format-version` | `1`, the version of this schema |
+| `format-version` | `2`, the version of this schema. Version 2 added `policy` |
 | `mode` | The mode, such as `"validate-certificate"` or `"validate-timestamp"` |
 | `validation-time` | The validation time, in UTC, such as `"2030-01-15T10:00:00Z"` |
-| `result` | `"validated"` when DSS ran the validation, `"rejected"` when it could not parse an input |
+| `policy` | The validation policy of the run: `"aligned-1"`, the aligned policy in version 1; `"default"`, the default policy of DSS; or, for a policy file, an object with `file`, the file as named on the command line, and `sha256`, the SHA-256 digest of its content in lowercase hexadecimal |
+| `result` | `"validated"` when DSS ran the validation, `"rejected"` when it could not parse or use an input, a policy file included ([ADR-0023](../../docs/design/adr/0023-validation-policy-of-the-dss-oracle.md)) |
 
 When the result is `validated`:
 

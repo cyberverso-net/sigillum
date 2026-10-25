@@ -137,6 +137,13 @@ class MainTest {
     }
 
     @Test
+    void helpNamesThePoliciesAndTheDefault() {
+        assertEquals(ExitCodes.SUCCESS, run("--help"));
+        assertTrue(stdout().contains("--policy aligned|default|<file>"), stdout());
+        assertTrue(stdout().contains("default: aligned"), stdout());
+    }
+
+    @Test
     void helpNamesTheCertificateToValidate() {
         assertEquals(ExitCodes.SUCCESS, run("--help"));
         assertTrue(stdout().contains("validate-certificate: the first --certificate is the certificate to validate"),

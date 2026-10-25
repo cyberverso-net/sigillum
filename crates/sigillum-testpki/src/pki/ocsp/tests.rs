@@ -54,7 +54,7 @@ const END_ENTITIES: [&str; 22] = [
 ];
 
 /// The responses of acceptance criterion 2, then those of threat K10.
-const CASES: [&str; 8] = [
+const CASES: [&str; 9] = [
     "unknown",
     "responder-without-ocsp-signing",
     "produced-at-after-validation-time",
@@ -63,6 +63,7 @@ const CASES: [&str; 8] = [
     "unauthorized",
     "cert-id-wrong-issuer-name-hash",
     "cert-id-wrong-issuer-key-hash",
+    "signer-expired-before-expiry",
 ];
 
 /// The certificate that signs the response for an end entity, and its
@@ -1035,5 +1036,42 @@ fn a_revocation_counts_from_this_update() -> TestResult {
             "{name}"
         );
     }
+    Ok(())
+}
+
+/// Issue #75: a response for `pki/signer-expired` issued before it
+/// expired and still fresh at the validation time. It shows no status
+/// after expiry, so ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, step 7 and
+/// NOTE 8, give OUT_OF_BOUNDS_NO_POE.
+#[test]
+fn the_response_issued_before_expiry_is_fresh_but_shows_no_later_status() -> TestResult {
+    let spec = spec("signer-expired-before-expiry")?;
+    assert_eq!(spec.covered, "signer-expired");
+    assert_eq!(
+        spec.expected_dss,
+        indication(Indication::Indeterminate, Some("OUT_OF_BOUNDS_NO_POE"))
+    );
+    assert!(spec.notes.as_deref().is_some_and(|n| n.contains("DIV-5")));
+    let Body::Signed(signed) = spec.body else {
+        return Err("not signed".into());
+    };
+    let not_after = hierarchy::find("signer-expired")
+        .ok_or("no certificate")?
+        .not_after
+        .from(VALIDATION_TIME)?;
+    let this_update = signed.this_update.from(VALIDATION_TIME)?;
+    let next_update = signed.next_update.from(VALIDATION_TIME)?;
+    assert!(this_update < not_after);
+    // Fresh under clause 5.2.5.4: issued within nextUpdate minus thisUpdate
+    // before the validation time.
+    assert!(this_update > VALIDATION_TIME - (next_update - this_update));
+    let basic = basic(&file("signer-expired-before-expiry")?.contents)?;
+    let single = &basic.tbs_response_data.responses[0];
+    assert!(matches!(single.cert_status, CertStatus::Good(_)));
+    assert_eq!(seconds(&single.this_update)?, at(signed.this_update)?);
+    assert_eq!(
+        seconds(&basic.tbs_response_data.produced_at)?,
+        at(signed.produced_at)?
+    );
     Ok(())
 }

@@ -68,8 +68,9 @@ public final class ValidateTimestamp implements Main.ModeRunner {
     @Override
     public int run(Arguments arguments, PrintStream out, PrintStream err) throws Exception {
         Options options = check(arguments);
+        PolicySelection policy = PolicySelection.of(arguments);
         ValidationOutput output = ValidationOutput.check(options.out(), Mode.VALIDATE_TIMESTAMP,
-                options.validationTime());
+                options.validationTime(), policy);
 
         // Read every file first: a missing file is a failure of the tool, whatever else is wrong.
         OfflineSources.Input token = OfflineSources.Input.read("--timestamp", options.timestamp());
@@ -102,7 +103,8 @@ public final class ValidateTimestamp implements Main.ModeRunner {
             if (timestamped != null) {
                 validator.setTimestampedData(timestamped);
             }
-            Reports reports = validator.validateDocument();
+            // ADR-0023: the aligned policy, the default validation policy of DSS, or a policy file.
+            Reports reports = policy.validate(PolicySelection.Kind.DOCUMENT, validator::validateDocument);
 
             SimpleReport simple = reports.getSimpleReport();
             String id = simple.getFirstTimestampId();

@@ -95,10 +95,16 @@ class ValidateCertificateTest {
     }
 
     private static void assertValidated(Path directory, String indication, String subIndication) throws Exception {
+        assertValidated(directory, "aligned-1", indication, subIndication);
+    }
+
+    private static void assertValidated(Path directory, String policy, String indication, String subIndication)
+            throws Exception {
         Map<String, Object> summary = summary(directory);
-        assertEquals(1L, summary.get("format-version"));
+        assertEquals(2L, summary.get("format-version"));
         assertEquals("validate-certificate", summary.get("mode"));
         assertEquals(VALIDATION_TIME, summary.get("validation-time"));
+        assertEquals(policy, summary.get("policy"), summary.toString());
         assertEquals("validated", summary.get("result"), summary.toString());
         assertEquals(indication, summary.get("indication"), summary.toString());
         assertEquals(subIndication, summary.get("sub-indication"), summary.toString());
@@ -185,10 +191,177 @@ class ValidateCertificateTest {
         Path result = temp.resolve("expired");
         assertEquals(ExitCodes.SUCCESS, run(underCaEcdsa("signer-expired",
                 "--crl", corpus("crl/ca-ecdsa.crl"), "--out", result.toString())), stderr());
-        // DSS 6.5.1 reports OUT_OF_BOUNDS_NOT_REVOKED: the CRL, issued after the certificate expired, does not
-        // list it. The manifest predicts OUT_OF_BOUNDS_NO_POE.
+        // DIV-5: the CRL was issued at the instant the certificate expired and shows no status after expiry.
+        // The manifest predicts OUT_OF_BOUNDS_NO_POE (ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, NOTE 8).
         assertValidated(result, "INDETERMINATE", "OUT_OF_BOUNDS_NOT_REVOKED");
         assertRevocation(member(summary(result), "details"), "GOOD", "CRL", "--crl", corpus("crl/ca-ecdsa.crl"));
+    }
+
+    // ADR-0023: the aligned policy differs from the default policy of DSS 6.5.1 in four parameters.
+
+    /** The arguments that validate a certificate of the corpus with its chain and the given revocation data. */
+    private static List<String> corpusRun(String certificate, String... revocation) throws IOException {
+        Manifest manifest = Manifest.read(CORPUS);
+        return corpusArguments(manifest, certificate, List.of(revocation));
+    }
+
+    private List<String> withOut(List<String> args, Path out, String... extra) {
+        List<String> all = new ArrayList<>(args);
+        all.addAll(Arrays.asList(extra));
+        all.addAll(List.of("--out", out.toString()));
+        return all;
+    }
+
+    @Test
+    void theAlignedPolicyIsTheDefaultAndAcceptsEd25519() throws Exception {
+        List<String> args = corpusRun("pki/signer-ed25519", "crl/ca-ed25519");
+        Path absent = temp.resolve("ed25519");
+        assertEquals(ExitCodes.SUCCESS, run(withOut(args, absent)), stderr());
+        assertValidated(absent, "aligned-1", "PASSED", null);
+        Path aligned = temp.resolve("ed25519-aligned");
+        assertEquals(ExitCodes.SUCCESS, run(withOut(args, aligned, "--policy", "aligned")), stderr());
+        assertTrue(Arrays.equals(Files.readAllBytes(absent.resolve("summary.json")),
+                Files.readAllBytes(aligned.resolve("summary.json"))));
+        Path dss = temp.resolve("ed25519-default");
+        assertEquals(ExitCodes.SUCCESS, run(withOut(args, dss, "--policy", "default")), stderr());
+        assertValidated(dss, "default", "INDETERMINATE", "CRYPTO_CONSTRAINTS_FAILURE_NO_POE");
+    }
+
+    @Test
+    void theAlignedPolicyChecksRevocationFreshness() throws Exception {
+        // ETSI EN 319 102-1 V1.4.1, clause 5.2.5.4: the maximum freshness is nextUpdate minus thisUpdate.
+        List<String> args = corpusRun("pki/signer-p256", "crl/ca-ecdsa-expired");
+        Path aligned = temp.resolve("stale");
+        assertEquals(ExitCodes.SUCCESS, run(withOut(args, aligned)), stderr());
+        assertValidated(aligned, "INDETERMINATE", "TRY_LATER");
+        Path dss = temp.resolve("stale-default");
+        assertEquals(ExitCodes.SUCCESS, run(withOut(args, dss, "--policy", "default")), stderr());
+        assertValidated(dss, "default", "PASSED", null);
+    }
+
+    @Test
+    void theAlignedPolicyFailsOnAnUnknownCriticalExtension() throws Exception {
+        List<String> args = corpusRun("pki/signer-unknown-critical-extension", "crl/ca-ecdsa");
+        Path aligned = temp.resolve("critical");
+        assertEquals(ExitCodes.SUCCESS, run(withOut(args, aligned)), stderr());
+        assertValidated(aligned, "INDETERMINATE", "CERTIFICATE_CHAIN_GENERAL_FAILURE");
+        Path dss = temp.resolve("critical-default");
+        assertEquals(ExitCodes.SUCCESS, run(withOut(args, dss, "--policy", "default")), stderr());
+        assertValidated(dss, "default", "PASSED", null);
+    }
+
+    @Test
+    void theAlignedPolicyHonoursOcspNoCheck() throws Exception {
+        List<String> args = corpusRun("pki/ocsp-responder", "crl/ca-ecdsa");
+        Path aligned = temp.resolve("nocheck");
+        assertEquals(ExitCodes.SUCCESS, run(withOut(args, aligned)), stderr());
+        assertValidated(aligned, "PASSED", null);
+        Path dss = temp.resolve("nocheck-default");
+        assertEquals(ExitCodes.SUCCESS, run(withOut(args, dss, "--policy", "default")), stderr());
+        assertValidated(dss, "default", "INDETERMINATE", "CERTIFICATE_CHAIN_GENERAL_FAILURE");
+    }
+
+    /** Writes the aligned certificate policy to a file, as a policy file that DSS can load. */
+    private Path policyFile(String name) throws Exception {
+        String xml = eu.europa.esig.dss.policy.ValidationPolicyFacade.newFacade().marshall(
+                AlignedPolicy.apply(AlignedPolicy.base(AlignedPolicy.CERTIFICATE_BASE)));
+        return Files.writeString(temp.resolve(name), xml, StandardCharsets.UTF_8);
+    }
+
+    private static String sha256(Path file) throws Exception {
+        return java.util.HexFormat.of().formatHex(
+                java.security.MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(file)));
+    }
+
+    @Test
+    void aPolicyFileIsUsedAndRecordedWithItsDigest() throws Exception {
+        Path policy = policyFile("aligned-policy.xml");
+        List<String> args = corpusRun("pki/signer-ed25519", "crl/ca-ed25519");
+        Path result = temp.resolve("policy-file");
+        assertEquals(ExitCodes.SUCCESS, run(withOut(args, result, "--policy", policy.toString())), stderr());
+        Map<String, Object> summary = summary(result);
+        assertEquals(Map.of("file", policy.toString(), "sha256", sha256(policy)), summary.get("policy"));
+        assertEquals("PASSED", summary.get("indication"), summary.toString());
+        assertTrue(Files.readString(result.resolve("simple-report.xml")).contains("sigillum aligned policy 1"));
+    }
+
+    @Test
+    void aPolicyFileThatDssCannotLoadIsRejected() throws Exception {
+        Path policy = policyFile("broken-policy.xml");
+        String valid = Files.readString(policy);
+        for (String content : List.of("not a policy", valid.replace("Level=\"FAIL\"", "Level=\"STRICT\""))) {
+            Files.writeString(policy, content, StandardCharsets.UTF_8);
+            Path result = temp.resolve("policy-rejected-" + content.length());
+            List<String> args = underCaEcdsa("signer-p256", "--crl", corpus("crl/ca-ecdsa.crl"),
+                    "--policy", policy.toString(), "--out", result.toString());
+            assertRejected(args, result, "--policy", policy.toString());
+            assertEquals(Map.of("file", policy.toString(), "sha256", sha256(policy)), summary(result).get("policy"));
+        }
+    }
+
+    @Test
+    void aPolicyFileThatDssLoadsButCannotValidateWithIsRejected() throws Exception {
+        // Valid against the policy schema, whose Format is any string, but DSS fails during the validation when it
+        // reads the dates of AlgoExpirationDate with this format. The aligned policy validates the same inputs,
+        // so the failure belongs to the file.
+        Path policy = policyFile("bad-format-policy.xml");
+        String xml = Files.readString(policy);
+        assertTrue(xml.contains("Format=\"yyyy-MM-dd\""), "no date format in the policy");
+        Files.writeString(policy, xml.replace("Format=\"yyyy-MM-dd\"", "Format=\"nonsense\""), StandardCharsets.UTF_8);
+        eu.europa.esig.dss.validation.policy.ValidationPolicyLoader.fromValidationPolicy(
+                new eu.europa.esig.dss.model.FileDocument(policy.toFile())).create();
+        Path result = temp.resolve("policy-bad-format");
+        assertRejected(underCaEcdsa("signer-p256", "--crl", corpus("crl/ca-ecdsa.crl"),
+                "--policy", policy.toString(), "--out", result.toString()), result, "--policy", policy.toString());
+    }
+
+    @Test
+    void aValidationThatFailsWithEveryPolicyKeepsItsOwnFailure() throws Exception {
+        Path policy = policyFile("any-policy.xml");
+        PolicySelection selection = PolicySelection.of(Arguments.parse(List.of(
+                "validate-certificate", "--policy", policy.toString())));
+        // The validation fails with the policy file, then again with the aligned policy: the failure is not the
+        // file's, so the first one is thrown, with the second suppressed.
+        List<IllegalStateException> failures = new ArrayList<>();
+        IllegalStateException thrown = org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class,
+                () -> selection.validate(PolicySelection.Kind.CERTIFICATE, used -> {
+                    IllegalStateException failure = new IllegalStateException("broken input " + failures.size());
+                    failures.add(failure);
+                    throw failure;
+                }));
+        assertEquals(2, failures.size());
+        assertEquals(failures.get(0), thrown);
+        assertEquals(List.of(failures.get(1)), Arrays.asList(thrown.getSuppressed()));
+    }
+
+    @Test
+    void aMissingPolicyFileIsAFailure() {
+        Path result = temp.resolve("policy-missing");
+        assertEquals(ExitCodes.FAILURE, run(underCaEcdsa("signer-p256", "--policy",
+                temp.resolve("absent.xml").toString(), "--out", result.toString())));
+        assertTrue(stderr().contains("absent.xml"), stderr());
+        assertFalse(Files.exists(result.resolve("summary.json")));
+    }
+
+    @Test
+    void aResponseFromAResponderWithoutOcspSigningIsAcceptedWhenTheResponderHasRevocationData() throws Exception {
+        // DIV-3 in docs/design/divergences.md. RFC 6960, section 4.2.2.2: a client must reject this response,
+        // whose signer is not the CA and lacks id-kp-OCSPSigning. Given the CRL of pki/ca-ecdsa, which covers the
+        // signer of the response, DSS 6.5.1 uses the response as the revocation data of pki/signer-p256.
+        String response = "ocsp/responder-without-ocsp-signing";
+        for (String policy : List.of("aligned", "default")) {
+            Path withCrl = temp.resolve("responder-with-crl-" + policy);
+            assertEquals(ExitCodes.SUCCESS, run(withOut(corpusRun("pki/signer-p256", response, "crl/ca-ecdsa"),
+                    withCrl, "--policy", policy)), stderr());
+            assertValidated(withCrl, OraclePolicy.fromCommandName(policy).orElseThrow().identifier(), "PASSED", null);
+            assertRevocation(member(summary(withCrl), "details"), "GOOD", "OCSP", "--ocsp",
+                    corpus(response + ".der"));
+        }
+        // Without that CRL, DSS fails for want of revocation data for the signer of the response.
+        Path alone = temp.resolve("responder-alone");
+        assertEquals(ExitCodes.SUCCESS, run(withOut(corpusRun("pki/signer-p256", response), alone)), stderr());
+        assertValidated(alone, "INDETERMINATE", "CERTIFICATE_CHAIN_GENERAL_FAILURE");
+        assertNull(member(summary(alone), "details").get("revocation"));
     }
 
     @Test
@@ -235,16 +408,48 @@ class ValidateCertificateTest {
         assertRevocation(member(summary(result), "details"), "GOOD", "CRL", "--crl", copy.toString());
     }
 
-    /** Returns a corpus file with the last octet of its signature value inverted, so that it stays readable. */
-    private Path withBadSignature(String path) throws IOException {
+    /**
+     * Returns a corpus CRL with the last octet of its signature value, the
+     * last octet of the file, inverted, so that it stays readable.
+     */
+    private Path withBadCrlSignature(String path) throws IOException {
         byte[] content = Files.readAllBytes(CORPUS.resolve(path));
         content[content.length - 1] ^= (byte) 0xff;
         return Files.write(temp.resolve("bad-signature-" + Path.of(path).getFileName()), content);
     }
 
+    /**
+     * Returns a corpus OCSP response of pki/ocsp-responder with the last
+     * octet inverted. The response ends with the certificate of the
+     * responder in certs, so the octet belongs to the signature of that
+     * certificate: the response itself still verifies, but the chain of its
+     * signer cannot be validated.
+     */
+    private Path withAlteredResponderCertificate(String path) throws IOException {
+        byte[] content = Files.readAllBytes(CORPUS.resolve(path));
+        content[content.length - 1] ^= (byte) 0xff;
+        return Files.write(temp.resolve("altered-responder-" + Path.of(path).getFileName()), content);
+    }
+
+    /** Returns a corpus OCSP response with the last octet of its own signature value inverted. */
+    private Path withAlteredResponseSignature(String path) throws Exception {
+        byte[] content = Files.readAllBytes(CORPUS.resolve(path));
+        byte[] signature = ((org.bouncycastle.cert.ocsp.BasicOCSPResp)
+                new org.bouncycastle.cert.ocsp.OCSPResp(content).getResponseObject()).getSignature();
+        int at = -1;
+        for (int i = 0; i + signature.length <= content.length && at < 0; i++) {
+            if (Arrays.equals(content, i, i + signature.length, signature, 0, signature.length)) {
+                at = i + signature.length - 1;
+            }
+        }
+        assertTrue(at > 0 && at < content.length - 1, "signature not found before certs");
+        content[at] ^= (byte) 0xff;
+        return Files.write(temp.resolve("altered-signature-" + Path.of(path).getFileName()), content);
+    }
+
     @Test
     void aCrlWhoseSignatureDoesNotVerifyIsKept() throws Exception {
-        Path crl = withBadSignature("crl/ca-ecdsa.crl");
+        Path crl = withBadCrlSignature("crl/ca-ecdsa.crl");
         Path result = temp.resolve("bad-crl");
         assertEquals(ExitCodes.SUCCESS, run(underCaEcdsa("signer-p256", "--crl", crl.toString(),
                 "--out", result.toString())), stderr());
@@ -253,23 +458,48 @@ class ValidateCertificateTest {
     }
 
     @Test
-    void anOcspResponseWhoseSignatureDoesNotVerifyIsKept() throws Exception {
-        Path response = withBadSignature("ocsp/signer-p256.der");
+    void anOcspResponseWhoseOwnSignatureDoesNotVerifyIsSetAsideForTheCrl() throws Exception {
+        Path response = withAlteredResponseSignature("ocsp/signer-p256.der");
+        Path alone = temp.resolve("bad-response-signature");
+        assertEquals(ExitCodes.SUCCESS, run(underCaEcdsa("signer-p256", "--ocsp", response.toString(),
+                "--out", alone.toString())), stderr());
+        assertValidated(alone, "INDETERMINATE", "CERTIFICATE_CHAIN_GENERAL_FAILURE");
+        assertNull(member(summary(alone), "details").get("revocation"));
+        // With the CRL of the issuer as well, DSS 6.5.1 sets the response aside and uses the CRL, under both
+        // policies: this case is not part of DIV-4.
+        for (String policy : List.of("aligned", "default")) {
+            Path withCrl = temp.resolve("bad-response-signature-with-crl-" + policy);
+            assertEquals(ExitCodes.SUCCESS, run(underCaEcdsa("signer-p256", "--ocsp", response.toString(),
+                    "--crl", corpus("crl/ca-ecdsa.crl"), "--policy", policy, "--out", withCrl.toString())), stderr());
+            assertValidated(withCrl, OraclePolicy.fromCommandName(policy).orElseThrow().identifier(), "PASSED", null);
+            assertRevocation(member(summary(withCrl), "details"), "GOOD", "CRL", "--crl", corpus("crl/ca-ecdsa.crl"));
+        }
+    }
+
+    @Test
+    void anOcspResponseWhoseSignerCannotBeValidatedIsKept() throws Exception {
+        Path response = withAlteredResponderCertificate("ocsp/signer-p256.der");
         Path result = temp.resolve("bad-ocsp");
         assertEquals(ExitCodes.SUCCESS, run(underCaEcdsa("signer-p256", "--ocsp", response.toString(),
                 "--out", result.toString())), stderr());
         assertValidated(result, "INDETERMINATE", "CERTIFICATE_CHAIN_GENERAL_FAILURE");
         assertNull(member(summary(result), "details").get("revocation"));
-        // With the CRL of the issuer as well, DSS 6.5.1 still takes the response that covers the certificate
-        // and does not load the CRL.
-        Path withCrl = temp.resolve("bad-ocsp-with-crl");
-        assertEquals(ExitCodes.SUCCESS, run(underCaEcdsa("signer-p256", "--ocsp", response.toString(),
-                "--crl", corpus("crl/ca-ecdsa.crl"), "--out", withCrl.toString())), stderr());
-        assertValidated(withCrl, "INDETERMINATE", "CERTIFICATE_CHAIN_GENERAL_FAILURE");
-        assertNull(member(summary(withCrl), "details").get("revocation"));
-        assertFalse(Files.readString(withCrl.resolve("diagnostic-data.xml")).contains(
-                eu.europa.esig.dss.crl.CRLUtils.buildCRLBinary(Files.readAllBytes(CORPUS.resolve("crl/ca-ecdsa.crl")))
-                        .asXmlId()));
+        // DIV-4: with the CRL of the issuer as well, DSS 6.5.1 still takes the response that covers the
+        // certificate, reports that the chain of its signer is not trusted, and does not load the CRL, under both
+        // policies.
+        for (String policy : List.of("aligned", "default")) {
+            Path withCrl = temp.resolve("bad-ocsp-with-crl-" + policy);
+            assertEquals(ExitCodes.SUCCESS, run(underCaEcdsa("signer-p256", "--ocsp", response.toString(),
+                    "--crl", corpus("crl/ca-ecdsa.crl"), "--policy", policy, "--out", withCrl.toString())), stderr());
+            assertValidated(withCrl, OraclePolicy.fromCommandName(policy).orElseThrow().identifier(), "INDETERMINATE",
+                    "CERTIFICATE_CHAIN_GENERAL_FAILURE");
+            assertNull(member(summary(withCrl), "details").get("revocation"));
+            assertTrue(summary(withCrl).toString().contains("BBB_XCV_CCCBB_REV_ANS"), summary(withCrl).toString());
+            assertTrue(summary(withCrl).toString().contains("BBB_XCV_IARDPFC_ANS"), summary(withCrl).toString());
+            assertFalse(Files.readString(withCrl.resolve("diagnostic-data.xml")).contains(
+                    eu.europa.esig.dss.crl.CRLUtils.buildCRLBinary(
+                            Files.readAllBytes(CORPUS.resolve("crl/ca-ecdsa.crl"))).asXmlId()));
+        }
         // A response that covers no certificate of the run leaves DSS to the CRL.
         Path fallback = temp.resolve("fallback");
         assertEquals(ExitCodes.SUCCESS, run(underCaEcdsa("signer-p256",
@@ -277,6 +507,26 @@ class ValidateCertificateTest {
                 "--crl", corpus("crl/ca-ecdsa.crl"), "--out", fallback.toString())), stderr());
         assertValidated(fallback, "PASSED", null);
         assertRevocation(member(summary(fallback), "details"), "GOOD", "CRL", "--crl", corpus("crl/ca-ecdsa.crl"));
+    }
+
+    @Test
+    void aResponseWithTheStatusUnknownHidesACrlOfTheIssuer() throws Exception {
+        // DIV-4 in docs/design/divergences.md: ocsp/unknown covers pki/signer-p256 and gives no status. DSS 6.5.1
+        // takes it and does not load the CRL of the issuer, which shows the certificate not revoked.
+        for (String policy : List.of("aligned", "default")) {
+            Path result = temp.resolve("unknown-with-crl-" + policy);
+            assertEquals(ExitCodes.SUCCESS, run(underCaEcdsa("signer-p256", "--ocsp", corpus("ocsp/unknown.der"),
+                    "--crl", corpus("crl/ca-ecdsa.crl"), "--policy", policy, "--out", result.toString())), stderr());
+            assertValidated(result, OraclePolicy.fromCommandName(policy).orElseThrow().identifier(), "INDETERMINATE",
+                    "CERTIFICATE_CHAIN_GENERAL_FAILURE");
+            assertNull(member(summary(result), "details").get("revocation"));
+            // The messages that the report to the DSS maintainers cites.
+            assertTrue(summary(result).toString().contains("BBB_XCV_ISCUKN_ANS"), summary(result).toString());
+            assertTrue(summary(result).toString().contains("BBB_XCV_IARDPFC_ANS"), summary(result).toString());
+            assertFalse(Files.readString(result.resolve("diagnostic-data.xml")).contains(
+                    eu.europa.esig.dss.crl.CRLUtils.buildCRLBinary(
+                            Files.readAllBytes(CORPUS.resolve("crl/ca-ecdsa.crl"))).asXmlId()));
+        }
     }
 
     @Test
@@ -494,36 +744,45 @@ class ValidateCertificateTest {
         return cases;
     }
 
-    /**
-     * The results of DSS 6.5.1 that differ from the predictions of
-     * testdata/manifest.toml, by identifier. They are tracked in issue #75;
-     * every other case must give the result that the manifest predicts.
-     */
-    private static final Map<String, String> KNOWN_DIFFERENCES = Map.ofEntries(
-            Map.entry("pki/signer-ed25519", "INDETERMINATE CRYPTO_CONSTRAINTS_FAILURE_NO_POE"),
-            Map.entry("crl/ca-ed25519", "INDETERMINATE CRYPTO_CONSTRAINTS_FAILURE_NO_POE"),
-            Map.entry("ocsp/signer-ed25519", "INDETERMINATE CRYPTO_CONSTRAINTS_FAILURE_NO_POE"),
-            Map.entry("pki/ocsp-responder", "INDETERMINATE CERTIFICATE_CHAIN_GENERAL_FAILURE"),
-            Map.entry("pki/signer-expired", "INDETERMINATE OUT_OF_BOUNDS_NOT_REVOKED"),
-            Map.entry("ocsp/signer-expired", "INDETERMINATE OUT_OF_BOUNDS_NOT_REVOKED"),
-            Map.entry("pki/ca-expired", "INDETERMINATE OUT_OF_BOUNDS_NOT_REVOKED"),
-            Map.entry("pki/signer-not-yet-valid", "INDETERMINATE CERTIFICATE_CHAIN_GENERAL_FAILURE"),
-            Map.entry("ocsp/signer-not-yet-valid", "INDETERMINATE CERTIFICATE_CHAIN_GENERAL_FAILURE"),
-            Map.entry("pki/signer-under-expired-ca", "INDETERMINATE REVOCATION_OUT_OF_BOUNDS_NO_POE"),
-            Map.entry("crl/ca-expired", "INDETERMINATE REVOCATION_OUT_OF_BOUNDS_NO_POE"),
-            Map.entry("ocsp/signer-under-expired-ca", "INDETERMINATE REVOCATION_OUT_OF_BOUNDS_NO_POE"),
-            Map.entry("pki/signer-unknown-critical-extension", "PASSED"),
-            Map.entry("ocsp/signer-unknown-critical-extension", "PASSED"),
-            Map.entry("crl/ca-ecdsa-expired", "PASSED"));
+    /** A result of DSS 6.5.1 that differs from the prediction, with its entry in docs/design/divergences.md. */
+    private record Divergence(String result, String entry) {
+    }
 
+    /**
+     * The results of DSS 6.5.1 under the aligned policy (ADR-0023) that
+     * differ from the predictions of testdata/manifest.toml, by identifier.
+     * Each is recorded in docs/design/divergences.md. Every other case must
+     * give the result that the manifest predicts.
+     */
+    private static final Map<String, Divergence> KNOWN_DIVERGENCES = Map.ofEntries(
+            Map.entry("pki/signer-expired", new Divergence("INDETERMINATE OUT_OF_BOUNDS_NOT_REVOKED", "DIV-5")),
+            Map.entry("ocsp/signer-expired", new Divergence("INDETERMINATE OUT_OF_BOUNDS_NOT_REVOKED", "DIV-5")),
+            Map.entry("pki/ca-expired", new Divergence("INDETERMINATE OUT_OF_BOUNDS_NOT_REVOKED", "DIV-5")),
+            Map.entry("ocsp/signer-expired-before-expiry",
+                    new Divergence("INDETERMINATE OUT_OF_BOUNDS_NOT_REVOKED", "DIV-5")));
+
+    private static String result(Map<String, Object> summary) {
+        return "rejected".equals(summary.get("result")) ? "rejected"
+                : summary.get("sub-indication") == null ? (String) summary.get("indication")
+                : summary.get("indication") + " " + summary.get("sub-indication");
+    }
+
+    /**
+     * Runs every case of the corpus twice under the aligned policy, which
+     * must give identical files and the predicted result or a recorded
+     * divergence, and once under the default policy of DSS, whose results
+     * are printed for the record and not compared (ADR-0023).
+     */
     @Test
-    void resultsOnTheCorpusAreStableOverTwoRuns() throws Exception {
+    void resultsOnTheCorpusAreStableAndMatchThePredictionsUnderTheAlignedPolicy() throws Exception {
         Manifest manifest = Manifest.read(CORPUS);
         Map<String, List<String>> cases = corpusCases(manifest);
         assertEquals(manifest.ofKind("certificate").size() + manifest.ofKind("crl").size()
                 + manifest.ofKind("ocsp-response").size(), cases.size());
+        assertTrue(cases.keySet().containsAll(KNOWN_DIVERGENCES.keySet()), KNOWN_DIVERGENCES.keySet().toString());
         StringBuilder table = new StringBuilder();
         List<String> failures = new ArrayList<>();
+        Set<String> policyDependent = new java.util.TreeSet<>();
         int index = 0;
         for (Map.Entry<String, List<String>> entry : cases.entrySet()) {
             List<String> run = entry.getValue();
@@ -532,9 +791,7 @@ class ValidateCertificateTest {
             List<Path> results = new ArrayList<>();
             for (int attempt = 0; attempt < 2; attempt++) {
                 Path result = temp.resolve("corpus-" + index + "-" + attempt);
-                List<String> withOut = new ArrayList<>(args);
-                withOut.addAll(List.of("--out", result.toString()));
-                assertEquals(ExitCodes.SUCCESS, run(withOut), entry.getKey() + ": " + stderr());
+                assertEquals(ExitCodes.SUCCESS, run(withOut(args, result)), entry.getKey() + ": " + stderr());
                 results.add(result);
             }
             for (String file : files(results.get(0))) {
@@ -543,22 +800,33 @@ class ValidateCertificateTest {
             }
             assertEquals(files(results.get(0)), files(results.get(1)), entry.getKey());
             Map<String, Object> summary = summary(results.get(0));
-            String actual = "rejected".equals(summary.get("result")) ? "rejected"
-                    : summary.get("sub-indication") == null ? (String) summary.get("indication")
-                    : summary.get("indication") + " " + summary.get("sub-indication");
+            assertEquals("aligned-1", summary.get("policy"), entry.getKey());
+            String actual = result(summary);
+            Path dss = temp.resolve("corpus-" + index + "-default");
+            assertEquals(ExitCodes.SUCCESS, run(withOut(args, dss, "--policy", "default")),
+                    entry.getKey() + ": " + stderr());
+            assertEquals("default", summary(dss).get("policy"), entry.getKey());
+            String byDefault = result(summary(dss));
+            if (!byDefault.equals(actual)) {
+                policyDependent.add(entry.getKey());
+            }
             String predicted = manifest.get(entry.getKey()).expectedDss().replace('-', '_');
-            String expected = KNOWN_DIFFERENCES.getOrDefault(entry.getKey(), predicted);
-            assertTrue(!expected.equals(predicted) || !KNOWN_DIFFERENCES.containsKey(entry.getKey()),
-                    entry.getKey() + " is listed as a known difference but matches the manifest");
-            table.append(String.format("%s | %s | %s | %s%n", entry.getKey(), predicted, actual,
-                    predicted.equals(actual) ? "match" : "differs (#75)"));
+            Divergence divergence = KNOWN_DIVERGENCES.get(entry.getKey());
+            assertTrue(divergence == null || !divergence.result().equals(predicted),
+                    entry.getKey() + " is listed as a divergence but matches the manifest");
+            String expected = divergence == null ? predicted : divergence.result();
+            table.append(String.format("| `%s` | %s | %s | %s |%n", entry.getKey(), predicted, actual,
+                    byDefault));
             if (!expected.equals(actual)) {
                 failures.add(entry.getKey() + ": expected " + expected + ", DSS gives " + actual);
             }
             index++;
         }
-        System.out.println("ValidateCertificateTest: corpus results against the manifest:\n" + table);
-        assertTrue(cases.keySet().containsAll(KNOWN_DIFFERENCES.keySet()), KNOWN_DIFFERENCES.keySet().toString());
+        System.out.println("ValidateCertificateTest: predicted result, aligned policy, default policy:\n" + table);
         assertTrue(failures.isEmpty(), String.join("\n", failures));
+        // ADR-0023 and the README of the tool: exactly these cases depend on the four deltas.
+        assertEquals(new java.util.TreeSet<>(List.of("pki/signer-ed25519", "crl/ca-ed25519", "ocsp/signer-ed25519",
+                "crl/ca-ecdsa-expired", "pki/signer-unknown-critical-extension",
+                "ocsp/signer-unknown-critical-extension", "pki/ocsp-responder")), policyDependent);
     }
 }

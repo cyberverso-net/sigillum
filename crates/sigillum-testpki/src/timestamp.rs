@@ -678,7 +678,7 @@ const TOKENS: [TokenSpec; 4] = [
         purpose: "Valid timestamp token over timestamps/content, issued by pki/tsa one day before the validation time.",
         expected_openssl: OpensslResult::Verified,
         expected_dss: (Indication::Passed, None),
-        notes: "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, clause 5.4.4, to be confirmed when verify runs DSS. Step 1 runs the basic signature validation, whose X.509 validation checks revocation (clause 5.2.6.4, step 4) with the CRLs that the chain of pki/tsa links: crl/ca-ecdsa for pki/tsa and crl/root-ca for pki/ca-ecdsa. Neither CRL revokes a certificate of the chain.",
+        notes: "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, clause 5.4.4. DSS 6.5.1 gives this result in the validate-timestamp mode of tools/dss-oracle, under the aligned policy of ADR-0023. Step 1 runs the basic signature validation, whose X.509 validation checks revocation (clause 5.2.6.4, step 4) with the CRLs that the chain of pki/tsa links: crl/ca-ecdsa for pki/tsa and crl/root-ca for pki/ca-ecdsa. Neither CRL revokes a certificate of the chain.",
     },
     TokenSpec {
         name: "signer-without-time-stamping",
@@ -688,7 +688,7 @@ const TOKENS: [TokenSpec; 4] = [
         purpose: "Timestamp token over timestamps/content, signed by pki/signer-p256, whose certificate lacks the extended key usage id-kp-timeStamping.",
         expected_openssl: OpensslResult::Rejected,
         expected_dss: (Indication::Indeterminate, Some("CHAIN_CONSTRAINTS_FAILURE")),
-        notes: "RFC 3161, section 2.3, requires the critical extended key usage id-kp-timeStamping. The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, step 5, to be confirmed when verify runs DSS.",
+        notes: "RFC 3161, section 2.3, requires the critical extended key usage id-kp-timeStamping. The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, step 5. DSS 6.5.1 gives this result in the validate-timestamp mode of tools/dss-oracle, under the aligned policy of ADR-0023.",
     },
     TokenSpec {
         name: "imprint-mismatch",
@@ -698,7 +698,7 @@ const TOKENS: [TokenSpec; 4] = [
         purpose: "Timestamp token issued by pki/tsa whose message imprint does not match timestamps/content.",
         expected_openssl: OpensslResult::Rejected,
         expected_dss: (Indication::Failed, Some("HASH_FAILURE")),
-        notes: "The message imprint is the SHA-256 digest of timestamps/content with its last octet inverted. The token itself is intact. FAILED with HASH_FAILURE is the project's mapping for a message imprint that does not match the data supplied to the validation, as the validate-timestamp mode of tools/dss-oracle will compare it, and a prediction to be confirmed when verify runs DSS.",
+        notes: "The message imprint is the SHA-256 digest of timestamps/content with its last octet inverted. The token itself is intact. FAILED with HASH_FAILURE is the project's mapping for a message imprint that does not match the data supplied to the validation, as the validate-timestamp mode of tools/dss-oracle compares it. It is a prediction, and DSS 6.5.1 gives this result in that mode, under the aligned policy of ADR-0023.",
     },
     TokenSpec {
         name: "gen-time-after-validation-time",
@@ -708,7 +708,7 @@ const TOKENS: [TokenSpec; 4] = [
         purpose: "Timestamp token over timestamps/content, issued by pki/tsa with a genTime one day after the validation time.",
         expected_openssl: OpensslResult::Verified,
         expected_dss: (Indication::Passed, None),
-        notes: "openssl ts -verify does not compare genTime with the verification time. Neither does the time-stamp validation building block of ETSI EN 319 102-1 V1.4.1, clause 5.4.4, so the DSS result PASSED is a prediction, to be confirmed when verify runs DSS. As for timestamps/valid, revocation is checked (clause 5.2.6.4, step 4) with the CRLs that the chain of pki/tsa links, crl/ca-ecdsa and crl/root-ca, which revoke none of its certificates. A verifier that uses the token as time evidence must reject a genTime after the validation time.",
+        notes: "openssl ts -verify does not compare genTime with the verification time. Neither does the time-stamp validation building block of ETSI EN 319 102-1 V1.4.1, clause 5.4.4, so the DSS result PASSED is a prediction. DSS 6.5.1 gives this result in the validate-timestamp mode of tools/dss-oracle, under the aligned policy of ADR-0023. As for timestamps/valid, revocation is checked (clause 5.2.6.4, step 4) with the CRLs that the chain of pki/tsa links, crl/ca-ecdsa and crl/root-ca, which revoke none of its certificates. A verifier that uses the token as time evidence must reject a genTime after the validation time.",
     },
 ];
 
