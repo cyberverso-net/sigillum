@@ -145,6 +145,62 @@ class ArgumentsTest {
     }
 
     @Test
+    void parsesTheDocumentOptions() throws UsageException {
+        Arguments arguments = Arguments.parse(List.of(
+                "validate-document",
+                "--document", "signed.pdf",
+                "--detached", "content.txt"));
+        assertEquals(Optional.of(Path.of("signed.pdf")), arguments.document());
+        assertEquals(Optional.of(Path.of("content.txt")), arguments.detached());
+        Arguments none = Arguments.parse(List.of("validate-document"));
+        assertEquals(Optional.empty(), none.document());
+        assertEquals(Optional.empty(), none.detached());
+    }
+
+    @Test
+    void rejectsDocumentOptionsGivenTwice() {
+        for (String option : List.of("--document", "--detached")) {
+            UsageException error = assertThrows(UsageException.class, () -> Arguments.parse(
+                    List.of("validate-document", option, "a", option, "b")), option);
+            assertTrue(error.getMessage().contains(option), error.getMessage());
+        }
+    }
+
+    @Test
+    void rejectsDocumentOptionsInOtherModes() {
+        for (Mode mode : List.of(Mode.VALIDATE_TIMESTAMP, Mode.VALIDATE_CERTIFICATE, Mode.SIGN)) {
+            for (String option : List.of("--document", "--detached")) {
+                UsageException error = assertThrows(UsageException.class,
+                        () -> Arguments.parse(List.of(mode.commandName(), option, "x")), option);
+                assertTrue(error.getMessage().contains(option + " is valid only in the mode validate-document"),
+                        error.getMessage());
+            }
+        }
+    }
+
+    @Test
+    void parsesTheTimeout() throws UsageException {
+        assertEquals(Optional.of(30), Arguments.parse(List.of("validate-document", "--timeout", "30")).timeout());
+        assertEquals(Optional.empty(), Arguments.parse(List.of("validate-document")).timeout());
+        assertEquals(Optional.of(86400), Arguments.parse(List.of("validate-timestamp", "--timeout", "86400"))
+                .timeout());
+    }
+
+    @Test
+    void rejectsATimeoutThatIsNotAPositiveNumberOfSeconds() {
+        for (String value : List.of("0", "-1", "1.5", "x", "86401", "99999999999")) {
+            UsageException error = assertThrows(UsageException.class,
+                    () -> Arguments.parse(List.of("validate-document", "--timeout", value)), value);
+            assertTrue(error.getMessage().contains("--timeout"), error.getMessage());
+        }
+        assertThrows(UsageException.class, () -> Arguments.parse(
+                List.of("validate-document", "--timeout", "1", "--timeout", "2")));
+        UsageException sign = assertThrows(UsageException.class,
+                () -> Arguments.parse(List.of("sign", "--timeout", "1")));
+        assertTrue(sign.getMessage().contains("--timeout"), sign.getMessage());
+    }
+
+    @Test
     void parsesThePolicyOfTheValidationModes() throws UsageException {
         for (Mode mode : List.of(Mode.VALIDATE_DOCUMENT, Mode.VALIDATE_CERTIFICATE, Mode.VALIDATE_TIMESTAMP)) {
             assertEquals(Optional.of(PolicyOption.named(OraclePolicy.ALIGNED)),

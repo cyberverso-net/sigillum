@@ -120,11 +120,18 @@ class MainTest {
     }
 
     @Test
-    void theDefaultRunnerImplementsTheTimestampAndCertificateModesOnly() {
+    void theDefaultRunnerImplementsTheValidationModesOnly() {
         assertEquals(ExitCodes.USAGE, run(Modes.RUNNER, "validate-timestamp"));
         assertEquals(ExitCodes.USAGE, run(Modes.RUNNER, "validate-certificate"));
-        for (Mode mode : List.of(Mode.VALIDATE_DOCUMENT, Mode.SIGN)) {
-            assertEquals(ExitCodes.NOT_IMPLEMENTED, run(Modes.RUNNER, mode.commandName()), mode.commandName());
+        assertEquals(ExitCodes.USAGE, run(Modes.RUNNER, "validate-document"));
+        assertEquals(ExitCodes.NOT_IMPLEMENTED, run(Modes.RUNNER, "sign"));
+    }
+
+    @Test
+    void helpListsTheDocumentOptions() {
+        assertEquals(ExitCodes.SUCCESS, run("--help"));
+        for (String option : List.of("--document", "--detached", "--policy")) {
+            assertTrue(stdout().contains(option), stdout());
         }
     }
 

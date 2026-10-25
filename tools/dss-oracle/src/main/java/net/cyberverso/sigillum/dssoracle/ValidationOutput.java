@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 public final class ValidationOutput {
 
     /** The version of the schema of {@code summary.json}. */
-    public static final int FORMAT_VERSION = 2;
+    public static final int FORMAT_VERSION = 3;
     /** The file name of the summary. */
     public static final String SUMMARY = "summary.json";
 
@@ -35,6 +35,10 @@ public final class ValidationOutput {
     private final Mode mode;
     private final Instant validationTime;
     private final PolicySelection policy;
+    /** The files written so far, which a resource limit removes. */
+    private final List<Path> written = new ArrayList<>();
+    /** Whether a resource limit has been recorded, after which nothing more is written. */
+    private boolean closed;
 
     /**
      * Checks the output directory before a run. It must not exist yet, or be
@@ -95,8 +99,8 @@ public final class ValidationOutput {
      *         is written then
      * @throws IOException if a file cannot be written
      */
-    public void writeValidated(List<Report> reports, Indication indication, SubIndication subIndication,
-            Map<String, Object> details) throws IOException {
+    public synchronized void writeValidated(List<Report> reports, Indication indication,
+            SubIndication subIndication, Map<String, Object> details) throws IOException {
         Set<String> names = new HashSet<>();
         for (Report report : reports) {
             String name = report.fileName();
@@ -106,6 +110,7 @@ public final class ValidationOutput {
                 throw new IllegalArgumentException("Report file name not allowed: " + name);
             }
         }
+        requireOpen();
         Files.createDirectories(directory);
         for (Report report : reports) {
             write(report.fileName(), report.xml());
@@ -124,13 +129,52 @@ public final class ValidationOutput {
      * @param rejection the rejection
      * @throws IOException if the file cannot be written
      */
-    public void writeRejected(RejectedInputException rejection) throws IOException {
+    public synchronized void writeRejected(RejectedInputException rejection) throws IOException {
+        requireOpen();
         Files.createDirectories(directory);
         Map<String, Object> summary = header("rejected");
         summary.put("input", rejection.option());
         summary.put("file", rejection.file());
         summary.put("message", rejection.getMessage());
         write(SUMMARY, Json.write(summary));
+    }
+
+    /**
+     * Writes the summary of a run that exceeded a resource limit, in place of
+     * any file written before, and closes the output: a later write fails
+     * with {@link IllegalStateException}. A run that has exceeded a limit
+     * may still be in progress on its worker thread.
+     *
+     * @param limit the limit exceeded: {@code heap}, {@code stack} or {@code time}
+     * @param limits the limits of the run
+     * @param message what happened, such as the message of the error
+     * @throws IOException if a file cannot be removed or written
+     */
+    public synchronized void writeResourceLimit(String limit, ResourceLimits.Limits limits, String message)
+            throws IOException {
+        requireOpen();
+        closed = true;
+        for (Path file : written) {
+            Files.deleteIfExists(file);
+        }
+        written.clear();
+        Files.createDirectories(directory);
+        Map<String, Object> summary = header("resource-limit");
+        summary.put("limit", limit);
+        Map<String, Object> recorded = new LinkedHashMap<>();
+        recorded.put("heap-bytes", limits.heapBytes());
+        recorded.put("stack-bytes", ResourceLimits.STACK_BYTES);
+        recorded.put("timeout-seconds", limits.timeoutSeconds());
+        recorded.put("garbage-collectors", limits.garbageCollectors());
+        summary.put("limits", recorded);
+        summary.put("message", message);
+        write(SUMMARY, Json.write(summary));
+    }
+
+    private void requireOpen() {
+        if (closed) {
+            throw new IllegalStateException("The run exceeded a resource limit; its output is closed");
+        }
     }
 
     /**
@@ -164,6 +208,7 @@ public final class ValidationOutput {
     private Map<String, Object> header(String result) {
         Map<String, Object> summary = new LinkedHashMap<>();
         summary.put("format-version", FORMAT_VERSION);
+        summary.put("oracle", Versions.oracle());
         summary.put("mode", mode.commandName());
         summary.put("validation-time", format(validationTime));
         summary.put("policy", policy.summary());
@@ -172,7 +217,9 @@ public final class ValidationOutput {
     }
 
     private void write(String name, String content) throws IOException {
-        Files.writeString(directory.resolve(name), content, StandardCharsets.UTF_8,
-                StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
+        Path file = directory.resolve(name);
+        written.add(file);
+        Files.writeString(file, content, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW,
+                StandardOpenOption.WRITE);
     }
 }

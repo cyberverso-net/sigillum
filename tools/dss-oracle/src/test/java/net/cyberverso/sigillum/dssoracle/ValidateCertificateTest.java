@@ -101,7 +101,8 @@ class ValidateCertificateTest {
     private static void assertValidated(Path directory, String policy, String indication, String subIndication)
             throws Exception {
         Map<String, Object> summary = summary(directory);
-        assertEquals(2L, summary.get("format-version"));
+        assertEquals(3L, summary.get("format-version"));
+        ValidateDocumentTest.assertOracle(summary);
         assertEquals("validate-certificate", summary.get("mode"));
         assertEquals(VALIDATION_TIME, summary.get("validation-time"));
         assertEquals(policy, summary.get("policy"), summary.toString());

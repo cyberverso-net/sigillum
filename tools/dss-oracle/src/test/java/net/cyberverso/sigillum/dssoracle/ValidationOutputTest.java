@@ -43,7 +43,7 @@ class ValidationOutputTest {
         Map<String, Object> summary = JsonReader.object(Files.readString(out.resolve("summary.json")));
         assertEquals("validate-certificate", summary.get("mode"));
         assertEquals("default", summary.get("policy"));
-        assertEquals(List.of("format-version", "mode", "validation-time", "policy", "result", "indication",
+        assertEquals(List.of("format-version", "oracle", "mode", "validation-time", "policy", "result", "indication",
                 "sub-indication", "details"), List.copyOf(summary.keySet()));
         assertEquals("INDETERMINATE", summary.get("indication"));
         assertEquals("TRY_LATER", summary.get("sub-indication"));

@@ -47,36 +47,39 @@ public final class ValidateCertificate implements Main.ModeRunner {
                 options.validationTime(), policy);
         OfflineSources sources = OfflineSources.read(arguments);
 
-        try {
-            CertificateVerifier verifier = sources.certificateVerifier(List.of());
-            CertificateToken certificate = sources.suppliedCertificate(0);
+        // The validation runs within limits of heap, stack and time; exceeding one is a recorded result.
+        ResourceLimits.run(ResourceLimits.Limits.of(arguments), output, () -> {
+            try {
+                CertificateVerifier verifier = sources.certificateVerifier(List.of());
+                CertificateToken certificate = sources.suppliedCertificate(0);
 
-            CertificateValidator validator = CertificateValidator.fromCertificate(certificate);
-            validator.setCertificateVerifier(verifier);
-            validator.setValidationTime(Date.from(options.validationTime()));
-            validator.setLocale(Locale.ENGLISH);
-            // ADR-0023: the aligned policy, the default certificate policy of DSS, or a policy file.
-            CertificateReports reports = policy.validate(PolicySelection.Kind.CERTIFICATE, validator::validate);
+                CertificateValidator validator = CertificateValidator.fromCertificate(certificate);
+                validator.setCertificateVerifier(verifier);
+                validator.setValidationTime(Date.from(options.validationTime()));
+                validator.setLocale(Locale.ENGLISH);
+                // ADR-0023: the aligned policy, the default certificate policy of DSS, or a policy file.
+                CertificateReports reports = policy.validate(PolicySelection.Kind.CERTIFICATE, validator::validate);
 
-            String id = certificate.getDSSIdAsString();
-            XmlBasicBuildingBlocks blocks = reports.getDetailedReport().getBasicBuildingBlockById(id);
-            XmlConclusion conclusion = blocks == null || blocks.getXCV() == null
-                    ? null : blocks.getXCV().getConclusion();
-            if (conclusion == null || !reports.getSimpleReport().getCertificateIds().contains(id)) {
-                throw new IllegalStateException("DSS reports no result for the certificate " + id);
+                String id = certificate.getDSSIdAsString();
+                XmlBasicBuildingBlocks blocks = reports.getDetailedReport().getBasicBuildingBlockById(id);
+                XmlConclusion conclusion = blocks == null || blocks.getXCV() == null
+                        ? null : blocks.getXCV().getConclusion();
+                if (conclusion == null || !reports.getSimpleReport().getCertificateIds().contains(id)) {
+                    throw new IllegalStateException("DSS reports no result for the certificate " + id);
+                }
+                // The result of the X.509 certificate validation of the whole chain (ETSI EN 319 102-1, clause 5.2.6)
+                // is the conclusion of the XCV block of the certificate. The simple report gives the certificate the
+                // conclusion of its own checks only, which details records apart.
+                output.writeValidated(List.of(
+                        new ValidationOutput.Report("diagnostic-data.xml", reports.getXmlDiagnosticData()),
+                        new ValidationOutput.Report("detailed-report.xml", reports.getXmlDetailedReport()),
+                        new ValidationOutput.Report("simple-report.xml", reports.getXmlSimpleReport())),
+                        conclusion.getIndication(), conclusion.getSubIndication(),
+                        details(reports, id, sources));
+            } catch (RejectedInputException e) {
+                output.writeRejected(e);
             }
-            // The result of the X.509 certificate validation of the whole chain (ETSI EN 319 102-1, clause 5.2.6)
-            // is the conclusion of the XCV block of the certificate. The simple report gives the certificate the
-            // conclusion of its own checks only, which details records apart.
-            output.writeValidated(List.of(
-                    new ValidationOutput.Report("diagnostic-data.xml", reports.getXmlDiagnosticData()),
-                    new ValidationOutput.Report("detailed-report.xml", reports.getXmlDetailedReport()),
-                    new ValidationOutput.Report("simple-report.xml", reports.getXmlSimpleReport())),
-                    conclusion.getIndication(), conclusion.getSubIndication(),
-                    details(reports, id, sources));
-        } catch (RejectedInputException e) {
-            output.writeRejected(e);
-        }
+        });
         return ExitCodes.SUCCESS;
     }
 

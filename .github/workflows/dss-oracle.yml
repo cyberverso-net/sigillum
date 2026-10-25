@@ -52,40 +52,59 @@ jobs:
           set -e
           test "$code" -eq 3
           out="$RUNNER_TEMP/validate-timestamp"
-          offline java -jar target/dss-oracle.jar validate-timestamp \
+          offline java -Xmx512m -XX:+UseSerialGC -jar target/dss-oracle.jar validate-timestamp \
             --timestamp ../../testdata/timestamps/valid.tst \
             --data ../../testdata/timestamps/content.txt \
             --trust-anchor ../../testdata/pki/root-ca.pem \
             --certificate ../../testdata/pki/ca-ecdsa.pem \
             --crl ../../testdata/crl/ca-ecdsa.crl \
             --crl ../../testdata/crl/root-ca.crl \
-            --validation-time 2030-01-15T10:00:00Z \
+            --validation-time 2030-01-15T10:00:00Z --timeout 120 \
             --out "$out"
           grep -F '"result": "validated"' "$out/summary.json"
           grep -F '"indication": "PASSED"' "$out/summary.json"
           out="$RUNNER_TEMP/validate-certificate"
-          offline java -jar target/dss-oracle.jar validate-certificate \
+          offline java -Xmx512m -XX:+UseSerialGC -jar target/dss-oracle.jar validate-certificate \
             --certificate ../../testdata/pki/signer-p256.pem \
             --certificate ../../testdata/pki/ca-ecdsa.pem \
             --trust-anchor ../../testdata/pki/root-ca.pem \
             --crl ../../testdata/crl/ca-ecdsa.crl \
             --crl ../../testdata/crl/root-ca.crl \
-            --validation-time 2030-01-15T10:00:00Z \
+            --validation-time 2030-01-15T10:00:00Z --timeout 120 \
             --out "$out"
           grep -Fx '  "result": "validated",' "$out/summary.json"
           grep -Fx '  "indication": "PASSED",' "$out/summary.json"
           grep -Fx '      "status": "GOOD",' "$out/summary.json"
           grep -F '"file": "../../testdata/crl/ca-ecdsa.crl"' "$out/summary.json"
           out="$RUNNER_TEMP/validate-certificate-ocsp"
-          offline java -jar target/dss-oracle.jar validate-certificate \
+          offline java -Xmx512m -XX:+UseSerialGC -jar target/dss-oracle.jar validate-certificate \
             --certificate ../../testdata/pki/signer-p256.pem \
             --certificate ../../testdata/pki/ca-ecdsa.pem \
             --trust-anchor ../../testdata/pki/root-ca.pem \
             --ocsp ../../testdata/ocsp/signer-p256.der \
             --crl ../../testdata/crl/root-ca.crl \
-            --validation-time 2030-01-15T10:00:00Z \
+            --validation-time 2030-01-15T10:00:00Z --timeout 120 \
             --out "$out"
           grep -Fx '  "result": "validated",' "$out/summary.json"
           grep -Fx '  "indication": "PASSED",' "$out/summary.json"
           grep -Fx '      "status": "GOOD",' "$out/summary.json"
           grep -F '"file": "../../testdata/ocsp/signer-p256.der"' "$out/summary.json"
+          # The tests write one signed document per format to target/test-documents.
+          for document in signed.p7m signed.pdf signed.jws detached.p7s; do
+            out="$RUNNER_TEMP/validate-document-$document"
+            detached=()
+            if [ "$document" = detached.p7s ]; then
+              detached=(--detached target/test-documents/content.txt)
+            fi
+            offline java -Xmx512m -XX:+UseSerialGC -jar target/dss-oracle.jar validate-document \
+              --document "target/test-documents/$document" "${detached[@]}" \
+              --trust-anchor ../../testdata/pki/root-ca.pem \
+              --certificate ../../testdata/pki/ca-ecdsa.pem \
+              --crl ../../testdata/crl/ca-ecdsa.crl \
+              --crl ../../testdata/crl/root-ca.crl \
+              --validation-time 2030-01-15T10:00:00Z --timeout 120 \
+              --out "$out"
+            grep -Fx '  "result": "validated",' "$out/summary.json"
+            grep -Fx '  "indication": "TOTAL_PASSED",' "$out/summary.json"
+            grep -F '"pdf-backend": "dss-pades-pdfbox"' "$out/summary.json"
+          done
