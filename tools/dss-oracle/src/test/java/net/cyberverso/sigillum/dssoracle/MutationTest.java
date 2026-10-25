@@ -18,7 +18,9 @@ import eu.europa.esig.dss.spi.x509.CommonCertificateSource;
 import eu.europa.esig.dss.spi.x509.CommonTrustedCertificateSource;
 import eu.europa.esig.dss.spi.x509.revocation.crl.ExternalResourcesCRLSource;
 import eu.europa.esig.dss.spi.x509.revocation.ocsp.ExternalResourcesOCSPSource;
+import eu.europa.esig.dss.spi.policy.SignaturePolicyProvider;
 import eu.europa.esig.dss.validation.CertificateValidator;
+import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.reports.CertificateReports;
 import eu.europa.esig.dss.validation.reports.Reports;
 import eu.europa.esig.dss.validation.timestamp.DetachedTimestampValidator;
@@ -43,8 +45,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * The fuzz coverage of the input paths of validate-timestamp and
- * validate-certificate: inputs of the corpus, mutated deterministically from
+ * The fuzz coverage of the input paths of validate-timestamp,
+ * validate-certificate and validate-document: inputs of the corpus, mutated deterministically from
  * a fixed seed, are run through each mode in process. Every run must end
  * with exit code 0 and the result {@code validated} or {@code rejected}:
  * never an exception, a failure of the tool or a network attempt.
@@ -404,6 +406,202 @@ class MutationTest {
         System.out.println("MutationTest: " + CERTIFICATE_RUNS + " certificate runs in " + seconds + " s: " + results);
         assertTrue(failures.isEmpty(), failures.size() + " failures:\n" + String.join("\n", failures));
         assertEquals(CERTIFICATE_RUNS, results.values().stream().mapToInt(Integer::intValue).sum());
+    }
+
+    /** The number of mutated runs of validate-document. */
+    static final int DOCUMENT_RUNS = 2000;
+    private static final long DOCUMENT_SEED = 37;
+
+    /**
+     * The files that DSS alone validates a document with, besides the chain
+     * and CRLs of pki/signer-p256: the document, the detached content or
+     * {@code null}, and the policy or {@code null} for the default one.
+     */
+    record DocumentSetup(byte[] document, byte[] detached, byte[] policy) {
+    }
+
+    /** The inputs of validate-document, and the setup of each without mutation. */
+    private static Map<String, DocumentSetup> documentSetups() throws Exception {
+        Map<String, DocumentSetup> setups = new java.util.LinkedHashMap<>();
+        setups.put("cades", new DocumentSetup(Documents.cades(), null, null));
+        setups.put("cades-t", new DocumentSetup(Documents.cadesT(), null, null));
+        setups.put("cades-detached", new DocumentSetup(Documents.cadesDetached(), Documents.CONTENT, null));
+        setups.put("content", new DocumentSetup(Documents.cadesDetached(), Documents.CONTENT, null));
+        setups.put("pades", new DocumentSetup(Documents.pades(), null, null));
+        setups.put("jades", new DocumentSetup(Documents.jades(), null, null));
+        setups.put("jades-json", new DocumentSetup(Documents.jadesJson(), null, null));
+        setups.put("policy", new DocumentSetup(Documents.cades(), null, Documents.defaultPolicy()));
+        return setups;
+    }
+
+    /** The option of each input of validate-document. */
+    private static String documentOption(String name) {
+        return switch (name) {
+            case "content" -> "--detached";
+            case "policy" -> "--policy";
+            default -> "--document";
+        };
+    }
+
+    /** The setup with the mutated file in the place of the input. */
+    private static DocumentSetup mutatedSetup(String name, DocumentSetup setup, byte[] mutated) {
+        return switch (documentOption(name)) {
+            case "--detached" -> new DocumentSetup(setup.document(), mutated, setup.policy());
+            case "--policy" -> new DocumentSetup(setup.document(), setup.detached(), mutated);
+            default -> new DocumentSetup(mutated, setup.detached(), setup.policy());
+        };
+    }
+
+    private static byte[] mutatedInput(String name, DocumentSetup setup) {
+        return switch (documentOption(name)) {
+            case "--detached" -> setup.detached();
+            case "--policy" -> setup.policy();
+            default -> setup.document();
+        };
+    }
+
+    @Test
+    void mutatedDocumentInputsAreValidatedOrRejected() throws Exception {
+        Map<String, DocumentSetup> setups = documentSetups();
+        List<String> names = List.copyOf(setups.keySet());
+
+        // Controls: DSS alone validates every document of the inputs as TOTAL_PASSED.
+        for (Map.Entry<String, DocumentSetup> entry : setups.entrySet()) {
+            RawResult control = rawDocumentDss(entry.getValue());
+            assertEquals("TOTAL_PASSED null", control.indication(), entry.getKey() + " " + control.failure());
+        }
+
+        Random random = new Random(DOCUMENT_SEED);
+        List<String> failures = new ArrayList<>();
+        Map<String, Integer> results = new java.util.TreeMap<>();
+        long start = System.nanoTime();
+        for (int run = 0; run < DOCUMENT_RUNS; run++) {
+            String name = names.get(random.nextInt(names.size()));
+            DocumentSetup setup = setups.get(name);
+            byte[] original = mutatedInput(name, setup);
+            boolean der = name.startsWith("cades");
+            Mutation mutation = Mutation.random(random, original, der);
+            byte[] mutated = mutation.apply(original);
+            DocumentSetup changed = mutatedSetup(name, setup, mutated);
+            Path directory = Files.createDirectories(temp.resolve("document-run-" + run));
+            Path document = Files.write(directory.resolve("document"), changed.document());
+            Path out = directory.resolve("out");
+            List<String> args = new ArrayList<>(List.of(
+                    "validate-document",
+                    "--document", document.toString(),
+                    "--trust-anchor", corpus("pki/root-ca.pem"),
+                    "--certificate", corpus("pki/ca-ecdsa.pem"),
+                    "--crl", corpus("crl/ca-ecdsa.crl"),
+                    "--crl", corpus("crl/root-ca.crl"),
+                    "--validation-time", "2030-01-15T10:00:00Z",
+                    "--out", out.toString()));
+            if (changed.detached() != null) {
+                args.addAll(List.of("--detached", Files.write(directory.resolve("detached"), changed.detached())
+                        .toString()));
+            }
+            if (changed.policy() != null) {
+                args.addAll(List.of("--policy", Files.write(directory.resolve("policy"), changed.policy())
+                        .toString()));
+            }
+            String label = "document run " + run + ", " + name + ", " + mutation;
+            ByteArrayOutputStream err = new ByteArrayOutputStream();
+            int code;
+            try {
+                code = Main.run(args.toArray(String[]::new), Modes.RUNNER,
+                        new PrintStream(new ByteArrayOutputStream(), true, StandardCharsets.UTF_8),
+                        new PrintStream(err, true, StandardCharsets.UTF_8));
+            } catch (RuntimeException | Error e) {
+                failures.add(label + ": " + e);
+                continue;
+            }
+            if (code != ExitCodes.SUCCESS) {
+                failures.add(label + ": exit " + code + ": " + err.toString(StandardCharsets.UTF_8).strip());
+            } else {
+                Map<String, Object> summary = JsonReader.object(Files.readString(out.resolve("summary.json")));
+                Object result = summary.get("result");
+                results.merge(name + " " + result, 1, Integer::sum);
+                if (!"validated".equals(result) && !"rejected".equals(result)) {
+                    failures.add(label + ": result " + result);
+                }
+                if ("validated".equals(result)) {
+                    // The checks of the tool run on the objects that DSS then validates; they must not change
+                    // the result that DSS alone gives.
+                    RawResult raw = rawDocumentDss(changed);
+                    @SuppressWarnings("unchecked")
+                    List<Map<String, Object>> signatures = (List<Map<String, Object>>)
+                            ((Map<String, Object>) summary.get("details")).get("signatures");
+                    String tool = signatures.isEmpty() ? "no signature"
+                            : signatures.get(0).get("indication") + " " + signatures.get(0).get("sub-indication");
+                    if (!tool.equals(raw.indication())) {
+                        failures.add(label + ": the tool gives " + tool + ", DSS alone " + raw.indication()
+                                + " " + raw.failure());
+                    }
+                }
+                if ("rejected".equals(result)) {
+                    if (!documentOption(name).equals(summary.get("input"))) {
+                        failures.add(label + ": rejected as " + summary.get("input"));
+                    }
+                    // Every validation uses the document, the detached content and the policy: DSS alone must fail.
+                    RawResult raw = rawDocumentDss(changed);
+                    if (raw.failure() == null) {
+                        failures.add(label + ": rejected (" + summary.get("message") + "), but DSS validates it: "
+                                + raw.indication());
+                    }
+                }
+            }
+            delete(directory);
+        }
+        long seconds = (System.nanoTime() - start) / 1_000_000_000L;
+        System.out.println("MutationTest: " + DOCUMENT_RUNS + " document runs in " + seconds + " s: " + results);
+        assertTrue(failures.isEmpty(), failures.size() + " failures:\n" + String.join("\n", failures));
+        assertEquals(DOCUMENT_RUNS, results.values().stream().mapToInt(Integer::intValue).sum());
+    }
+
+    /**
+     * Validates a document with DSS alone, without any code of the tool, with
+     * the chain and CRLs of pki/signer-p256, and returns the indication of
+     * its first signature, or the failure. DSS is given a signature policy
+     * provider without a data loader, so that it retrieves no policy.
+     */
+    static RawResult rawDocumentDss(DocumentSetup setup) {
+        try {
+            CommonTrustedCertificateSource trusted = new CommonTrustedCertificateSource();
+            trusted.addCertificate(DSSUtils.loadCertificate(der("pki/root-ca.pem")));
+            CommonCertificateSource adjunct = new CommonCertificateSource();
+            adjunct.addCertificate(DSSUtils.loadCertificate(der("pki/ca-ecdsa.pem")));
+            CommonCertificateVerifier verifier = new CommonCertificateVerifier(true);
+            verifier.setTrustedCertSources(trusted);
+            verifier.setAdjunctCertSources(adjunct);
+            verifier.setCrlSource(new ExternalResourcesCRLSource(documents(
+                    List.of(read("crl/ca-ecdsa.crl"), read("crl/root-ca.crl")))));
+            SignedDocumentValidator validator = SignedDocumentValidator.fromDocument(
+                    new InMemoryDocument(setup.document(), "document"));
+            validator.setCertificateVerifier(verifier);
+            // As the tool does: the supplied certificates are candidates for the signing certificate.
+            CommonCertificateSource signing = new CommonCertificateSource();
+            trusted.getCertificates().forEach(signing::addCertificate);
+            adjunct.getCertificates().forEach(signing::addCertificate);
+            validator.setSigningCertificateSource(signing);
+            validator.setSignaturePolicyProvider(new SignaturePolicyProvider());
+            validator.setValidationTime(Date.from(Instant.parse("2030-01-15T10:00:00Z")));
+            if (setup.detached() != null) {
+                validator.setDetachedContents(List.of(new InMemoryDocument(setup.detached(), "detached")));
+            }
+            // Without a policy file, the tool applies the aligned policy (ADR-0023).
+            Reports reports = setup.policy() == null ? validator.validateDocument(AlignedPolicy.forDocuments())
+                    : validator.validateDocument(new InMemoryDocument(setup.policy(), "policy"));
+            // The tool writes the reports; DSS alone must be able to as well.
+            reports.getXmlDiagnosticData();
+            reports.getXmlDetailedReport();
+            reports.getXmlSimpleReport();
+            reports.getXmlValidationReport();
+            SimpleReport simple = reports.getSimpleReport();
+            String id = simple.getFirstSignatureId();
+            return new RawResult(id == null ? "no signature" : simple.getIndication(id) + " "
+                    + simple.getSubIndication(id), null, Set.of(), Set.of());
+        } catch (RuntimeException | IOException | OutOfMemoryError | StackOverflowError e) {
+            return new RawResult(null, e, Set.of(), Set.of());
+        }
     }
 
     /**

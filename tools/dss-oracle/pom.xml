@@ -51,6 +51,34 @@
       <artifactId>dss-crl-parser-stream</artifactId>
       <version>${dss.version}</version>
     </dependency>
+    <!-- The signature formats that validate-document reads: CAdES, PAdES and JAdES. -->
+    <dependency>
+      <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+      <artifactId>dss-cades</artifactId>
+      <version>${dss.version}</version>
+    </dependency>
+    <!-- The implementation of the DSS CMS interface that DSS requires at run time for CAdES and PAdES. -->
+    <dependency>
+      <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+      <artifactId>dss-cms-object</artifactId>
+      <version>${dss.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+      <artifactId>dss-pades</artifactId>
+      <version>${dss.version}</version>
+    </dependency>
+    <!-- The PDF backend of DSS for PAdES, built on Apache PDFBox. -->
+    <dependency>
+      <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+      <artifactId>dss-pades-pdfbox</artifactId>
+      <version>${dss.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+      <artifactId>dss-jades</artifactId>
+      <version>${dss.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>

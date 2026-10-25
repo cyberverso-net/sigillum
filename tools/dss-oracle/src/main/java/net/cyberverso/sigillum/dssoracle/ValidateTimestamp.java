@@ -79,47 +79,50 @@ public final class ValidateTimestamp implements Main.ModeRunner {
                 : null;
         OfflineSources sources = OfflineSources.read(arguments);
 
-        try {
-            TimestampToken parsed = parse(token, data != null);
-            if (options.digestAlgorithm() != null
-                    && parsed.getMessageImprint().getAlgorithm() != options.digestAlgorithm()) {
-                throw new UsageException("--digest-algorithm " + options.digestAlgorithm().getName()
-                        + " differs from the algorithm of the message imprint of the token, "
-                        + parsed.getMessageImprint().getAlgorithm().getName() + ".");
-            }
-            CertificateVerifier verifier = sources.certificateVerifier(certificates(parsed));
-            List<CertificateToken> candidates = new ArrayList<>(certificates(parsed));
-            candidates.addAll(verifier.getTrustedCertSources().getCertificates());
-            candidates.addAll(verifier.getAdjunctCertSources().getCertificates());
-            checkSigningCertificateReferences(token, parsed, candidates);
-            checkSignature(token, parsed, verifier);
+        // The validation runs within limits of heap, stack and time; exceeding one is a recorded result.
+        ResourceLimits.run(ResourceLimits.Limits.of(arguments), output, () -> {
+            try {
+                TimestampToken parsed = parse(token, data != null);
+                if (options.digestAlgorithm() != null
+                        && parsed.getMessageImprint().getAlgorithm() != options.digestAlgorithm()) {
+                    throw new UsageException("--digest-algorithm " + options.digestAlgorithm().getName()
+                            + " differs from the algorithm of the message imprint of the token, "
+                            + parsed.getMessageImprint().getAlgorithm().getName() + ".");
+                }
+                CertificateVerifier verifier = sources.certificateVerifier(certificates(parsed));
+                List<CertificateToken> candidates = new ArrayList<>(certificates(parsed));
+                candidates.addAll(verifier.getTrustedCertSources().getCertificates());
+                candidates.addAll(verifier.getAdjunctCertSources().getCertificates());
+                checkSigningCertificateReferences(token, parsed, candidates);
+                checkSignature(token, parsed, verifier);
 
-            DetachedTimestampValidator validator = new DetachedTimestampValidator(token.document(),
-                    TimestampType.CONTENT_TIMESTAMP);
-            validator.setCertificateVerifier(verifier);
-            validator.setValidationTime(Date.from(options.validationTime()));
-            validator.setLocale(Locale.ENGLISH);
-            DSSDocument timestamped = timestampedData(data, options);
-            if (timestamped != null) {
-                validator.setTimestampedData(timestamped);
-            }
-            // ADR-0023: the aligned policy, the default validation policy of DSS, or a policy file.
-            Reports reports = policy.validate(PolicySelection.Kind.DOCUMENT, validator::validateDocument);
+                DetachedTimestampValidator validator = new DetachedTimestampValidator(token.document(),
+                        TimestampType.CONTENT_TIMESTAMP);
+                validator.setCertificateVerifier(verifier);
+                validator.setValidationTime(Date.from(options.validationTime()));
+                validator.setLocale(Locale.ENGLISH);
+                DSSDocument timestamped = timestampedData(data, options);
+                if (timestamped != null) {
+                    validator.setTimestampedData(timestamped);
+                }
+                // ADR-0023: the aligned policy, the default validation policy of DSS, or a policy file.
+                Reports reports = policy.validate(PolicySelection.Kind.DOCUMENT, validator::validateDocument);
 
-            SimpleReport simple = reports.getSimpleReport();
-            String id = simple.getFirstTimestampId();
-            if (id == null) {
-                throw new IllegalStateException("DSS reports no timestamp for " + options.timestamp());
+                SimpleReport simple = reports.getSimpleReport();
+                String id = simple.getFirstTimestampId();
+                if (id == null) {
+                    throw new IllegalStateException("DSS reports no timestamp for " + options.timestamp());
+                }
+                output.writeValidated(List.of(
+                        new ValidationOutput.Report("diagnostic-data.xml", reports.getXmlDiagnosticData()),
+                        new ValidationOutput.Report("detailed-report.xml", reports.getXmlDetailedReport()),
+                        new ValidationOutput.Report("simple-report.xml", reports.getXmlSimpleReport()),
+                        new ValidationOutput.Report("etsi-validation-report.xml", reports.getXmlValidationReport())),
+                        simple.getIndication(id), simple.getSubIndication(id), details(reports, id));
+            } catch (RejectedInputException e) {
+                output.writeRejected(e);
             }
-            output.writeValidated(List.of(
-                    new ValidationOutput.Report("diagnostic-data.xml", reports.getXmlDiagnosticData()),
-                    new ValidationOutput.Report("detailed-report.xml", reports.getXmlDetailedReport()),
-                    new ValidationOutput.Report("simple-report.xml", reports.getXmlSimpleReport()),
-                    new ValidationOutput.Report("etsi-validation-report.xml", reports.getXmlValidationReport())),
-                    simple.getIndication(id), simple.getSubIndication(id), details(reports, id));
-        } catch (RejectedInputException e) {
-            output.writeRejected(e);
-        }
+        });
         return ExitCodes.SUCCESS;
     }
 
@@ -273,9 +276,10 @@ public final class ValidateTimestamp implements Main.ModeRunner {
      * A value that does not decode is skipped. The token is rejected only in
      * the cases where DSS fails.
      *
+     * @param token the input that holds the token, which a failure rejects
      * @param candidates the certificates of the token and the supplied ones
      */
-    private static void checkSigningCertificateReferences(OfflineSources.Input token, TimestampToken parsed,
+    static void checkSigningCertificateReferences(OfflineSources.Input token, TimestampToken parsed,
             List<CertificateToken> candidates) throws RejectedInputException {
         AttributeTable attributes = parsed.getSignerInformation().getSignedAttributes();
         if (attributes == null) {
@@ -380,9 +384,9 @@ public final class ValidateTimestamp implements Main.ModeRunner {
      * as its signer: the best candidate found in the token, or, when the
      * token does not hold it, the supplied certificates that match the signer
      * identifier. A signature value or algorithm that cannot be decoded
-     * rejects the token.
+     * rejects the input that holds the token.
      */
-    private static void checkSignature(OfflineSources.Input token, TimestampToken parsed,
+    static void checkSignature(OfflineSources.Input token, TimestampToken parsed,
             CertificateVerifier verifier) throws RejectedInputException {
         CertificateValidity best = parsed.getCandidatesForSigningCertificate().getTheBestCandidate();
         if (best == null) {

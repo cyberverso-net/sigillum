@@ -34,6 +34,10 @@ import java.util.Optional;
  * @param policy the validation policy, a built-in one or a file, if given
  *        (validation modes only); the modes use {@link OraclePolicy#ALIGNED}
  *        without it
+ * @param document the signed document to validate, if given (validate-document only)
+ * @param detached the detached content of the signed document, if given
+ *        (validate-document only)
+ * @param timeout the time limit of the validation, in seconds, if given
  */
 public record Arguments(
         Mode mode,
@@ -47,7 +51,13 @@ public record Arguments(
         Optional<Path> data,
         Optional<String> digest,
         Optional<String> digestAlgorithm,
-        Optional<PolicyOption> policy) {
+        Optional<PolicyOption> policy,
+        Optional<Path> document,
+        Optional<Path> detached,
+        Optional<Integer> timeout) {
+
+    /** The largest time limit accepted, one day in seconds. */
+    public static final int MAX_TIMEOUT_SECONDS = 86_400;
 
     /**
      * Parses the arguments that follow the program name.
@@ -71,6 +81,9 @@ public record Arguments(
         String digest = null;
         String digestAlgorithm = null;
         PolicyOption policy = null;
+        Path document = null;
+        Path detached = null;
+        Integer timeout = null;
         List<Path> trustAnchors = new ArrayList<>();
         List<Path> certificates = new ArrayList<>();
         List<Path> crls = new ArrayList<>();
@@ -91,10 +104,14 @@ public record Arguments(
                     }
                     out = Path.of(value);
                 }
-                case "--timestamp" -> timestamp = Path.of(once(timestamp, option, mode, value));
-                case "--data" -> data = Path.of(once(data, option, mode, value));
-                case "--digest" -> digest = once(digest, option, mode, value);
-                case "--digest-algorithm" -> digestAlgorithm = once(digestAlgorithm, option, mode, value);
+                case "--timestamp" ->
+                        timestamp = Path.of(once(timestamp, option, mode, Mode.VALIDATE_TIMESTAMP, value));
+                case "--data" -> data = Path.of(once(data, option, mode, Mode.VALIDATE_TIMESTAMP, value));
+                case "--digest" -> digest = once(digest, option, mode, Mode.VALIDATE_TIMESTAMP, value);
+                case "--digest-algorithm" ->
+                        digestAlgorithm = once(digestAlgorithm, option, mode, Mode.VALIDATE_TIMESTAMP, value);
+                case "--document" -> document = Path.of(once(document, option, mode, Mode.VALIDATE_DOCUMENT, value));
+                case "--detached" -> detached = Path.of(once(detached, option, mode, Mode.VALIDATE_DOCUMENT, value));
                 case "--policy" -> {
                     if (mode == Mode.SIGN) {
                         throw new UsageException("--policy is valid only in the validation modes.");
@@ -103,6 +120,15 @@ public record Arguments(
                         throw new UsageException("--policy is given more than once.");
                     }
                     policy = PolicyOption.parse(value);
+                }
+                case "--timeout" -> {
+                    if (mode == Mode.SIGN) {
+                        throw new UsageException("--timeout is valid only in the validation modes.");
+                    }
+                    if (timeout != null) {
+                        throw new UsageException("--timeout is given more than once.");
+                    }
+                    timeout = seconds(value);
                 }
                 case "--trust-anchor" -> trustAnchors.add(Path.of(value));
                 case "--certificate" -> certificates.add(Path.of(value));
@@ -114,23 +140,36 @@ public record Arguments(
         return new Arguments(mode, Optional.ofNullable(validationTime), List.copyOf(trustAnchors),
                 List.copyOf(certificates), List.copyOf(crls), List.copyOf(ocspResponses), Optional.ofNullable(out),
                 Optional.ofNullable(timestamp), Optional.ofNullable(data), Optional.ofNullable(digest),
-                Optional.ofNullable(digestAlgorithm), Optional.ofNullable(policy));
+                Optional.ofNullable(digestAlgorithm), Optional.ofNullable(policy), Optional.ofNullable(document),
+                Optional.ofNullable(detached), Optional.ofNullable(timeout));
     }
 
     /**
-     * Checks an option of the validate-timestamp mode that may be given once.
+     * Checks an option of one mode that may be given once.
      *
+     * @param valid the mode in which the option is valid
      * @return the value of the option
      */
-    private static String once(Object previous, String option, Mode mode, String value) throws UsageException {
-        if (mode != Mode.VALIDATE_TIMESTAMP) {
-            throw new UsageException(option + " is valid only in the mode " + Mode.VALIDATE_TIMESTAMP.commandName()
-                    + ".");
+    private static String once(Object previous, String option, Mode mode, Mode valid, String value)
+            throws UsageException {
+        if (mode != valid) {
+            throw new UsageException(option + " is valid only in the mode " + valid.commandName() + ".");
         }
         if (previous != null) {
             throw new UsageException(option + " is given more than once.");
         }
         return value;
+    }
+
+    private static int seconds(String value) throws UsageException {
+        if (!value.matches("[0-9]{1,9}")) {
+            throw new UsageException("--timeout is not a whole number of seconds: " + value);
+        }
+        int seconds = Integer.parseInt(value);
+        if (seconds < 1 || seconds > MAX_TIMEOUT_SECONDS) {
+            throw new UsageException("--timeout must be from 1 to " + MAX_TIMEOUT_SECONDS + " seconds: " + value);
+        }
+        return seconds;
     }
 
     private static String valueOf(List<String> args, int optionIndex) throws UsageException {

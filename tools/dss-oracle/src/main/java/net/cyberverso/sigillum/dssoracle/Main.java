@@ -1,11 +1,7 @@
 package net.cyberverso.sigillum.dssoracle;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintStream;
-import java.io.UncheckedIOException;
 import java.util.Arrays;
-import java.util.Properties;
 import java.util.stream.Collectors;
 
 /** Entry point of {@code dss-oracle}. */
@@ -50,9 +46,7 @@ public final class Main {
             return ExitCodes.USAGE;
         }
         if (args.length == 1 && args[0].equals("--version")) {
-            Properties versions = versions();
-            out.println("dss-oracle " + versions.getProperty("tool.version")
-                    + " (DSS " + versions.getProperty("dss.version") + ")");
+            out.println("dss-oracle " + Versions.tool() + " (DSS " + Versions.dss() + ")");
             return ExitCodes.SUCCESS;
         }
         if (args.length == 1 && args[0].equals("--help")) {
@@ -109,7 +103,12 @@ public final class Main {
                 "  --crl <file>                       CRL supplied offline (repeatable)",
                 "  --ocsp <file>                      OCSP response supplied offline (repeatable)",
                 "  --out <directory>                  output directory, absent or empty",
+                "  --timeout <seconds>                time limit of a validation (default "
+                        + ResourceLimits.DEFAULT_TIMEOUT_SECONDS + ")",
                 "  --policy aligned|default|<file>    validation policy of a validation mode (default: aligned)",
+                "validate-document options:",
+                "  --document <file>                  signed document: CAdES, PAdES or JAdES",
+                "  --detached <file>                  detached content of the signed document",
                 "validate-certificate: the first --certificate is the certificate to validate;",
                 "  the others are supplied for its chain.",
                 "validate-timestamp options:",
@@ -118,17 +117,5 @@ public final class Main {
                 "  --digest <hex>                     digest of the data covered by the token",
                 "  --digest-algorithm <name>          algorithm of --digest, such as SHA256",
                 "Exit codes: 0 success, 1 failure, 2 usage error, 3 mode not implemented, 4 network access attempted.");
-    }
-
-    private static Properties versions() {
-        Properties properties = new Properties();
-        try (InputStream in = Main.class.getResourceAsStream("/dss-oracle.properties")) {
-            if (in != null) {
-                properties.load(in);
-            }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-        return properties;
     }
 }

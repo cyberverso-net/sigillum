@@ -7,7 +7,8 @@ public final class Modes {
     public static final Main.ModeRunner RUNNER = (arguments, out, err) -> switch (arguments.mode()) {
         case VALIDATE_TIMESTAMP -> new ValidateTimestamp().run(arguments, out, err);
         case VALIDATE_CERTIFICATE -> new ValidateCertificate().run(arguments, out, err);
-        case VALIDATE_DOCUMENT, SIGN -> Main.NOT_IMPLEMENTED.run(arguments, out, err);
+        case VALIDATE_DOCUMENT -> new ValidateDocument().run(arguments, out, err);
+        case SIGN -> Main.NOT_IMPLEMENTED.run(arguments, out, err);
     };
 
     private Modes() {
