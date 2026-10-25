@@ -33,6 +33,24 @@
       <artifactId>dss-validation</artifactId>
       <version>${dss.version}</version>
     </dependency>
+    <!-- The default validation policy, loaded by DSS through a service. -->
+    <dependency>
+      <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+      <artifactId>dss-policy-jaxb</artifactId>
+      <version>${dss.version}</version>
+    </dependency>
+    <!-- The implementation of the DSS utility interface that DSS requires at run time. -->
+    <dependency>
+      <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+      <artifactId>dss-utils-apache-commons</artifactId>
+      <version>${dss.version}</version>
+    </dependency>
+    <!-- The implementation of the DSS CRL parser that DSS requires at run time. -->
+    <dependency>
+      <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+      <artifactId>dss-crl-parser-stream</artifactId>
+      <version>${dss.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>

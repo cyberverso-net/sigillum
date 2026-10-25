@@ -24,6 +24,12 @@ import java.util.Optional;
  * @param crls CRLs supplied offline
  * @param ocspResponses OCSP responses supplied offline
  * @param out the output directory, if given
+ * @param timestamp the timestamp token to validate, if given (validate-timestamp only)
+ * @param data the data the timestamp covers, if given (validate-timestamp only)
+ * @param digest the digest of the data the timestamp covers, in hexadecimal, if given
+ *        (validate-timestamp only)
+ * @param digestAlgorithm the name of the algorithm of {@code digest}, if given
+ *        (validate-timestamp only)
  */
 public record Arguments(
         Mode mode,
@@ -32,7 +38,11 @@ public record Arguments(
         List<Path> certificates,
         List<Path> crls,
         List<Path> ocspResponses,
-        Optional<Path> out) {
+        Optional<Path> out,
+        Optional<Path> timestamp,
+        Optional<Path> data,
+        Optional<String> digest,
+        Optional<String> digestAlgorithm) {
 
     /**
      * Parses the arguments that follow the program name.
@@ -51,6 +61,10 @@ public record Arguments(
                 .orElseThrow(() -> new UsageException("Unknown mode: " + args.get(0)));
         Instant validationTime = null;
         Path out = null;
+        Path timestamp = null;
+        Path data = null;
+        String digest = null;
+        String digestAlgorithm = null;
         List<Path> trustAnchors = new ArrayList<>();
         List<Path> certificates = new ArrayList<>();
         List<Path> crls = new ArrayList<>();
@@ -71,6 +85,10 @@ public record Arguments(
                     }
                     out = Path.of(value);
                 }
+                case "--timestamp" -> timestamp = Path.of(once(timestamp, option, mode, value));
+                case "--data" -> data = Path.of(once(data, option, mode, value));
+                case "--digest" -> digest = once(digest, option, mode, value);
+                case "--digest-algorithm" -> digestAlgorithm = once(digestAlgorithm, option, mode, value);
                 case "--trust-anchor" -> trustAnchors.add(Path.of(value));
                 case "--certificate" -> certificates.add(Path.of(value));
                 case "--crl" -> crls.add(Path.of(value));
@@ -79,7 +97,25 @@ public record Arguments(
             }
         }
         return new Arguments(mode, Optional.ofNullable(validationTime), List.copyOf(trustAnchors),
-                List.copyOf(certificates), List.copyOf(crls), List.copyOf(ocspResponses), Optional.ofNullable(out));
+                List.copyOf(certificates), List.copyOf(crls), List.copyOf(ocspResponses), Optional.ofNullable(out),
+                Optional.ofNullable(timestamp), Optional.ofNullable(data), Optional.ofNullable(digest),
+                Optional.ofNullable(digestAlgorithm));
+    }
+
+    /**
+     * Checks an option of the validate-timestamp mode that may be given once.
+     *
+     * @return the value of the option
+     */
+    private static String once(Object previous, String option, Mode mode, String value) throws UsageException {
+        if (mode != Mode.VALIDATE_TIMESTAMP) {
+            throw new UsageException(option + " is valid only in the mode " + Mode.VALIDATE_TIMESTAMP.commandName()
+                    + ".");
+        }
+        if (previous != null) {
+            throw new UsageException(option + " is given more than once.");
+        }
+        return value;
     }
 
     private static String valueOf(List<String> args, int optionIndex) throws UsageException {

@@ -80,6 +80,8 @@ Trusting another publisher, with `cargo vet trust`, or adding another source of 
 
 Thresholds apply to the change under review. A shortfall is acceptable only with a written justification in the pull request, for example code that is unreachable by construction.
 
+The fuzzing threshold applies to parsers in the library crates and in the Rust tools. The Java test tool `tools/dss-oracle` is covered instead by a deterministic JUnit mutation test of its inputs, run by `mvn verify`, because it is not distributed and reads only project fixtures and sigillum output. Its README describes the test.
+
 ## Kinds of test
 
 - **Unit tests** for each function's contract, including error paths.

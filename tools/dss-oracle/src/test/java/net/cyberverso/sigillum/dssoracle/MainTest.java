@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class MainTest {
@@ -106,6 +107,32 @@ class MainTest {
     void versionAndHelpTakeNoOtherArguments() {
         assertEquals(ExitCodes.USAGE, run("--version", "sign"));
         assertEquals(ExitCodes.USAGE, run("sign", "--help"));
+    }
+
+    @Test
+    void aUsageErrorFoundByARunnerHasTheUsageExitCode() {
+        int code = run((arguments, stdout, stderr) -> {
+            throw new UsageException("--out is required.");
+        }, "sign");
+        assertEquals(ExitCodes.USAGE, code);
+        assertTrue(stderr().contains("--out is required."), stderr());
+        assertTrue(stderr().contains("Usage"), stderr());
+    }
+
+    @Test
+    void theDefaultRunnerImplementsValidateTimestampOnly() {
+        assertEquals(ExitCodes.USAGE, run(Modes.RUNNER, "validate-timestamp"));
+        for (Mode mode : List.of(Mode.VALIDATE_DOCUMENT, Mode.VALIDATE_CERTIFICATE, Mode.SIGN)) {
+            assertEquals(ExitCodes.NOT_IMPLEMENTED, run(Modes.RUNNER, mode.commandName()), mode.commandName());
+        }
+    }
+
+    @Test
+    void helpListsTheTimestampOptions() {
+        assertEquals(ExitCodes.SUCCESS, run("--help"));
+        for (String option : List.of("--timestamp", "--data", "--digest", "--digest-algorithm")) {
+            assertTrue(stdout().contains(option), stdout());
+        }
     }
 
     @Test

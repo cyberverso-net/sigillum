@@ -106,6 +106,45 @@ class ArgumentsTest {
     }
 
     @Test
+    void parsesTheTimestampOptions() throws UsageException {
+        Arguments arguments = Arguments.parse(List.of(
+                "validate-timestamp",
+                "--timestamp", "token.tst",
+                "--data", "content.txt",
+                "--digest", "00ff",
+                "--digest-algorithm", "SHA256"));
+        assertEquals(Optional.of(Path.of("token.tst")), arguments.timestamp());
+        assertEquals(Optional.of(Path.of("content.txt")), arguments.data());
+        assertEquals(Optional.of("00ff"), arguments.digest());
+        assertEquals(Optional.of("SHA256"), arguments.digestAlgorithm());
+        Arguments none = Arguments.parse(List.of("validate-timestamp"));
+        assertEquals(Optional.empty(), none.timestamp());
+        assertEquals(Optional.empty(), none.data());
+        assertEquals(Optional.empty(), none.digest());
+        assertEquals(Optional.empty(), none.digestAlgorithm());
+    }
+
+    @Test
+    void rejectsTimestampOptionsGivenTwice() {
+        for (String option : List.of("--timestamp", "--data", "--digest", "--digest-algorithm")) {
+            UsageException error = assertThrows(UsageException.class, () -> Arguments.parse(
+                    List.of("validate-timestamp", option, "a", option, "b")), option);
+            assertTrue(error.getMessage().contains(option), error.getMessage());
+        }
+    }
+
+    @Test
+    void rejectsTimestampOptionsInOtherModes() {
+        for (Mode mode : List.of(Mode.VALIDATE_DOCUMENT, Mode.VALIDATE_CERTIFICATE, Mode.SIGN)) {
+            for (String option : List.of("--timestamp", "--data", "--digest", "--digest-algorithm")) {
+                UsageException error = assertThrows(UsageException.class,
+                        () -> Arguments.parse(List.of(mode.commandName(), option, "x")), option);
+                assertTrue(error.getMessage().contains(option), error.getMessage());
+            }
+        }
+    }
+
+    @Test
     void rejectsATimeThatIsNotRfc3339() {
         for (String value : List.of("2030-01-15", "2030-01-15T10:00:00", "soon", "2030-01-15T10:00Z",
                 "2030-01-15T10:00:00+01:00:30", "+12030-01-15T10:00:00Z", "2030-02-30T10:00:00Z",

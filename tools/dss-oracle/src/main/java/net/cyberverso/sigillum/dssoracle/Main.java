@@ -71,6 +71,10 @@ public final class Main {
             int code;
             try {
                 code = runner.run(arguments, out, err);
+            } catch (UsageException e) {
+                err.println("dss-oracle: " + e.getMessage());
+                err.println(usage());
+                code = ExitCodes.USAGE;
             } catch (Exception | Error e) {
                 err.println("dss-oracle: " + e);
                 code = ExitCodes.FAILURE;
@@ -89,7 +93,7 @@ public final class Main {
      * @param args the command-line arguments
      */
     public static void main(String[] args) {
-        System.exit(run(args, NOT_IMPLEMENTED, System.out, System.err));
+        System.exit(run(args, Modes.RUNNER, System.out, System.err));
     }
 
     private static String usage() {
@@ -104,7 +108,12 @@ public final class Main {
                 "  --certificate <file>               certificate supplied offline (repeatable)",
                 "  --crl <file>                       CRL supplied offline (repeatable)",
                 "  --ocsp <file>                      OCSP response supplied offline (repeatable)",
-                "  --out <directory>                  output directory",
+                "  --out <directory>                  output directory, absent or empty",
+                "validate-timestamp options:",
+                "  --timestamp <file>                 RFC 3161 timestamp token, DER",
+                "  --data <file>                      data covered by the token",
+                "  --digest <hex>                     digest of the data covered by the token",
+                "  --digest-algorithm <name>          algorithm of --digest, such as SHA256",
                 "Exit codes: 0 success, 1 failure, 2 usage error, 3 mode not implemented, 4 network access attempted.");
     }
 
