@@ -1,22 +1,22 @@
 //! Command-line entry point of `sigillum-testpki`.
 //!
 //! Exit codes: 0 on success, 1 when the manifest cannot be read or is not
-//! valid or an artefact cannot be generated or written, or when `tsa`
-//! cannot read its key or certificate or issue the token, 2 on a usage
-//! error, 3 when the subcommand is not implemented yet.
+//! valid, an artefact cannot be generated or written, `tsa` cannot read
+//! its key or certificate or issue the token, or `verify` finds an
+//! artefact without its expected result or cannot run its checks, 2 on a
+//! usage error.
 
 mod tsa_cli;
+mod verify_cli;
 
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use clap::{Parser, Subcommand, ValueEnum};
-use sigillum_testpki::manifest::Manifest;
 use sigillum_testpki::pki::{self, GenerateError, Summary};
 use sigillum_testpki::timestamp;
-use time::OffsetDateTime;
-use time::format_description::well_known::Rfc3339;
 use tsa_cli::TsaOptions;
+use verify_cli::VerifyOptions;
 
 /// Generator and checker of the sigillum test PKI and corpus.
 #[derive(Parser)]
@@ -33,15 +33,15 @@ enum Command {
     /// Issue an RFC 3161 timestamp token for a digest at a given time.
     Tsa(TsaOptions),
     /// Check every artefact against the results recorded in the manifest.
-    Verify(ManifestOptions),
+    Verify(VerifyOptions),
 }
 
 /// Options of the subcommands that work on the corpus.
 #[derive(clap::Args)]
-struct ManifestOptions {
+pub struct ManifestOptions {
     /// Path to the manifest of the test corpus.
     #[arg(long, default_value = "testdata/manifest.toml")]
-    manifest: PathBuf,
+    pub manifest: PathBuf,
 }
 
 /// Options of `generate`.
@@ -80,15 +80,8 @@ impl Target {
     }
 }
 
-const NOT_IMPLEMENTED: u8 = 3;
-
-fn format_time(time: OffsetDateTime) -> String {
-    time.format(&Rfc3339).unwrap_or_else(|_| time.to_string())
-}
-
 fn main() -> ExitCode {
-    let cli = Cli::parse();
-    let (name, time) = match &cli.command {
+    match Cli::parse().command {
         Command::Generate(GenerateOptions { target, corpus }) => {
             let result = match target {
                 Target::Pki => pki::write_into_corpus(&corpus.manifest),
@@ -96,22 +89,11 @@ fn main() -> ExitCode {
                 Target::Timestamps => timestamp::write_into_corpus(&corpus.manifest),
                 Target::Ocsp => pki::ocsp::write_into_corpus(&corpus.manifest),
             };
-            return report(target.name(), result, &corpus.manifest);
+            report(target.name(), result, &corpus.manifest)
         }
-        Command::Verify(options) => match Manifest::load(&options.manifest) {
-            Ok(manifest) => ("verify", manifest.header.validation_time),
-            Err(error) => {
-                eprintln!("sigillum-testpki: {error}");
-                return ExitCode::FAILURE;
-            }
-        },
-        Command::Tsa(options) => return tsa_cli::run(options),
-    };
-    eprintln!(
-        "sigillum-testpki {name}: not implemented yet (time {})",
-        format_time(time)
-    );
-    ExitCode::from(NOT_IMPLEMENTED)
+        Command::Verify(options) => verify_cli::run(&options),
+        Command::Tsa(options) => tsa_cli::run(&options),
+    }
 }
 
 /// Reports what `generate` did for the target `name`, and returns the exit

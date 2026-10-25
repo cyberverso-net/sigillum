@@ -1,0 +1,6 @@
+./pki/signer-p256.pem
+./pki/signer-p256.pem: WARNING: Status times invalid.
+80616DF201000000:error:1380007E:OCSP routines:OCSP_check_validity:status not yet valid:crypto/ocsp/ocsp_cl.c:324:
+good
+	This Update: Jan 14 10:00:00 2030 GMT
+	Next Update: Jan 21 10:00:00 2030 GMT

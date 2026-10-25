@@ -8,5 +8,6 @@
 #![forbid(unsafe_code)]
 
 pub mod manifest;
+pub mod openssl;
 pub mod pki;
 pub mod timestamp;

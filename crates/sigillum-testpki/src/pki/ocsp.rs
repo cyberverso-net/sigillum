@@ -171,6 +171,12 @@ pub struct OcspSpec {
     pub notes: Option<String>,
 }
 
+/// The last sentence of the notes of every response with a status.
+/// `openssl ocsp` compares `thisUpdate` and `nextUpdate` with the current
+/// time only, and `-attime` sets the time of the path validation of the
+/// signer, so the expected OpenSSL result cannot cover freshness.
+pub const OPENSSL_FRESHNESS_NOTE: &str = "openssl ocsp compares thisUpdate and nextUpdate with the current time only, so the expected OpenSSL result covers the parsing of the response, its signature and the path of its signer at the validation time, and not its freshness.";
+
 /// The identifier of the response with this name.
 pub fn ocsp_id(name: &str) -> String {
     format!("{DIRECTORY}/{name}")
@@ -698,6 +704,10 @@ fn response_file(spec: &OcspSpec, der: Vec<u8>) -> Result<GeneratedFile, PkiErro
         Body::Unsuccessful(_) => Links::default(),
     };
     let covered = format!("Covered certificate: {}.", certificate_id(spec.covered));
+    let freshness = match spec.body {
+        Body::Signed(_) => Some(OPENSSL_FRESHNESS_NOTE),
+        Body::Unsuccessful(_) => None,
+    };
     let artefact = Artefact {
         id: ocsp_id(&spec.name),
         path: PathBuf::from(format!("{DIRECTORY}/{}.der", spec.name)),
@@ -707,10 +717,13 @@ fn response_file(spec: &OcspSpec, der: Vec<u8>) -> Result<GeneratedFile, PkiErro
         expected_openssl: spec.expected_openssl,
         expected_dss: spec.expected_dss.clone(),
         links,
-        notes: Some(match &spec.notes {
-            Some(notes) => format!("{covered} {notes}"),
-            None => covered,
-        }),
+        notes: Some(
+            [Some(covered.as_str()), spec.notes.as_deref(), freshness]
+                .into_iter()
+                .flatten()
+                .collect::<Vec<_>>()
+                .join(" "),
+        ),
     };
     Ok(GeneratedFile {
         artefact,

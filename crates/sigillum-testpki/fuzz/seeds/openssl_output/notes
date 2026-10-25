@@ -1,0 +1,1 @@
+Covered certificate: pki/signer-p256. openssl ocsp compares thisUpdate and nextUpdate with the current time only.

@@ -1,0 +1,4 @@
+./pki/signer-p256-revoked.pem
+./pki/signer-p256-revoked.pem: revoked
+	This Update: Jan 14 10:00:00 2030 GMT
+	Reason: keyCompromise

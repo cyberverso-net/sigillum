@@ -1,0 +1,102 @@
+name: Fixture verification with OpenSSL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Fixture verification with OpenSSL (${{ matrix.check }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # The release that the manifest header names, with the tests of
+          # tests/openssl.rs. This entry passes no --openssl-version.
+          - check: manifest
+            version: ""
+          # A second release, checked against the same expected results.
+          - check: "4.0.3"
+            version: "4.0.3"
+    env:
+      CARGO_TERM_COLOR: always
+      RUSTFLAGS: -D warnings
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
+        with:
+          toolchain: stable
+      # Each release is built from its published source, checked against
+      # the SHA-256 digest recorded here, whatever the runner ships.
+      - name: Choose the OpenSSL release
+        id: openssl
+        env:
+          OTHER: ${{ matrix.version }}
+        run: |
+          if [ -n "$OTHER" ]; then
+            version=$OTHER
+          else
+            version=$(sed -n 's/^openssl-version *= *"\([^"]*\)".*/\1/p' testdata/manifest.toml | head -n 1)
+          fi
+          case "$version" in
+            3.5.9) sha256=603f5602e2eef00d77fbd429d34dcd5822bb301757a1bc9cdb24c670f1eb859a ;;
+            4.0.3) sha256=325b5c806167c13b40b1ffeadfe0248197c00eccc4cf123ec1e28d2d2fd216d9 ;;
+            *)
+              echo "::error file=testdata/manifest.toml::No SHA-256 digest is recorded in this workflow for OpenSSL '$version'."
+              exit 1
+              ;;
+          esac
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "sha256=$sha256" >> "$GITHUB_OUTPUT"
+      - name: Build OpenSSL
+        env:
+          VERSION: ${{ steps.openssl.outputs.version }}
+          SHA256: ${{ steps.openssl.outputs.sha256 }}
+        working-directory: ${{ runner.temp }}
+        run: |
+          curl -sSfL -o openssl.tar.gz \
+            "https://github.com/openssl/openssl/releases/download/openssl-$VERSION/openssl-$VERSION.tar.gz"
+          echo "$SHA256  openssl.tar.gz" | sha256sum -c -
+          tar -xzf openssl.tar.gz
+          cd "openssl-$VERSION"
+          ./Configure --prefix="$RUNNER_TEMP/openssl" --openssldir="$RUNNER_TEMP/openssl/ssl" no-shared no-tests
+          make -j"$(nproc)" build_programs
+          ./apps/openssl version
+          echo "OPENSSL=$PWD/apps/openssl" >> "$GITHUB_ENV"
+      - name: Build sigillum-testpki and its OpenSSL tests
+        run: |
+          cargo build --locked -p sigillum-testpki
+          tests=$(cargo test --locked -p sigillum-testpki --test openssl --no-run --message-format=json \
+            | jq -r 'select(.reason == "compiler-artifact" and .target.name == "openssl" and .profile.test) | .executable')
+          test -x "$tests"
+          echo "OPENSSL_TESTS=$tests" >> "$GITHUB_ENV"
+      # The checks are built with network access and run in a network
+      # namespace without it.
+      - name: Verify the corpus with OpenSSL, without network
+        env:
+          OTHER: ${{ matrix.version }}
+        run: |
+          offline() {
+            sudo unshare --net -- runuser -u "$(id -un)" -- env "PATH=$PATH" "SIGILLUM_TESTPKI_OPENSSL=$OPENSSL" SIGILLUM_TESTPKI_OPENSSL_REQUIRED=1 "$@"
+          }
+          offline true
+          for url in https://github.com https://1.1.1.1; do
+            if offline curl -sS --max-time 5 "$url" > /dev/null; then
+              echo "The network namespace still reaches $url."
+              exit 1
+            fi
+          done
+          if [ -n "$OTHER" ]; then
+            offline target/debug/sigillum-testpki verify --openssl --openssl-program "$OPENSSL" --openssl-version "$OTHER"
+          else
+            offline target/debug/sigillum-testpki verify --openssl --openssl-program "$OPENSSL"
+            offline "$OPENSSL_TESTS"
+          fi
