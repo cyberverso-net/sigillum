@@ -127,7 +127,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate with an RSA 2048-bit key, signed with RSA PKCS#1 v1.5 and SHA-256."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"], revocation = ["crl/ca-rsa"] }
+links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"], revocation = ["crl/ca-rsa", "ocsp/signer-rsa-2048"] }
 
 [[artefact]]
 id = "pki/keys/signer-rsa-2048"
@@ -146,7 +146,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate with an RSA 3072-bit key, signed with RSA PKCS#1 v1.5 and SHA-256."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"], revocation = ["crl/ca-rsa"] }
+links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"], revocation = ["crl/ca-rsa", "ocsp/signer-rsa-3072"] }
 
 [[artefact]]
 id = "pki/keys/signer-rsa-3072"
@@ -165,7 +165,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate with an RSA 2048-bit key, signed with RSA PKCS#1 v1.5 and SHA3-256."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"], revocation = ["crl/ca-rsa"] }
+links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"], revocation = ["crl/ca-rsa", "ocsp/signer-rsa-sha3-256"] }
 
 [[artefact]]
 id = "pki/keys/signer-rsa-sha3-256"
@@ -184,7 +184,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate with an RSA 3072-bit key, signed with RSASSA-PSS and SHA-256."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/ca-rsa-pss", chain = ["pki/ca-rsa-pss", "pki/root-ca"], revocation = ["crl/ca-rsa-pss"] }
+links = { issuer = "pki/ca-rsa-pss", chain = ["pki/ca-rsa-pss", "pki/root-ca"], revocation = ["crl/ca-rsa-pss", "ocsp/signer-rsa-pss-sha256"] }
 
 [[artefact]]
 id = "pki/keys/signer-rsa-pss-sha256"
@@ -203,7 +203,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate with an RSA 3072-bit key, signed with RSASSA-PSS and SHA-384."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/ca-rsa-pss", chain = ["pki/ca-rsa-pss", "pki/root-ca"], revocation = ["crl/ca-rsa-pss"] }
+links = { issuer = "pki/ca-rsa-pss", chain = ["pki/ca-rsa-pss", "pki/root-ca"], revocation = ["crl/ca-rsa-pss", "ocsp/signer-rsa-pss-sha384"] }
 
 [[artefact]]
 id = "pki/keys/signer-rsa-pss-sha384"
@@ -222,7 +222,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate with an ECDSA P-256 key."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa"] }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa", "ocsp/signer-p256"] }
 
 [[artefact]]
 id = "pki/keys/signer-p256"
@@ -241,7 +241,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate with an ECDSA P-384 key."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa"] }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa", "ocsp/signer-p384"] }
 
 [[artefact]]
 id = "pki/keys/signer-p384"
@@ -260,7 +260,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate with an ECDSA P-521 key, signed with ECDSA on P-521 and SHA-512."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/ca-ecdsa-p521", chain = ["pki/ca-ecdsa-p521", "pki/root-ca"], revocation = ["crl/ca-ecdsa-p521"] }
+links = { issuer = "pki/ca-ecdsa-p521", chain = ["pki/ca-ecdsa-p521", "pki/root-ca"], revocation = ["crl/ca-ecdsa-p521", "ocsp/signer-p521"] }
 
 [[artefact]]
 id = "pki/keys/signer-p521"
@@ -279,7 +279,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate with an Ed25519 key."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/ca-ed25519", chain = ["pki/ca-ed25519", "pki/root-ca"], revocation = ["crl/ca-ed25519"] }
+links = { issuer = "pki/ca-ed25519", chain = ["pki/ca-ed25519", "pki/root-ca"], revocation = ["crl/ca-ed25519", "ocsp/signer-ed25519"] }
 
 [[artefact]]
 id = "pki/keys/signer-ed25519"
@@ -298,7 +298,7 @@ kind = "certificate"
 purpose = "Timestamping authority certificate, with the critical extended key usage id-kp-timeStamping."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa"] }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa", "ocsp/tsa"] }
 
 [[artefact]]
 id = "pki/keys/tsa"
@@ -336,7 +336,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate that expired one day before the validation time."
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
-links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa"] }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa", "ocsp/signer-expired"] }
 
 [[artefact]]
 id = "pki/keys/signer-expired"
@@ -355,7 +355,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate that becomes valid one day after the validation time."
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
-links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa"] }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa", "ocsp/signer-not-yet-valid"] }
 
 [[artefact]]
 id = "pki/keys/signer-not-yet-valid"
@@ -393,7 +393,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate, valid at the validation time, issued by an intermediate CA that has expired."
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
-links = { issuer = "pki/ca-expired", chain = ["pki/ca-expired", "pki/root-ca"], revocation = ["crl/ca-expired"] }
+links = { issuer = "pki/ca-expired", chain = ["pki/ca-expired", "pki/root-ca"], revocation = ["crl/ca-expired", "ocsp/signer-under-expired-ca"] }
 
 [[artefact]]
 id = "pki/keys/signer-under-expired-ca"
@@ -412,7 +412,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate whose key usage lacks nonRepudiation."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa"] }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa", "ocsp/signer-without-non-repudiation"] }
 
 [[artefact]]
 id = "pki/keys/signer-without-non-repudiation"
@@ -451,7 +451,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate issued by a CA certificate whose basic constraints do not assert cA."
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
-links = { issuer = "pki/ca-without-ca-flag", chain = ["pki/ca-without-ca-flag", "pki/root-ca"], revocation = ["crl/ca-without-ca-flag"] }
+links = { issuer = "pki/ca-without-ca-flag", chain = ["pki/ca-without-ca-flag", "pki/root-ca"], revocation = ["crl/ca-without-ca-flag", "ocsp/signer-under-ca-without-ca-flag"] }
 
 [[artefact]]
 id = "pki/keys/signer-under-ca-without-ca-flag"
@@ -490,7 +490,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate issued by a CA certificate without the basic constraints extension."
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
-links = { issuer = "pki/ca-without-basic-constraints", chain = ["pki/ca-without-basic-constraints", "pki/root-ca"], revocation = ["crl/ca-without-basic-constraints"] }
+links = { issuer = "pki/ca-without-basic-constraints", chain = ["pki/ca-without-basic-constraints", "pki/root-ca"], revocation = ["crl/ca-without-basic-constraints", "ocsp/signer-under-ca-without-basic-constraints"] }
 
 [[artefact]]
 id = "pki/keys/signer-under-ca-without-basic-constraints"
@@ -509,7 +509,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate with a critical extension that no implementation recognises."
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
-links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa"] }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa", "ocsp/signer-unknown-critical-extension"] }
 notes = "The extension 1.3.6.1.4.1.32473.1.1 is critical and its value is a DER NULL."
 
 [[artefact]]
@@ -529,7 +529,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate of the RSA PKCS#1 v1.5 family, revoked for key compromise before the planned signing time."
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "REVOKED_NO_POE" }
-links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"], revocation = ["crl/ca-rsa"] }
+links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"], revocation = ["crl/ca-rsa", "ocsp/signer-rsa-revoked"] }
 
 [[artefact]]
 id = "pki/keys/signer-rsa-revoked"
@@ -548,7 +548,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate of the RSASSA-PSS family, revoked for key compromise before the planned signing time."
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "REVOKED_NO_POE" }
-links = { issuer = "pki/ca-rsa-pss", chain = ["pki/ca-rsa-pss", "pki/root-ca"], revocation = ["crl/ca-rsa-pss"] }
+links = { issuer = "pki/ca-rsa-pss", chain = ["pki/ca-rsa-pss", "pki/root-ca"], revocation = ["crl/ca-rsa-pss", "ocsp/signer-rsa-pss-revoked"] }
 
 [[artefact]]
 id = "pki/keys/signer-rsa-pss-revoked"
@@ -567,7 +567,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate of the ECDSA family, revoked for key compromise before the planned signing time."
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "REVOKED_NO_POE" }
-links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa"] }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa", "ocsp/signer-p256-revoked"] }
 
 [[artefact]]
 id = "pki/keys/signer-p256-revoked"
@@ -586,7 +586,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate of the Ed25519 family, revoked for key compromise before the planned signing time."
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "REVOKED_NO_POE" }
-links = { issuer = "pki/ca-ed25519", chain = ["pki/ca-ed25519", "pki/root-ca"], revocation = ["crl/ca-ed25519"] }
+links = { issuer = "pki/ca-ed25519", chain = ["pki/ca-ed25519", "pki/root-ca"], revocation = ["crl/ca-ed25519", "ocsp/signer-ed25519-revoked"] }
 
 [[artefact]]
 id = "pki/keys/signer-ed25519-revoked"
@@ -605,7 +605,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate of the ECDSA family, revoked for key compromise after the planned signing time."
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "REVOKED_NO_POE" }
-links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa"] }
+links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa", "ocsp/signer-p256-revoked-after-signing"] }
 notes = "Revoked 10 days before the validation time, 20 days after the planned signing time, for signatures that a timestamp shows to exist before the revocation."
 
 [[artefact]]
@@ -801,3 +801,331 @@ expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
 links = { issuer = "pki/tsa", chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], content = "timestamps/content" }
 notes = "openssl ts -verify does not compare genTime with the verification time. Neither does the time-stamp validation building block of ETSI EN 319 102-1 V1.4.1, clause 5.4.4, so the DSS result PASSED is a prediction, to be confirmed when verify runs DSS. As for timestamps/valid, revocation is checked (clause 5.2.6.4, step 4) with the CRLs that the chain of pki/tsa links, crl/ca-ecdsa and crl/root-ca, which revoke none of its certificates. A verifier that uses the token as time evidence must reject a genTime after the validation time."
+
+[[artefact]]
+id = "ocsp/signer-rsa-2048"
+path = "ocsp/signer-rsa-2048.der"
+sha256 = "02a0b7e6ff5f43c0c22b3a04f578e0fc826e021c45b28551820eb73f7693e321"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ca-rsa for pki/signer-rsa-2048, whose status is good."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-rsa-2048."
+
+[[artefact]]
+id = "ocsp/signer-rsa-3072"
+path = "ocsp/signer-rsa-3072.der"
+sha256 = "93edefee8aac9b2ae02e84b19323ba0cec1b4eb7902a76acff7ce517542c3370"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ca-rsa for pki/signer-rsa-3072, whose status is good."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-rsa-3072."
+
+[[artefact]]
+id = "ocsp/signer-rsa-sha3-256"
+path = "ocsp/signer-rsa-sha3-256.der"
+sha256 = "36ed24915b703b8428d37c73c00ca06aa6851953e4de06577ceea914539d182d"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ca-rsa for pki/signer-rsa-sha3-256, whose status is good."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-rsa-sha3-256."
+
+[[artefact]]
+id = "ocsp/signer-rsa-pss-sha256"
+path = "ocsp/signer-rsa-pss-sha256.der"
+sha256 = "e9575f37c955d855468a65597f40d751a93a4edbc78d4e56ed5d41c7247235be"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ca-rsa-pss for pki/signer-rsa-pss-sha256, whose status is good."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ca-rsa-pss", chain = ["pki/ca-rsa-pss", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-rsa-pss-sha256."
+
+[[artefact]]
+id = "ocsp/signer-rsa-pss-sha384"
+path = "ocsp/signer-rsa-pss-sha384.der"
+sha256 = "719735194b20fa7183e2faf57a08867c1c4d866832551d070efe6fadce7b5eab"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ca-rsa-pss for pki/signer-rsa-pss-sha384, whose status is good."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ca-rsa-pss", chain = ["pki/ca-rsa-pss", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-rsa-pss-sha384."
+
+[[artefact]]
+id = "ocsp/signer-p256"
+path = "ocsp/signer-p256.der"
+sha256 = "d33ab552a39fb48f3543ab637f8802c6d08ab9ae08748f9f3bd7f53d685a53a5"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ocsp-responder for pki/signer-p256, whose status is good."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ocsp-responder", chain = ["pki/ocsp-responder", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-p256."
+
+[[artefact]]
+id = "ocsp/signer-p384"
+path = "ocsp/signer-p384.der"
+sha256 = "ead05a293f5238e0781a4dfdbfc57333f1dc28cddd2327ceda20f508d0bc2cb6"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ocsp-responder for pki/signer-p384, whose status is good."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ocsp-responder", chain = ["pki/ocsp-responder", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-p384."
+
+[[artefact]]
+id = "ocsp/signer-p521"
+path = "ocsp/signer-p521.der"
+sha256 = "5d08118380d7f9cc1ba71076efb387a0d66e6836ccd56e3d68db575647f806c3"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ca-ecdsa-p521 for pki/signer-p521, whose status is good."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ca-ecdsa-p521", chain = ["pki/ca-ecdsa-p521", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-p521."
+
+[[artefact]]
+id = "ocsp/signer-ed25519"
+path = "ocsp/signer-ed25519.der"
+sha256 = "92018cfe0a14b99a4ab10f88120d3b1e3522a45b6bdb54dd10a09a88bddad5dc"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ca-ed25519 for pki/signer-ed25519, whose status is good."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ca-ed25519", chain = ["pki/ca-ed25519", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-ed25519."
+
+[[artefact]]
+id = "ocsp/tsa"
+path = "ocsp/tsa.der"
+sha256 = "a18309c1ee6e0c558166c6d653f3fdde0eb8bc1fc07d198712a184b054c37688"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ocsp-responder for pki/tsa, whose status is good."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ocsp-responder", chain = ["pki/ocsp-responder", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "Covered certificate: pki/tsa."
+
+[[artefact]]
+id = "ocsp/signer-expired"
+path = "ocsp/signer-expired.der"
+sha256 = "49f57ba3dda543e18622c6441f5387321b3c172d7f08c70aee4cd8bd0494a9df"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ocsp-responder for pki/signer-expired, whose status is good."
+expected-openssl = "verified"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
+links = { issuer = "pki/ocsp-responder", chain = ["pki/ocsp-responder", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-expired."
+
+[[artefact]]
+id = "ocsp/signer-not-yet-valid"
+path = "ocsp/signer-not-yet-valid.der"
+sha256 = "265c97c710429194ff50d833b0d315870b7fae0094d4062e50dab273ca9fd0ec"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ocsp-responder for pki/signer-not-yet-valid, whose status is good."
+expected-openssl = "verified"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
+links = { issuer = "pki/ocsp-responder", chain = ["pki/ocsp-responder", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-not-yet-valid."
+
+[[artefact]]
+id = "ocsp/signer-under-expired-ca"
+path = "ocsp/signer-under-expired-ca.der"
+sha256 = "353c5d91e3ccf285c35c9f740bf0a44fe57ed77c69e2a72f55db686e1eca4b94"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ca-expired for pki/signer-under-expired-ca, whose status is good."
+expected-openssl = "rejected"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
+links = { issuer = "pki/ca-expired", chain = ["pki/ca-expired", "pki/root-ca"] }
+notes = 'Covered certificate: pki/signer-under-expired-ca. Signed by pki/ca-expired, which expired one day before the validation time, at the instant it signed, so within its validity, because notAfter is inclusive (RFC 5280, section 4.1.2.5). openssl ocsp checks the signer at the validation time given with -attime, when it has expired, and rejects the response with "certificate has expired".'
+
+[[artefact]]
+id = "ocsp/signer-without-non-repudiation"
+path = "ocsp/signer-without-non-repudiation.der"
+sha256 = "e908b2c0314127cd126560ebeb193eb67bfb2f0e4bb8a870ee3c1a15088c4f2d"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ocsp-responder for pki/signer-without-non-repudiation, whose status is good."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ocsp-responder", chain = ["pki/ocsp-responder", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-without-non-repudiation."
+
+[[artefact]]
+id = "ocsp/signer-under-ca-without-ca-flag"
+path = "ocsp/signer-under-ca-without-ca-flag.der"
+sha256 = "12e7411a7c87d4d09b2cdca2c9eaff4461a14cb05995a045a7292f3aa0064dd1"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ca-without-ca-flag for pki/signer-under-ca-without-ca-flag, whose status is good."
+expected-openssl = "verified"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
+links = { issuer = "pki/ca-without-ca-flag", chain = ["pki/ca-without-ca-flag", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-under-ca-without-ca-flag."
+
+[[artefact]]
+id = "ocsp/signer-under-ca-without-basic-constraints"
+path = "ocsp/signer-under-ca-without-basic-constraints.der"
+sha256 = "2f938c1626342767ae4005237593d272c05f029a305a388b0fc96d9363a78a69"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ca-without-basic-constraints for pki/signer-under-ca-without-basic-constraints, whose status is good."
+expected-openssl = "verified"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
+links = { issuer = "pki/ca-without-basic-constraints", chain = ["pki/ca-without-basic-constraints", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-under-ca-without-basic-constraints."
+
+[[artefact]]
+id = "ocsp/signer-unknown-critical-extension"
+path = "ocsp/signer-unknown-critical-extension.der"
+sha256 = "d45ed1e7c1cc6ed5f933d656f1bc32ee7ccfe8cc6262ae6a1cd01dd80a13e2e7"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ocsp-responder for pki/signer-unknown-critical-extension, whose status is good."
+expected-openssl = "verified"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
+links = { issuer = "pki/ocsp-responder", chain = ["pki/ocsp-responder", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-unknown-critical-extension."
+
+[[artefact]]
+id = "ocsp/signer-rsa-revoked"
+path = "ocsp/signer-rsa-revoked.der"
+sha256 = "fb60c3c7ee11a8a7ab9dc2202abafaf0f051d14b4cdc508a23113a346a878a87"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ca-rsa for pki/signer-rsa-revoked, whose status is revoked."
+expected-openssl = "verified"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "REVOKED_NO_POE" }
+links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-rsa-revoked."
+
+[[artefact]]
+id = "ocsp/signer-rsa-pss-revoked"
+path = "ocsp/signer-rsa-pss-revoked.der"
+sha256 = "3666ea43a84bc98be45ae42f9043680b819db1de6501c56e4689821bfc275392"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ca-rsa-pss for pki/signer-rsa-pss-revoked, whose status is revoked."
+expected-openssl = "verified"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "REVOKED_NO_POE" }
+links = { issuer = "pki/ca-rsa-pss", chain = ["pki/ca-rsa-pss", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-rsa-pss-revoked."
+
+[[artefact]]
+id = "ocsp/signer-p256-revoked"
+path = "ocsp/signer-p256-revoked.der"
+sha256 = "481fd93355a89378a18814f350d56a1d519ec04f524b7ffa2d44e42df51f7850"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ocsp-responder for pki/signer-p256-revoked, whose status is revoked."
+expected-openssl = "verified"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "REVOKED_NO_POE" }
+links = { issuer = "pki/ocsp-responder", chain = ["pki/ocsp-responder", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-p256-revoked."
+
+[[artefact]]
+id = "ocsp/signer-ed25519-revoked"
+path = "ocsp/signer-ed25519-revoked.der"
+sha256 = "41ecf153d5143521ee43e6a3cc47dc055726b8d10c31bcf94d88bba2e9bdd048"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ca-ed25519 for pki/signer-ed25519-revoked, whose status is revoked."
+expected-openssl = "verified"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "REVOKED_NO_POE" }
+links = { issuer = "pki/ca-ed25519", chain = ["pki/ca-ed25519", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-ed25519-revoked."
+
+[[artefact]]
+id = "ocsp/signer-p256-revoked-after-signing"
+path = "ocsp/signer-p256-revoked-after-signing.der"
+sha256 = "037b0f83817e8220027612acf8709fc471f354694d071530a6f4ef5952f38bde"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ocsp-responder for pki/signer-p256-revoked-after-signing, whose status is revoked."
+expected-openssl = "verified"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "REVOKED_NO_POE" }
+links = { issuer = "pki/ocsp-responder", chain = ["pki/ocsp-responder", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-p256-revoked-after-signing."
+
+[[artefact]]
+id = "ocsp/unknown"
+path = "ocsp/unknown.der"
+sha256 = "b9f6b1f67b1b3d45a57a99ae35b2ac83bc9869a86b508e9a07cd3f6ea31f88ae"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ocsp-responder for pki/signer-p256 whose status is unknown."
+expected-openssl = "verified"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
+links = { issuer = "pki/ocsp-responder", chain = ["pki/ocsp-responder", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-p256. RFC 6960, section 2.2: unknown means that the responder does not know the certificate. The response verifies, so OpenSSL accepts it and reports the status. The DSS result is a prediction: the response shows neither good nor revoked, so the path validation cannot show that the certificate is not revoked (RFC 5280, section 6.1.3, step (a)(3)), and step 4 e) of ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, applies. DSS is likely to report TRY_LATER instead, from its check for acceptable revocation data."
+
+[[artefact]]
+id = "ocsp/responder-without-ocsp-signing"
+path = "ocsp/responder-without-ocsp-signing.der"
+sha256 = "6e72849a08bf0787dffa5c663467abd757b7f41d16b00a7e432c5a9f4935b166"
+kind = "ocsp-response"
+purpose = "OCSP response for pki/signer-p256, whose status is good, signed by pki/signer-p384, which pki/ca-ecdsa issued without the extended key usage id-kp-OCSPSigning."
+expected-openssl = "rejected"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
+links = { issuer = "pki/signer-p384", chain = ["pki/signer-p384", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-p256. RFC 6960, section 4.2.2.2: a client must reject a response whose signer is neither the CA, nor a certificate of the CA with id-kp-OCSPSigning, nor a locally configured responder. The status is good. The DSS result is a prediction: without a usable response the path validation cannot show that the certificate is not revoked (RFC 5280, section 6.1.3, step (a)(3)), and step 4 e) of ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, applies. DSS is likely to report TRY_LATER instead, from its check for acceptable revocation data."
+
+[[artefact]]
+id = "ocsp/produced-at-after-validation-time"
+path = "ocsp/produced-at-after-validation-time.der"
+sha256 = "35144a1dd939537bb75aaf5aef5604bf2998402ecf433bcf6a6a8f4fbe7a8118"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ocsp-responder for pki/signer-p256, whose status is good, produced one day after the validation time."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ocsp-responder", chain = ["pki/ocsp-responder", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-p256. thisUpdate and nextUpdate are those of the other responses. openssl ocsp does not compare producedAt with the verification time. The DSS result PASSED is a prediction from ETSI EN 319 102-1 V1.4.1: the revocation freshness checker of clause 5.2.5.4 uses thisUpdate (NOTE 3), and clause 5.2.6.4, step 4, checks only that producedAt falls within the validity of the responder certificate. DSS may reject revocation data produced after the validation time. A verifier that uses the response as evidence at the validation time must reject it, because it did not exist then."
+
+[[artefact]]
+id = "ocsp/nonce"
+path = "ocsp/nonce.der"
+sha256 = "f8b3c49f9484b67f9b2f828c46fdff922a1e2193399391d7203eb8944f297388"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ocsp-responder for pki/signer-p256, whose status is good, with a nonce extension."
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/ocsp-responder", chain = ["pki/ocsp-responder", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-p256. The nonce (RFC 6960, section 4.4.1) holds 32 octets, the most that RFC 8954, section 2.1, allows: the SHA-256 hash of a fixed label, so that the response is reproducible. No request matches it; openssl ocsp -respin checks a nonce only against a request. The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, step 9."
+
+[[artefact]]
+id = "ocsp/try-later"
+path = "ocsp/try-later.der"
+sha256 = "fbd4659d4015d0c863b798196d20b58d657d12960fbc96fcf8c22e2c10d29440"
+kind = "ocsp-response"
+purpose = "OCSP response with the status tryLater and no response bytes."
+expected-openssl = "rejected"
+expected-dss = "rejected"
+notes = "Covered certificate: pki/signer-p256. RFC 6960, section 4.2.1: a response whose status is not successful has no responseBytes, and so no certificate status. The covered certificate is the one that a request would have named. The DSS result is a prediction: DSS cannot load the response as revocation data. If the validate-certificate mode of tools/dss-oracle loads it and ignores it instead, the result is that of the covered certificate without revocation data."
+
+[[artefact]]
+id = "ocsp/unauthorized"
+path = "ocsp/unauthorized.der"
+sha256 = "bebe2853a3485d1c2e5c5be4249183e0ddaff9f87de71652371700a89d937128"
+kind = "ocsp-response"
+purpose = "OCSP response with the status unauthorized and no response bytes."
+expected-openssl = "rejected"
+expected-dss = "rejected"
+notes = "Covered certificate: pki/signer-p256. RFC 6960, section 4.2.1: a response whose status is not successful has no responseBytes, and so no certificate status. The covered certificate is the one that a request would have named. The DSS result is a prediction: DSS cannot load the response as revocation data. If the validate-certificate mode of tools/dss-oracle loads it and ignores it instead, the result is that of the covered certificate without revocation data."
+
+[[artefact]]
+id = "ocsp/cert-id-wrong-issuer-name-hash"
+path = "ocsp/cert-id-wrong-issuer-name-hash.der"
+sha256 = "7370433fd44fcc95828303170ed33ba8d4e9ed194cd7ff6cc5b31fbf8827d277"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ocsp-responder, whose status is good, whose CertID has the serial number of pki/signer-p256 and a wrong issuer name hash."
+expected-openssl = "rejected"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
+links = { issuer = "pki/ocsp-responder", chain = ["pki/ocsp-responder", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-p256. A fixture for threat K10 of the threat model. The issuer name hash of the CertID is that of pki/ca-ecdsa with its last octet inverted; the other fields are those of ocsp/signer-p256. RFC 6960, sections 3.2 and 4.1.1: the CertID does not identify the certificate, so the response does not apply to it, and openssl ocsp finds no status for it. OpenSSL also fails to verify the response, because pki/ocsp-responder is not a delegated responder of the CA that the CertID names (RFC 6960, section 4.2.2.2); a test of sigillum should assert the first reason, that the response does not apply to the certificate. The DSS result is a prediction: without a response that applies to the certificate, the path validation cannot show that it is not revoked (RFC 5280, section 6.1.3, step (a)(3)), and step 4 e) of ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, applies. DSS is likely to report TRY_LATER instead, from its check for acceptable revocation data."
+
+[[artefact]]
+id = "ocsp/cert-id-wrong-issuer-key-hash"
+path = "ocsp/cert-id-wrong-issuer-key-hash.der"
+sha256 = "ea5c0a74e0dfc93cc505e49d338b240cb354ad2318adaf658fe653ff08bf3757"
+kind = "ocsp-response"
+purpose = "OCSP response of pki/ocsp-responder, whose status is good, whose CertID has the serial number of pki/signer-p256 and a wrong issuer key hash."
+expected-openssl = "rejected"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "CERTIFICATE_CHAIN_GENERAL_FAILURE" }
+links = { issuer = "pki/ocsp-responder", chain = ["pki/ocsp-responder", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "Covered certificate: pki/signer-p256. A fixture for threat K10 of the threat model. The issuer key hash of the CertID is that of pki/ca-ecdsa with its last octet inverted; the other fields are those of ocsp/signer-p256. RFC 6960, sections 3.2 and 4.1.1: the CertID does not identify the certificate, so the response does not apply to it, and openssl ocsp finds no status for it. OpenSSL also fails to verify the response, because pki/ocsp-responder is not a delegated responder of the CA that the CertID names (RFC 6960, section 4.2.2.2); a test of sigillum should assert the first reason, that the response does not apply to the certificate. The DSS result is a prediction: without a response that applies to the certificate, the path validation cannot show that it is not revoked (RFC 5280, section 6.1.3, step (a)(3)), and step 4 e) of ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, applies. DSS is likely to report TRY_LATER instead, from its check for acceptable revocation data."

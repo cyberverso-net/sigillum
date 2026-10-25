@@ -38,6 +38,7 @@ fn every_subcommand_has_help() -> std::io::Result<()> {
         ("generate", "pki"),
         ("generate", "crls"),
         ("generate", "timestamps"),
+        ("generate", "ocsp"),
         ("tsa", "--tsa-cert"),
         ("tsa", "--digest-algorithm"),
         ("tsa", "--digest"),
@@ -765,11 +766,15 @@ fn generate_crls_writes_the_crls_and_links_the_certificates()
     assert!(text(&output.stderr).is_empty(), "{}", text(&output.stderr));
     let written = std::fs::read_to_string(&manifest)?;
     // The entries are those of the committed corpus, which also holds
-    // the timestamp tokens.
+    // the timestamp tokens and the OCSP responses, and the links to them.
     let committed: Vec<_> = load(&committed_manifest())?
         .artefacts
         .into_iter()
-        .filter(|a| !a.id.starts_with("timestamps/"))
+        .filter(|a| !a.id.starts_with("timestamps/") && !a.id.starts_with("ocsp/"))
+        .map(|mut a| {
+            a.links.revocation.retain(|r| !r.starts_with("ocsp/"));
+            a
+        })
         .collect();
     assert_eq!(load(&manifest)?.artefacts, committed);
     for artefact in &load(&manifest)?.artefacts {
@@ -904,7 +909,7 @@ fn generate_crls_keeps_the_revocation_links_of_its_entries()
     Ok(())
 }
 
-/// The three generators, run in the documented order on a manifest with
+/// The four generators, run in the documented order on a manifest with
 /// only a header, reproduce the committed manifest byte for byte.
 #[test]
 fn the_generators_in_order_reproduce_the_committed_manifest()
@@ -912,7 +917,7 @@ fn the_generators_in_order_reproduce_the_committed_manifest()
     let manifest = corpus("the_generators_in_order_reproduce_the_manifest", "")?;
     let dir = manifest.parent().ok_or("no parent")?.to_path_buf();
     let path = manifest.to_string_lossy().into_owned();
-    for target in ["pki", "crls", "timestamps"] {
+    for target in ["pki", "crls", "timestamps", "ocsp"] {
         let output = run(&["generate", target, "--manifest", &path])?;
         assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
         assert!(text(&output.stderr).is_empty(), "{}", text(&output.stderr));
@@ -931,6 +936,147 @@ fn the_generators_in_order_reproduce_the_committed_manifest()
             artefact.id
         );
     }
+    let _ = std::fs::remove_dir_all(&dir);
+    Ok(())
+}
+
+#[test]
+fn generate_ocsp_writes_the_responses_and_links_the_certificates()
+-> Result<(), Box<dyn std::error::Error>> {
+    let manifest = corpus("generate_ocsp_writes_the_responses", "")?;
+    let dir = manifest.parent().ok_or("no parent")?.to_path_buf();
+    let path = manifest.to_string_lossy().into_owned();
+    for target in ["pki", "ocsp"] {
+        let output = run(&["generate", target, "--manifest", &path])?;
+        assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
+        assert!(text(&output.stderr).is_empty(), "{}", text(&output.stderr));
+    }
+    let written = std::fs::read_to_string(&manifest)?;
+    let parsed = load(&manifest)?;
+    let committed = load(&committed_manifest())?;
+    let responses: Vec<_> = parsed
+        .artefacts
+        .iter()
+        .filter(|a| a.id.starts_with("ocsp/"))
+        .collect();
+    assert_eq!(responses.len(), 30);
+    for artefact in &parsed.artefacts {
+        assert!(dir.join(&artefact.path).is_file(), "{}", artefact.id);
+        if artefact.id.starts_with("ocsp/") {
+            assert!(committed.artefacts.contains(artefact), "{}", artefact.id);
+        }
+    }
+    // Without the CRLs, a certificate links its response alone.
+    let signer = parsed
+        .artefacts
+        .iter()
+        .find(|a| a.id == "pki/signer-p256")
+        .ok_or("no pki/signer-p256")?;
+    assert_eq!(signer.links.revocation, ["ocsp/signer-p256"]);
+    // generate crls then puts the CRL first, and every generator run again
+    // changes nothing.
+    let output = run(&["generate", "crls", "--manifest", &path])?;
+    assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
+    let with_crls = std::fs::read_to_string(&manifest)?;
+    assert_ne!(with_crls, written);
+    let signer = load(&manifest)?
+        .artefacts
+        .into_iter()
+        .find(|a| a.id == "pki/signer-p256")
+        .ok_or("no pki/signer-p256")?;
+    assert_eq!(
+        signer.links.revocation,
+        ["crl/ca-ecdsa", "ocsp/signer-p256"]
+    );
+    for target in ["ocsp", "crls", "pki", "ocsp"] {
+        let output = run(&["generate", target, "--manifest", &path])?;
+        assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
+        assert!(text(&output.stdout).contains("generate "), "{target}");
+        assert_eq!(std::fs::read_to_string(&manifest)?, with_crls, "{target}");
+    }
+    let _ = std::fs::remove_dir_all(&dir);
+    Ok(())
+}
+
+#[test]
+fn generate_ocsp_needs_the_certificates() -> Result<(), Box<dyn std::error::Error>> {
+    let manifest = corpus("generate_ocsp_needs_the_certificates", "")?;
+    let dir = manifest.parent().ok_or("no parent")?.to_path_buf();
+    let before = std::fs::read_to_string(&manifest)?;
+    let output = run(&[
+        "generate",
+        "ocsp",
+        "--manifest",
+        &manifest.to_string_lossy(),
+    ])?;
+    assert_eq!(output.status.code(), Some(1));
+    let stderr = text(&output.stderr);
+    assert!(stderr.contains("\"pki/ca-rsa\""), "{stderr}");
+    assert_eq!(std::fs::read_to_string(&manifest)?, before);
+    assert!(!dir.join("ocsp").exists());
+    let _ = std::fs::remove_dir_all(&dir);
+    Ok(())
+}
+
+#[test]
+fn generate_ocsp_prunes_stale_responses_and_the_links_to_them()
+-> Result<(), Box<dyn std::error::Error>> {
+    let manifest = corpus("generate_ocsp_prunes_stale_responses", "")?;
+    let dir = manifest.parent().ok_or("no parent")?.to_path_buf();
+    let path = manifest.to_string_lossy().into_owned();
+    let output = run(&["generate", "pki", "--manifest", &path])?;
+    assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
+    let entry = |id: &str, path: &str, kind: &str, links: &str| {
+        format!(
+            "\n[[artefact]]\nid = \"{id}\"\npath = \"{path}\"\nsha256 = \"0000000000000000000000000000000000000000000000000000000000000000\"\nkind = \"{kind}\"\npurpose = \"Other\"\nexpected-openssl = \"not-applicable\"\nexpected-dss = \"not-applicable\"\n{links}"
+        )
+    };
+    let extra = [
+        // A response the generator no longer produces: removed, with the
+        // links to it.
+        entry("ocsp/old", "ocsp/old.der", "ocsp-response", ""),
+        // A revocation artefact of another generator: kept, with its links.
+        entry("crl/other", "crl/other.crl", "crl", ""),
+        entry(
+            "doc/a",
+            "doc/a.txt",
+            "document",
+            "links = { revocation = [\"ocsp/old\", \"crl/other\"] }\n",
+        ),
+    ]
+    .concat();
+    let mut text_before = std::fs::read_to_string(&manifest)?;
+    text_before.push_str(&extra);
+    std::fs::write(&manifest, &text_before)?;
+    std::fs::create_dir_all(dir.join("ocsp"))?;
+    std::fs::write(dir.join("ocsp/old.der"), "")?;
+    std::fs::write(dir.join("ocsp/stray.der"), "")?;
+    let output = run(&["generate", "ocsp", "--manifest", &path])?;
+    assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
+    assert!(text(&output.stdout).contains("generate ocsp: wrote 30 files"));
+    let stderr = text(&output.stderr);
+    assert!(
+        stderr.contains("generate ocsp: removed the manifest entry ocsp/old"),
+        "{stderr}"
+    );
+    assert!(
+        stderr.contains("no manifest entry names ocsp/old.der"),
+        "{stderr}"
+    );
+    assert!(
+        stderr.contains("no manifest entry names ocsp/stray.der"),
+        "{stderr}"
+    );
+    let parsed = load(&manifest)?;
+    assert!(parsed.artefacts.iter().all(|a| a.id != "ocsp/old"));
+    assert!(parsed.artefacts.iter().any(|a| a.id == "crl/other"));
+    let doc = parsed
+        .artefacts
+        .iter()
+        .find(|a| a.id == "doc/a")
+        .ok_or("no doc/a")?;
+    assert_eq!(doc.links.revocation, ["crl/other"]);
+    assert!(dir.join("ocsp/old.der").is_file());
     let _ = std::fs::remove_dir_all(&dir);
     Ok(())
 }

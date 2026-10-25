@@ -16,6 +16,7 @@ pub mod crl;
 pub mod hierarchy;
 pub mod issue;
 pub mod keys;
+pub mod ocsp;
 pub(crate) mod rng;
 
 use std::collections::HashMap;

@@ -63,6 +63,9 @@ enum Target {
     /// The standalone timestamp tokens and the data they cover, under
     /// timestamps/, after the certificates.
     Timestamps,
+    /// The OCSP responses of the test PKI, under ocsp/, after the
+    /// certificates.
+    Ocsp,
 }
 
 impl Target {
@@ -72,6 +75,7 @@ impl Target {
             Self::Pki => "pki",
             Self::Crls => "crls",
             Self::Timestamps => "timestamps",
+            Self::Ocsp => "ocsp",
         }
     }
 }
@@ -90,6 +94,7 @@ fn main() -> ExitCode {
                 Target::Pki => pki::write_into_corpus(&corpus.manifest),
                 Target::Crls => pki::crl::write_into_corpus(&corpus.manifest),
                 Target::Timestamps => timestamp::write_into_corpus(&corpus.manifest),
+                Target::Ocsp => pki::ocsp::write_into_corpus(&corpus.manifest),
             };
             return report(target.name(), result, &corpus.manifest);
         }
