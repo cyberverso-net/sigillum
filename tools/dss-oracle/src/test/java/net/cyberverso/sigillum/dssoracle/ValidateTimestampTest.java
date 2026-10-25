@@ -376,6 +376,16 @@ class ValidateTimestampTest {
     }
 
     @Test
+    void anOcspResponseWithAnUnknownSignatureAlgorithmIsRejected() throws Exception {
+        // DSS fails on it with "Unsupported algorithm" when it reads the signature algorithm of the response.
+        Path file = Files.write(temp.resolve("unknown-algorithm.ocsp"),
+                OcspResponses.signerP256WithUnknownSignatureAlgorithm());
+        Path result = temp.resolve("unknown-algorithm");
+        assertRejected(arguments("valid", "--data", corpus("timestamps/content.txt"), "--ocsp", file.toString(),
+                "--out", result.toString()), result, "--ocsp", file.toString());
+    }
+
+    @Test
     void anOcspResponseWithAMalformedProducedAtIsRejected() throws Exception {
         Path file = Files.write(temp.resolve("produced-at.ocsp"), OcspResponses.withMalformedProducedAt());
         Path result = temp.resolve("produced-at");
@@ -888,7 +898,7 @@ class ValidateTimestampTest {
 
     @Test
     void otherModesAreNotImplementedYet() {
-        for (Mode mode : List.of(Mode.VALIDATE_DOCUMENT, Mode.VALIDATE_CERTIFICATE, Mode.SIGN)) {
+        for (Mode mode : List.of(Mode.VALIDATE_DOCUMENT, Mode.SIGN)) {
             assertEquals(ExitCodes.NOT_IMPLEMENTED, run(List.of(mode.commandName())), mode.commandName());
         }
     }

@@ -144,4 +144,21 @@ final class OcspResponses {
                 new ResponseBytes(OCSPObjectIdentifiers.id_pkix_ocsp_basic, new DEROctetString(basic.getEncoded())))
                 .getEncoded();
     }
+
+    /**
+     * Returns ocsp/signer-p256 of the corpus with the signatureAlgorithm of
+     * its BasicOCSPResponse changed from ecdsa-with-SHA256
+     * (1.2.840.10045.4.3.2) to 1.2.840.10045.4.386, which no implementation
+     * knows: the octet 0x03 at offset 191 becomes 0x83. The response data
+     * and the signature are unchanged.
+     */
+    static byte[] signerP256WithUnknownSignatureAlgorithm() throws IOException {
+        byte[] response = Files.readAllBytes(Path.of("..", "..", "testdata", "ocsp", "signer-p256.der"));
+        byte[] oid = {0x06, 0x08, 0x2a, (byte) 0x86, 0x48, (byte) 0xce, 0x3d, 0x04, 0x03, 0x02};
+        if (!java.util.Arrays.equals(response, 183, 183 + oid.length, oid, 0, oid.length)) {
+            throw new IllegalStateException("the signature algorithm is not at offset 183");
+        }
+        response[191] = (byte) 0x83;
+        return response;
+    }
 }

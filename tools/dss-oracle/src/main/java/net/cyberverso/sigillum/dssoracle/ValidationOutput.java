@@ -2,6 +2,7 @@ package net.cyberverso.sigillum.dssoracle;
 
 import eu.europa.esig.dss.enumerations.Indication;
 import eu.europa.esig.dss.enumerations.SubIndication;
+import eu.europa.esig.dss.jaxb.object.Message;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -9,6 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -135,6 +137,24 @@ public final class ValidationOutput {
      */
     public static String format(Instant time) {
         return DateTimeFormatter.ISO_INSTANT.format(time);
+    }
+
+    /**
+     * Converts the messages of a DSS report into the entries of the lists
+     * {@code errors} and {@code warnings} of {@code summary.json}.
+     *
+     * @param messages the messages, in the order of the report
+     * @return one object per message, with its {@code key} and English {@code message}
+     */
+    public static List<Object> messages(List<Message> messages) {
+        List<Object> list = new ArrayList<>();
+        for (Message message : messages) {
+            Map<String, Object> entry = new LinkedHashMap<>();
+            entry.put("key", message.getKey());
+            entry.put("message", message.getValue());
+            list.add(entry);
+        }
+        return list;
     }
 
     private Map<String, Object> header(String result) {

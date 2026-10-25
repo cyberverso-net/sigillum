@@ -120,9 +120,10 @@ class MainTest {
     }
 
     @Test
-    void theDefaultRunnerImplementsValidateTimestampOnly() {
+    void theDefaultRunnerImplementsTheTimestampAndCertificateModesOnly() {
         assertEquals(ExitCodes.USAGE, run(Modes.RUNNER, "validate-timestamp"));
-        for (Mode mode : List.of(Mode.VALIDATE_DOCUMENT, Mode.VALIDATE_CERTIFICATE, Mode.SIGN)) {
+        assertEquals(ExitCodes.USAGE, run(Modes.RUNNER, "validate-certificate"));
+        for (Mode mode : List.of(Mode.VALIDATE_DOCUMENT, Mode.SIGN)) {
             assertEquals(ExitCodes.NOT_IMPLEMENTED, run(Modes.RUNNER, mode.commandName()), mode.commandName());
         }
     }
@@ -133,6 +134,13 @@ class MainTest {
         for (String option : List.of("--timestamp", "--data", "--digest", "--digest-algorithm")) {
             assertTrue(stdout().contains(option), stdout());
         }
+    }
+
+    @Test
+    void helpNamesTheCertificateToValidate() {
+        assertEquals(ExitCodes.SUCCESS, run("--help"));
+        assertTrue(stdout().contains("validate-certificate: the first --certificate is the certificate to validate"),
+                stdout());
     }
 
     @Test

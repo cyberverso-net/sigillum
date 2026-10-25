@@ -20,7 +20,8 @@ import java.util.Optional;
  * @param mode the mode to run
  * @param validationTime the fixed validation or signing time, if given
  * @param trustAnchors trust anchor certificates
- * @param certificates certificates supplied offline
+ * @param certificates certificates supplied offline; in validate-certificate,
+ *        the first is the certificate to validate
  * @param crls CRLs supplied offline
  * @param ocspResponses OCSP responses supplied offline
  * @param out the output directory, if given
