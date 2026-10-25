@@ -27,6 +27,13 @@ test = false
 doc = false
 bench = false
 
+[[bin]]
+name = "openssl_output"
+path = "fuzz_targets/openssl_output.rs"
+test = false
+doc = false
+bench = false
+
 # The fuzz targets form their own workspace, built with the nightly toolchain.
 [workspace]
 members = ["."]

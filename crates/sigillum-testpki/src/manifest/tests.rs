@@ -8,7 +8,7 @@ const HEADER: &str = r#"
 [header]
 format-version = 1
 validation-time = "2030-01-15T10:00:00Z"
-openssl-version = "3.0.13"
+openssl-version = "3.5.9"
 dss-version = "6.5.1"
 "#;
 
@@ -69,7 +69,7 @@ fn parses_header_only() -> Result<(), ManifestError> {
         manifest.header.validation_time,
         datetime!(2030-01-15 10:00:00 UTC)
     );
-    assert_eq!(manifest.header.openssl_version, "3.0.13");
+    assert_eq!(manifest.header.openssl_version, "3.5.9");
     assert_eq!(manifest.header.dss_version, "6.5.1");
     assert!(manifest.artefacts.is_empty());
     Ok(())
@@ -505,7 +505,7 @@ fn rejects_empty_text_fields() {
             field: "notes"
         })
     );
-    let text = HEADER.replace(r#"openssl-version = "3.0.13""#, r#"openssl-version = """#);
+    let text = HEADER.replace(r#"openssl-version = "3.5.9""#, r#"openssl-version = """#);
     assert_eq!(
         parse_err(&text),
         Some(ManifestError::EmptyField {

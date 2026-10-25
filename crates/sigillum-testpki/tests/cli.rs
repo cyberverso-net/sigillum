@@ -43,6 +43,9 @@ fn every_subcommand_has_help() -> std::io::Result<()> {
         ("tsa", "--digest-algorithm"),
         ("tsa", "--digest"),
         ("verify", "--manifest"),
+        ("verify", "--openssl"),
+        ("verify", "--openssl-program"),
+        ("verify", "--openssl-version"),
     ] {
         let output = run(&[subcommand, "--help"])?;
         assert!(output.status.success(), "{subcommand}");
@@ -52,13 +55,105 @@ fn every_subcommand_has_help() -> std::io::Result<()> {
 }
 
 #[test]
-fn verify_reads_the_validation_time_from_the_manifest() -> std::io::Result<()> {
+fn verify_needs_a_check() -> std::io::Result<()> {
     let manifest = committed_manifest();
     let output = run(&["verify", "--manifest", &manifest.to_string_lossy()])?;
-    assert_eq!(output.status.code(), Some(3));
+    assert_eq!(output.status.code(), Some(2));
     let stderr = text(&output.stderr);
-    assert!(stderr.contains("2030-01-15T10:00:00Z"), "{stderr}");
-    assert!(stderr.contains("not implemented"), "{stderr}");
+    assert!(stderr.contains("--openssl"), "{stderr}");
+    Ok(())
+}
+
+#[test]
+fn the_openssl_program_is_an_option_of_the_openssl_check() -> std::io::Result<()> {
+    let output = run(&["verify", "--openssl-program", "openssl"])?;
+    assert_eq!(output.status.code(), Some(2));
+    Ok(())
+}
+
+#[test]
+fn another_openssl_version_is_an_option_of_the_openssl_check() -> std::io::Result<()> {
+    let output = run(&["verify", "--openssl-version", "4.0.3"])?;
+    assert_eq!(output.status.code(), Some(2));
+    for version in ["", "four", "4.0.3 ", "4.0.3;x", "-4"] {
+        let option = format!("--openssl-version={version}");
+        let output = run(&["verify", "--openssl", &option])?;
+        assert_eq!(output.status.code(), Some(2), "{version:?}");
+        assert!(
+            text(&output.stderr).contains("--openssl-version"),
+            "{version:?}: {}",
+            text(&output.stderr)
+        );
+    }
+    Ok(())
+}
+
+/// The release given with `--openssl-version` replaces that of the
+/// manifest header, and `verify` says so before it checks anything.
+#[cfg(unix)]
+#[test]
+fn verify_says_when_another_openssl_version_replaces_the_header() -> std::io::Result<()> {
+    let manifest = committed_manifest();
+    let output = run(&[
+        "verify",
+        "--openssl",
+        "--openssl-version",
+        "4.0.3",
+        "--openssl-program",
+        "echo",
+        "--manifest",
+        &manifest.to_string_lossy(),
+    ])?;
+    assert_eq!(output.status.code(), Some(1));
+    let stderr = text(&output.stderr);
+    assert!(
+        stderr.contains("checks with OpenSSL 4.0.3 in place of OpenSSL 3.5.9, the release of the manifest header"),
+        "{stderr}"
+    );
+    Ok(())
+}
+
+#[test]
+fn verify_reports_an_openssl_that_cannot_be_started() -> std::io::Result<()> {
+    let manifest = committed_manifest();
+    let output = run(&[
+        "verify",
+        "--openssl",
+        "--openssl-program",
+        "sigillum-testpki-no-such-program",
+        "--manifest",
+        &manifest.to_string_lossy(),
+    ])?;
+    assert_eq!(output.status.code(), Some(1));
+    let stderr = text(&output.stderr);
+    assert!(stderr.contains("cannot be started"), "{stderr}");
+    assert!(
+        stderr.contains("sigillum-testpki-no-such-program"),
+        "{stderr}"
+    );
+    assert!(output.stdout.is_empty());
+    Ok(())
+}
+
+/// `echo` stands in for a program that is not OpenSSL.
+#[cfg(unix)]
+#[test]
+fn verify_refuses_a_program_that_is_not_openssl() -> std::io::Result<()> {
+    let manifest = committed_manifest();
+    let output = run(&[
+        "verify",
+        "--openssl",
+        "--openssl-program",
+        "echo",
+        "--manifest",
+        &manifest.to_string_lossy(),
+    ])?;
+    assert_eq!(output.status.code(), Some(1));
+    let stderr = text(&output.stderr);
+    assert!(
+        stderr.contains("not the version of an OpenSSL release"),
+        "{stderr}"
+    );
     Ok(())
 }
 
@@ -71,7 +166,7 @@ fn corpus(name: &str, artefacts: &str) -> std::io::Result<PathBuf> {
     std::fs::write(
         &path,
         format!(
-            "[header]\nformat-version = 1\nvalidation-time = \"2030-01-15T10:00:00Z\"\nopenssl-version = \"3.0.13\"\ndss-version = \"6.5.1\"\n{artefacts}"
+            "[header]\nformat-version = 1\nvalidation-time = \"2030-01-15T10:00:00Z\"\nopenssl-version = \"3.5.9\"\ndss-version = \"6.5.1\"\n{artefacts}"
         ),
     )?;
     Ok(path)
@@ -664,7 +759,7 @@ fn generate_timestamps_prunes_its_stale_entries() -> Result<(), Box<dyn std::err
 
 #[test]
 fn an_unreadable_manifest_is_reported() -> std::io::Result<()> {
-    let output = run(&["verify", "--manifest", "no/such/manifest.toml"])?;
+    let output = run(&["verify", "--openssl", "--manifest", "no/such/manifest.toml"])?;
     assert_eq!(output.status.code(), Some(1));
     assert!(text(&output.stderr).contains("the manifest cannot be read"));
     Ok(())

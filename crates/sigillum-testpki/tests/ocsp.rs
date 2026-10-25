@@ -233,3 +233,32 @@ fn certificates_link_their_response_after_their_crl() -> TestResult {
     }
     Ok(())
 }
+
+/// `openssl ocsp` compares `thisUpdate` and `nextUpdate` with the current
+/// time only, so the manifest says, for every response with a status,
+/// that the expected OpenSSL result does not cover freshness. Responses
+/// without a status have no times and do not say it.
+#[test]
+fn the_manifest_says_that_openssl_does_not_check_freshness() -> TestResult {
+    let manifest = Manifest::load(&testdata().join("manifest.toml"))?;
+    let mut signed = 0;
+    for artefact in manifest
+        .artefacts
+        .iter()
+        .filter(|a| a.kind == Kind::OcspResponse)
+    {
+        let notes = artefact.notes.as_deref().ok_or("no notes")?;
+        let says_so = notes.ends_with(ocsp::OPENSSL_FRESHNESS_NOTE);
+        let has_status = artefact.links.issuer.is_some();
+        assert_eq!(says_so, has_status, "{}: {notes}", artefact.id);
+        assert_eq!(
+            notes.matches(ocsp::OPENSSL_FRESHNESS_NOTE).count(),
+            usize::from(has_status)
+        );
+        signed += usize::from(has_status);
+    }
+    assert_eq!(signed, 29);
+    assert!(ocsp::OPENSSL_FRESHNESS_NOTE.contains("current time"));
+    assert!(ocsp::OPENSSL_FRESHNESS_NOTE.contains("not its freshness"));
+    Ok(())
+}
