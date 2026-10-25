@@ -108,6 +108,7 @@ The security objectives, trust boundaries and threats that these choices address
 | XAdES | Deferred; reviewed once the phase 3 XML component for trusted lists exists | [ADR-0009](adr/0009-keep-xades-deferred.md) |
 | Cryptographic backend | RustCrypto behind a provider interface; `rsa` for public-key operations only, enforced by lint | [ADR-0010](adr/0010-cryptographic-backend.md) |
 | ASN.1, X.509 and CMS | RustCrypto formats crates, stable `der` 0.7 generation, not exposed in the public API | [ADR-0011](adr/0011-asn1-x509-cms-foundations.md) |
+| Untrusted input | Caller-configurable size limits; DER length walk in `sigillum-pki` before decoding; untrusted object identifiers checked before parsing, with arcs below 2^28 (DIV-2); fuzz target per entry point | [ADR-0024](adr/0024-bounded-decoding-of-untrusted-input.md) |
 | Accepted advisories | RUSTSEC-2023-0071 and RUSTSEC-2026-0387, public data and test keys only; no elliptic-curve operation on secret values before the der 0.8 migration | [ADR-0020](adr/0020-accepted-advisories-der-0-7.md) |
 | Certificate path validation | Own implementation of RFC 5280 at an explicit validation time, with results in AdES terms | [ADR-0012](adr/0012-certificate-path-validation.md) |
 | DSS execution | Purpose-built Java command-line tool against a pinned DSS release; Linux-only job | [ADR-0013](adr/0013-dss-oracle-command-line-tool.md) |

@@ -30,3 +30,5 @@ The public API of sigillum never exposes types from these crates. Moving to the 
 ## Consequences
 
 An internal adapter layer converts between RustCrypto types and sigillum's own types. Dependabot groups the RustCrypto updates so that the set moves together, and major-version updates of this set are handled by the migration issue, not by individual Dependabot pull requests.
+
+The rules for decoding untrusted input with these crates are set by [ADR-0024](0024-bounded-decoding-of-untrusted-input.md).

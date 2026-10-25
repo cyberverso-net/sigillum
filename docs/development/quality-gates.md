@@ -97,7 +97,7 @@ The reviewer, and the author before requesting review, checks that:
 
 1. Each acceptance criterion is met and has a test that would fail without the change.
 2. The implementation follows the cited clauses of the standards; deviations are recorded.
-3. No input can cause a panic, unbounded allocation or unbounded recursion.
+3. No input can cause a panic, unbounded allocation or unbounded recursion. Decoding of untrusted input follows [ADR-0024](../design/adr/0024-bounded-decoding-of-untrusted-input.md).
 4. Errors are typed and informative, and do not leak secret material.
 5. Cryptographic comparisons that involve secrets run in constant time.
 6. Unsupported input yields an explicit "not supported" result, never a pass.
