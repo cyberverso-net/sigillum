@@ -34,8 +34,11 @@ A story may move to *Ready* when:
 - its acceptance criteria are complete and testable;
 - its normative references are identified;
 - any decision it depends on is recorded in an accepted ADR;
-- the stories it depends on are done;
+- the issues it depends on are done;
+- if it performs elliptic-curve operations on secret values, it names #21 as a dependency in the issue;
 - it fits within [scope.md](../project/scope.md).
+
+[ADR-0020](../design/adr/0020-accepted-advisories-der-0-7.md) accepts RUSTSEC-2026-0387 only while no library code performs such operations. Such a story therefore cannot be ready until #21 is done.
 
 ## Workflow
 
@@ -48,6 +51,8 @@ A story may move to *Ready* when:
 | Done | Merged and meets the Definition of Done |
 
 Branches are named `<type>/<issue>-<short-slug>`, for example `story/42-cades-signed-attributes`. Pull requests reference their issue with `Closes #42` and are merged by squash, with a commit message that follows [CONTRIBUTING.md](../../CONTRIBUTING.md).
+
+`.github/CODEOWNERS` names the maintainer as owner of every file. While there is a single maintainer, the ruleset on `main` must not require code-owner review, because the only code owner cannot approve their own pull requests. The other rules on `main` are listed in [CONTRIBUTING.md](../../CONTRIBUTING.md).
 
 ## Definition of Done
 
