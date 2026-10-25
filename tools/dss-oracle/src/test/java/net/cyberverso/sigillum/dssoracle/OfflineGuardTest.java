@@ -12,7 +12,9 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.net.spi.InetAddressResolver;
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 class OfflineGuardTest {
@@ -64,6 +66,41 @@ class OfflineGuardTest {
             String name = address.getCanonicalHostName();
             assertEquals("192.0.2.1", name);
             assertTrue(guard.attempted());
+        }
+    }
+
+    /**
+     * InetAddress.getLocalHost() resolves the local host name through the
+     * installed resolver, except when the name is "localhost" or a result is
+     * still cached. The resolver is called here directly, so that neither
+     * case can hide its behaviour: during a run it refuses and records the
+     * name, whatever it is, and never falls back to the built-in resolver.
+     * Any name stands for the local host name, since the resolver cannot
+     * tell names apart. Reverse lookups are refused and recorded too.
+     */
+    @Test
+    void theResolverRefusesAndRecordsEveryLookupIncludingTheLocalHost() {
+        InetAddressResolver builtin = new InetAddressResolver() {
+            @Override
+            public Stream<InetAddress> lookupByName(String host, LookupPolicy lookupPolicy) {
+                throw new AssertionError("the built-in resolver was called for " + host);
+            }
+
+            @Override
+            public String lookupByAddress(byte[] address) {
+                throw new AssertionError("the built-in resolver was called");
+            }
+        };
+        InetAddressResolver resolver = OfflineResolverProvider.resolver(builtin);
+        InetAddressResolver.LookupPolicy policy = InetAddressResolver.LookupPolicy.of(
+                InetAddressResolver.LookupPolicy.IPV4 | InetAddressResolver.LookupPolicy.IPV6);
+        try (OfflineGuard guard = OfflineGuard.install()) {
+            assertThrows(UnknownHostException.class, () -> resolver.lookupByName("host.example", policy));
+            assertThrows(UnknownHostException.class, () -> resolver.lookupByName("localhost", policy));
+            assertThrows(UnknownHostException.class,
+                    () -> resolver.lookupByAddress(new byte[] {(byte) 192, 0, 2, 7}));
+            assertEquals(List.of(URI.create("dns://host.example"), URI.create("dns://localhost"),
+                    URI.create("dns://192.0.2.7")), guard.attempts());
         }
     }
 

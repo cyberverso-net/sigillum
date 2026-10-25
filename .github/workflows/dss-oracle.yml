@@ -51,3 +51,15 @@ jobs:
           code=$?
           set -e
           test "$code" -eq 3
+          out="$RUNNER_TEMP/validate-timestamp"
+          offline java -jar target/dss-oracle.jar validate-timestamp \
+            --timestamp ../../testdata/timestamps/valid.tst \
+            --data ../../testdata/timestamps/content.txt \
+            --trust-anchor ../../testdata/pki/root-ca.pem \
+            --certificate ../../testdata/pki/ca-ecdsa.pem \
+            --crl ../../testdata/crl/ca-ecdsa.crl \
+            --crl ../../testdata/crl/root-ca.crl \
+            --validation-time 2030-01-15T10:00:00Z \
+            --out "$out"
+          grep -F '"result": "validated"' "$out/summary.json"
+          grep -F '"indication": "PASSED"' "$out/summary.json"

@@ -1,0 +1,905 @@
+package net.cyberverso.sigillum.dssoracle;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HexFormat;
+import java.util.List;
+import java.util.Map;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.cms.Attribute;
+import org.bouncycastle.asn1.ess.ESSCertID;
+import org.bouncycastle.asn1.ess.ESSCertIDv2;
+import org.bouncycastle.asn1.ess.SigningCertificateV2;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import java.util.stream.Stream;
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+/**
+ * Tests of the validate-timestamp mode on the timestamp corpus of
+ * {@code testdata/timestamps}, at the validation time of the corpus.
+ */
+class ValidateTimestampTest {
+
+    private static final Path CORPUS = Path.of("..", "..", "testdata");
+    private static final String VALIDATION_TIME = "2030-01-15T10:00:00Z";
+    private static final List<String> REPORTS = List.of(
+            "diagnostic-data.xml", "detailed-report.xml", "simple-report.xml", "etsi-validation-report.xml");
+
+    @TempDir
+    Path temp;
+
+    private final ByteArrayOutputStream out = new ByteArrayOutputStream();
+    private final ByteArrayOutputStream err = new ByteArrayOutputStream();
+
+    private int run(List<String> args) {
+        return Main.run(args.toArray(String[]::new), Modes.RUNNER,
+                new PrintStream(out, true, StandardCharsets.UTF_8),
+                new PrintStream(err, true, StandardCharsets.UTF_8));
+    }
+
+    private String stderr() {
+        return err.toString(StandardCharsets.UTF_8);
+    }
+
+    private static String corpus(String path) {
+        return CORPUS.resolve(path).toString();
+    }
+
+    /** The arguments for a corpus token with the chain and CRLs of pki/tsa, without --out. */
+    private static List<String> arguments(String token, String... extra) {
+        List<String> args = new ArrayList<>(List.of(
+                "validate-timestamp",
+                "--timestamp", corpus("timestamps/" + token + ".tst"),
+                "--trust-anchor", corpus("pki/root-ca.pem"),
+                "--certificate", corpus("pki/ca-ecdsa.pem"),
+                "--crl", corpus("crl/ca-ecdsa.crl"),
+                "--crl", corpus("crl/root-ca.crl"),
+                "--validation-time", VALIDATION_TIME));
+        args.addAll(Arrays.asList(extra));
+        return args;
+    }
+
+    private static List<String> without(List<String> args, String option) {
+        List<String> remaining = new ArrayList<>(args);
+        int index = remaining.indexOf(option);
+        remaining.remove(index + 1);
+        remaining.remove(index);
+        return remaining;
+    }
+
+    private static Map<String, Object> summary(Path directory) throws IOException {
+        return JsonReader.object(Files.readString(directory.resolve("summary.json"), StandardCharsets.UTF_8));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> member(Map<String, Object> object, String name) {
+        return (Map<String, Object>) object.get(name);
+    }
+
+    private static String sha256Hex(byte[] data) throws NoSuchAlgorithmException {
+        return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(data));
+    }
+
+    private static List<String> files(Path directory) throws IOException {
+        try (Stream<Path> entries = Files.list(directory)) {
+            return entries.map(path -> path.getFileName().toString()).sorted().toList();
+        }
+    }
+
+    private static void assertWellFormedXml(Path file) throws Exception {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        factory.setNamespaceAware(true);
+        assertTrue(factory.newDocumentBuilder().parse(file.toFile()).getDocumentElement() != null, file.toString());
+    }
+
+    private void assertValidated(Path directory, String indication, String subIndication) throws Exception {
+        Map<String, Object> summary = summary(directory);
+        assertEquals(1L, summary.get("format-version"));
+        assertEquals("validate-timestamp", summary.get("mode"));
+        assertEquals(VALIDATION_TIME, summary.get("validation-time"));
+        assertEquals("validated", summary.get("result"), summary.toString());
+        assertEquals(indication, summary.get("indication"), summary.toString());
+        assertEquals(subIndication, summary.get("sub-indication"), summary.toString());
+        List<String> expected = new ArrayList<>(REPORTS);
+        expected.add("summary.json");
+        expected.sort(null);
+        assertEquals(expected, files(directory));
+        for (String report : REPORTS) {
+            assertWellFormedXml(directory.resolve(report));
+        }
+    }
+
+    // Acceptance criterion 1: the token and its message imprint are validated.
+
+    @Test
+    void aValidTokenWithItsDataPasses() throws Exception {
+        Path result = temp.resolve("valid");
+        assertEquals(ExitCodes.SUCCESS, run(arguments("valid",
+                "--data", corpus("timestamps/content.txt"), "--out", result.toString())), stderr());
+        assertValidated(result, "PASSED", null);
+        Map<String, Object> details = member(summary(result), "details");
+        assertEquals("2030-01-14T10:00:00Z", details.get("production-time"));
+        Map<String, Object> imprint = member(details, "message-imprint");
+        assertEquals("SHA256", imprint.get("digest-algorithm"));
+        assertEquals(true, imprint.get("data-found"));
+        assertEquals(true, imprint.get("data-intact"));
+        assertTrue(details.get("errors") instanceof List<?> errors && errors.isEmpty(), details.toString());
+    }
+
+    @Test
+    void aValidTokenWithTheDigestOfItsDataPasses() throws Exception {
+        Path result = temp.resolve("digest");
+        String digest = sha256Hex(Files.readAllBytes(CORPUS.resolve("timestamps/content.txt")));
+        assertEquals(ExitCodes.SUCCESS, run(arguments("valid",
+                "--digest", digest.toUpperCase(java.util.Locale.ROOT), "--digest-algorithm", "SHA256",
+                "--out", result.toString())), stderr());
+        assertValidated(result, "PASSED", null);
+        assertEquals(true, member(member(summary(result), "details"), "message-imprint").get("data-intact"));
+    }
+
+    @Test
+    void theMismatchingImprintTokenFailsWithHashFailure() throws Exception {
+        Path result = temp.resolve("mismatch");
+        assertEquals(ExitCodes.SUCCESS, run(arguments("imprint-mismatch",
+                "--data", corpus("timestamps/content.txt"), "--out", result.toString())), stderr());
+        assertValidated(result, "FAILED", "HASH_FAILURE");
+        Map<String, Object> imprint = member(member(summary(result), "details"), "message-imprint");
+        assertEquals(true, imprint.get("data-found"));
+        assertEquals(false, imprint.get("data-intact"));
+    }
+
+    @Test
+    void aValidTokenWithAnotherDigestFailsWithHashFailure() throws Exception {
+        Path result = temp.resolve("other-digest");
+        String digest = sha256Hex("other data".getBytes(StandardCharsets.UTF_8));
+        assertEquals(ExitCodes.SUCCESS, run(arguments("valid",
+                "--digest", digest, "--digest-algorithm", "SHA256", "--out", result.toString())), stderr());
+        assertValidated(result, "FAILED", "HASH_FAILURE");
+    }
+
+    @Test
+    void withoutDataTheImprintIsNotChecked() throws Exception {
+        Path result = temp.resolve("no-data");
+        assertEquals(ExitCodes.SUCCESS, run(arguments("valid", "--out", result.toString())), stderr());
+        assertValidated(result, "INDETERMINATE", "SIGNED_DATA_NOT_FOUND");
+        Map<String, Object> imprint = member(member(summary(result), "details"), "message-imprint");
+        assertEquals(false, imprint.get("data-found"));
+        assertEquals(false, imprint.get("data-intact"));
+    }
+
+    @Test
+    void theSuppliedCrlsAreTheOnlyRevocationData() throws Exception {
+        Path result = temp.resolve("no-crl");
+        List<String> args = without(without(arguments("valid", "--data", corpus("timestamps/content.txt"),
+                "--out", result.toString()), "--crl"), "--crl");
+        assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+        assertValidated(result, "INDETERMINATE", "CERTIFICATE_CHAIN_GENERAL_FAILURE");
+    }
+
+    // Acceptance criterion 3: results on the corpus are stable over two runs.
+
+    /** The DSS results that testdata/manifest.toml predicts for the timestamp corpus, with its content. */
+    private static final Map<String, List<String>> PREDICTIONS = Map.of(
+            "valid", Arrays.asList("PASSED", null),
+            "signer-without-time-stamping", Arrays.asList("INDETERMINATE", "CHAIN_CONSTRAINTS_FAILURE"),
+            "imprint-mismatch", Arrays.asList("FAILED", "HASH_FAILURE"),
+            "gen-time-after-validation-time", Arrays.asList("PASSED", null));
+
+    @Test
+    void resultsOnTheCorpusAreStableOverTwoRunsAndMatchTheManifest() throws Exception {
+        for (Map.Entry<String, List<String>> prediction : PREDICTIONS.entrySet()) {
+            String token = prediction.getKey();
+            Path first = temp.resolve(token + "-1");
+            Path second = temp.resolve(token + "-2");
+            for (Path result : List.of(first, second)) {
+                assertEquals(ExitCodes.SUCCESS, run(arguments(token,
+                        "--data", corpus("timestamps/content.txt"), "--out", result.toString())), stderr());
+                assertValidated(result, prediction.getValue().get(0), prediction.getValue().get(1));
+            }
+            for (String file : List.of("summary.json", "diagnostic-data.xml", "detailed-report.xml",
+                    "simple-report.xml")) {
+                assertTrue(Arrays.equals(Files.readAllBytes(first.resolve(file)),
+                        Files.readAllBytes(second.resolve(file))), token + " " + file);
+            }
+            // The namespace prefixes of this report may differ between runs; its content may not.
+            assertEquals(XmlContent.of(first.resolve("etsi-validation-report.xml")),
+                    XmlContent.of(second.resolve("etsi-validation-report.xml")), token);
+        }
+    }
+
+    // Acceptance criterion 2: unparsable input is rejected; tool failures exit non-zero.
+
+    @Test
+    void anUnparsableTokenIsRejected() throws Exception {
+        Path result = temp.resolve("rejected");
+        List<String> args = arguments("valid", "--out", result.toString());
+        args.set(args.indexOf("--timestamp") + 1, corpus("timestamps/content.txt"));
+        assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+        Map<String, Object> summary = summary(result);
+        assertEquals("rejected", summary.get("result"));
+        assertEquals("validate-timestamp", summary.get("mode"));
+        assertEquals("--timestamp", summary.get("input"));
+        assertEquals(corpus("timestamps/content.txt"), summary.get("file"));
+        assertTrue(summary.get("message") instanceof String message && !message.isBlank(), summary.toString());
+        assertFalse(summary.containsKey("indication"));
+        assertEquals(List.of("summary.json"), files(result));
+    }
+
+    @Test
+    void anUnparsableCertificateIsRejected() throws Exception {
+        Path result = temp.resolve("certificate");
+        assertEquals(ExitCodes.SUCCESS, run(arguments("valid",
+                "--certificate", corpus("timestamps/content.txt"), "--out", result.toString())), stderr());
+        Map<String, Object> summary = summary(result);
+        assertEquals("rejected", summary.get("result"));
+        assertEquals("--certificate", summary.get("input"));
+    }
+
+    @Test
+    void anUnparsableTrustAnchorIsRejected() throws Exception {
+        Path result = temp.resolve("anchor");
+        List<String> args = arguments("valid", "--out", result.toString());
+        args.set(args.indexOf("--trust-anchor") + 1, corpus("crl/root-ca.crl"));
+        assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+        Map<String, Object> summary = summary(result);
+        assertEquals("rejected", summary.get("result"));
+        assertEquals("--trust-anchor", summary.get("input"));
+    }
+
+    @Test
+    void anUnparsableCrlIsRejected() throws Exception {
+        Path result = temp.resolve("crl");
+        assertEquals(ExitCodes.SUCCESS, run(arguments("valid",
+                "--crl", corpus("timestamps/content.txt"), "--out", result.toString())), stderr());
+        Map<String, Object> summary = summary(result);
+        assertEquals("rejected", summary.get("result"));
+        assertEquals("--crl", summary.get("input"));
+        assertEquals(corpus("timestamps/content.txt"), summary.get("file"));
+        assertTrue(((String) summary.get("message")).contains("CRL"), summary.toString());
+    }
+
+    @Test
+    void anUnparsableOcspResponseIsRejected() throws Exception {
+        Path result = temp.resolve("ocsp");
+        assertEquals(ExitCodes.SUCCESS, run(arguments("valid",
+                "--ocsp", corpus("timestamps/content.txt"), "--out", result.toString())), stderr());
+        Map<String, Object> summary = summary(result);
+        assertEquals("rejected", summary.get("result"));
+        assertEquals("--ocsp", summary.get("input"));
+    }
+
+    private Path derCertificate() throws IOException {
+        return Files.write(temp.resolve("tsa.cer"), Pem.decode(Files.readString(CORPUS.resolve("pki/tsa.pem"))));
+    }
+
+    private Path truncated(String path, int length) throws IOException {
+        byte[] content = Files.readAllBytes(CORPUS.resolve(path));
+        return Files.write(temp.resolve("truncated-" + Path.of(path).getFileName()),
+                Arrays.copyOf(content, length));
+    }
+
+    private void assertRejected(List<String> args, Path result, String option, String file) throws IOException {
+        assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+        Map<String, Object> summary = summary(result);
+        assertEquals("rejected", summary.get("result"), summary.toString());
+        assertEquals(option, summary.get("input"));
+        assertEquals(file, summary.get("file"));
+        assertTrue(summary.get("message") instanceof String message && !message.isBlank(), summary.toString());
+        assertEquals(List.of("summary.json"), files(result));
+    }
+
+    @Test
+    void aCertificateGivenAsACrlIsRejected() throws Exception {
+        for (String file : List.of(corpus("pki/tsa.pem"), derCertificate().toString())) {
+            Path result = temp.resolve("certificate-as-crl-" + file.length());
+            assertRejected(arguments("valid", "--data", corpus("timestamps/content.txt"), "--crl", file,
+                    "--out", result.toString()), result, "--crl", file);
+        }
+    }
+
+    @Test
+    void aTruncatedCrlIsRejected() throws Exception {
+        Path crl = truncated("crl/ca-ecdsa.crl", 200);
+        Path result = temp.resolve("truncated-crl");
+        assertRejected(arguments("valid", "--data", corpus("timestamps/content.txt"), "--crl", crl.toString(),
+                "--out", result.toString()), result, "--crl", crl.toString());
+    }
+
+    @Test
+    void aPemCrlIsAccepted() throws Exception {
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"));
+        for (String crl : List.of("ca-ecdsa", "root-ca")) {
+            Path pem = Files.writeString(temp.resolve(crl + ".pem"),
+                    Pem.encode("X509 CRL", Files.readAllBytes(CORPUS.resolve("crl/" + crl + ".crl"))));
+            args.set(args.indexOf(corpus("crl/" + crl + ".crl")), pem.toString());
+        }
+        Path result = temp.resolve("pem-crl");
+        args.addAll(List.of("--out", result.toString()));
+        assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+        assertValidated(result, "PASSED", null);
+    }
+
+    private static final byte[] TRAILING = {1, 2, 3, 4, 5, 6, 7};
+
+    private static byte[] withTrailingBytes(byte[] content) {
+        byte[] extended = Arrays.copyOf(content, content.length + TRAILING.length);
+        System.arraycopy(TRAILING, 0, extended, content.length, TRAILING.length);
+        return extended;
+    }
+
+    @Test
+    void aCrlFollowedByOtherBytesIsUsedAsDssUsesIt() throws Exception {
+        Path extended = Files.write(temp.resolve("ca-ecdsa-extended.crl"),
+                withTrailingBytes(Files.readAllBytes(CORPUS.resolve("crl/ca-ecdsa.crl"))));
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"));
+        args.set(args.indexOf(corpus("crl/ca-ecdsa.crl")), extended.toString());
+        Path result = temp.resolve("extended-crl");
+        args.addAll(List.of("--out", result.toString()));
+        assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+        assertValidated(result, "PASSED", null);
+    }
+
+    @Test
+    void anOcspResponseFollowedByOtherBytesIsNotRejected() throws Exception {
+        byte[] response = OcspResponses.wellFormed();
+        List<byte[]> summaries = new ArrayList<>();
+        for (byte[] content : List.of(response, withTrailingBytes(response))) {
+            Path file = Files.write(temp.resolve("response-" + content.length + ".ocsp"), content);
+            Path result = temp.resolve("ocsp-" + content.length);
+            assertEquals(ExitCodes.SUCCESS, run(arguments("valid", "--data", corpus("timestamps/content.txt"),
+                    "--ocsp", file.toString(), "--out", result.toString())), stderr());
+            assertValidated(result, "PASSED", null);
+            summaries.add(Files.readAllBytes(result.resolve("summary.json")));
+        }
+        assertTrue(Arrays.equals(summaries.get(0), summaries.get(1)));
+    }
+
+    @Test
+    void anOcspResponseWithAMalformedProducedAtIsRejected() throws Exception {
+        Path file = Files.write(temp.resolve("produced-at.ocsp"), OcspResponses.withMalformedProducedAt());
+        Path result = temp.resolve("produced-at");
+        assertRejected(arguments("valid", "--ocsp", file.toString(), "--out", result.toString()), result,
+                "--ocsp", file.toString());
+    }
+
+    @Test
+    void aCrlWhoseOuterLengthDssIgnoresIsUsed() throws Exception {
+        // DSS uses a CRL whose outer SEQUENCE declares a wrong length; a strict DER decoder refuses it.
+        byte[] crl = Files.readAllBytes(CORPUS.resolve("crl/ca-ecdsa.crl"));
+        crl[3] = (byte) 0xd6;
+        Path file = Files.write(temp.resolve("outer-length.crl"), crl);
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"));
+        args.set(args.indexOf(corpus("crl/ca-ecdsa.crl")), file.toString());
+        Path result = temp.resolve("outer-length");
+        args.addAll(List.of("--out", result.toString()));
+        assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+        assertValidated(result, "PASSED", null);
+    }
+
+    @Test
+    void anOcspResponseWithAnotherStatusAndResponseBytesIsUsedAsDssUsesIt() throws Exception {
+        List<Map<String, Object>> summaries = new ArrayList<>();
+        byte[] response = OcspResponses.forTsa();
+        List<byte[]> responses = List.of(response, OcspResponses.withStatus(response, 128));
+        for (int i = 0; i < responses.size(); i++) {
+            Path file = Files.write(temp.resolve("status-" + i + ".ocsp"), responses.get(i));
+            Path result = temp.resolve("status-" + i);
+            assertEquals(ExitCodes.SUCCESS, run(arguments("valid", "--data", corpus("timestamps/content.txt"),
+                    "--ocsp", file.toString(), "--out", result.toString())), stderr());
+            assertEquals("validated", summary(result).get("result"), summary(result).toString());
+            summaries.add(summary(result));
+        }
+        assertEquals(summaries.get(0).get("indication"), summaries.get(1).get("indication"));
+    }
+
+    @Test
+    void theSignatureIsCheckedWithASuppliedCertificateWhenTheTokenHasNone() throws Exception {
+        byte[] withoutCertificates = Tokens.withoutCertificates(
+                Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst")));
+        Path intact = Files.write(temp.resolve("no-certificates.tst"), withoutCertificates);
+        Path malformed = Files.write(temp.resolve("no-certificates-malformed.tst"),
+                Tokens.withMalformedSignature(withoutCertificates));
+        Path first = temp.resolve("supplied-intact");
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"),
+                "--certificate", corpus("pki/tsa.pem"), "--out", first.toString());
+        args.set(args.indexOf("--timestamp") + 1, intact.toString());
+        assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+        assertValidated(first, "PASSED", null);
+        Path second = temp.resolve("supplied-malformed");
+        args.set(args.indexOf("--timestamp") + 1, malformed.toString());
+        args.set(args.indexOf("--out") + 1, second.toString());
+        assertRejected(args, second, "--timestamp", malformed.toString());
+    }
+
+    @Test
+    void aSuppliedSigningCertificateWithAnUndecodableSubjectIsRejected() throws Exception {
+        Path token = Files.write(temp.resolve("no-certificates.tst"), Tokens.withoutCertificates(
+                Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst"))));
+        Path certificate = Files.write(temp.resolve("tsa-invalid-utf8.cer"),
+                Tokens.certificateWithInvalidUtf8Subject(Files.readString(CORPUS.resolve("pki/tsa.pem"))));
+        Path result = temp.resolve("invalid-utf8-certificate");
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"),
+                "--certificate", certificate.toString(), "--out", result.toString());
+        args.set(args.indexOf("--timestamp") + 1, token.toString());
+        assertRejected(args, result, "--certificate", certificate.toString());
+    }
+
+    @Test
+    void aTokenWhoseImprintAlgorithmCannotBeComputedIsRejectedWhenDataIsGiven() throws Exception {
+        for (String oid : List.of("2.16.840.1.101.3.4.2.11", "2.16.840.1.101.3.4.2.12")) {
+            Path token = Files.write(temp.resolve("shake-" + oid + ".tst"), Tokens.withImprintAlgorithm(
+                    Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst")), oid));
+            Path result = temp.resolve("shake-" + oid);
+            List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"),
+                    "--out", result.toString());
+            args.set(args.indexOf("--timestamp") + 1, token.toString());
+            assertRejected(args, result, "--timestamp", token.toString());
+            // Without data DSS computes no digest, and the token is validated.
+            Path withoutData = temp.resolve("shake-no-data-" + oid);
+            args = arguments("valid", "--out", withoutData.toString());
+            args.set(args.indexOf("--timestamp") + 1, token.toString());
+            assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+            assertEquals("validated", summary(withoutData).get("result"));
+        }
+    }
+
+    /**
+     * The fourth byte of a UTCTime length becomes 0x84, so the CRL declares
+     * a time of about 858 MB in a file of 570 bytes. DSS alone has been
+     * observed to use memory in proportion to such a length: with a small
+     * heap the run fails, with a large one DSS makes no usable token from the
+     * CRL. The tool must reject the CRL whatever the heap, so the run uses a
+     * small heap in a new JVM.
+     */
+    @Test
+    void aCrlDeclaringALengthBeyondTheHeapIsRejected() throws Exception {
+        byte[] crl = Files.readAllBytes(CORPUS.resolve("crl/root-ca.crl"));
+        crl[103] = (byte) 0x84;
+        Path file = Files.write(temp.resolve("huge-length.crl"), crl);
+        Path result = temp.resolve("huge-length");
+        List<String> command = new ArrayList<>(List.of(
+                Path.of(System.getProperty("java.home"), "bin", "java").toString(), "-Xmx64m",
+                "-cp", System.getProperty("java.class.path"), Main.class.getName()));
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"), "--out", result.toString());
+        args.set(args.indexOf(corpus("crl/root-ca.crl")), file.toString());
+        command.addAll(args);
+        Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
+        String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        assertEquals(ExitCodes.SUCCESS, process.waitFor(), output);
+        Map<String, Object> summary = summary(result);
+        assertEquals("rejected", summary.get("result"), summary.toString());
+        assertEquals("--crl", summary.get("input"));
+    }
+
+    /** Asserts that the tool rejects the token, and that DSS alone fails on it at the same stage. */
+    private void assertTokenRejected(byte[] content, String name) throws Exception {
+        Path token = Files.write(temp.resolve(name + ".tst"), content);
+        Path result = temp.resolve(name);
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"), "--out", result.toString());
+        args.set(args.indexOf("--timestamp") + 1, token.toString());
+        assertRejected(args, result, "--timestamp", token.toString());
+        String message = (String) summary(result).get("message");
+        assertNull(MutationTest.crossCheckToken(content, message), message);
+    }
+
+    @Test
+    void aTokenWithoutEncapsulatedContentIsRejected() throws Exception {
+        assertTokenRejected(Tokens.withoutEncapsulatedContent(
+                Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst"))), "no-content");
+    }
+
+    @Test
+    void aTokenWithAnEmptySigningCertificateHashIsRejected() throws Exception {
+        assertTokenRejected(Tokens.withEmptySigningCertificateHash(
+                Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst"))), "empty-cert-hash");
+    }
+
+    @Test
+    void aTokenWithASigningCertificateHashThatDssCannotComputeIsRejected() throws Exception {
+        assertTokenRejected(Tokens.withShake128SigningCertificateHash(
+                Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst"))), "shake-cert-hash");
+    }
+
+    @Test
+    void anOcspResponseHoldingACertificateWithAWrongEncodingIsRejected() throws Exception {
+        // Found by mutation: Bouncy Castle fails with "unexpected explicit encoding" on the certificate.
+        byte[] response = OcspResponses.forTsa();
+        response[332] = 1;
+        Path file = Files.write(temp.resolve("explicit.ocsp"), response);
+        Path result = temp.resolve("explicit");
+        assertRejected(arguments("valid", "--ocsp", file.toString(), "--out", result.toString()), result,
+                "--ocsp", file.toString());
+    }
+
+    @Test
+    void aCrlDeclaringALargeLengthIsRejectedWithoutAllocatingIt() throws Exception {
+        byte[] crl = Files.readAllBytes(CORPUS.resolve("crl/root-ca.crl"));
+        crl[103] = (byte) 0x84;
+        Path file = Files.write(temp.resolve("large-length.crl"), crl);
+        Path result = temp.resolve("large-length");
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"), "--out", result.toString());
+        args.set(args.indexOf(corpus("crl/root-ca.crl")), file.toString());
+        com.sun.management.ThreadMXBean threads =
+                (com.sun.management.ThreadMXBean) java.lang.management.ManagementFactory.getThreadMXBean();
+        long before = threads.getCurrentThreadAllocatedBytes();
+        assertRejected(args, result, "--crl", file.toString());
+        long allocated = threads.getCurrentThreadAllocatedBytes() - before;
+        assertTrue(allocated < 64L * 1024 * 1024, "allocated " + allocated + " bytes");
+    }
+
+    private void assertCrlUsed(byte[] crl, String name) throws Exception {
+        Path file = Files.write(temp.resolve(name + ".crl"), crl);
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"));
+        args.set(args.indexOf(corpus("crl/ca-ecdsa.crl")), file.toString());
+        Path result = temp.resolve(name);
+        args.addAll(List.of("--out", result.toString()));
+        assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+        assertValidated(result, "PASSED", null);
+    }
+
+    @Test
+    void aCrlWhoseLastSignatureOctetIsMissingIsUsedAsDssUsesIt() throws Exception {
+        // The signature ends with a zero octet; DSS reads the short CRL as if the zero were there.
+        byte[] crl = Crls.caEcdsaSignatureEndingInZero();
+        assertCrlUsed(Arrays.copyOf(crl, crl.length - 1), "short");
+    }
+
+    @Test
+    void aCrlWithAnIndefiniteOuterLengthIsUsedAsDssUsesIt() throws Exception {
+        byte[] original = Files.readAllBytes(CORPUS.resolve("crl/ca-ecdsa.crl"));
+        byte[] crl = new byte[original.length - 2];
+        crl[0] = 0x30;
+        crl[1] = (byte) 0x80;
+        System.arraycopy(original, 4, crl, 2, original.length - 4);
+        assertCrlUsed(crl, "outer-indefinite");
+    }
+
+    private static Attribute signingCertificate(ESSCertID... ids) {
+        return new Attribute(PKCSObjectIdentifiers.id_aa_signingCertificate, new DERSet(
+                new DERSequence(new DERSequence(ids))));
+    }
+
+    private static Attribute signingCertificateV2(ESSCertIDv2... ids) {
+        return new Attribute(PKCSObjectIdentifiers.id_aa_signingCertificateV2, new DERSet(
+                new SigningCertificateV2(ids)));
+    }
+
+    private byte[] resigned(Attribute... attributes) throws Exception {
+        return Tokens.resignedWithSigningCertificates(
+                Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst")), attributes);
+    }
+
+    @Test
+    void anEmptyHashAfterTheMatchingReferenceIsUsedAsDssUsesIt() throws Exception {
+        ESSCertID empty = new ESSCertID(new byte[0], Tokens.tsaIssuerSerial());
+        Path token = Files.write(temp.resolve("ok-then-empty.tst"),
+                resigned(signingCertificate(Tokens.tsaCertId(), empty)));
+        Path result = temp.resolve("ok-then-empty");
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"), "--out", result.toString());
+        args.set(args.indexOf("--timestamp") + 1, token.toString());
+        assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+        assertValidated(result, "PASSED", null);
+    }
+
+    @Test
+    void signingCertificateReferencesOnWhichDssFailsAreRejected() throws Exception {
+        ESSCertID empty = new ESSCertID(new byte[0], Tokens.tsaIssuerSerial());
+        ESSCertID emptyWithoutIssuer = new ESSCertID(new byte[0]);
+        ESSCertIDv2 shake = new ESSCertIDv2(new AlgorithmIdentifier(NISTObjectIdentifiers.id_shake128),
+                Tokens.tsaCertIdV2().getCertHash(), Tokens.tsaIssuerSerial());
+        assertTokenRejected(resigned(signingCertificate(empty, Tokens.tsaCertId())), "empty-then-ok");
+        assertTokenRejected(resigned(signingCertificateV2(Tokens.tsaCertIdV2()), signingCertificate(empty)),
+                "v2-ok-and-v1-empty");
+        assertTokenRejected(resigned(signingCertificate(Tokens.tsaCertId(), emptyWithoutIssuer)),
+                "ok-then-empty-without-issuer");
+        assertTokenRejected(resigned(signingCertificateV2(Tokens.tsaCertIdV2(), shake)), "v2-ok-then-shake");
+        assertTokenRejected(resigned(signingCertificate(Tokens.tsaCertId()), signingCertificateV2(shake)),
+                "v1-ok-and-v2-shake");
+    }
+
+    @Test
+    void cmsStructuresWithMissingMembersAreRejected() throws Exception {
+        for (String hex : List.of(
+                // ContentInfo of type signedData with an empty SignedData.
+                "300f06092a864886f70d010702a0023000",
+                // ContentInfo of type signedData without content.
+                "300b06092a864886f70d010702",
+                // SignedData with its version only.
+                "301206092a864886f70d010702a00530030201 03".replace(" ", ""),
+                // SignedData with version and digestAlgorithms only.
+                "301406092a864886f70d010702a007300502010331 00".replace(" ", ""),
+                // SignedData without signerInfos.
+                "302306092a864886f70d010702a01630140201033100300d060b2a864886f70d0109100104")) {
+            assertTokenRejected(HexFormat.of().parseHex(hex), "cms-" + hex.length());
+        }
+    }
+
+    @Test
+    void aSignedCrlWithAnIndefiniteLengthInItsExtensionsIsUsedAsDssUsesIt() throws Exception {
+        assertCrlUsed(Crls.caEcdsaWithIndefiniteExtensions(), "indefinite-extensions");
+    }
+
+    @Test
+    void aSignedCrlWithAnIndefiniteLengthEntryIsRejected() throws Exception {
+        Path file = Files.write(temp.resolve("indefinite-entry.crl"), Crls.caEcdsaWithIndefiniteEntry());
+        Path result = temp.resolve("indefinite-entry");
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"), "--out", result.toString());
+        args.set(args.indexOf(corpus("crl/ca-ecdsa.crl")), file.toString());
+        assertRejected(args, result, "--crl", file.toString());
+    }
+
+    /**
+     * Every element of crl/ca-ecdsa in turn declares a length just under
+     * 64 MiB. In a JVM with a heap of 128 MiB, every run must end with exit
+     * code 0: the CRL is rejected before DSS reads it, or DSS reads it within
+     * the heap.
+     */
+    @Test
+    void largeLengthsInEveryElementOfACrlEndWithinASmallHeap() throws Exception {
+        List<String> command = new ArrayList<>(List.of(
+                Path.of(System.getProperty("java.home"), "bin", "java").toString(), "-Xmx128m",
+                "-cp", System.getProperty("java.class.path"), HeapProbe.class.getName()));
+        for (int offset : Crls.caEcdsaElementOffsets()) {
+            command.add(Files.write(temp.resolve("large-" + offset + ".crl"),
+                    Crls.caEcdsaWithLength(offset, 64L * 1024 * 1024 - 1)).toString());
+        }
+        Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
+        String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        assertEquals(0, process.waitFor(), output);
+    }
+
+    @Test
+    void aSigningCertificateV2ListIsReadUpToItsFirstUnknownAlgorithmAsDssReadsIt() throws Exception {
+        ESSCertIDv2 match = Tokens.tsaCertIdV2();
+        ESSCertIDv2 unknown = new ESSCertIDv2(new AlgorithmIdentifier(
+                new org.bouncycastle.asn1.ASN1ObjectIdentifier("1.3.6.1.4.1.32473.99")), match.getCertHash(),
+                match.getIssuerSerial());
+        ESSCertIDv2 shake = new ESSCertIDv2(new AlgorithmIdentifier(NISTObjectIdentifiers.id_shake128),
+                match.getCertHash(), match.getIssuerSerial());
+        Path token = Files.write(temp.resolve("unknown-shake-match.tst"),
+                resigned(signingCertificateV2(unknown, shake, match)));
+        Path result = temp.resolve("unknown-shake-match");
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"), "--out", result.toString());
+        args.set(args.indexOf("--timestamp") + 1, token.toString());
+        assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+        assertValidated(result, "PASSED", null);
+        assertTokenRejected(resigned(signingCertificateV2(shake, unknown, match)), "shake-unknown-match");
+    }
+
+    @Test
+    void aCertificateGivenAsAnOcspResponseIsRejected() throws Exception {
+        for (String file : List.of(corpus("pki/tsa.pem"), derCertificate().toString())) {
+            Path result = temp.resolve("certificate-as-ocsp-" + file.length());
+            assertRejected(arguments("valid", "--ocsp", file, "--out", result.toString()), result, "--ocsp", file);
+        }
+    }
+
+    @Test
+    void aTruncatedOcspResponseIsRejected() throws Exception {
+        byte[] response = OcspResponses.wellFormed();
+        Path file = Files.write(temp.resolve("truncated.ocsp"), Arrays.copyOf(response, response.length - 10));
+        Path result = temp.resolve("truncated-ocsp");
+        assertRejected(arguments("valid", "--ocsp", file.toString(), "--out", result.toString()), result,
+                "--ocsp", file.toString());
+    }
+
+    @Test
+    void anOcspResponseWithAMalformedSingleResponseIsRejected() throws Exception {
+        Path file = Files.write(temp.resolve("malformed.ocsp"), OcspResponses.malformedSingleResponse());
+        Path result = temp.resolve("malformed-ocsp");
+        assertRejected(arguments("valid", "--ocsp", file.toString(), "--out", result.toString()), result,
+                "--ocsp", file.toString());
+    }
+
+    @Test
+    void aTokenWithAnUnknownImprintAlgorithmIsRejected() throws Exception {
+        Path token = Files.write(temp.resolve("unknown-imprint.tst"), Tokens.withUnknownImprintAlgorithm(
+                Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst"))));
+        List<List<String>> variants = List.of(
+                List.of("--data", corpus("timestamps/content.txt")),
+                List.of(),
+                List.of("--digest", "00".repeat(32), "--digest-algorithm", "SHA256"));
+        for (int i = 0; i < variants.size(); i++) {
+            Path result = temp.resolve("unknown-imprint-" + i);
+            List<String> args = arguments("valid", variants.get(i).toArray(String[]::new));
+            args.set(args.indexOf("--timestamp") + 1, token.toString());
+            args.addAll(List.of("--out", result.toString()));
+            assertRejected(args, result, "--timestamp", token.toString());
+            assertTrue(((String) summary(result).get("message")).contains(Tokens.UNKNOWN_IMPRINT_OID),
+                    summary(result).toString());
+        }
+    }
+
+    @Test
+    void aTokenWithAMalformedSignatureIsRejected() throws Exception {
+        Path token = Files.write(temp.resolve("malformed-signature.tst"), Tokens.withMalformedSignature(
+                Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst"))));
+        Path result = temp.resolve("malformed-signature");
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"),
+                "--out", result.toString());
+        args.set(args.indexOf("--timestamp") + 1, token.toString());
+        assertRejected(args, result, "--timestamp", token.toString());
+    }
+
+    /**
+     * One mutation of a corpus token per kind of failure that the mutation
+     * test found, each of which made DSS fail during the validation, before
+     * the token was checked up front. The offsets refer to the committed
+     * corpus files.
+     */
+    @Test
+    void tokensOnWhichDssFailsLateAreRejected() throws Exception {
+        record Case(String token, int offset, int value, String message) {
+        }
+        List<Case> cases = List.of(
+                // The OID id-ecPublicKey of the certificate becomes unknown: its key cannot be decoded.
+                new Case("gen-time-after-validation-time", 373, 2, "a certificate in the token cannot be decoded"),
+                // A byte of a UTF8String in the subject name becomes invalid UTF-8.
+                new Case("valid", 348, 211, "a certificate in the token cannot be decoded"),
+                // The authority key identifier extension gets an illegal tag.
+                new Case("imprint-mismatch", 507, 74, "a certificate in the token cannot be decoded"),
+                // The signature algorithm of the signer becomes an unknown OID.
+                new Case("gen-time-after-validation-time", 1178, 32, "the signature of the token cannot be decoded"));
+        for (Case c : cases) {
+            byte[] content = Files.readAllBytes(CORPUS.resolve("timestamps/" + c.token() + ".tst"));
+            content[c.offset()] = (byte) c.value();
+            Path token = Files.write(temp.resolve(c.token() + "-" + c.offset() + ".tst"), content);
+            Path result = temp.resolve("late-" + c.token() + "-" + c.offset());
+            List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"),
+                    "--out", result.toString());
+            args.set(args.indexOf("--timestamp") + 1, token.toString());
+            assertRejected(args, result, "--timestamp", token.toString());
+            assertTrue(((String) summary(result).get("message")).startsWith(c.message()), summary(result).toString());
+        }
+    }
+
+    /**
+     * Bouncy Castle provides RIPEMD-160, not the JVM. DSS registers it when
+     * it starts, which a fresh process has not done yet when the options are
+     * checked, so this runs the tool in a new JVM.
+     */
+    @Test
+    void aDigestAlgorithmThatOnlyBouncyCastleProvidesIsKnownInAFreshProcess() throws Exception {
+        List<String> command = new ArrayList<>(List.of(
+                Path.of(System.getProperty("java.home"), "bin", "java").toString(),
+                "-cp", System.getProperty("java.class.path"), Main.class.getName()));
+        command.addAll(arguments("valid", "--digest", "00".repeat(20), "--digest-algorithm", "RIPEMD160",
+                "--out", temp.resolve("ripemd").toString()));
+        Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
+        String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        assertEquals(ExitCodes.USAGE, process.waitFor(), output);
+        assertFalse(output.contains("not available"), output);
+        assertTrue(output.contains("differs from the algorithm of the message imprint"), output);
+    }
+
+    @Test
+    void aMissingFileIsAToolFailure() {
+        Path result = temp.resolve("missing");
+        List<String> args = arguments("valid", "--out", result.toString());
+        args.set(args.indexOf("--timestamp") + 1, temp.resolve("absent.tst").toString());
+        assertEquals(ExitCodes.FAILURE, run(args));
+        assertTrue(stderr().contains("absent.tst"), stderr());
+        assertFalse(Files.exists(result.resolve("summary.json")));
+    }
+
+    @Test
+    void aMissingDataFileIsAToolFailure() {
+        Path result = temp.resolve("missing-data");
+        assertEquals(ExitCodes.FAILURE, run(arguments("valid",
+                "--data", temp.resolve("absent.txt").toString(), "--out", result.toString())));
+        assertFalse(Files.exists(result.resolve("summary.json")));
+    }
+
+    @Test
+    void aNonEmptyOutputDirectoryIsAToolFailure() throws IOException {
+        Path result = Files.createDirectories(temp.resolve("used"));
+        Files.writeString(result.resolve("old.txt"), "old");
+        assertEquals(ExitCodes.FAILURE, run(arguments("valid", "--out", result.toString())));
+        assertEquals(List.of("old.txt"), files(result));
+    }
+
+    @Test
+    void anOutputPathThatIsAFileIsAToolFailure() throws IOException {
+        Path result = Files.writeString(temp.resolve("file"), "x");
+        assertEquals(ExitCodes.FAILURE, run(arguments("valid", "--out", result.toString())));
+    }
+
+    @Test
+    void anEmptyOutputDirectoryIsUsed() throws Exception {
+        Path result = Files.createDirectories(temp.resolve("empty"));
+        assertEquals(ExitCodes.SUCCESS, run(arguments("valid",
+                "--data", corpus("timestamps/content.txt"), "--out", result.toString())), stderr());
+        assertValidated(result, "PASSED", null);
+    }
+
+    // Usage errors.
+
+    @Test
+    void dataAndDigestAreMutuallyExclusive() throws NoSuchAlgorithmException {
+        String digest = sha256Hex(new byte[0]);
+        assertEquals(ExitCodes.USAGE, run(arguments("valid", "--data", corpus("timestamps/content.txt"),
+                "--digest", digest, "--digest-algorithm", "SHA256", "--out", temp.resolve("x").toString())));
+        assertTrue(stderr().contains("--data"), stderr());
+        assertFalse(Files.exists(temp.resolve("x")));
+    }
+
+    @Test
+    void aDigestNeedsItsAlgorithmAndTheReverse() throws NoSuchAlgorithmException {
+        String digest = sha256Hex(new byte[0]);
+        assertEquals(ExitCodes.USAGE, run(arguments("valid", "--digest", digest,
+                "--out", temp.resolve("x").toString())));
+        assertEquals(ExitCodes.USAGE, run(arguments("valid", "--digest-algorithm", "SHA256",
+                "--out", temp.resolve("y").toString())));
+    }
+
+    @Test
+    void requiredOptionsMustBeGiven() {
+        List<String> complete = arguments("valid", "--out", temp.resolve("x").toString());
+        for (String option : List.of("--timestamp", "--trust-anchor", "--validation-time", "--out")) {
+            err.reset();
+            assertEquals(ExitCodes.USAGE, run(without(complete, option)), option);
+            assertTrue(stderr().contains(option), stderr());
+        }
+    }
+
+    @Test
+    void anInvalidDigestIsAUsageError() {
+        for (String digest : List.of("xyz", "abc", "00".repeat(31), "00".repeat(33))) {
+            assertEquals(ExitCodes.USAGE, run(arguments("valid", "--digest", digest, "--digest-algorithm", "SHA256",
+                    "--out", temp.resolve("x").toString())), digest);
+        }
+    }
+
+    @Test
+    void anUnknownDigestAlgorithmIsAUsageError() {
+        assertEquals(ExitCodes.USAGE, run(arguments("valid", "--digest", "00".repeat(32),
+                "--digest-algorithm", "SHA-999", "--out", temp.resolve("x").toString())));
+    }
+
+    @Test
+    void aDigestAlgorithmOtherThanTheTokensIsAUsageError() {
+        Path result = temp.resolve("x");
+        assertEquals(ExitCodes.USAGE, run(arguments("valid", "--digest", "00".repeat(64),
+                "--digest-algorithm", "SHA512", "--out", result.toString())));
+        assertTrue(stderr().contains("SHA256"), stderr());
+        assertFalse(Files.exists(result.resolve("summary.json")));
+    }
+
+    @Test
+    void otherModesAreNotImplementedYet() {
+        for (Mode mode : List.of(Mode.VALIDATE_DOCUMENT, Mode.VALIDATE_CERTIFICATE, Mode.SIGN)) {
+            assertEquals(ExitCodes.NOT_IMPLEMENTED, run(List.of(mode.commandName())), mode.commandName());
+        }
+    }
+
+    @Test
+    void theSummaryNamesNoSubIndicationAsNull() throws Exception {
+        Path result = temp.resolve("null");
+        assertEquals(ExitCodes.SUCCESS, run(arguments("valid",
+                "--data", corpus("timestamps/content.txt"), "--out", result.toString())), stderr());
+        Map<String, Object> summary = summary(result);
+        assertTrue(summary.containsKey("sub-indication"));
+        assertNull(summary.get("sub-indication"));
+    }
+}

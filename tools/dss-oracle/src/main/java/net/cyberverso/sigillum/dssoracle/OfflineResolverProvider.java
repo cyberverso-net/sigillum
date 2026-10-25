@@ -29,7 +29,19 @@ public final class OfflineResolverProvider extends InetAddressResolverProvider {
 
     @Override
     public InetAddressResolver get(Configuration configuration) {
-        InetAddressResolver builtin = configuration.builtinResolver();
+        return resolver(configuration.builtinResolver());
+    }
+
+    /**
+     * Returns the resolver that blocks lookups during a run and otherwise
+     * delegates to another resolver. It makes no exception for any name:
+     * {@code InetAddress.getLocalHost()} resolves the local host name through
+     * it like any other name.
+     *
+     * @param builtin the resolver used outside a run
+     * @return the resolver
+     */
+    static InetAddressResolver resolver(InetAddressResolver builtin) {
         return new InetAddressResolver() {
             @Override
             public Stream<InetAddress> lookupByName(String host, LookupPolicy lookupPolicy)
