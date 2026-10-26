@@ -3,6 +3,7 @@ package net.cyberverso.sigillum.dssoracle;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.sun.management.HotSpotDiagnosticMXBean;
 import eu.europa.esig.dss.crl.CRLUtils;
 import eu.europa.esig.dss.diagnostic.CertificateWrapper;
 import eu.europa.esig.dss.diagnostic.DiagnosticData;
@@ -27,6 +28,7 @@ import eu.europa.esig.dss.validation.timestamp.DetachedTimestampValidator;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -41,6 +43,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -62,7 +65,11 @@ import org.junit.jupiter.api.io.TempDir;
  * not appear among the certificates or revocation data that DSS used. A
  * failing mutation is reported with its number, so that it can be
  * reproduced and given its own regression test.
+ *
+ * <p>The tag {@code mutation} runs this class in its own JVM, with the
+ * options set in {@code pom.xml}.
  */
+@Tag("mutation")
 class MutationTest {
 
     /** The number of mutated runs. */
@@ -72,6 +79,17 @@ class MutationTest {
 
     @TempDir
     Path temp;
+
+    /**
+     * The cross-checks find the stage where DSS fails by the frames of its
+     * exception, so the JVM must keep them for exceptions thrown many times.
+     */
+    @Test
+    void theJvmKeepsTheStackTracesOfRepeatedExceptions() {
+        assertEquals("false", ManagementFactory.getPlatformMXBean(HotSpotDiagnosticMXBean.class)
+                .getVMOption("OmitStackTraceInFastThrow").getValue(),
+                "MutationTest runs without -XX:-OmitStackTraceInFastThrow");
+    }
 
     /**
      * An input of the mode: the option that names it, the corpus file it
