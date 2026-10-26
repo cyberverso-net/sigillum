@@ -1,0 +1,66 @@
+name: Development image
+
+# Building the image takes several minutes, so it runs when one of its
+# inputs changes, and weekly to show that its downloads still verify.
+on:
+  push:
+    branches: [main]
+    paths:
+      - tools/dev-image/**
+      - tools/dss-oracle/pom.xml
+      - .github/workflows/dev-image.yml
+  pull_request:
+    paths:
+      - tools/dev-image/**
+      - tools/dss-oracle/pom.xml
+      - .github/workflows/dev-image.yml
+  schedule:
+    - cron: "17 4 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Development image (${{ matrix.platform }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-24.04
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build the image and check its tools
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          tools/dev-image/run.sh --platform "$PLATFORM" tools/dev-image/smoke.sh
+          tools/dev-image/run.sh --platform "$PLATFORM" .github/scripts/check-dependabot-lists.sh
+      # The portability checks of ci.yml and the fuzz targets, with the
+      # targets and the nightly that the image holds.
+      - name: Run the portability checks and build the fuzz targets
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          for target in wasm32-unknown-unknown aarch64-apple-ios aarch64-linux-android; do
+            tools/dev-image/run.sh --platform "$PLATFORM" cargo check --locked --workspace \
+              --exclude sigillum-oracle --exclude sigillum-testpki --target "$target"
+          done
+          tools/dev-image/run.sh --platform "$PLATFORM" bash -c 'cd crates/sigillum-testpki/fuzz && cargo +nightly fuzz build'
+      # Without network, the image builds tools/dss-oracle and runs one of its
+      # test classes from the Maven dependencies that it holds.
+      - name: Build tools/dss-oracle without network
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          tools/dev-image/run.sh --platform "$PLATFORM" --offline bash -c '
+            if curl -sS --max-time 5 https://github.com > /dev/null 2>&1; then exit 1; fi
+            rustc +nightly --version
+            cd tools/dss-oracle && mvn -B -o -q verify -Dtest=ArgumentsTest -Dsurefire.failIfNoSpecifiedTests=false'

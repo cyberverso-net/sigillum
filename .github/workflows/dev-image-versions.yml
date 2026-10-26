@@ -1,0 +1,32 @@
+name: Development image versions
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  versions:
+    name: Development image pins the workflow versions
+    # The label that most workflows use, so that a move to a new release is seen.
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Test the version check
+        run: tools/dev-image/test-check-versions.sh
+      # A newer stable Rust release is reported as a warning, not a failure.
+      - name: Compare the image with the workflows
+        run: tools/dev-image/check-versions.sh
+      - name: Compare the image with the ubuntu-latest runner
+        run: |
+          image=$(sed -n 's/^UBUNTU_IMAGE=ubuntu:\([0-9.]*\)@.*/\1/p' tools/dev-image/versions.env)
+          runner=$(. /etc/os-release && echo "$VERSION_ID")
+          if [ "$image" != "$runner" ]; then
+            echo "::warning file=tools/dev-image/versions.env::The image is Ubuntu $image, ubuntu-latest is now Ubuntu $runner"
+          fi

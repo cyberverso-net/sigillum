@@ -21,6 +21,8 @@ Every change must pass the gates below before it is merged. Continuous integrati
 | Fixture verification with DSS (planned with the test PKI, phase 0) | `sigillum-testpki verify` with `tools/dss-oracle` run without network, Linux | Every artefact matches the DSS result in its manifest |
 | DSS oracle build | `mvn -B verify` in `tools/dss-oracle`, Java 21, Linux; the tool then runs without network | Builds, its tests pass, and it runs offline |
 | Signed corpus | `sigillum-testpki generate documents` and `generate signed` with `tools/dss-oracle`, run without network, Linux | The regenerated `testdata/` is identical, byte for byte, to the committed one |
+| Development image versions | `tools/dev-image/check-versions.sh`, with its tests in `tools/dev-image/test-check-versions.sh` | The versions in `tools/dev-image/versions.env` are those that the workflows, the manifest and `Cargo.toml` pin. A newer stable Rust or Temurin 21 release, or a new Ubuntu release behind `ubuntu-latest`, is reported as a warning |
+| Development image (when its inputs change, and weekly) | `tools/dev-image/run.sh tools/dev-image/smoke.sh` on `linux/amd64` and `linux/arm64`, then a build of `tools/dss-oracle` without network | The image builds, every download matches its recorded digest, each tool is the version of `versions.env`, and Maven needs no network |
 | Differential tests (planned with the harness, phase 0) | `cargo test -p sigillum-oracle --features dss` on Linux, with Java and Maven, running `tools/dss-oracle` without network | Pass |
 
 The `dss` feature of `sigillum-oracle` is excluded from the cross-platform test job, which tests `sigillum-oracle` with its default features only.
@@ -83,6 +85,21 @@ Trusting another publisher, with `cargo vet trust`, or adding another source of 
 Thresholds apply to the change under review. A shortfall is acceptable only with a written justification in the pull request, for example code that is unreachable by construction.
 
 The fuzzing threshold applies to parsers in the library crates and in the Rust tools. The Java test tool `tools/dss-oracle` is covered instead by a deterministic JUnit mutation test of its inputs, run by `mvn verify`, because it is not distributed and reads only project fixtures and sigillum output. Its README describes the test.
+
+## Local runs
+
+`tools/dev-image/` holds a container image with the tools of the workflows at the versions they pin: Ubuntu 24.04, Temurin 21, Maven, Rust stable, the minimum supported Rust version and a nightly for `cargo fuzz`, OpenSSL 3.5.9 and 4.0.3 built from source, and the tools of the author gates. `versions.env` records every version and digest. The compiler and download tools come from the Ubuntu archive when the image is built: snapshot.ubuntu.com serves no snapshot of the archive for `arm64`. The gates then run with the tools and versions of continuous integration, whatever the host has installed. The `linux/amd64` image is the closest match to the runners; results that depend on timing or on the architecture can still differ, as #99, #100 and #101 record.
+
+```
+tools/dev-image/run.sh cargo test --workspace
+tools/dev-image/run.sh bash -c 'cd tools/dss-oracle && mvn -B verify'
+tools/dev-image/run.sh cargo fetch --locked
+tools/dev-image/run.sh --offline cargo run -p sigillum-testpki -- verify --openssl
+```
+
+The first run builds the image, which takes several minutes. The worktree is mounted at `/work`, and commands run as the user of the host. Build outputs stay in Docker volumes, one set per worktree and architecture, so they do not mix with those of the host. The home directory, with the Maven dependencies that the image holds and the Cargo registry, is a volume of each image. `git` does not work in the container for a worktree, whose repository is outside the mounted directory, so a check such as "Check that nothing changed" of `signed-corpus.yml` runs on the host. `--offline` runs without network, as the workflows run the checks that must work offline; fetch dependencies first. The image runs natively on `linux/arm64` hosts. `--platform linux/amd64` selects the architecture of the workflows, emulated on such hosts, for a step that must match them byte for byte. In the image, `openssl` and `SIGILLUM_TESTPKI_OPENSSL` name OpenSSL 3.5.9, and `SIGILLUM_TESTPKI_OPENSSL_OTHER` names 4.0.3.
+
+Docker needs about 8 GiB of memory for `cargo test` and `mvn -B verify` in the image. With 1 GiB, the linker and the compiler are killed.
 
 ## Kinds of test
 
