@@ -66,10 +66,13 @@ impl Runner for Program {
     /// The time limit covers the reading of the outputs too: a run whose
     /// outputs stay open after the program exits, held by a process it
     /// started, ends with [`RunError::TimedOut`] at the limit. On Unix the
-    /// program runs in a process group of its own, which is killed then,
-    /// with every process it started. On other platforms only the program
-    /// itself is killed, and the threads reading the outputs are left to
-    /// end when the outputs close.
+    /// program runs in a process group of its own, which is killed whenever
+    /// the run is stopped, with every process it started. The group is
+    /// signalled before the program is reaped, except when the program has
+    /// already exited: the group of a run whose outputs are still held then
+    /// is signalled after, once. On other
+    /// platforms only the program itself is killed, and the threads reading
+    /// the outputs are left to end when the outputs close.
     fn run(&self, args: &[OsString]) -> Result<Output, RunError> {
         let mut command = Command::new(&self.program);
         command
@@ -96,15 +99,13 @@ impl Runner for Program {
             .stderr
             .take()
             .map(|pipe| self.reader(pipe, Arc::clone(&overflow)));
-        let success = match self.wait(&mut child, &overflow, deadline) {
-            Ok(success) => success,
-            Err(error) => {
-                stop_group(&child);
-                return Err(error);
-            }
-        };
-        let outputs = collect(stdout, deadline)
-            .and_then(|stdout| collect(stderr, deadline).map(|stderr| (stdout, stderr)));
+        let mut stopped = false;
+        let success = self.wait(&mut child, &overflow, deadline, &mut stopped)?;
+        let outputs =
+            collect(stdout, deadline, &overflow, &child, &mut stopped).and_then(|stdout| {
+                collect(stderr, deadline, &overflow, &child, &mut stopped)
+                    .map(|stderr| (stdout, stderr))
+            });
         let (stdout, stderr) = match outputs {
             Ok(outputs) => outputs,
             Err(Collect::TimedOut) => {
@@ -156,19 +157,22 @@ impl Program {
         receiver
     }
 
-    /// Waits for the child to exit, and kills it when it runs past
-    /// `deadline` or writes too much. Returns whether it exited with 0.
+    /// Waits for the child to exit, and kills it and its process group when
+    /// it runs past `deadline` or writes too much, setting `stopped` then.
+    /// Returns whether it exited with 0.
     fn wait(
         &self,
         child: &mut Child,
         overflow: &AtomicBool,
         deadline: Instant,
+        stopped: &mut bool,
     ) -> Result<bool, RunError> {
         loop {
             match child.try_wait() {
                 Ok(Some(status)) => return Ok(status.success()),
                 Ok(None) if overflow.load(Ordering::Relaxed) => {
                     stop(child);
+                    *stopped = true;
                     return Ok(false);
                 }
                 Ok(None) if Instant::now() >= deadline => {
@@ -188,8 +192,11 @@ impl Program {
 /// How often a running child is polled.
 const POLL_INTERVAL: Duration = Duration::from_millis(5);
 
-/// Kills the child and reaps it. Either may fail when it has just exited.
+/// Kills the process group of the child, then the child itself, and
+/// reaps it. The group is signalled first, while its leader still holds
+/// it. Each step may fail when the child has just exited.
 fn stop(child: &mut Child) {
+    stop_group(child);
     let _ = child.kill();
     let _ = child.wait();
 }
@@ -198,10 +205,12 @@ fn stop(child: &mut Child) {
 /// lead, so that the processes it started end too. The standard library
 /// has no call for this without unsafe code, which the crate forbids, so
 /// the `kill` program does it, found in `PATH` and run without a shell.
+/// The signal is given as `-KILL`: the `kill` of procps-ng 4.0.4, in
+/// Ubuntu 24.04, rejects a negative process group after `-s`.
 #[cfg(unix)]
 fn stop_group(child: &Child) {
     let _ = Command::new("kill")
-        .args(["-s", "KILL", "--", &format!("-{}", child.id())])
+        .args(["-KILL", "--", &format!("-{}", child.id())])
         .stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(Stdio::null())
@@ -221,24 +230,41 @@ enum Collect {
 }
 
 /// The output that a reader thread collected, as text, if it arrives
-/// before `deadline`.
+/// before `deadline`. The child may have exited before it was seen to write
+/// too much, leaving a process it started holding the outputs: the process
+/// group is then killed as soon as either reader passes the limit, unless
+/// `stopped` says that it was already.
 fn collect(
     reader: Option<Receiver<std::io::Result<Vec<u8>>>>,
     deadline: Instant,
+    overflow: &AtomicBool,
+    child: &Child,
+    stopped: &mut bool,
 ) -> Result<String, Collect> {
     let Some(reader) = reader else {
         return Ok(String::new());
     };
-    let remaining = deadline.saturating_duration_since(Instant::now());
-    let bytes = match reader.recv_timeout(remaining) {
-        Ok(read) => read.map_err(|e| Collect::Failed(RunError::Io(e.to_string())))?,
-        Err(RecvTimeoutError::Timeout) => return Err(Collect::TimedOut),
-        Err(RecvTimeoutError::Disconnected) => {
-            return Err(Collect::Failed(RunError::Io(
-                "the thread reading an output failed".to_owned(),
-            )));
+    let read = loop {
+        let remaining = deadline.saturating_duration_since(Instant::now());
+        match reader.recv_timeout(remaining.min(POLL_INTERVAL)) {
+            Ok(read) => break read,
+            Err(RecvTimeoutError::Timeout) if remaining.is_zero() => {
+                return Err(Collect::TimedOut);
+            }
+            Err(RecvTimeoutError::Timeout) => {
+                if !*stopped && overflow.load(Ordering::Relaxed) {
+                    stop_group(child);
+                    *stopped = true;
+                }
+            }
+            Err(RecvTimeoutError::Disconnected) => {
+                return Err(Collect::Failed(RunError::Io(
+                    "the thread reading an output failed".to_owned(),
+                )));
+            }
         }
     };
+    let bytes = read.map_err(|e| Collect::Failed(RunError::Io(e.to_string())))?;
     Ok(String::from_utf8_lossy(&bytes).into_owned())
 }
 
