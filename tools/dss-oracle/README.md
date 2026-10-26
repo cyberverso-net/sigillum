@@ -309,7 +309,7 @@ It also checks every rejection against DSS alone, without any code of the tool, 
 - a rejected certificate under validation must make DSS fail, since every validation of that certificate uses it;
 - any other rejected certificate, CRL or OCSP response is put where the corpus uses it, and DSS validates the token or the certificate with it. If that validation completes, the file must not be among the certificates that DSS used, or among the revocation data whose signing certificate DSS found, whether or not the signature verifies.
 
-As controls, DSS alone must validate the corpus as PASSED, and every test document as TOTAL_PASSED, and must use the corpus files that the cross-checks look for. The test takes a few minutes in `mvn -B verify` and needs no dependency of its own.
+As controls, DSS alone must validate the corpus as PASSED, and every test document as TOTAL_PASSED, and must use the corpus files that the cross-checks look for. The test takes a few minutes in `mvn -B verify` and needs no dependency of its own. The stage where DSS fails is read from the stack trace of its exception. HotSpot drops the stack trace of an exception thrown many times at the same place, so Surefire runs this test in its own JVM with `-XX:-OmitStackTraceInFastThrow`. The other tests and the tool itself run without it. A `-Dtest` filter applies to both runs of Surefire, and neither fails when it matches none of its tests, so a mistyped test name runs no test instead of failing the build.
 
 ### summary.json
 
