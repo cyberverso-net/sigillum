@@ -20,6 +20,7 @@ Every change must pass the gates below before it is merged. Continuous integrati
 | Fixture verification with OpenSSL | `sigillum-testpki verify --openssl` with the OpenSSL release named in the manifest, and with OpenSSL 4.0.3 through `--openssl-version`, each built from source and run without network, Linux | Every artefact matches the OpenSSL result in its manifest |
 | Fixture verification with DSS (planned with the test PKI, phase 0) | `sigillum-testpki verify` with `tools/dss-oracle` run without network, Linux | Every artefact matches the DSS result in its manifest |
 | DSS oracle build | `mvn -B verify` in `tools/dss-oracle`, Java 21, Linux; the tool then runs without network | Builds, its tests pass, and it runs offline |
+| Signed corpus | `sigillum-testpki generate documents` and `generate signed` with `tools/dss-oracle`, run without network, Linux | The regenerated `testdata/` is identical, byte for byte, to the committed one |
 | Differential tests (planned with the harness, phase 0) | `cargo test -p sigillum-oracle --features dss` on Linux, with Java and Maven, running `tools/dss-oracle` without network | Pass |
 
 The `dss` feature of `sigillum-oracle` is excluded from the cross-platform test job, which tests `sigillum-oracle` with its default features only.

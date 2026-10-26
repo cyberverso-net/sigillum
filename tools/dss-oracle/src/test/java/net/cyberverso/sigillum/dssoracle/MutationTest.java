@@ -821,7 +821,7 @@ class MutationTest {
     }
 
     /** A mutation of an input, described so that it can be reproduced. */
-    private record Mutation(String kind, int offset, int value) {
+    record Mutation(String kind, int offset, int value) {
 
         static Mutation random(Random random, byte[] content, boolean der) {
             int kind = random.nextInt(der ? 5 : 4);

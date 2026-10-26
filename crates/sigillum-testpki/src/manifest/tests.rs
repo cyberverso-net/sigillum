@@ -223,8 +223,26 @@ links = { issuer = "pki/root", chain = ["pki/root"], revocation = ["pki/root-crl
             chain: vec!["pki/root".into()],
             revocation: vec!["pki/root-crl".into()],
             content: Some("pki/leaf".into()),
+            timestamp_chain: Vec::new(),
         }
     );
+    Ok(())
+}
+
+#[test]
+fn parses_and_writes_a_timestamp_chain() -> Result<(), ManifestError> {
+    let text = with_artefacts(&format!(
+        "{ROOT}{}",
+        leaf("links = { chain = [\"pki/root\"], timestamp-chain = [\"pki/root\"] }")
+    ));
+    let manifest = Manifest::parse(&text)?;
+    assert_eq!(manifest.artefacts[1].links.timestamp_chain, ["pki/root"]);
+    let written = manifest.to_toml();
+    assert!(
+        written.contains("links = { chain = [\"pki/root\"], timestamp-chain = [\"pki/root\"] }"),
+        "{written}"
+    );
+    assert_eq!(Manifest::parse(&written)?, manifest);
     Ok(())
 }
 
@@ -625,6 +643,12 @@ expected-dss = "not-applicable"
         ("chain", "[\"pki/root-crl\"]", "pki/root-crl"),
         ("chain", "[\"pki/root\", \"pki/root\"]", "pki/root"),
         ("revocation", "[\"pki/root\"]", "pki/root"),
+        ("timestamp-chain", "[\"pki/root-crl\"]", "pki/root-crl"),
+        (
+            "timestamp-chain",
+            "[\"pki/root\", \"pki/root\"]",
+            "pki/root",
+        ),
         (
             "revocation",
             "[\"pki/root-crl\", \"pki/root-crl\"]",
@@ -863,6 +887,7 @@ fn varied_manifest() -> Result<Manifest, ManifestError> {
                 chain: vec!["pki/root".into()],
                 revocation: vec!["x/crl".into(), "x/ocsp-response".into()],
                 content: Some("x/document".into()),
+                timestamp_chain: Vec::new(),
             },
             _ => Links::default(),
         };

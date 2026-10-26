@@ -153,6 +153,7 @@ fn certificate_file(spec: &CertSpec, certificate: &[u8]) -> Result<GeneratedFile
             chain,
             revocation: Vec::new(),
             content: None,
+            timestamp_chain: Vec::new(),
         },
         notes: spec.notes.map(str::to_owned),
     };
@@ -202,6 +203,8 @@ pub enum GenerateError {
     Pki(PkiError),
     /// A timestamp token cannot be generated.
     Timestamp(crate::timestamp::TsaError),
+    /// A signature of the signed corpus cannot be created.
+    Signed(crate::signed::SignedError),
     /// A file cannot be written.
     Io(String),
 }
@@ -212,6 +215,7 @@ impl fmt::Display for GenerateError {
             Self::Manifest(error) => error.fmt(f),
             Self::Pki(error) => error.fmt(f),
             Self::Timestamp(error) => error.fmt(f),
+            Self::Signed(error) => error.fmt(f),
             Self::Io(message) => write!(f, "a file cannot be written: {message}"),
         }
     }

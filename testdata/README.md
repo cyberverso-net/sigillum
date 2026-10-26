@@ -2,7 +2,7 @@
 
 This directory holds the test corpus of sigillum: certificates, CRLs, OCSP responses, timestamp tokens and signed documents, generated as described in [ADR-0014](../docs/design/adr/0014-test-pki-and-corpus.md). Every artefact is listed in `manifest.toml`, with its purpose and the results expected from OpenSSL and DSS. The program `sigillum-testpki` (in `crates/sigillum-testpki`) generates the artefacts and checks them against the manifest. Its `tsa` subcommand issues timestamp tokens with a time, key and certificate given explicitly, and does not read the manifest.
 
-Four generators write the corpus, in this order: `generate pki`, then `generate crls`, `generate timestamps` and `generate ocsp`, which link the certificates that `generate pki` records. Each owns the entries described in its section below, keeps every other entry, and follows the regeneration rules of the test PKI.
+Six generators write the corpus, in this order: `generate pki`, then `generate crls`, `generate timestamps` and `generate ocsp`, which link the certificates that `generate pki` records, then `generate documents`, which writes the unsigned base documents, and last `generate signed`, which has DSS sign them. Each owns the entries described in its section below, keeps every other entry, and follows the regeneration rules of the test PKI.
 
 ## Manifest format
 
@@ -28,7 +28,7 @@ Four generators write the corpus, in this order: `generate pki`, then `generate 
 | `purpose` | Why the artefact exists, in one sentence. |
 | `expected-openssl` | The result expected from OpenSSL: `verified`, `parsed` (parsing only, as for private keys), `rejected`, or `not-applicable` (OpenSSL does not process this kind of artefact). Where OpenSSL can check part of an artefact only against the current time, `verified` covers the rest, and the notes of the entry say so, as for the OCSP responses. |
 | `expected-dss` | The result expected from DSS: `"not-applicable"` when DSS does not process this kind of artefact, such as a private key or an unsigned document; `"rejected"` when DSS cannot parse it; otherwise a table `{ indication = "...", sub-indication = "..." }` with the result of a validation that DSS could run. |
-| `links` | Optional table of other artefacts, by identifier, needed to check this one. `issuer` names the issuer's certificate. `chain` lists the certificates above this artefact, from its issuer up to the trust anchor; when both are given, `chain` starts with `issuer`. `revocation` lists CRLs and OCSP responses. `content` names the signed content of a detached signature, or the data a timestamp covers, of any kind. For a timestamp token, `issuer` names the certificate that signed it, and `chain` starts with that certificate. Every identifier must name another artefact of the manifest; `issuer` and `chain` must name certificates, and `revocation` CRLs or OCSP responses. A list may not name one artefact twice. |
+| `links` | Optional table of other artefacts, by identifier, needed to check this one. `issuer` names the issuer's certificate. `chain` lists the certificates above this artefact, from its issuer up to the trust anchor; when both are given, `chain` starts with `issuer`. `revocation` lists CRLs and OCSP responses. `content` names the signed content of a detached signature, or the data a timestamp covers, of any kind. `timestamp-chain`, for a signed document with a signature timestamp, lists the certificate of the timestamping authority and the certificates above it, up to the trust anchor, because a token may hold only the certificate of its authority. For a timestamp token and a signed document, `issuer` names the certificate that signed it, and `chain` starts with that certificate. Every identifier must name another artefact of the manifest; `issuer`, `chain` and `timestamp-chain` must name certificates, and `revocation` CRLs or OCSP responses. A list may not name one artefact twice. |
 | `notes` | Optional remarks; not empty when present. |
 
 The indication is one of `TOTAL-PASSED`, `TOTAL-FAILED`, `INDETERMINATE` (ETSI EN 319 102-1 V1.4.1, clause 5.1.3), or `PASSED`, `FAILED` for building blocks such as certificate validation. The sub-indication is optional and must be one that Table 6 of that standard defines for the indication. `TOTAL-PASSED` and `PASSED` take none, `TOTAL-FAILED` takes the `TOTAL-FAILED` list, and `INDETERMINATE` takes its own list, which includes `CUSTOM`. Table 6 defines no list for the building-block indications. This project gives `FAILED` the `TOTAL-FAILED` list, and uses the `INDETERMINATE` list for building blocks too. Indications are written with hyphens, as in the standard; DSS reports them with underscores, and `verify` maps one to the other.
@@ -109,7 +109,7 @@ Every time of the test PKI, in order, for the validation time `2030-01-15T10:00:
 | 2030-01-21 | 6 days after | `nextUpdate` of the other CRLs, except `crl/ca-ecdsa-expired` and `crl/ca-ecdsa-expired-certs`, and of the other OCSP responses |
 | 2030-01-22 | 7 days after | `nextUpdate` of `crl/ca-ecdsa-expired-certs` |
 | 2031-01-15 | 1 year after | `notAfter` of `pki/signer-not-yet-valid` |
-| 2032-01-15 | 2 years after | `notAfter` of the other end entities |
+| 2032-01-15 | 2 years after | `notAfter` of the other end entities. Horizon of the signed corpus: while DSS 6.5.1 adds the B-LT validation data, it checks certificates at the time of the clock, which no public setting of DSS changes, so `generate signed` may fail after this date |
 | 2035-01-15 | 5 years after | `notAfter` of the CA certificates, except `pki/ca-expired` |
 | 2040-01-15 | 10 years after | `notAfter` of `pki/root-ca` |
 
@@ -284,6 +284,47 @@ The expected DSS result of a response is the result of the X.509 certificate val
 
 These are predictions from the text of the standard. DSS 6.5.1 gives them under the aligned policy, except for `ocsp/signer-expired` and `ocsp/signer-expired-before-expiry`, for which it reports OUT_OF_BOUNDS_NOT_REVOKED, the divergence DIV-5. It gives the predicted result for `ocsp/responder-without-ocsp-signing` for another reason: it finds no revocation data for `pki/signer-p384`, the signer of the response, and does not check `id-kp-OCSPSigning`. Given `crl/ca-ecdsa` as well, which covers that signer, DSS accepts the response, the divergence DIV-3. DSS 6.5.1 gives PASSED for `ocsp/produced-at-after-validation-time`; a verifier that uses it as evidence at the validation time must reject it, because it did not exist then. The `validate-certificate` mode rejects the two unsuccessful responses, because DSS cannot load them.
 
+## Base documents
+
+`sigillum-testpki generate documents` writes the unsigned base documents of the signed corpus under `documents/` and records each in `manifest.toml`, with the kind `document` and no expected result from OpenSSL or DSS. It owns every entry under `documents/` and follows the regeneration rules of the test PKI. The documents depend neither on the validation time nor on any other entry, and a test checks that the committed files are what the generator produces, byte for byte.
+
+| Artefact | Content |
+| --- | --- |
+| `documents/simple` | A PDF 1.7 file of one A4 page with one line of text in Helvetica, the base document of the PAdES signatures |
+| `documents/signature-field` | The same page with an interactive form holding one empty signature field, `Signature1`, merged with an invisible widget annotation. It is an unsigned input reserved for signing into an existing field, by sigillum's PAdES creation (#32) |
+| `documents/text` | A line of text, the signed content of the CAdES signatures |
+| `documents/payload` | A JSON object on one line (RFC 8259), the payload of the JAdES signatures |
+
+The PDF files are written byte by byte from ISO 32000-1:2008, without a PDF library: the header and a binary comment (clause 7.5.2), the objects (clauses 7.7.2, 7.7.3 and 7.3.8), a cross-reference table of one subsection whose entries are 20 bytes long (clause 7.5.4), and a trailer whose two file identifiers (clause 14.4) are derived from the name of the document. The signature field follows clauses 12.7.2 and 12.7.4.5. A test checks the structure, including every offset of the cross-reference table. No signature of the corpus uses `documents/signature-field`.
+
+## Signed corpus
+
+`sigillum-testpki generate signed` creates the signed corpus under `signed/` with the `sign` mode of `tools/dss-oracle` ([ADR-0013](../docs/design/adr/0013-dss-oracle-command-line-tool.md)), and records each signature in `manifest.toml`. It runs `java -XX:+UnlockExperimentalVMOptions -XX:hashCode=2 -jar <jar> sign ...` once per signature, without a shell. The two options make every identity hash code of the JVM 1. DSS 6.5.1 embeds the validation data of B-LT in an order that depends on these hash codes, so without the options the order, and the bytes, change between JVMs. `--dss-oracle` names the JAR, by default `tools/dss-oracle/target/dss-oracle.jar`, and `--java` the Java launcher, by default `java` from the `PATH`. For the timestamps, it gives `tools/dss-oracle` its own executable as `--tsa-program`. It runs last, because the signatures read the test PKI, its OCSP responses and CRLs, and the base documents, and link them; when the manifest does not list one of them, nothing is signed or written. It owns every entry under `signed/` and follows the regeneration rules of the test PKI.
+
+| Artefacts | Content |
+| --- | --- |
+| `signed/cades-enveloping-<level>-<signer>` | CAdES with the content of `documents/text` inside, `.p7m` |
+| `signed/cades-detached-<level>-<signer>` | CAdES over `documents/text`, without the content, `.p7s`, which links `documents/text` as its content |
+| `signed/pades-<level>-<signer>` | An invisible PAdES signature of `documents/simple`, `.pdf` |
+| `signed/jades-compact-b-b-<signer>` | JAdES over `documents/payload` in the JWS compact serialisation, `.jws`, at B-B only: the compact serialisation has no unprotected header for unsigned properties (RFC 7515, section 7.1) |
+| `signed/jades-flattened-<level>-<signer>`, `signed/jades-general-<level>-<signer>` | JAdES over `documents/payload` in the flattened and general JWS JSON serialisations, `.json` |
+
+The level is `b-b`, `b-t` or `b-lt`. The signers are `rsa` (`pki/signer-rsa-2048`, RSA PKCS#1 v1.5 with SHA-256), `rsa-pss` (`pki/signer-rsa-pss-sha256`, RSASSA-PSS with SHA-256), `p256` (`pki/signer-p256`, ECDSA with SHA-256) and `ed25519` (`pki/signer-ed25519`). That is 64 signatures. DSS 6.5.1 creates every combination of the story, Ed25519 included, so none is left out for want of support.
+
+Every signature is made as follows:
+
+- The signing time is the planned signing time, 2029-12-16T10:00:00Z. The certificate chain of the signer, up to `pki/root-ca`, is included.
+- At B-T and B-LT, the signature timestamp is issued by `sigillum-testpki tsa` with `pki/tsa`, for the digest that DSS asks for, with the planned signing time as its genTime.
+- At B-LT, DSS embeds the OCSP response of the signer, `ocsp/tsa` and `crl/root-ca`, with the certificates of both chains. It selects and checks the revocation data at the validation time, under the cryptographic constraints of the aligned policy of `tools/dss-oracle`, which authorises EdDSA. A CRL or OCSP response that fails the checks is never embedded; the run fails when no accepted revocation data remains for a certificate that needs it.
+- Every JAdES signature carries `x5c` in its protected header. Annex I of [Commission Implementing Regulation (EU) 2026/248 of 2 February 2026](http://data.europa.eu/eli/reg_impl/2026/248/oj) replaces clause 5.1.8 of ETSI TS 119 182-1 V1.2.1 and requires `x5c` "either as a signed or unsigned header parameter".
+- Every signature algorithm is deterministic, and no clock is read, so the corpus is reproduced byte for byte with the same DSS version, on any JVM that accepts the options above, such as HotSpot 21 to 27. The workflow `signed-corpus.yml` regenerates it without network access and fails on any difference. Without Java, the tests of `sigillum-testpki` check that each committed signature has its manifest entry.
+
+The links of each entry name the signing certificate as `issuer`, the chain from it to `pki/root-ca` as `chain`, and revocation data: at B-B the OCSP response of the signer and `crl/root-ca`, at B-T also `ocsp/tsa`, and at B-LT none, since the signature holds them. At B-T and B-LT, `timestamp-chain` links `pki/tsa`, `pki/ca-ecdsa` and `pki/root-ca`: the token holds the certificate of `pki/tsa` only, so a validation of a B-T signature needs `pki/ca-ecdsa` from the links. A B-LT signature also holds it among its validation data. A validation uses the linked files only: the certificates of `chain` and `timestamp-chain`, with `pki/root-ca` as trust anchor, the revocation data of `revocation`, and the content of `content`. A test checks that every signed entry links the chain of its signer and, from B-T on, the chain of `pki/tsa`.
+
+The expected OpenSSL result of a CAdES signature is that of `openssl cms -verify`, as `verify --openssl` runs it (see below): `verified` for every signature, with OpenSSL 3.5.9 and with OpenSSL 4.0.3. OpenSSL does not process PAdES or JAdES, whose entries are `not-applicable`.
+
+The expected DSS result is TOTAL-PASSED for every signature: a prediction from ETSI EN 319 102-1 V1.4.1. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to `pki/root-ca` (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). With the linked files, the signature timestamp passes the time-stamp validation building block (clause 5.4). DSS 6.5.1 gives this result for all 64 signatures in the `validate-document` mode of `tools/dss-oracle`, under the aligned policy of [ADR-0023](../docs/design/adr/0023-validation-policy-of-the-dss-oracle.md), with the linked files only and the root CA as trust anchor. Under its default validation policy, DSS 6.5.1 reports the 16 Ed25519 signatures INDETERMINATE with CRYPTO_CONSTRAINTS_FAILURE_NO_POE instead, because that policy does not authorise EdDSA; the notes of those entries say so.
+
 ## Verification with OpenSSL
 
 `sigillum-testpki verify --openssl` checks every artefact of the manifest with OpenSSL, as [ADR-0014](../docs/design/adr/0014-test-pki-and-corpus.md) decides, and compares the result with `expected-openssl`. It reports each artefact without its expected result on standard error, with the commands that decided the result and the start of their output, and then prints a summary. It exits with 0 when every artefact has its expected result, and with 1 otherwise or when the checks cannot run.
@@ -300,7 +341,7 @@ Each command runs the program directly, with explicit arguments and never throug
 | `ocsp-response` | `openssl ocsp -respin -attime` for the covered certificate, as described under OCSP responses | `verified` when it exits with 0, prints `Response verify OK` and gives a status for the covered certificate, and `rejected` otherwise |
 | `timestamp-token` | `openssl ts -verify -attime` with the data it covers, as described under Timestamp tokens | `verified` when it exits with 0 and prints `Verification: OK`, and `rejected` otherwise |
 | `document` | None | `not-applicable` |
-| `signed-document` | None yet | `not-applicable` when the manifest expects it. Any other expected result is reported as a check that cannot run: the check of the CAdES fixtures with `openssl cms -verify` comes with those fixtures |
+| `signed-document` | A CMS `SignedData`, a CAdES signature: `openssl cms -verify -binary -inform DER` at the validation time, with `-no-CApath -no-CAstore`, the trust anchor of the chain as `-CAfile`, the certificates between the signer and the anchor as `-certfile`, and `-content` with the linked content of a detached signature. Revocation is not checked, because the signatures link OCSP responses, which `openssl cms` does not take. Any other signed document: none | `verified` when it exits with 0 and prints `CMS Verification successful`, and `rejected` otherwise. Another signed document is `not-applicable`, and must be recorded so. A CMS signature recorded as `not-applicable` is refused as a check that cannot run, so that no CAdES entry escapes the check |
 
 Before any command, `verify` reads every corpus file that the command takes. A missing, unreadable or oversized file stops the check of the artefact with the reason, which never counts as a result of OpenSSL: otherwise a missing file expected to be rejected would pass.
 

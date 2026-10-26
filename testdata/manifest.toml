@@ -1155,3 +1155,743 @@ expected-openssl = "verified"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
 links = { issuer = "pki/ocsp-responder", chain = ["pki/ocsp-responder", "pki/ca-ecdsa", "pki/root-ca"] }
 notes = "Covered certificate: pki/signer-expired. thisUpdate is two days and nextUpdate five days from the validation time, so the response is fresh under clause 5.2.5.4 of ETSI EN 319 102-1 V1.4.1. It was issued one day before pki/signer-expired expired, so it shows no status after expiry, as clause 5.2.6.4, NOTE 8, describes for a certificate known not to have been revoked, and step 7 gives OUT_OF_BOUNDS_NO_POE. DIV-5 in docs/design/divergences.md records the result of DSS 6.5.1. openssl ocsp compares thisUpdate and nextUpdate with the current time only, so the expected OpenSSL result covers the parsing of the response, its signature and the path of its signer at the validation time, and not its freshness."
+
+[[artefact]]
+id = "documents/simple"
+path = "documents/simple.pdf"
+sha256 = "c310095959b2e7b2785278c42725596228bb1e37e77762226e40450f1c1136e7"
+kind = "document"
+purpose = "A small PDF of one page with one line of text, the base document of the PAdES signatures."
+expected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "documents/signature-field"
+path = "documents/signature-field.pdf"
+sha256 = "6475dffdf1f25947ef37765c1781db31025895274ccf7cc283ee85ea32430180"
+kind = "document"
+purpose = "A small PDF of one page with an empty, invisible signature field named Signature1 in its interactive form, an unsigned input reserved for signing into an existing field."
+expected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "documents/text"
+path = "documents/text.txt"
+sha256 = "2a5961b7f233dcca7f2428276aaa6e4724c37cbca18685d3f556c6891ab851f2"
+kind = "document"
+purpose = "A line of text, the signed content of the CAdES signatures."
+expected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "documents/payload"
+path = "documents/payload.json"
+sha256 = "cac25da6c2a90e9236a9e12bef593f01ed9a2bf3490607478d7445a549862790"
+kind = "document"
+purpose = "A JSON object on one line, the payload of the JAdES signatures."
+expected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "signed/cades-enveloping-b-b-rsa"
+path = "signed/cades-enveloping-b-b-rsa.p7m"
+sha256 = "4847a2d8e4a14d053435b4aabb269a45fa1f73deb51025d56627adaa12c775d1"
+kind = "signed-document"
+purpose = "CAdES baseline signature, enveloping, at B-B, over documents/text, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS."
+expected-openssl = "verified"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-2048", chain = ["pki/signer-rsa-2048", "pki/ca-rsa", "pki/root-ca"], revocation = ["ocsp/signer-rsa-2048", "crl/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA."
+
+[[artefact]]
+id = "signed/cades-enveloping-b-b-rsa-pss"
+path = "signed/cades-enveloping-b-b-rsa-pss.p7m"
+sha256 = "784ba6fc420fa6e67df0a2397be0d5b87216916b9ce81b939ea54706bfa9f9ab"
+kind = "signed-document"
+purpose = "CAdES baseline signature, enveloping, at B-B, over documents/text, by pki/signer-rsa-pss-sha256 with RSASSA-PSS and SHA-256, created by DSS."
+expected-openssl = "verified"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-pss-sha256", chain = ["pki/signer-rsa-pss-sha256", "pki/ca-rsa-pss", "pki/root-ca"], revocation = ["ocsp/signer-rsa-pss-sha256", "crl/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA."
+
+[[artefact]]
+id = "signed/cades-enveloping-b-b-p256"
+path = "signed/cades-enveloping-b-b-p256.p7m"
+sha256 = "da42c0886c4c1928910aa499b7e57a80999f436c6cbb9bcedf053dea3c5a7a49"
+kind = "signed-document"
+purpose = "CAdES baseline signature, enveloping, at B-B, over documents/text, by pki/signer-p256 with ECDSA on P-256 and SHA-256, created by DSS."
+expected-openssl = "verified"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-p256", "crl/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA."
+
+[[artefact]]
+id = "signed/cades-enveloping-b-b-ed25519"
+path = "signed/cades-enveloping-b-b-ed25519.p7m"
+sha256 = "ce2c10b2b7eec4bc2a1555217bb74dd5fa7c40f267ce1bd5f84cb04bf6cf8e14"
+kind = "signed-document"
+purpose = "CAdES baseline signature, enveloping, at B-B, over documents/text, by pki/signer-ed25519 with Ed25519, created by DSS."
+expected-openssl = "verified"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-ed25519", chain = ["pki/signer-ed25519", "pki/ca-ed25519", "pki/root-ca"], revocation = ["ocsp/signer-ed25519", "crl/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA. Under its default validation policy, DSS 6.5.1 reports INDETERMINATE with CRYPTO_CONSTRAINTS_FAILURE_NO_POE instead, because that policy does not authorise EdDSA; the aligned policy does."
+
+[[artefact]]
+id = "signed/cades-enveloping-b-t-rsa"
+path = "signed/cades-enveloping-b-t-rsa.p7m"
+sha256 = "9739e6e9b4f5faf52f60f05d3ad2a8f4795bb4fa2d3276fb1a54a44765a4a850"
+kind = "signed-document"
+purpose = "CAdES baseline signature, enveloping, at B-T, over documents/text, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS."
+expected-openssl = "verified"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-2048", chain = ["pki/signer-rsa-2048", "pki/ca-rsa", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-rsa-2048", "crl/root-ca", "ocsp/tsa"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. The token holds pki/tsa only; timestamp-chain links pki/tsa and the chain above it, and the revocation data linked cover the signer, pki/tsa and the CAs, so with the linked files, the signature timestamp passes the time-stamp validation building block (clause 5.4)."
+
+[[artefact]]
+id = "signed/cades-enveloping-b-t-rsa-pss"
+path = "signed/cades-enveloping-b-t-rsa-pss.p7m"
+sha256 = "a416a494b523d9fac2f766730cf1b049beb73c8a5c803dac3262247b1cab3733"
+kind = "signed-document"
+purpose = "CAdES baseline signature, enveloping, at B-T, over documents/text, by pki/signer-rsa-pss-sha256 with RSASSA-PSS and SHA-256, created by DSS."
+expected-openssl = "verified"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-pss-sha256", chain = ["pki/signer-rsa-pss-sha256", "pki/ca-rsa-pss", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-rsa-pss-sha256", "crl/root-ca", "ocsp/tsa"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. The token holds pki/tsa only; timestamp-chain links pki/tsa and the chain above it, and the revocation data linked cover the signer, pki/tsa and the CAs, so with the linked files, the signature timestamp passes the time-stamp validation building block (clause 5.4)."
+
+[[artefact]]
+id = "signed/cades-enveloping-b-t-p256"
+path = "signed/cades-enveloping-b-t-p256.p7m"
+sha256 = "6079626093514bfb6d658d92a008bc972433009a2841d15c576e3f3b449753df"
+kind = "signed-document"
+purpose = "CAdES baseline signature, enveloping, at B-T, over documents/text, by pki/signer-p256 with ECDSA on P-256 and SHA-256, created by DSS."
+expected-openssl = "verified"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-p256", "crl/root-ca", "ocsp/tsa"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. The token holds pki/tsa only; timestamp-chain links pki/tsa and the chain above it, and the revocation data linked cover the signer, pki/tsa and the CAs, so with the linked files, the signature timestamp passes the time-stamp validation building block (clause 5.4)."
+
+[[artefact]]
+id = "signed/cades-enveloping-b-t-ed25519"
+path = "signed/cades-enveloping-b-t-ed25519.p7m"
+sha256 = "6541749c01313667f4839718717643f3b684564da77f6bce365b1ca1f2fe635a"
+kind = "signed-document"
+purpose = "CAdES baseline signature, enveloping, at B-T, over documents/text, by pki/signer-ed25519 with Ed25519, created by DSS."
+expected-openssl = "verified"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-ed25519", chain = ["pki/signer-ed25519", "pki/ca-ed25519", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-ed25519", "crl/root-ca", "ocsp/tsa"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. The token holds pki/tsa only; timestamp-chain links pki/tsa and the chain above it, and the revocation data linked cover the signer, pki/tsa and the CAs, so with the linked files, the signature timestamp passes the time-stamp validation building block (clause 5.4). Under its default validation policy, DSS 6.5.1 reports INDETERMINATE with CRYPTO_CONSTRAINTS_FAILURE_NO_POE instead, because that policy does not authorise EdDSA; the aligned policy does."
+
+[[artefact]]
+id = "signed/cades-enveloping-b-lt-rsa"
+path = "signed/cades-enveloping-b-lt-rsa.p7m"
+sha256 = "658e72d1aaad23eb7b494be38c97bbcb1559106ca225edfa2c97b5486c1663f4"
+kind = "signed-document"
+purpose = "CAdES baseline signature, enveloping, at B-LT, over documents/text, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS."
+expected-openssl = "verified"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-2048", chain = ["pki/signer-rsa-2048", "pki/ca-rsa", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. DSS embedded the OCSP responses of the signer and of pki/tsa and crl/root-ca, selected at the validation time, with the certificates of both chains, so the validation needs no revocation data linked; timestamp-chain still links the chain of pki/tsa."
+
+[[artefact]]
+id = "signed/cades-enveloping-b-lt-rsa-pss"
+path = "signed/cades-enveloping-b-lt-rsa-pss.p7m"
+sha256 = "c03affe68d45330f85485e12a42c5f295773e6c9c1078afd40f3277c2687fa72"
+kind = "signed-document"
+purpose = "CAdES baseline signature, enveloping, at B-LT, over documents/text, by pki/signer-rsa-pss-sha256 with RSASSA-PSS and SHA-256, created by DSS."
+expected-openssl = "verified"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-pss-sha256", chain = ["pki/signer-rsa-pss-sha256", "pki/ca-rsa-pss", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. DSS embedded the OCSP responses of the signer and of pki/tsa and crl/root-ca, selected at the validation time, with the certificates of both chains, so the validation needs no revocation data linked; timestamp-chain still links the chain of pki/tsa."
+
+[[artefact]]
+id = "signed/cades-enveloping-b-lt-p256"
+path = "signed/cades-enveloping-b-lt-p256.p7m"
+sha256 = "ae250a09300d92d033343ee5f3b4f4c137e6199bc8fcc82c2463c246f84927d2"
+kind = "signed-document"
+purpose = "CAdES baseline signature, enveloping, at B-LT, over documents/text, by pki/signer-p256 with ECDSA on P-256 and SHA-256, created by DSS."
+expected-openssl = "verified"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. DSS embedded the OCSP responses of the signer and of pki/tsa and crl/root-ca, selected at the validation time, with the certificates of both chains, so the validation needs no revocation data linked; timestamp-chain still links the chain of pki/tsa."
+
+[[artefact]]
+id = "signed/cades-enveloping-b-lt-ed25519"
+path = "signed/cades-enveloping-b-lt-ed25519.p7m"
+sha256 = "fd9d7cbb3aa2651bb7c88c65e146bb81fb1bef24bae9d0e84383daeb07cefa19"
+kind = "signed-document"
+purpose = "CAdES baseline signature, enveloping, at B-LT, over documents/text, by pki/signer-ed25519 with Ed25519, created by DSS."
+expected-openssl = "verified"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-ed25519", chain = ["pki/signer-ed25519", "pki/ca-ed25519", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. DSS embedded the OCSP responses of the signer and of pki/tsa and crl/root-ca, selected at the validation time, with the certificates of both chains, so the validation needs no revocation data linked; timestamp-chain still links the chain of pki/tsa. Under its default validation policy, DSS 6.5.1 reports INDETERMINATE with CRYPTO_CONSTRAINTS_FAILURE_NO_POE instead, because that policy does not authorise EdDSA; the aligned policy does."
+
+[[artefact]]
+id = "signed/cades-detached-b-b-rsa"
+path = "signed/cades-detached-b-b-rsa.p7s"
+sha256 = "1f8b9259aa506c9f63402689c1a3d70401153f2cc298c4e3ad3252f5d8449d4e"
+kind = "signed-document"
+purpose = "CAdES baseline signature, detached, at B-B, over documents/text, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS."
+expected-openssl = "verified"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-2048", chain = ["pki/signer-rsa-2048", "pki/ca-rsa", "pki/root-ca"], revocation = ["ocsp/signer-rsa-2048", "crl/root-ca"], content = "documents/text" }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA."
+
+[[artefact]]
+id = "signed/cades-detached-b-b-rsa-pss"
+path = "signed/cades-detached-b-b-rsa-pss.p7s"
+sha256 = "f7ec3497bfa774bafcb5e0b8f5455ca91f46e233501e9bd831f036fdb4b9e712"
+kind = "signed-document"
+purpose = "CAdES baseline signature, detached, at B-B, over documents/text, by pki/signer-rsa-pss-sha256 with RSASSA-PSS and SHA-256, created by DSS."
+expected-openssl = "verified"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-pss-sha256", chain = ["pki/signer-rsa-pss-sha256", "pki/ca-rsa-pss", "pki/root-ca"], revocation = ["ocsp/signer-rsa-pss-sha256", "crl/root-ca"], content = "documents/text" }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA."
+
+[[artefact]]
+id = "signed/cades-detached-b-b-p256"
+path = "signed/cades-detached-b-b-p256.p7s"
+sha256 = "81771733d94f032bc86f3fd8919ec78d4b703f3b5c61ba942daa4fb5b01616cf"
+kind = "signed-document"
+purpose = "CAdES baseline signature, detached, at B-B, over documents/text, by pki/signer-p256 with ECDSA on P-256 and SHA-256, created by DSS."
+expected-openssl = "verified"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-p256", "crl/root-ca"], content = "documents/text" }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA."
+
+[[artefact]]
+id = "signed/cades-detached-b-b-ed25519"
+path = "signed/cades-detached-b-b-ed25519.p7s"
+sha256 = "f9e4898541b660928ac9627e7b7396b251bd3354c6a45f59ddefae86e0bc06bb"
+kind = "signed-document"
+purpose = "CAdES baseline signature, detached, at B-B, over documents/text, by pki/signer-ed25519 with Ed25519, created by DSS."
+expected-openssl = "verified"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-ed25519", chain = ["pki/signer-ed25519", "pki/ca-ed25519", "pki/root-ca"], revocation = ["ocsp/signer-ed25519", "crl/root-ca"], content = "documents/text" }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA. Under its default validation policy, DSS 6.5.1 reports INDETERMINATE with CRYPTO_CONSTRAINTS_FAILURE_NO_POE instead, because that policy does not authorise EdDSA; the aligned policy does."
+
+[[artefact]]
+id = "signed/cades-detached-b-t-rsa"
+path = "signed/cades-detached-b-t-rsa.p7s"
+sha256 = "fedd2a7d15d16ff20efdefd4209739e375aea2a09e452b4f7cd7206b0ce9f597"
+kind = "signed-document"
+purpose = "CAdES baseline signature, detached, at B-T, over documents/text, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS."
+expected-openssl = "verified"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-2048", chain = ["pki/signer-rsa-2048", "pki/ca-rsa", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-rsa-2048", "crl/root-ca", "ocsp/tsa"], content = "documents/text" }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. The token holds pki/tsa only; timestamp-chain links pki/tsa and the chain above it, and the revocation data linked cover the signer, pki/tsa and the CAs, so with the linked files, the signature timestamp passes the time-stamp validation building block (clause 5.4)."
+
+[[artefact]]
+id = "signed/cades-detached-b-t-rsa-pss"
+path = "signed/cades-detached-b-t-rsa-pss.p7s"
+sha256 = "2827714a5e71bed307b4bba956d6429eb7d5d87efe568bd773cc6963c1bde6fd"
+kind = "signed-document"
+purpose = "CAdES baseline signature, detached, at B-T, over documents/text, by pki/signer-rsa-pss-sha256 with RSASSA-PSS and SHA-256, created by DSS."
+expected-openssl = "verified"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-pss-sha256", chain = ["pki/signer-rsa-pss-sha256", "pki/ca-rsa-pss", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-rsa-pss-sha256", "crl/root-ca", "ocsp/tsa"], content = "documents/text" }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. The token holds pki/tsa only; timestamp-chain links pki/tsa and the chain above it, and the revocation data linked cover the signer, pki/tsa and the CAs, so with the linked files, the signature timestamp passes the time-stamp validation building block (clause 5.4)."
+
+[[artefact]]
+id = "signed/cades-detached-b-t-p256"
+path = "signed/cades-detached-b-t-p256.p7s"
+sha256 = "f8b236483cb57cbd32e1b23e4e24c612b935a6641b722b66ef6b4ebc22758391"
+kind = "signed-document"
+purpose = "CAdES baseline signature, detached, at B-T, over documents/text, by pki/signer-p256 with ECDSA on P-256 and SHA-256, created by DSS."
+expected-openssl = "verified"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-p256", "crl/root-ca", "ocsp/tsa"], content = "documents/text" }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. The token holds pki/tsa only; timestamp-chain links pki/tsa and the chain above it, and the revocation data linked cover the signer, pki/tsa and the CAs, so with the linked files, the signature timestamp passes the time-stamp validation building block (clause 5.4)."
+
+[[artefact]]
+id = "signed/cades-detached-b-t-ed25519"
+path = "signed/cades-detached-b-t-ed25519.p7s"
+sha256 = "1659f81b1495bd99f85fcbdbc1d19249a8614d679d38b3546bce178aef2a1561"
+kind = "signed-document"
+purpose = "CAdES baseline signature, detached, at B-T, over documents/text, by pki/signer-ed25519 with Ed25519, created by DSS."
+expected-openssl = "verified"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-ed25519", chain = ["pki/signer-ed25519", "pki/ca-ed25519", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-ed25519", "crl/root-ca", "ocsp/tsa"], content = "documents/text" }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. The token holds pki/tsa only; timestamp-chain links pki/tsa and the chain above it, and the revocation data linked cover the signer, pki/tsa and the CAs, so with the linked files, the signature timestamp passes the time-stamp validation building block (clause 5.4). Under its default validation policy, DSS 6.5.1 reports INDETERMINATE with CRYPTO_CONSTRAINTS_FAILURE_NO_POE instead, because that policy does not authorise EdDSA; the aligned policy does."
+
+[[artefact]]
+id = "signed/cades-detached-b-lt-rsa"
+path = "signed/cades-detached-b-lt-rsa.p7s"
+sha256 = "3fabf7697478acd07e99a27a78d350525467b0e28230270fa526dbb0d76ce0d3"
+kind = "signed-document"
+purpose = "CAdES baseline signature, detached, at B-LT, over documents/text, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS."
+expected-openssl = "verified"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-2048", chain = ["pki/signer-rsa-2048", "pki/ca-rsa", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], content = "documents/text" }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. DSS embedded the OCSP responses of the signer and of pki/tsa and crl/root-ca, selected at the validation time, with the certificates of both chains, so the validation needs no revocation data linked; timestamp-chain still links the chain of pki/tsa."
+
+[[artefact]]
+id = "signed/cades-detached-b-lt-rsa-pss"
+path = "signed/cades-detached-b-lt-rsa-pss.p7s"
+sha256 = "4b0a5f05f6f4db339f02cc6a5cf2cb17fc0819d8099ec16f5f91d7a0c73f20c6"
+kind = "signed-document"
+purpose = "CAdES baseline signature, detached, at B-LT, over documents/text, by pki/signer-rsa-pss-sha256 with RSASSA-PSS and SHA-256, created by DSS."
+expected-openssl = "verified"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-pss-sha256", chain = ["pki/signer-rsa-pss-sha256", "pki/ca-rsa-pss", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], content = "documents/text" }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. DSS embedded the OCSP responses of the signer and of pki/tsa and crl/root-ca, selected at the validation time, with the certificates of both chains, so the validation needs no revocation data linked; timestamp-chain still links the chain of pki/tsa."
+
+[[artefact]]
+id = "signed/cades-detached-b-lt-p256"
+path = "signed/cades-detached-b-lt-p256.p7s"
+sha256 = "155ee597bea0fbdd343cacb94bf6b0003605bc1fbe69f9402e0aca270b7c5c82"
+kind = "signed-document"
+purpose = "CAdES baseline signature, detached, at B-LT, over documents/text, by pki/signer-p256 with ECDSA on P-256 and SHA-256, created by DSS."
+expected-openssl = "verified"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], content = "documents/text" }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. DSS embedded the OCSP responses of the signer and of pki/tsa and crl/root-ca, selected at the validation time, with the certificates of both chains, so the validation needs no revocation data linked; timestamp-chain still links the chain of pki/tsa."
+
+[[artefact]]
+id = "signed/cades-detached-b-lt-ed25519"
+path = "signed/cades-detached-b-lt-ed25519.p7s"
+sha256 = "aa275113a02d7929c4b28515cf33d8881a865cbccf68e724e25fab4039340965"
+kind = "signed-document"
+purpose = "CAdES baseline signature, detached, at B-LT, over documents/text, by pki/signer-ed25519 with Ed25519, created by DSS."
+expected-openssl = "verified"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-ed25519", chain = ["pki/signer-ed25519", "pki/ca-ed25519", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], content = "documents/text" }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. DSS embedded the OCSP responses of the signer and of pki/tsa and crl/root-ca, selected at the validation time, with the certificates of both chains, so the validation needs no revocation data linked; timestamp-chain still links the chain of pki/tsa. Under its default validation policy, DSS 6.5.1 reports INDETERMINATE with CRYPTO_CONSTRAINTS_FAILURE_NO_POE instead, because that policy does not authorise EdDSA; the aligned policy does."
+
+[[artefact]]
+id = "signed/pades-b-b-rsa"
+path = "signed/pades-b-b-rsa.pdf"
+sha256 = "006858689dbefe0c45825eb66fdea0c380889e2658f77a85a7e1e469b702b220"
+kind = "signed-document"
+purpose = "PAdES baseline signature, invisible, at B-B, over documents/simple, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-2048", chain = ["pki/signer-rsa-2048", "pki/ca-rsa", "pki/root-ca"], revocation = ["ocsp/signer-rsa-2048", "crl/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA."
+
+[[artefact]]
+id = "signed/pades-b-b-rsa-pss"
+path = "signed/pades-b-b-rsa-pss.pdf"
+sha256 = "849f912bf485015360450575f28b3b84add9cd11531a7cbe3c0b7de14da37fc1"
+kind = "signed-document"
+purpose = "PAdES baseline signature, invisible, at B-B, over documents/simple, by pki/signer-rsa-pss-sha256 with RSASSA-PSS and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-pss-sha256", chain = ["pki/signer-rsa-pss-sha256", "pki/ca-rsa-pss", "pki/root-ca"], revocation = ["ocsp/signer-rsa-pss-sha256", "crl/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA."
+
+[[artefact]]
+id = "signed/pades-b-b-p256"
+path = "signed/pades-b-b-p256.pdf"
+sha256 = "578e49491a17fae6aa9567ea7971670dad920351d0ab1cca990b5437cb41882c"
+kind = "signed-document"
+purpose = "PAdES baseline signature, invisible, at B-B, over documents/simple, by pki/signer-p256 with ECDSA on P-256 and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-p256", "crl/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA."
+
+[[artefact]]
+id = "signed/pades-b-b-ed25519"
+path = "signed/pades-b-b-ed25519.pdf"
+sha256 = "4a12ec0025dd5f67912b700f0bd7a7a017d046c866b45dad7c798a2106f727e1"
+kind = "signed-document"
+purpose = "PAdES baseline signature, invisible, at B-B, over documents/simple, by pki/signer-ed25519 with Ed25519, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-ed25519", chain = ["pki/signer-ed25519", "pki/ca-ed25519", "pki/root-ca"], revocation = ["ocsp/signer-ed25519", "crl/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA. Under its default validation policy, DSS 6.5.1 reports INDETERMINATE with CRYPTO_CONSTRAINTS_FAILURE_NO_POE instead, because that policy does not authorise EdDSA; the aligned policy does."
+
+[[artefact]]
+id = "signed/pades-b-t-rsa"
+path = "signed/pades-b-t-rsa.pdf"
+sha256 = "298731c21e22a314328defc490112b7adefce74c078be3b7ab138cb0a817047f"
+kind = "signed-document"
+purpose = "PAdES baseline signature, invisible, at B-T, over documents/simple, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-2048", chain = ["pki/signer-rsa-2048", "pki/ca-rsa", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-rsa-2048", "crl/root-ca", "ocsp/tsa"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. The token holds pki/tsa only; timestamp-chain links pki/tsa and the chain above it, and the revocation data linked cover the signer, pki/tsa and the CAs, so with the linked files, the signature timestamp passes the time-stamp validation building block (clause 5.4)."
+
+[[artefact]]
+id = "signed/pades-b-t-rsa-pss"
+path = "signed/pades-b-t-rsa-pss.pdf"
+sha256 = "7e38a6bc08fcc8f51ad4d18cf5bd0ccf5070fd634745f40c1c92b0096fe74458"
+kind = "signed-document"
+purpose = "PAdES baseline signature, invisible, at B-T, over documents/simple, by pki/signer-rsa-pss-sha256 with RSASSA-PSS and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-pss-sha256", chain = ["pki/signer-rsa-pss-sha256", "pki/ca-rsa-pss", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-rsa-pss-sha256", "crl/root-ca", "ocsp/tsa"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. The token holds pki/tsa only; timestamp-chain links pki/tsa and the chain above it, and the revocation data linked cover the signer, pki/tsa and the CAs, so with the linked files, the signature timestamp passes the time-stamp validation building block (clause 5.4)."
+
+[[artefact]]
+id = "signed/pades-b-t-p256"
+path = "signed/pades-b-t-p256.pdf"
+sha256 = "0c096068324ba7cff4839e584a18e550f45e83d1af812cd8bdf85bc0b18ecbb6"
+kind = "signed-document"
+purpose = "PAdES baseline signature, invisible, at B-T, over documents/simple, by pki/signer-p256 with ECDSA on P-256 and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-p256", "crl/root-ca", "ocsp/tsa"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. The token holds pki/tsa only; timestamp-chain links pki/tsa and the chain above it, and the revocation data linked cover the signer, pki/tsa and the CAs, so with the linked files, the signature timestamp passes the time-stamp validation building block (clause 5.4)."
+
+[[artefact]]
+id = "signed/pades-b-t-ed25519"
+path = "signed/pades-b-t-ed25519.pdf"
+sha256 = "7cd6a084c0e060633566172387f78b10ef35f6e262f4ca5d7307168559cc4d26"
+kind = "signed-document"
+purpose = "PAdES baseline signature, invisible, at B-T, over documents/simple, by pki/signer-ed25519 with Ed25519, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-ed25519", chain = ["pki/signer-ed25519", "pki/ca-ed25519", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-ed25519", "crl/root-ca", "ocsp/tsa"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. The token holds pki/tsa only; timestamp-chain links pki/tsa and the chain above it, and the revocation data linked cover the signer, pki/tsa and the CAs, so with the linked files, the signature timestamp passes the time-stamp validation building block (clause 5.4). Under its default validation policy, DSS 6.5.1 reports INDETERMINATE with CRYPTO_CONSTRAINTS_FAILURE_NO_POE instead, because that policy does not authorise EdDSA; the aligned policy does."
+
+[[artefact]]
+id = "signed/pades-b-lt-rsa"
+path = "signed/pades-b-lt-rsa.pdf"
+sha256 = "21f33d6f3113b83e136bd573a942c1e8059e3e6caca9e370cff381d0c8aea61b"
+kind = "signed-document"
+purpose = "PAdES baseline signature, invisible, at B-LT, over documents/simple, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-2048", chain = ["pki/signer-rsa-2048", "pki/ca-rsa", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. DSS embedded the OCSP responses of the signer and of pki/tsa and crl/root-ca, selected at the validation time, with the certificates of both chains, so the validation needs no revocation data linked; timestamp-chain still links the chain of pki/tsa."
+
+[[artefact]]
+id = "signed/pades-b-lt-rsa-pss"
+path = "signed/pades-b-lt-rsa-pss.pdf"
+sha256 = "7a9ac041984afae5bb8c53a71561a2750361c7c712acc41e34f3fdf1b3c69264"
+kind = "signed-document"
+purpose = "PAdES baseline signature, invisible, at B-LT, over documents/simple, by pki/signer-rsa-pss-sha256 with RSASSA-PSS and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-pss-sha256", chain = ["pki/signer-rsa-pss-sha256", "pki/ca-rsa-pss", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. DSS embedded the OCSP responses of the signer and of pki/tsa and crl/root-ca, selected at the validation time, with the certificates of both chains, so the validation needs no revocation data linked; timestamp-chain still links the chain of pki/tsa."
+
+[[artefact]]
+id = "signed/pades-b-lt-p256"
+path = "signed/pades-b-lt-p256.pdf"
+sha256 = "c1eabc4dab9a1d9f3048de04e4870e93fd79e6de5b64289495ebb2eebd58d37b"
+kind = "signed-document"
+purpose = "PAdES baseline signature, invisible, at B-LT, over documents/simple, by pki/signer-p256 with ECDSA on P-256 and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. DSS embedded the OCSP responses of the signer and of pki/tsa and crl/root-ca, selected at the validation time, with the certificates of both chains, so the validation needs no revocation data linked; timestamp-chain still links the chain of pki/tsa."
+
+[[artefact]]
+id = "signed/pades-b-lt-ed25519"
+path = "signed/pades-b-lt-ed25519.pdf"
+sha256 = "b5c6a1cdc8018af4a60f87a2c3237fdd3d9602024e00fe72a809ac18c3724e69"
+kind = "signed-document"
+purpose = "PAdES baseline signature, invisible, at B-LT, over documents/simple, by pki/signer-ed25519 with Ed25519, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-ed25519", chain = ["pki/signer-ed25519", "pki/ca-ed25519", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. DSS embedded the OCSP responses of the signer and of pki/tsa and crl/root-ca, selected at the validation time, with the certificates of both chains, so the validation needs no revocation data linked; timestamp-chain still links the chain of pki/tsa. Under its default validation policy, DSS 6.5.1 reports INDETERMINATE with CRYPTO_CONSTRAINTS_FAILURE_NO_POE instead, because that policy does not authorise EdDSA; the aligned policy does."
+
+[[artefact]]
+id = "signed/jades-compact-b-b-rsa"
+path = "signed/jades-compact-b-b-rsa.jws"
+sha256 = "a662cc6794d35f54a875364c601d42fbfc2f04f65c4c8b4d9341639a992cadb8"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the JWS compact serialisation, at B-B, over documents/payload, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-2048", chain = ["pki/signer-rsa-2048", "pki/ca-rsa", "pki/root-ca"], revocation = ["ocsp/signer-rsa-2048", "crl/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA. The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. x5c holds the signing certificate and the chain up to pki/root-ca. The compact serialisation has no unprotected header for unsigned properties (RFC 7515, section 7.1), so it is created at B-B only."
+
+[[artefact]]
+id = "signed/jades-compact-b-b-rsa-pss"
+path = "signed/jades-compact-b-b-rsa-pss.jws"
+sha256 = "323e2ae3e51080867cb19f0ebe77afbfebb8ef41babb443c454251528ebba06c"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the JWS compact serialisation, at B-B, over documents/payload, by pki/signer-rsa-pss-sha256 with RSASSA-PSS and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-pss-sha256", chain = ["pki/signer-rsa-pss-sha256", "pki/ca-rsa-pss", "pki/root-ca"], revocation = ["ocsp/signer-rsa-pss-sha256", "crl/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA. The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. x5c holds the signing certificate and the chain up to pki/root-ca. The compact serialisation has no unprotected header for unsigned properties (RFC 7515, section 7.1), so it is created at B-B only."
+
+[[artefact]]
+id = "signed/jades-compact-b-b-p256"
+path = "signed/jades-compact-b-b-p256.jws"
+sha256 = "c72d7981fb23d77d8ff6bebc2a01e7f34904c401afcdff228cf178a900a2ecc7"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the JWS compact serialisation, at B-B, over documents/payload, by pki/signer-p256 with ECDSA on P-256 and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-p256", "crl/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA. The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. x5c holds the signing certificate and the chain up to pki/root-ca. The compact serialisation has no unprotected header for unsigned properties (RFC 7515, section 7.1), so it is created at B-B only."
+
+[[artefact]]
+id = "signed/jades-compact-b-b-ed25519"
+path = "signed/jades-compact-b-b-ed25519.jws"
+sha256 = "10ab615ed2b0cb1cffb1c70a2617bd5b971f669cae09a3fb229c7bc650c73a2b"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the JWS compact serialisation, at B-B, over documents/payload, by pki/signer-ed25519 with Ed25519, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-ed25519", chain = ["pki/signer-ed25519", "pki/ca-ed25519", "pki/root-ca"], revocation = ["ocsp/signer-ed25519", "crl/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA. The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. x5c holds the signing certificate and the chain up to pki/root-ca. The compact serialisation has no unprotected header for unsigned properties (RFC 7515, section 7.1), so it is created at B-B only. Under its default validation policy, DSS 6.5.1 reports INDETERMINATE with CRYPTO_CONSTRAINTS_FAILURE_NO_POE instead, because that policy does not authorise EdDSA; the aligned policy does."
+
+[[artefact]]
+id = "signed/jades-flattened-b-b-rsa"
+path = "signed/jades-flattened-b-b-rsa.json"
+sha256 = "1573e95c7bf745f605c21d3fa14683c34835221e507d221e77f380c6e6b75dfd"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the flattened JWS JSON serialisation, at B-B, over documents/payload, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-2048", chain = ["pki/signer-rsa-2048", "pki/ca-rsa", "pki/root-ca"], revocation = ["ocsp/signer-rsa-2048", "crl/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA. The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. x5c holds the signing certificate and the chain up to pki/root-ca."
+
+[[artefact]]
+id = "signed/jades-flattened-b-b-rsa-pss"
+path = "signed/jades-flattened-b-b-rsa-pss.json"
+sha256 = "62726d3d81d180dc83e2fb919369db1c0b15f543b11d99ccd834b6bf38420fe1"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the flattened JWS JSON serialisation, at B-B, over documents/payload, by pki/signer-rsa-pss-sha256 with RSASSA-PSS and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-pss-sha256", chain = ["pki/signer-rsa-pss-sha256", "pki/ca-rsa-pss", "pki/root-ca"], revocation = ["ocsp/signer-rsa-pss-sha256", "crl/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA. The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. x5c holds the signing certificate and the chain up to pki/root-ca."
+
+[[artefact]]
+id = "signed/jades-flattened-b-b-p256"
+path = "signed/jades-flattened-b-b-p256.json"
+sha256 = "17eb82faac815eabb6752b925a407b5c0a8313438060f681f7a6b59ced809218"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the flattened JWS JSON serialisation, at B-B, over documents/payload, by pki/signer-p256 with ECDSA on P-256 and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-p256", "crl/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA. The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. x5c holds the signing certificate and the chain up to pki/root-ca."
+
+[[artefact]]
+id = "signed/jades-flattened-b-b-ed25519"
+path = "signed/jades-flattened-b-b-ed25519.json"
+sha256 = "e92d9aaa6607635b479fab9d64ca77a8ef7e5af2e820f0d64d34ecda5dd310d8"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the flattened JWS JSON serialisation, at B-B, over documents/payload, by pki/signer-ed25519 with Ed25519, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-ed25519", chain = ["pki/signer-ed25519", "pki/ca-ed25519", "pki/root-ca"], revocation = ["ocsp/signer-ed25519", "crl/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA. The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. x5c holds the signing certificate and the chain up to pki/root-ca. Under its default validation policy, DSS 6.5.1 reports INDETERMINATE with CRYPTO_CONSTRAINTS_FAILURE_NO_POE instead, because that policy does not authorise EdDSA; the aligned policy does."
+
+[[artefact]]
+id = "signed/jades-flattened-b-t-rsa"
+path = "signed/jades-flattened-b-t-rsa.json"
+sha256 = "458ab5fe121b99c006a2304041d6e758e1a928e23301e279220309f084110bf0"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the flattened JWS JSON serialisation, at B-T, over documents/payload, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-2048", chain = ["pki/signer-rsa-2048", "pki/ca-rsa", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-rsa-2048", "crl/root-ca", "ocsp/tsa"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. The token holds pki/tsa only; timestamp-chain links pki/tsa and the chain above it, and the revocation data linked cover the signer, pki/tsa and the CAs, so with the linked files, the signature timestamp passes the time-stamp validation building block (clause 5.4). The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. x5c holds the signing certificate and the chain up to pki/root-ca."
+
+[[artefact]]
+id = "signed/jades-flattened-b-t-rsa-pss"
+path = "signed/jades-flattened-b-t-rsa-pss.json"
+sha256 = "33984f2004d3903f478e054db7c89c4e213baf5c8968fc27d6f8ac7c52eb6ac9"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the flattened JWS JSON serialisation, at B-T, over documents/payload, by pki/signer-rsa-pss-sha256 with RSASSA-PSS and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-pss-sha256", chain = ["pki/signer-rsa-pss-sha256", "pki/ca-rsa-pss", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-rsa-pss-sha256", "crl/root-ca", "ocsp/tsa"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. The token holds pki/tsa only; timestamp-chain links pki/tsa and the chain above it, and the revocation data linked cover the signer, pki/tsa and the CAs, so with the linked files, the signature timestamp passes the time-stamp validation building block (clause 5.4). The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. x5c holds the signing certificate and the chain up to pki/root-ca."
+
+[[artefact]]
+id = "signed/jades-flattened-b-t-p256"
+path = "signed/jades-flattened-b-t-p256.json"
+sha256 = "0659ea4efdb0f7b6092727e21785051a39c370d78cc6c94105e73d9280f2aafe"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the flattened JWS JSON serialisation, at B-T, over documents/payload, by pki/signer-p256 with ECDSA on P-256 and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-p256", "crl/root-ca", "ocsp/tsa"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. The token holds pki/tsa only; timestamp-chain links pki/tsa and the chain above it, and the revocation data linked cover the signer, pki/tsa and the CAs, so with the linked files, the signature timestamp passes the time-stamp validation building block (clause 5.4). The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. x5c holds the signing certificate and the chain up to pki/root-ca."
+
+[[artefact]]
+id = "signed/jades-flattened-b-t-ed25519"
+path = "signed/jades-flattened-b-t-ed25519.json"
+sha256 = "d5f86b023c368f731fab3908d48bd09154cf58fcc8688affce04ec013bcc1b8b"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the flattened JWS JSON serialisation, at B-T, over documents/payload, by pki/signer-ed25519 with Ed25519, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-ed25519", chain = ["pki/signer-ed25519", "pki/ca-ed25519", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-ed25519", "crl/root-ca", "ocsp/tsa"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. The token holds pki/tsa only; timestamp-chain links pki/tsa and the chain above it, and the revocation data linked cover the signer, pki/tsa and the CAs, so with the linked files, the signature timestamp passes the time-stamp validation building block (clause 5.4). The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. x5c holds the signing certificate and the chain up to pki/root-ca. Under its default validation policy, DSS 6.5.1 reports INDETERMINATE with CRYPTO_CONSTRAINTS_FAILURE_NO_POE instead, because that policy does not authorise EdDSA; the aligned policy does."
+
+[[artefact]]
+id = "signed/jades-flattened-b-lt-rsa"
+path = "signed/jades-flattened-b-lt-rsa.json"
+sha256 = "e068fd8a66022061269ffd6e82832209f9a599c1f5677087829ec96797485cd0"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the flattened JWS JSON serialisation, at B-LT, over documents/payload, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-2048", chain = ["pki/signer-rsa-2048", "pki/ca-rsa", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. DSS embedded the OCSP responses of the signer and of pki/tsa and crl/root-ca, selected at the validation time, with the certificates of both chains, so the validation needs no revocation data linked; timestamp-chain still links the chain of pki/tsa. The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. At B-LT, x5c holds the signing certificate and the chain below the trust anchor: DSS leaves pki/root-ca, given as trust anchor, out of it, and holds it in the validation data of etsiU."
+
+[[artefact]]
+id = "signed/jades-flattened-b-lt-rsa-pss"
+path = "signed/jades-flattened-b-lt-rsa-pss.json"
+sha256 = "abcb0d7275f0620c0c2025394247a62df90de728c08c90eae00d3779944385e6"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the flattened JWS JSON serialisation, at B-LT, over documents/payload, by pki/signer-rsa-pss-sha256 with RSASSA-PSS and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-pss-sha256", chain = ["pki/signer-rsa-pss-sha256", "pki/ca-rsa-pss", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. DSS embedded the OCSP responses of the signer and of pki/tsa and crl/root-ca, selected at the validation time, with the certificates of both chains, so the validation needs no revocation data linked; timestamp-chain still links the chain of pki/tsa. The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. At B-LT, x5c holds the signing certificate and the chain below the trust anchor: DSS leaves pki/root-ca, given as trust anchor, out of it, and holds it in the validation data of etsiU."
+
+[[artefact]]
+id = "signed/jades-flattened-b-lt-p256"
+path = "signed/jades-flattened-b-lt-p256.json"
+sha256 = "401bd870618a7f5b6c4817a7c4e171ba429aa9e00c96bb48510459cb8d0f5a22"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the flattened JWS JSON serialisation, at B-LT, over documents/payload, by pki/signer-p256 with ECDSA on P-256 and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. DSS embedded the OCSP responses of the signer and of pki/tsa and crl/root-ca, selected at the validation time, with the certificates of both chains, so the validation needs no revocation data linked; timestamp-chain still links the chain of pki/tsa. The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. At B-LT, x5c holds the signing certificate and the chain below the trust anchor: DSS leaves pki/root-ca, given as trust anchor, out of it, and holds it in the validation data of etsiU."
+
+[[artefact]]
+id = "signed/jades-flattened-b-lt-ed25519"
+path = "signed/jades-flattened-b-lt-ed25519.json"
+sha256 = "5339ee4d099946879c4c995b879e5c3c63750c5575bb1ba2ea230283b3ec0059"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the flattened JWS JSON serialisation, at B-LT, over documents/payload, by pki/signer-ed25519 with Ed25519, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-ed25519", chain = ["pki/signer-ed25519", "pki/ca-ed25519", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. DSS embedded the OCSP responses of the signer and of pki/tsa and crl/root-ca, selected at the validation time, with the certificates of both chains, so the validation needs no revocation data linked; timestamp-chain still links the chain of pki/tsa. The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. At B-LT, x5c holds the signing certificate and the chain below the trust anchor: DSS leaves pki/root-ca, given as trust anchor, out of it, and holds it in the validation data of etsiU. Under its default validation policy, DSS 6.5.1 reports INDETERMINATE with CRYPTO_CONSTRAINTS_FAILURE_NO_POE instead, because that policy does not authorise EdDSA; the aligned policy does."
+
+[[artefact]]
+id = "signed/jades-general-b-b-rsa"
+path = "signed/jades-general-b-b-rsa.json"
+sha256 = "717eebda5c3ffa421713cb641fecc43a17546398834fc6cbe9f1f5730e3f070a"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the general JWS JSON serialisation, at B-B, over documents/payload, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-2048", chain = ["pki/signer-rsa-2048", "pki/ca-rsa", "pki/root-ca"], revocation = ["ocsp/signer-rsa-2048", "crl/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA. The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. x5c holds the signing certificate and the chain up to pki/root-ca."
+
+[[artefact]]
+id = "signed/jades-general-b-b-rsa-pss"
+path = "signed/jades-general-b-b-rsa-pss.json"
+sha256 = "88a7eafaa62d13b92dbf4e960d284b20d25fae6e8fb668930d581e4070e3da83"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the general JWS JSON serialisation, at B-B, over documents/payload, by pki/signer-rsa-pss-sha256 with RSASSA-PSS and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-pss-sha256", chain = ["pki/signer-rsa-pss-sha256", "pki/ca-rsa-pss", "pki/root-ca"], revocation = ["ocsp/signer-rsa-pss-sha256", "crl/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA. The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. x5c holds the signing certificate and the chain up to pki/root-ca."
+
+[[artefact]]
+id = "signed/jades-general-b-b-p256"
+path = "signed/jades-general-b-b-p256.json"
+sha256 = "720fa5003c4ef3e172859aee713464b344c8a71dd424ee00b15bc0e94bac5bfb"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the general JWS JSON serialisation, at B-B, over documents/payload, by pki/signer-p256 with ECDSA on P-256 and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-p256", "crl/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA. The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. x5c holds the signing certificate and the chain up to pki/root-ca."
+
+[[artefact]]
+id = "signed/jades-general-b-b-ed25519"
+path = "signed/jades-general-b-b-ed25519.json"
+sha256 = "b9b2fad9df43773af17c1b5bcc73e6b31abefbf647b10e1896a5ef1b948e080a"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the general JWS JSON serialisation, at B-B, over documents/payload, by pki/signer-ed25519 with Ed25519, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-ed25519", chain = ["pki/signer-ed25519", "pki/ca-ed25519", "pki/root-ca"], revocation = ["ocsp/signer-ed25519", "crl/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA. The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. x5c holds the signing certificate and the chain up to pki/root-ca. Under its default validation policy, DSS 6.5.1 reports INDETERMINATE with CRYPTO_CONSTRAINTS_FAILURE_NO_POE instead, because that policy does not authorise EdDSA; the aligned policy does."
+
+[[artefact]]
+id = "signed/jades-general-b-t-rsa"
+path = "signed/jades-general-b-t-rsa.json"
+sha256 = "98a378307777581487dacf329b746bc6d8d41a14b44654e3d14c680d81080425"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the general JWS JSON serialisation, at B-T, over documents/payload, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-2048", chain = ["pki/signer-rsa-2048", "pki/ca-rsa", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-rsa-2048", "crl/root-ca", "ocsp/tsa"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. The token holds pki/tsa only; timestamp-chain links pki/tsa and the chain above it, and the revocation data linked cover the signer, pki/tsa and the CAs, so with the linked files, the signature timestamp passes the time-stamp validation building block (clause 5.4). The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. x5c holds the signing certificate and the chain up to pki/root-ca."
+
+[[artefact]]
+id = "signed/jades-general-b-t-rsa-pss"
+path = "signed/jades-general-b-t-rsa-pss.json"
+sha256 = "a24772f806cb45ea49075b11f2b104deb9de654d752ae07cbeb0eb42de2b3c01"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the general JWS JSON serialisation, at B-T, over documents/payload, by pki/signer-rsa-pss-sha256 with RSASSA-PSS and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-pss-sha256", chain = ["pki/signer-rsa-pss-sha256", "pki/ca-rsa-pss", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-rsa-pss-sha256", "crl/root-ca", "ocsp/tsa"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. The token holds pki/tsa only; timestamp-chain links pki/tsa and the chain above it, and the revocation data linked cover the signer, pki/tsa and the CAs, so with the linked files, the signature timestamp passes the time-stamp validation building block (clause 5.4). The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. x5c holds the signing certificate and the chain up to pki/root-ca."
+
+[[artefact]]
+id = "signed/jades-general-b-t-p256"
+path = "signed/jades-general-b-t-p256.json"
+sha256 = "7c7ab8d7de0b82f03302424c73bc43decf9fd7b82b4b38d19af6562ebb48e34b"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the general JWS JSON serialisation, at B-T, over documents/payload, by pki/signer-p256 with ECDSA on P-256 and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-p256", "crl/root-ca", "ocsp/tsa"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. The token holds pki/tsa only; timestamp-chain links pki/tsa and the chain above it, and the revocation data linked cover the signer, pki/tsa and the CAs, so with the linked files, the signature timestamp passes the time-stamp validation building block (clause 5.4). The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. x5c holds the signing certificate and the chain up to pki/root-ca."
+
+[[artefact]]
+id = "signed/jades-general-b-t-ed25519"
+path = "signed/jades-general-b-t-ed25519.json"
+sha256 = "596827fc2ec9f57327311fd4cbec3242da0405ee02f31ecedcbae2f6b701d913"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the general JWS JSON serialisation, at B-T, over documents/payload, by pki/signer-ed25519 with Ed25519, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-ed25519", chain = ["pki/signer-ed25519", "pki/ca-ed25519", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-ed25519", "crl/root-ca", "ocsp/tsa"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. The token holds pki/tsa only; timestamp-chain links pki/tsa and the chain above it, and the revocation data linked cover the signer, pki/tsa and the CAs, so with the linked files, the signature timestamp passes the time-stamp validation building block (clause 5.4). The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. x5c holds the signing certificate and the chain up to pki/root-ca. Under its default validation policy, DSS 6.5.1 reports INDETERMINATE with CRYPTO_CONSTRAINTS_FAILURE_NO_POE instead, because that policy does not authorise EdDSA; the aligned policy does."
+
+[[artefact]]
+id = "signed/jades-general-b-lt-rsa"
+path = "signed/jades-general-b-lt-rsa.json"
+sha256 = "404471813357acca92ca4fc8209b9b805d6dacae3e85cdbf53208c38f805db57"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the general JWS JSON serialisation, at B-LT, over documents/payload, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-2048", chain = ["pki/signer-rsa-2048", "pki/ca-rsa", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. DSS embedded the OCSP responses of the signer and of pki/tsa and crl/root-ca, selected at the validation time, with the certificates of both chains, so the validation needs no revocation data linked; timestamp-chain still links the chain of pki/tsa. The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. At B-LT, x5c holds the signing certificate and the chain below the trust anchor: DSS leaves pki/root-ca, given as trust anchor, out of it, and holds it in the validation data of etsiU."
+
+[[artefact]]
+id = "signed/jades-general-b-lt-rsa-pss"
+path = "signed/jades-general-b-lt-rsa-pss.json"
+sha256 = "84bb93368bc78eef1d1434a8bf22c58ac255d18f2b5a268b9f596dcf6fbb4d3c"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the general JWS JSON serialisation, at B-LT, over documents/payload, by pki/signer-rsa-pss-sha256 with RSASSA-PSS and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-rsa-pss-sha256", chain = ["pki/signer-rsa-pss-sha256", "pki/ca-rsa-pss", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. DSS embedded the OCSP responses of the signer and of pki/tsa and crl/root-ca, selected at the validation time, with the certificates of both chains, so the validation needs no revocation data linked; timestamp-chain still links the chain of pki/tsa. The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. At B-LT, x5c holds the signing certificate and the chain below the trust anchor: DSS leaves pki/root-ca, given as trust anchor, out of it, and holds it in the validation data of etsiU."
+
+[[artefact]]
+id = "signed/jades-general-b-lt-p256"
+path = "signed/jades-general-b-lt-p256.json"
+sha256 = "13d45d1d870dbd17179fc8067dd4a847748ce2a95da608c30f1b74ceb0e24207"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the general JWS JSON serialisation, at B-LT, over documents/payload, by pki/signer-p256 with ECDSA on P-256 and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. DSS embedded the OCSP responses of the signer and of pki/tsa and crl/root-ca, selected at the validation time, with the certificates of both chains, so the validation needs no revocation data linked; timestamp-chain still links the chain of pki/tsa. The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. At B-LT, x5c holds the signing certificate and the chain below the trust anchor: DSS leaves pki/root-ca, given as trust anchor, out of it, and holds it in the validation data of etsiU."
+
+[[artefact]]
+id = "signed/jades-general-b-lt-ed25519"
+path = "signed/jades-general-b-lt-ed25519.json"
+sha256 = "5f4a342a4141688f8b7840a74d6df6fce05adebb8bc9149ec5c78eeb4d31787a"
+kind = "signed-document"
+purpose = "JAdES baseline signature in the general JWS JSON serialisation, at B-LT, over documents/payload, by pki/signer-ed25519 with Ed25519, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-ed25519", chain = ["pki/signer-ed25519", "pki/ca-ed25519", "pki/root-ca"], timestamp-chain = ["pki/tsa", "pki/ca-ecdsa", "pki/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. DSS embedded the OCSP responses of the signer and of pki/tsa and crl/root-ca, selected at the validation time, with the certificates of both chains, so the validation needs no revocation data linked; timestamp-chain still links the chain of pki/tsa. The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. At B-LT, x5c holds the signing certificate and the chain below the trust anchor: DSS leaves pki/root-ca, given as trust anchor, out of it, and holds it in the validation data of etsiU. Under its default validation policy, DSS 6.5.1 reports INDETERMINATE with CRYPTO_CONSTRAINTS_FAILURE_NO_POE instead, because that policy does not authorise EdDSA; the aligned policy does."

@@ -13,7 +13,9 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use clap::{Parser, Subcommand, ValueEnum};
+use sigillum_testpki::documents;
 use sigillum_testpki::pki::{self, GenerateError, Summary};
+use sigillum_testpki::signed::{self, JavaOracle};
 use sigillum_testpki::timestamp;
 use tsa_cli::TsaOptions;
 use verify_cli::VerifyOptions;
@@ -51,6 +53,12 @@ struct GenerateOptions {
     target: Target,
     #[command(flatten)]
     corpus: ManifestOptions,
+    /// The executable JAR of tools/dss-oracle, which `generate signed` runs.
+    #[arg(long, default_value = "tools/dss-oracle/target/dss-oracle.jar")]
+    dss_oracle: PathBuf,
+    /// The Java launcher that runs tools/dss-oracle for `generate signed`.
+    #[arg(long, default_value = "java")]
+    java: PathBuf,
 }
 
 /// The artefacts that `generate` can produce.
@@ -66,6 +74,12 @@ enum Target {
     /// The OCSP responses of the test PKI, under ocsp/, after the
     /// certificates.
     Ocsp,
+    /// The unsigned base documents of the signed corpus, under documents/.
+    Documents,
+    /// The signed corpus, under signed/, created by tools/dss-oracle with
+    /// this program as its timestamping authority, after every other
+    /// target.
+    Signed,
 }
 
 impl Target {
@@ -76,18 +90,40 @@ impl Target {
             Self::Crls => "crls",
             Self::Timestamps => "timestamps",
             Self::Ocsp => "ocsp",
+            Self::Documents => "documents",
+            Self::Signed => "signed",
         }
     }
 }
 
 fn main() -> ExitCode {
     match Cli::parse().command {
-        Command::Generate(GenerateOptions { target, corpus }) => {
+        Command::Generate(GenerateOptions {
+            target,
+            corpus,
+            dss_oracle,
+            java,
+        }) => {
             let result = match target {
                 Target::Pki => pki::write_into_corpus(&corpus.manifest),
                 Target::Crls => pki::crl::write_into_corpus(&corpus.manifest),
                 Target::Timestamps => timestamp::write_into_corpus(&corpus.manifest),
                 Target::Ocsp => pki::ocsp::write_into_corpus(&corpus.manifest),
+                Target::Documents => documents::write_into_corpus(&corpus.manifest),
+                Target::Signed => {
+                    let oracle = JavaOracle::new(java, dss_oracle);
+                    match std::env::current_exe() {
+                        Ok(program) => {
+                            signed::write_into_corpus(&corpus.manifest, &oracle, &program)
+                        }
+                        Err(error) => {
+                            eprintln!(
+                                "sigillum-testpki: the program cannot locate itself: {error}"
+                            );
+                            return ExitCode::FAILURE;
+                        }
+                    }
+                }
             };
             report(target.name(), result, &corpus.manifest)
         }

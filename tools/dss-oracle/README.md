@@ -30,7 +30,7 @@ Usage: `dss-oracle <mode> [options]`, or `dss-oracle --version` or `--help` on t
 | `--policy aligned\|default\|<file>` | Validation policy of a validation mode, described below; `aligned` when absent. Refused in `sign` |
 | `--timeout <seconds>` | Time limit of the validation, from 1 to 86400 seconds; 300 by default (see "Resource limits"). Refused in `sign` |
 
-Exit codes: 0 success, 1 failure, 2 usage error, 3 mode not implemented yet, 4 network access attempted. A missing or unreadable input file, or an output directory that is not empty, is a failure. `sign` is not implemented yet.
+Exit codes: 0 success, 1 failure, 2 usage error, 3 mode not implemented yet, 4 network access attempted. A missing or unreadable input file, or an output directory that is not empty, is a failure. Every mode is implemented. In `sign`, `--certificate` names the signing certificate, `--document` the document to sign and `--out` the signed file; its own options are described under [sign](#sign).
 
 ## Network access
 
@@ -403,6 +403,65 @@ When the result is `rejected`:
 | `message` | The message of the DSS parser, joined with the messages of its causes |
 
 Later validation modes add their own `details` and keep the other members.
+
+## sign
+
+```
+dss-oracle sign --format cades|pades|jades --level B-B|B-T|B-LT --key <pkcs8> --certificate <file>
+    [--chain <file>]... --signing-time <time> --document <file> [--packaging enveloping|detached]
+    [--serialisation compact|flattened|general] [--signature-algorithm <name>]
+    [--tsa-program <file>] [--tsa-key <file> --tsa-cert <file> --timestamp-time <time>]
+    [--tsa-chain <file>]... [--trust-anchor <file> [--crl <file>]... [--ocsp <file>]... --validation-time <time>]
+    --out <file>
+```
+
+It creates a baseline signature with DSS, as the signed corpus of `testdata/signed/` needs: CAdES ([ETSI EN 319 122-1 V1.3.1](https://www.etsi.org/deliver/etsi_en/319100_319199/31912201/01.03.01_60/en_31912201v010301p.pdf)), PAdES ([ETSI EN 319 142-1 V1.2.1](https://www.etsi.org/deliver/etsi_en/319100_319199/31914201/01.02.01_60/en_31914201v010201p.pdf)) or JAdES ([ETSI TS 119 182-1 V1.2.1](https://www.etsi.org/deliver/etsi_ts/119100_119199/11918201/01.02.01_60/ts_11918201v010201p.pdf)), at B-B, B-T or B-LT. The signature is written to `--out`, which must not exist. Nothing else is written.
+
+| Option | Meaning |
+| --- | --- |
+| `--format` | `cades`, `pades` or `jades` |
+| `--level` | `B-B`, `B-T` or `B-LT` |
+| `--key` | The private key of the signer, PKCS#8 in a PEM block labelled `PRIVATE KEY` or in DER |
+| `--certificate` | The signing certificate, given once |
+| `--chain` | A certificate above the signing certificate, included in the signature; repeatable |
+| `--signing-time` | The signing time, RFC 3339 with an offset, in whole seconds |
+| `--document` | The document to sign; it must not be empty |
+| `--packaging` | `enveloping`, the default, or `detached`, for CAdES and JAdES. PAdES is always enveloped and refuses the option |
+| `--serialisation` | The JWS serialisation of JAdES, required for JAdES and refused otherwise: `compact` (B-B only, because it has no unprotected header, RFC 7515, section 7.1), `flattened` or `general` |
+| `--signature-algorithm` | The DSS name of the signature algorithm, such as `RSA_SSA_PSS_SHA256_MGF1`. By default, RSA PKCS#1 v1.5 with SHA-256 for an RSA key, ECDSA with SHA-256, SHA-384 or SHA-512 on P-256, P-384 or P-521, and Ed25519. An algorithm that does not fit the key is a usage error |
+| `--tsa-program` | The path of `sigillum-testpki`, at B-T and B-LT. Without the option, the environment variable `SIGILLUM_TESTPKI` gives it. A bare name, which would be looked up on the `PATH`, is a usage error: write `./sigillum-testpki` instead |
+| `--tsa-key`, `--tsa-cert` | The key and certificate of the timestamping authority, passed to `sigillum-testpki tsa`; required at B-T and B-LT |
+| `--tsa-chain` | A certificate above the certificate of the timestamping authority, supplied to DSS at B-LT, so that it collects their validation data; repeatable, and refused below B-LT, where it has no effect |
+| `--timestamp-time` | The genTime of the signature timestamp, in whole seconds; required at B-T and B-LT |
+| `--trust-anchor` | The trust anchor at which DSS stops collecting validation data; required at B-LT |
+| `--crl`, `--ocsp` | The revocation data that DSS embeds at B-LT; repeatable |
+| `--validation-time` | The time at which DSS selects the revocation data that it embeds; required at B-LT, since no time is taken from the clock |
+
+The options of B-T are refused at B-B, and those of B-LT below B-LT, so that a command line says what the signature holds.
+
+**Signing.** DSS computes the data to be signed, the tool signs them with the key, and DSS assembles the signature. Every signature is deterministic, so that two runs with the same inputs give the same bytes: RSA PKCS#1 v1.5 and Ed25519 are deterministic, ECDSA uses the deterministic nonces of RFC 6979, from Bouncy Castle, and the RSASSA-PSS salt, as long as the hash, is derived from the data to be signed with SHA-256 in counter mode. The tool checks that the key matches the signing certificate before it signs. At B-T and B-LT, the signature timestamp uses SHA-256.
+
+**Timestamps.** At B-T and B-LT, DSS asks for a timestamp over a digest of the signature value. The tool runs `sigillum-testpki tsa` once per token, as a program with explicit arguments and without a shell:
+
+```
+<tsa-program> tsa --digest-algorithm=SHA-256 --digest=<hex> --time=<timestamp-time> --tsa-key=<file> --tsa-cert=<file>
+```
+
+Each option and its value form one argument, so that no value, such as a path that starts with a hyphen, can be read as an option. It reads the token from standard output, up to 1 MiB, and fails the run when the program cannot be started, runs for more than 60 seconds or keeps its output open longer, exits with another code than 0, or writes no token. At the deadline, it kills the program and every process that the program started. It records them every 10 milliseconds while the program runs, so that it also kills a process whose parent has ended. A process started and left within that interval may survive. The program stays in the process group of the JVM, so a supervisor that kills that group, as `sigillum-testpki generate signed` does at its own deadline, kills such a process too. It also fails unless the token covers the digest that DSS asked for, with the same algorithm, and has the configured time as its genTime (RFC 3161, section 2.4.2). No clock is read for the timestamp.
+
+**B-LT.** DSS collects the validation data of the signing certificate and of the timestamping authority up to the trust anchor, from the files supplied only, and embeds them. Its revocation data loading strategy, OCSP first, checks the revocation data at `--validation-time` rather than at the current time. DSS accepts a CRL or OCSP response under the cryptographic constraints of the aligned policy ([ADR-0023](../../docs/design/adr/0023-validation-policy-of-the-dss-oracle.md)), which authorises the EdDSA of `pki/ca-ed25519`, and checks its signature, issuer and consistency at that time. The revocation fallback of DSS is disabled, so a CRL or OCSP response that fails the checks is never embedded, such as a response whose signature does not verify; the run fails when no accepted revocation data remains for a certificate that needs it. The offline sources of DSS take the CRLs and OCSP responses in the order given on the command line. DSS keeps the validation data in hash sets whose order depends on identity hash codes of the JVM, so the order in which they are embedded, and the bytes of the signature, can change between JVMs. `sigillum-testpki generate signed` therefore runs Java with `-XX:+UnlockExperimentalVMOptions -XX:hashCode=2`, which makes every identity hash code 1. The option `--policy` is refused, because the revocation checks of `sign` always follow the aligned policy, and so is `--timeout`, because the validation-time limit does not apply to signing; the program of the timestamps has its own limit. DSS fails the run when no revocation data are supplied for a certificate that needs them. While it adds the validation data, DSS still checks certificates at the time of the clock for its alerts, and DSS 6.5.1 has no public setting for that time, so `generate signed` may fail once the end entities of the test PKI expire, on 2032-01-15.
+
+**PAdES.** The signature is invisible and is added by an incremental update (ISO 32000-1:2008, clause 7.5.6). The signing time of the signature dictionary is written in UTC. PDFBox derives the second file identifier of each incremental update (clause 14.4) from a document identifier, or from the clock when none is set. DSS sets one for the revision of the signature, derived from the signature parameters. For the revision of the document security store at B-LT, the tool sets one derived from `--validation-time`, so that the file is reproducible.
+
+**JAdES.** The protected header always carries `x5c` with the signing certificate and the chain, as Annex I of [Commission Implementing Regulation (EU) 2026/248 of 2 February 2026](http://data.europa.eu/eli/reg_impl/2026/248/oj) requires: it replaces clause 5.1.8 of ETSI TS 119 182-1 V1.2.1 and requires `x5c` "either as a signed or unsigned header parameter". The payload is base64url-encoded and so are the unsigned properties in `etsiU`. A detached signature uses the `ObjectIdByURIHash` mechanism of `sigD`, as [ADR-0018](../../docs/design/adr/0018-restrict-jades-payloads-and-detached-mechanisms.md) requires.
+
+**Error contract.** Every input of `sign` is a file of the project, so the mode has no `rejected` result. An input that DSS cannot use fails the run with exit code 1 and a message that names the option when the input is known: a certificate that DSS cannot load or decode, as in the validation modes, a key that cannot be read or does not match the certificate, a CRL or OCSP response that DSS cannot use, a document that DSS cannot sign. Before writing, the tool validates the signature with DSS, offline and without revocation data, and fails unless DSS finds exactly one signature whose value and signed data are intact, with an intact signature timestamp at B-T and B-LT. The mode thus never writes a signature that does not verify, even from an input that DSS accepted, such as a certificate whose names DSS cannot decode when it validates. A usage error exits with code 2.
+
+### Fuzz coverage of sign
+
+The test `SignMutationTest` runs the sign mode on inputs of the corpus with deterministic mutations, 600 in all, from a fixed seed, with the mutations of `MutationTest`. The inputs are the key, the signing certificate and a certificate of the chain of `pki/signer-p256` (mutated in their DER and encoded again in PEM), the PDF and JSON documents, an OCSP response and a CRL at B-LT, and the timestamp token that the program writes, through a stand-in program that writes the mutated token. Every run must exit with code 0 or 1, never with a usage error or a network attempt. A failed run must write no file and give a message. A successful run must write a signature that DSS alone, without any code of the tool, finds intact, with an intact timestamp at B-T and B-LT. The test runs in about two minutes in `mvn -B verify`.
+
+The tests of `sign` use a stand-in for `sigillum-testpki tsa`, the test class `TestTsa`, run through a POSIX shell script, so that `mvn -B verify` needs no Rust build. It issues tokens with deterministic ECDSA from `pki/tsa`, without a signing time, as `sigillum-testpki tsa` does. The workflow `signed-corpus.yml` runs `sign` with `sigillum-testpki` itself.
 
 ## Maven dependencies
 

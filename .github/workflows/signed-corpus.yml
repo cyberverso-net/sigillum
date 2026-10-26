@@ -1,0 +1,50 @@
+name: Signed corpus
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  regenerate:
+    name: Signed corpus reproduced
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
+        with:
+          toolchain: stable
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: tools/dss-oracle/pom.xml
+      - name: Build sigillum-testpki
+        run: cargo build --locked -p sigillum-testpki
+      # The JAR contains DSS (LGPL-2.1) and is never uploaded as an artefact (ADR-0013).
+      - name: Build tools/dss-oracle
+        working-directory: tools/dss-oracle
+        run: mvn -B -ntp package -DskipTests
+      # The corpus is regenerated in a network namespace without network: DSS and the
+      # timestamping authority must work offline. The documents come first, as the
+      # signatures read them.
+      - name: Regenerate the documents and the signed corpus without network
+        run: |
+          offline() {
+            sudo unshare --net -- runuser -u "$(id -un)" -- env "PATH=$PATH" "JAVA_HOME=$JAVA_HOME" "$@"
+          }
+          offline ./target/debug/sigillum-testpki generate documents --manifest testdata/manifest.toml
+          offline ./target/debug/sigillum-testpki generate signed --manifest testdata/manifest.toml \
+            --java "$JAVA_HOME/bin/java" --dss-oracle tools/dss-oracle/target/dss-oracle.jar
+      - name: Check that nothing changed
+        run: |
+          git status --porcelain -- testdata
+          git diff --exit-code -- testdata
+          test -z "$(git status --porcelain -- testdata)"

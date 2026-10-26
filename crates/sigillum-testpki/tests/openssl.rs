@@ -159,6 +159,35 @@ fn a_wrong_expected_result_makes_verify_fail() -> TestResult {
 }
 
 #[test]
+fn a_cades_signature_that_does_not_verify_makes_verify_fail() -> TestResult {
+    let Some(program) = openssl("a_cades_signature_that_does_not_verify_makes_verify_fail")? else {
+        return Ok(());
+    };
+    let dir = copy_of_corpus("openssl-cades-tampered")?;
+    // The last octet of a CAdES B-B signature is the last octet of its signature value.
+    let file = dir.join("signed/cades-enveloping-b-b-rsa.p7m");
+    let mut bytes = std::fs::read(&file)?;
+    if let Some(last) = bytes.last_mut() {
+        *last ^= 0xff;
+    }
+    std::fs::write(&file, bytes)?;
+    let output = verify(&program, &dir.join("manifest.toml"))?;
+    let stdout = text(&output.stdout);
+    let stderr = text(&output.stderr);
+    assert_eq!(output.status.code(), Some(1), "{stdout}{stderr}");
+    assert!(stdout.contains(", 1 not as expected"), "{stdout}");
+    assert!(
+        stderr.contains(
+            "signed/cades-enveloping-b-b-rsa: OpenSSL gives rejected, the manifest expects verified"
+        ),
+        "{stderr}"
+    );
+    assert!(stderr.contains("openssl cms -verify"), "{stderr}");
+    let _ = std::fs::remove_dir_all(&dir);
+    Ok(())
+}
+
+#[test]
 fn another_openssl_version_in_the_manifest_makes_verify_fail() -> TestResult {
     let Some(program) = openssl("another_openssl_version_in_the_manifest_makes_verify_fail")?
     else {

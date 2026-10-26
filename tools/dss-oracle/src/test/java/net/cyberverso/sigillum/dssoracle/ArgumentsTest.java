@@ -169,7 +169,9 @@ class ArgumentsTest {
     @Test
     void rejectsDocumentOptionsInOtherModes() {
         for (Mode mode : List.of(Mode.VALIDATE_TIMESTAMP, Mode.VALIDATE_CERTIFICATE, Mode.SIGN)) {
-            for (String option : List.of("--document", "--detached")) {
+            // In sign, --document names the document to sign.
+            List<String> options = mode == Mode.SIGN ? List.of("--detached") : List.of("--document", "--detached");
+            for (String option : options) {
                 UsageException error = assertThrows(UsageException.class,
                         () -> Arguments.parse(List.of(mode.commandName(), option, "x")), option);
                 assertTrue(error.getMessage().contains(option + " is valid only in the mode validate-document"),
@@ -235,6 +237,96 @@ class ArgumentsTest {
             UsageException error = assertThrows(UsageException.class,
                     () -> Arguments.parse(List.of("sign", "--validation-time", value)), value);
             assertTrue(error.getMessage().contains("--validation-time"), error.getMessage());
+        }
+    }
+
+    @Test
+    void parsesTheSignOptions() throws UsageException {
+        Arguments arguments = Arguments.parse(List.of("sign",
+                "--format", "cades", "--level", "B-T", "--key", "key.pem", "--certificate", "signer.pem",
+                "--chain", "ca.pem", "--chain", "root.pem", "--signing-time", "2029-12-16T11:00:00+01:00",
+                "--document", "text.txt", "--packaging", "detached", "--serialisation", "general",
+                "--signature-algorithm", "ECDSA_SHA256", "--tsa-program", "testpki", "--tsa-key", "tsa-key.pem",
+                "--tsa-cert", "tsa.pem", "--tsa-chain", "tsa-ca.pem", "--timestamp-time", "2029-12-16T10:05:00Z",
+                "--out", "signed.p7m"));
+        SignArguments sign = arguments.sign();
+        assertEquals(Optional.of("cades"), sign.format());
+        assertEquals(Optional.of("B-T"), sign.level());
+        assertEquals(Optional.of(Path.of("key.pem")), sign.key());
+        assertEquals(List.of(Path.of("signer.pem")), arguments.certificates());
+        assertEquals(List.of(Path.of("ca.pem"), Path.of("root.pem")), sign.chain());
+        assertEquals(Optional.of(Instant.parse("2029-12-16T10:00:00Z")), sign.signingTime());
+        assertEquals(Optional.of(Path.of("text.txt")), sign.document());
+        assertEquals(Optional.of("detached"), sign.packaging());
+        assertEquals(Optional.of("general"), sign.serialisation());
+        assertEquals(Optional.of("ECDSA_SHA256"), sign.signatureAlgorithm());
+        assertEquals(Optional.of(Path.of("testpki")), sign.tsaProgram());
+        assertEquals(Optional.of(Path.of("tsa-key.pem")), sign.tsaKey());
+        assertEquals(Optional.of(Path.of("tsa.pem")), sign.tsaCertificate());
+        assertEquals(List.of(Path.of("tsa-ca.pem")), sign.tsaChain());
+        assertEquals(Optional.of(Instant.parse("2029-12-16T10:05:00Z")), sign.timestampTime());
+        assertEquals(Optional.of(Path.of("signed.p7m")), arguments.out());
+    }
+
+    @Test
+    void signOptionsAreEmptyWhenNotGiven() throws UsageException {
+        SignArguments sign = Arguments.parse(List.of("sign")).sign();
+        assertEquals(Optional.empty(), sign.format());
+        assertTrue(sign.chain().isEmpty());
+        assertTrue(sign.tsaChain().isEmpty());
+        assertEquals(Optional.empty(), sign.timestampTime());
+    }
+
+    @Test
+    void signOptionsGivenOnceAreNotRepeated() {
+        for (String option : List.of("--format", "--level", "--key", "--signing-time", "--document", "--packaging",
+                "--serialisation", "--signature-algorithm", "--tsa-program", "--tsa-key", "--tsa-cert",
+                "--timestamp-time")) {
+            String value = option.endsWith("-time") ? "2029-12-16T10:00:00Z" : "x";
+            UsageException error = assertThrows(UsageException.class,
+                    () -> Arguments.parse(List.of("sign", option, value, option, value)), option);
+            assertTrue(error.getMessage().contains(option + " is given more than once"), error.getMessage());
+        }
+    }
+
+    @Test
+    void signTimesAreWholeSecondsInRfc3339() {
+        for (String option : List.of("--signing-time", "--timestamp-time")) {
+            for (String value : List.of("2029-12-16T10:00:00.1Z", "2029-12-16", "2029-12-16T23:59:60Z")) {
+                UsageException error = assertThrows(UsageException.class,
+                        () -> Arguments.parse(List.of("sign", option, value)), option + " " + value);
+                assertTrue(error.getMessage().contains(option), error.getMessage());
+            }
+        }
+    }
+
+    @Test
+    void signOptionsAreRefusedInOtherModes() {
+        for (String option : SignArguments.OPTIONS) {
+            UsageException error = assertThrows(UsageException.class,
+                    () -> Arguments.parse(List.of("validate-timestamp", option, "x")), option);
+            // --document is shared with validate-document, which the message names.
+            String modes = option.equals("--document") ? "validate-document" : "sign";
+            assertEquals(option + " is valid only in the mode " + modes + ".", error.getMessage());
+        }
+    }
+
+    @Test
+    void documentIsTheDocumentToSignInSignAndTheSignedDocumentInValidateDocument() throws UsageException {
+        Arguments sign = Arguments.parse(List.of("sign", "--document", "text.txt"));
+        assertEquals(Optional.of(Path.of("text.txt")), sign.sign().document());
+        assertEquals(Optional.empty(), sign.document());
+        Arguments validate = Arguments.parse(List.of("validate-document", "--document", "signed.p7m"));
+        assertEquals(Optional.of(Path.of("signed.p7m")), validate.document());
+        assertEquals(Optional.empty(), validate.sign().document());
+    }
+
+    @Test
+    void signRefusesThePolicyAndTheTimeoutOfTheValidationModes() {
+        for (String option : List.of("--policy", "--timeout")) {
+            UsageException error = assertThrows(UsageException.class,
+                    () -> Arguments.parse(List.of("sign", option, "aligned")), option);
+            assertEquals(option + " is valid only in the validation modes.", error.getMessage());
         }
     }
 }

@@ -474,13 +474,7 @@ impl<'a> Checker<'a> {
             Kind::OcspResponse => self.check_ocsp(artefact),
             Kind::TimestampToken => self.check_timestamp(artefact),
             Kind::Document => Ok((OpensslResult::NotApplicable, String::new())),
-            Kind::SignedDocument if artefact.expected_openssl == OpensslResult::NotApplicable => {
-                Ok((OpensslResult::NotApplicable, String::new()))
-            }
-            Kind::SignedDocument => Err(
-                "OpenSSL checks of signed documents, with openssl cms -verify, are not supported yet"
-                    .to_owned(),
-            ),
+            Kind::SignedDocument => self.check_signed_document(artefact),
         };
         let (actual, detail) = match checked {
             Ok((result, detail)) => (Ok(result), detail),
@@ -894,6 +888,82 @@ impl<'a> Checker<'a> {
         Ok(args)
     }
 
+    /// Whether the file of `artefact` is a CMS `SignedData`, as a CAdES
+    /// signature is, by [`is_cms_signed_data`].
+    fn is_cms_file(&self, artefact: &Artefact) -> Result<bool, String> {
+        Ok(is_cms_signed_data(&self.read(artefact)?))
+    }
+
+    /// A signed document in CMS, a CAdES signature, is checked with
+    /// `openssl cms -verify`. Other signed documents, such as PAdES and
+    /// JAdES, are not processed by OpenSSL. A CMS signature cannot be
+    /// declared `not-applicable`, so that no CAdES entry escapes the check,
+    /// and another document cannot expect a result from OpenSSL.
+    fn check_signed_document(&self, artefact: &Artefact) -> Checked {
+        let cms = self.is_cms_file(artefact)?;
+        match (cms, artefact.expected_openssl) {
+            (false, OpensslResult::NotApplicable) => {
+                Ok((OpensslResult::NotApplicable, String::new()))
+            }
+            (false, _) => Err(format!(
+                "{} is not a CMS SignedData, which OpenSSL does not check",
+                artefact.path.display()
+            )),
+            (true, OpensslResult::NotApplicable) => Err(format!(
+                "{} is a CMS SignedData, which openssl cms -verify checks, so not-applicable is refused",
+                artefact.path.display()
+            )),
+            (true, _) => {
+                let args = self.cms_args(artefact)?;
+                let output = self.run(&args)?;
+                Ok((Step {
+                    passed: output.success
+                        && output
+                            .stderr
+                            .lines()
+                            .any(|line| line == "CMS Verification successful"),
+                    detail: describe(&args, &output),
+                })
+                .result(OpensslResult::Verified))
+            }
+        }
+    }
+
+    /// The arguments of `openssl cms -verify` for a CMS signature, at the
+    /// validation time, with its trust anchor as the only trusted
+    /// certificate, the certificates of its chain between the signer and
+    /// the anchor as untrusted, and its content when it is detached. The
+    /// signed content is written to a file of the scratch directory.
+    /// Revocation is not checked: the signatures link OCSP responses,
+    /// which `openssl cms` does not take.
+    fn cms_args(&self, signature: &Artefact) -> Result<Vec<OsString>, String> {
+        let chain = self.chain(signature)?;
+        let (anchor, rest) = match chain.split_last() {
+            Some((anchor, rest)) => (*anchor, rest),
+            None => return Err(format!("{} links no chain", signature.id)),
+        };
+        let issuer = signature.links.issuer.as_deref();
+        let intermediates: Vec<&Artefact> = rest
+            .iter()
+            .copied()
+            .filter(|c| Some(c.id.as_str()) != issuer)
+            .collect();
+        let mut args = os(&["cms", "-verify", "-binary", "-inform", "DER", "-in"]);
+        args.push(self.input(signature)?);
+        if let Some(content) = signature.links.content.as_deref() {
+            args.push("-content".into());
+            args.push(self.input(self.find(content)?)?);
+        }
+        args.extend(os(&["-no-CApath", "-no-CAstore", "-CAfile"]));
+        args.push(self.bundle(&[anchor])?);
+        if !intermediates.is_empty() {
+            args.push("-certfile".into());
+            args.push(self.bundle(&intermediates)?);
+        }
+        args.extend(os(&["-attime", &self.attime, "-out", "cms-content.bin"]));
+        Ok(args)
+    }
+
     /// A token verifies when `openssl ts -verify` exits with 0 and says
     /// `Verification: OK`.
     fn check_timestamp(&self, token: &Artefact) -> Checked {
@@ -917,6 +987,59 @@ impl Step {
         };
         (result, self.detail)
     }
+}
+
+/// The content octets of the object identifier id-signedData,
+/// 1.2.840.113549.1.7.2 (RFC 5652, section 5.1).
+const ID_SIGNED_DATA: [u8; 9] = [0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x07, 0x02];
+
+/// Reads the length octets at `at` (ITU-T X.690 (02/2021), clause 8.1.3)
+/// and returns the definite length, `None` for the indefinite form, and the
+/// position after them; or `None` when they are malformed: 0xFF is
+/// reserved (clause 8.1.3.5 c)), and this reader takes at most four
+/// subsequent octets in the long form, far more than a file it reads holds.
+fn length_at(bytes: &[u8], at: usize) -> Option<(Option<usize>, usize)> {
+    let first = *bytes.get(at)?;
+    match first {
+        0x00..=0x7f => Some((Some(usize::from(first)), at + 1)),
+        0x80 => Some((None, at + 1)),
+        _ => {
+            // The reserved 0xFF announces 127 subsequent octets, beyond the limit.
+            let count = usize::from(first & 0x7f);
+            if count > 4 {
+                return None;
+            }
+            let octets = bytes.get(at + 1..at + 1 + count)?;
+            let length = octets
+                .iter()
+                .fold(0usize, |length, octet| (length << 8) | usize::from(*octet));
+            Some((Some(length), at + 1 + count))
+        }
+    }
+}
+
+/// Whether `bytes` start as a CMS `ContentInfo` of type `SignedData`
+/// (RFC 5652, sections 3 and 5.1): a SEQUENCE, of definite or indefinite
+/// length, so BER as well as DER (ITU-T X.690 (02/2021), clauses 8.1.3
+/// and 8.9), whose first element is the OBJECT IDENTIFIER id-signedData.
+/// Only these headers are read: nothing is decoded further and nothing is
+/// allocated, whatever lengths the input declares.
+pub fn is_cms_signed_data(bytes: &[u8]) -> bool {
+    // The SEQUENCE tag: universal, constructed, number 16 (clauses 8.1.2 and 8.9.1).
+    if bytes.first() != Some(&0x30) {
+        return false;
+    }
+    let Some((_, at)) = length_at(bytes, 1) else {
+        return false;
+    };
+    // The OBJECT IDENTIFIER tag, universal, primitive, number 6 (clause 8.19).
+    if bytes.get(at) != Some(&0x06) {
+        return false;
+    }
+    let Some((Some(length), start)) = length_at(bytes, at + 1) else {
+        return false;
+    };
+    bytes.get(start..start.saturating_add(length)) == Some(&ID_SIGNED_DATA[..])
 }
 
 /// The artefacts of `artefacts`, each once, in their first order.

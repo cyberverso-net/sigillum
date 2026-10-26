@@ -225,6 +225,13 @@ impl Oracle {
                 }
             }
             Some("pkey") => output(self.is(first("-in"), OpensslResult::Parsed), "", ""),
+            Some("cms") => {
+                if self.is(first("-in"), OpensslResult::Verified) {
+                    output(true, "", "CMS Verification successful\n")
+                } else {
+                    output(false, "", "CMS Verification failure\n")
+                }
+            }
             _ => output(false, "", "unknown command\n"),
         }
     }
@@ -838,20 +845,20 @@ fn every_time_dependent_command_runs_at_the_validation_time() -> TestResult {
         commands.insert(command);
         let attime = value_after(call, "-attime");
         match command {
-            "verify" | "ocsp" | "ts" => assert_eq!(attime, [ATTIME], "{call:?}"),
+            "verify" | "ocsp" | "ts" | "cms" => assert_eq!(attime, [ATTIME], "{call:?}"),
             // openssl crl -verify checks only the signature, and the
             // validity of the CRL is checked by openssl verify.
             "crl" | "pkey" | "version" => assert!(attime.is_empty(), "{call:?}"),
             _ => return Err(format!("unexpected command {call:?}").into()),
         }
-        if matches!(command, "verify" | "ocsp" | "crl") {
+        if matches!(command, "verify" | "ocsp" | "crl" | "cms") {
             assert!(call.contains(&"-no-CApath".to_owned()), "{call:?}");
             assert!(call.contains(&"-no-CAstore".to_owned()), "{call:?}");
         }
     }
     assert_eq!(
         commands,
-        BTreeSet::from(["crl", "ocsp", "pkey", "ts", "verify", "version"])
+        BTreeSet::from(["cms", "crl", "ocsp", "pkey", "ts", "verify", "version"])
     );
     Ok(())
 }
@@ -1319,7 +1326,8 @@ fn documents_are_not_applicable_and_run_nothing() -> TestResult {
     let mut manifest = committed()?;
     manifest.artefacts.push(Artefact {
         id: "documents/pades".to_owned(),
-        path: PathBuf::from("documents/pades.pdf"),
+        // A PAdES file of the corpus: the check reads it to tell that it is no CMS signature.
+        path: PathBuf::from("signed/pades-b-b-rsa.pdf"),
         sha256: "0".repeat(64),
         kind: Kind::SignedDocument,
         purpose: "A signed PDF.".to_owned(),
@@ -1349,25 +1357,123 @@ fn documents_are_not_applicable_and_run_nothing() -> TestResult {
 }
 
 #[test]
-fn signed_documents_with_an_openssl_result_are_not_supported_yet() -> TestResult {
-    let mut manifest = committed()?;
-    manifest.artefacts.push(Artefact {
-        id: "documents/cades".to_owned(),
-        path: PathBuf::from("documents/cades.p7m"),
-        sha256: "0".repeat(64),
-        kind: Kind::SignedDocument,
-        purpose: "A CAdES signature.".to_owned(),
-        expected_openssl: OpensslResult::Verified,
-        expected_dss: DssResult::NotApplicable,
-        links: Links::default(),
-        notes: None,
-    });
-    let dir = scratch("cades")?;
+fn a_cades_signature_is_checked_with_openssl_cms_verify() -> TestResult {
+    let manifest = committed()?;
+    let dir = scratch("cms-args")?;
     let oracle = Oracle::new(&manifest);
     let checker = Checker::new(&manifest, &testdata(), &dir, &oracle);
-    let finding = checker.check(artefact(&manifest, "documents/cades")?);
+    assert_eq!(
+        strings(&checker.cms_args(artefact(&manifest, "signed/cades-enveloping-b-t-p256")?)?),
+        [
+            "cms",
+            "-verify",
+            "-binary",
+            "-inform",
+            "DER",
+            "-in",
+            &c("signed/cades-enveloping-b-t-p256.p7m"),
+            "-no-CApath",
+            "-no-CAstore",
+            "-CAfile",
+            &bundle(&dir, 1),
+            "-certfile",
+            &bundle(&dir, 2),
+            "-attime",
+            ATTIME,
+            "-out",
+            "cms-content.bin",
+        ]
+    );
+    assert_eq!(
+        std::fs::read(bundle_file(&dir, 1))?,
+        corpus_file("pki/root-ca.pem")?
+    );
+    assert_eq!(
+        std::fs::read(bundle_file(&dir, 2))?,
+        corpus_file("pki/ca-ecdsa.pem")?
+    );
+    Ok(())
+}
+
+#[test]
+fn a_detached_cades_signature_is_checked_with_its_content() -> TestResult {
+    let manifest = committed()?;
+    let dir = scratch("cms-detached")?;
+    let oracle = Oracle::new(&manifest);
+    let checker = Checker::new(&manifest, &testdata(), &dir, &oracle);
+    let args = strings(&checker.cms_args(artefact(&manifest, "signed/cades-detached-b-b-rsa")?)?);
+    assert_eq!(value_after(&args, "-content"), [c("documents/text.txt")]);
+    assert_eq!(value_after(&args, "-attime"), [ATTIME]);
+    Ok(())
+}
+
+#[test]
+fn a_cades_signature_verifies_only_with_exit_0_and_cms_verification_successful() -> TestResult {
+    let manifest = committed()?;
+    for (answer, expected) in [
+        (
+            output(true, "", "CMS Verification successful\n"),
+            OpensslResult::Verified,
+        ),
+        (
+            output(false, "", "CMS Verification successful\n"),
+            OpensslResult::Rejected,
+        ),
+        (
+            output(true, "", "Verification failure\n"),
+            OpensslResult::Rejected,
+        ),
+        (
+            output(true, "CMS Verification successful\n", ""),
+            OpensslResult::Rejected,
+        ),
+    ] {
+        let finding = check_with(
+            &manifest,
+            "signed/cades-enveloping-b-b-p256",
+            &single(answer.clone()),
+            "cms-output",
+        )?;
+        assert_eq!(finding.actual, Ok(expected), "{answer:?}");
+    }
+    Ok(())
+}
+
+#[test]
+fn a_cms_signed_document_cannot_be_declared_not_applicable() -> TestResult {
+    let mut manifest = committed()?;
+    artefact_mut(&mut manifest, "signed/cades-detached-b-lt-p256")?.expected_openssl =
+        OpensslResult::NotApplicable;
+    let dir = scratch("cms-not-applicable")?;
+    let oracle = Oracle::new(&manifest);
+    let checker = Checker::new(&manifest, &testdata(), &dir, &oracle);
+    let finding = checker.check(artefact(&manifest, "signed/cades-detached-b-lt-p256")?);
+    assert!(!finding.matches());
     let message = finding.actual.err().unwrap_or_default();
-    assert!(message.contains("not supported yet"), "{message}");
+    assert!(message.contains("CMS SignedData"), "{message}");
+    assert!(oracle.calls.borrow().is_empty());
+    Ok(())
+}
+
+#[test]
+fn pades_and_jades_are_not_applicable_and_cannot_expect_a_result() -> TestResult {
+    let mut manifest = committed()?;
+    let dir = scratch("not-cms")?;
+    {
+        let oracle = Oracle::new(&manifest);
+        let checker = Checker::new(&manifest, &testdata(), &dir, &oracle);
+        for id in ["signed/pades-b-t-rsa", "signed/jades-general-b-lt-ed25519"] {
+            let finding = checker.check(artefact(&manifest, id)?);
+            assert_eq!(finding.actual, Ok(OpensslResult::NotApplicable), "{id}");
+        }
+        assert!(oracle.calls.borrow().is_empty());
+    }
+    artefact_mut(&mut manifest, "signed/pades-b-t-rsa")?.expected_openssl = OpensslResult::Verified;
+    let oracle = Oracle::new(&manifest);
+    let checker = Checker::new(&manifest, &testdata(), &dir, &oracle);
+    let finding = checker.check(artefact(&manifest, "signed/pades-b-t-rsa")?);
+    let message = finding.actual.err().unwrap_or_default();
+    assert!(message.contains("not a CMS SignedData"), "{message}");
     assert!(oracle.calls.borrow().is_empty());
     Ok(())
 }
@@ -1720,4 +1826,115 @@ proptest! {
         let _ = covered_certificate(&text);
         let _ = crl_times(&text);
     }
+}
+
+// The peek at the content type of a signed document.
+
+/// The content octets of id-signedData, 1.2.840.113549.1.7.2.
+const SIGNED_DATA: [u8; 9] = [0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x07, 0x02];
+
+fn content_info(length: &[u8], oid: &[u8]) -> Vec<u8> {
+    let mut bytes = vec![0x30];
+    bytes.extend_from_slice(length);
+    bytes.push(0x06);
+    bytes.push(u8::try_from(oid.len()).unwrap_or(0));
+    bytes.extend_from_slice(oid);
+    bytes
+}
+
+#[test]
+fn the_peek_finds_signed_data_in_every_cades_fixture_and_nothing_else() -> TestResult {
+    let manifest = committed()?;
+    for artefact in manifest
+        .artefacts
+        .iter()
+        .filter(|a| a.kind == Kind::SignedDocument)
+    {
+        let bytes = std::fs::read(testdata().join(&artefact.path))?;
+        assert_eq!(
+            is_cms_signed_data(&bytes),
+            artefact.id.starts_with("signed/cades-"),
+            "{}",
+            artefact.id
+        );
+    }
+    Ok(())
+}
+
+#[test]
+fn the_peek_reads_the_header_only_and_allocates_nothing() {
+    // A ContentInfo whose content claims about 256 MiB (finding of der 0.7.10, ADR-0024).
+    let bytes: [u8; 21] = [
+        0x30, 0x13, 0x06, 0x09, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x07, 0x02, 0xa0, 0x06,
+        0x30, 0x84, 0x0f, 0xff, 0xff, 0xff,
+    ];
+    assert!(is_cms_signed_data(&bytes));
+}
+
+#[test]
+fn the_peek_accepts_definite_and_indefinite_lengths() {
+    for length in [
+        &[0x13][..],
+        &[0x81, 0x80],
+        &[0x82, 0x01, 0x00],
+        &[0x84, 0, 0, 1, 0],
+        &[0x80],
+    ] {
+        assert!(
+            is_cms_signed_data(&content_info(length, &SIGNED_DATA)),
+            "{length:?}"
+        );
+    }
+    // A BER CAdES signature: the indefinite length of a real fixture.
+    let mut ber = content_info(&[0x80], &SIGNED_DATA);
+    ber.extend_from_slice(&[0xa0, 0x80, 0x00, 0x00, 0x00, 0x00]);
+    assert!(is_cms_signed_data(&ber));
+}
+
+#[test]
+fn the_peek_refuses_other_content_types_and_malformed_headers() {
+    let data = [0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x07, 0x01];
+    let signed_data_and_more = [&SIGNED_DATA[..], &[0x01]].concat();
+    let cases: Vec<Vec<u8>> = vec![
+        Vec::new(),
+        vec![0x30],
+        vec![0x31, 0x0b, 0x06, 0x09],
+        content_info(&[0x13], &data),
+        content_info(&[0x13], &signed_data_and_more),
+        content_info(&[0x13], &SIGNED_DATA[..8]),
+        // Length octets: reserved 0xFF, more than four, or missing.
+        content_info(&[0xff], &SIGNED_DATA),
+        content_info(&[0x85, 0, 0, 0, 0, 1], &SIGNED_DATA),
+        vec![0x30, 0x82, 0x01],
+        // The OID truncated, with a long-form length, or another tag.
+        vec![0x30, 0x0b, 0x06, 0x09, 0x2a, 0x86],
+        vec![0x30, 0x0c, 0x06, 0x81, 0x09],
+        vec![
+            0x30, 0x0b, 0x04, 0x09, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x07, 0x02,
+        ],
+        b"%PDF-1.7".to_vec(),
+        b"{\"payload\":\"x\"}".to_vec(),
+    ];
+    for bytes in cases {
+        assert!(!is_cms_signed_data(&bytes), "{bytes:02x?}");
+    }
+}
+
+#[test]
+fn length_octets_are_read_in_every_form() {
+    assert_eq!(length_at(&[0x05], 0), Some((Some(5), 1)));
+    assert_eq!(length_at(&[0x7f], 0), Some((Some(127), 1)));
+    assert_eq!(length_at(&[0x80], 0), Some((None, 1)));
+    assert_eq!(length_at(&[0x81, 0x80], 0), Some((Some(128), 2)));
+    assert_eq!(length_at(&[0x82, 0x01, 0x02], 0), Some((Some(0x0102), 3)));
+    assert_eq!(
+        length_at(&[0x84, 0x01, 0x02, 0x03, 0x04], 0),
+        Some((Some(0x0102_0304), 5))
+    );
+    assert_eq!(length_at(&[0xaa, 0x81, 0x09], 1), Some((Some(9), 3)));
+    // The reserved value, more than four subsequent octets, missing octets.
+    assert_eq!(length_at(&[0xff], 0), None);
+    assert_eq!(length_at(&[0x85, 0, 0, 0, 0, 1], 0), None);
+    assert_eq!(length_at(&[0x82, 0x01], 0), None);
+    assert_eq!(length_at(&[], 0), None);
 }
