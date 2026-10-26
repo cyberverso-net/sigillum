@@ -153,6 +153,19 @@ fn the_errors_say_what_happened() {
     );
 }
 
+/// A wrapper that exits while a background child still writes to its
+/// outputs for a moment: the run waits for them within the time limit.
+#[cfg(unix)]
+#[test]
+fn outputs_closed_after_the_program_exits_are_collected() -> Result<(), RunError> {
+    let output = Program::new("sh", ".")
+        .with_limits(Duration::from_secs(30), 1024)
+        .run(&args(&["-c", "(sleep 1; echo late) & echo early"]))?;
+    assert!(output.success);
+    assert_eq!(output.stdout, "early\nlate\n");
+    Ok(())
+}
+
 /// A wrapper that leaves a background child holding its outputs, and then
 /// exits: the run must still end at the time limit.
 #[cfg(unix)]
@@ -186,7 +199,8 @@ fn a_timed_out_run_kills_its_process_group() -> Result<(), Box<dyn std::error::E
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(&dir)?;
     let start = Instant::now();
-    let limit = Duration::from_millis(500);
+    // Long enough for the wrapper to record the background child under load.
+    let limit = Duration::from_secs(5);
     let result = Program::new("sh", &dir)
         .with_limits(limit, 1024)
         .run(&args(&[
@@ -195,25 +209,114 @@ fn a_timed_out_run_kills_its_process_group() -> Result<(), Box<dyn std::error::E
         ]));
     assert_eq!(result, Err(RunError::TimedOut(limit)));
     assert!(
+        start.elapsed() < Duration::from_secs(20),
+        "{:?}",
+        start.elapsed()
+    );
+    let pid = std::fs::read_to_string(dir.join("background.pid"))?;
+    let _ = std::fs::remove_dir_all(&dir);
+    assert!(
+        ends(pid.trim())?,
+        "the background child {} survived",
+        pid.trim()
+    );
+    Ok(())
+}
+
+/// A wrapper that writes too much, with a background child holding its
+/// outputs: the run ends at once with the output error, and the whole
+/// process group, the background child included, is killed.
+#[cfg(unix)]
+#[test]
+fn a_run_that_writes_too_much_kills_its_process_group() -> Result<(), Box<dyn std::error::Error>> {
+    let dir = std::env::temp_dir().join(format!(
+        "sigillum-testpki-process-group-output-{}",
+        std::process::id()
+    ));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir)?;
+    let start = Instant::now();
+    let result = Program::new("sh", &dir)
+        .with_limits(Duration::from_secs(30), 4096)
+        .run(&args(&["-c", "sleep 30 & echo $! > background.pid; yes"]));
+    assert_eq!(result, Err(RunError::OutputTooLarge(4096)));
+    assert!(
         start.elapsed() < Duration::from_secs(10),
         "{:?}",
         start.elapsed()
     );
     let pid = std::fs::read_to_string(dir.join("background.pid"))?;
     let _ = std::fs::remove_dir_all(&dir);
-    // Give the signal a moment, then check that the background child is gone.
-    let mut alive = true;
-    for _ in 0..100 {
+    assert!(
+        ends(pid.trim())?,
+        "the background child {} survived",
+        pid.trim()
+    );
+    Ok(())
+}
+
+/// A wrapper that exits at once, leaving a background child that holds its
+/// outputs and a subshell that writes too much a moment later: the run
+/// still ends at once with the output error, and the whole process group is
+/// killed.
+#[cfg(unix)]
+#[test]
+fn a_run_that_writes_too_much_after_it_exits_kills_its_process_group()
+-> Result<(), Box<dyn std::error::Error>> {
+    let dir = std::env::temp_dir().join(format!(
+        "sigillum-testpki-process-group-late-{}",
+        std::process::id()
+    ));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir)?;
+    let start = Instant::now();
+    let result = Program::new("sh", &dir)
+        .with_limits(Duration::from_secs(30), 4096)
+        .run(&args(&[
+            "-c",
+            "sleep 30 & echo $! > background.pid; (sleep 1; head -c 100000 /dev/zero) & exit 0",
+        ]));
+    assert_eq!(result, Err(RunError::OutputTooLarge(4096)));
+    assert!(
+        start.elapsed() < Duration::from_secs(10),
+        "{:?}",
+        start.elapsed()
+    );
+    let pid = std::fs::read_to_string(dir.join("background.pid"))?;
+    let _ = std::fs::remove_dir_all(&dir);
+    assert!(
+        ends(pid.trim())?,
+        "the background child {} survived",
+        pid.trim()
+    );
+    Ok(())
+}
+
+/// Whether the process `pid` ends within ten seconds. A killed process
+/// that has left the group stays a zombie until its new parent reaps it,
+/// and `kill -0` still finds it then, so on Linux a zombie counts as ended.
+#[cfg(unix)]
+fn ends(pid: &str) -> Result<bool, std::io::Error> {
+    let deadline = Instant::now() + Duration::from_secs(10);
+    while Instant::now() < deadline {
         let probe = std::process::Command::new("kill")
-            .args(["-0", pid.trim()])
+            .args(["-0", pid])
             .stderr(std::process::Stdio::null())
             .status()?;
-        if !probe.success() {
-            alive = false;
-            break;
+        if !probe.success() || zombie(pid) {
+            return Ok(true);
         }
         std::thread::sleep(Duration::from_millis(20));
     }
-    assert!(!alive, "the background child {} survived", pid.trim());
-    Ok(())
+    Ok(false)
+}
+
+/// Whether `/proc` shows the process `pid` as a zombie. The state follows
+/// the command name, which is in parentheses and may contain any byte.
+#[cfg(unix)]
+fn zombie(pid: &str) -> bool {
+    std::fs::read_to_string(format!("/proc/{pid}/stat")).is_ok_and(|stat| {
+        stat.rsplit_once(')')
+            .is_some_and(|(_, rest)| rest.trim_start().starts_with('Z'))
+    })
 }

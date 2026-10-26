@@ -4,10 +4,10 @@ import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.model.TimestampBinary;
 import eu.europa.esig.dss.spi.x509.tsp.TSPSource;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
@@ -36,17 +36,17 @@ final class TestPkiTspSource implements TSPSource {
 
     /** The largest token read from the program, far above any token of the test PKI. */
     static final int MAX_TOKEN = 1024 * 1024;
-    /** The largest error output kept from the program. */
+    /** The largest error output that the program may write. */
     static final int MAX_ERROR = 64 * 1024;
-    /** How long the program may run, until its output and error streams are closed. */
+    /** How long the program may run. */
     static final Duration TIMEOUT = Duration.ofSeconds(60);
 
     /**
-     * How often the source records the processes that the program started,
-     * so that one whose parent has ended can still be killed. The program
-     * stays in the process group of the JVM, so that a supervisor that kills
-     * that group, as {@code sigillum-testpki generate signed} does, kills
-     * them too.
+     * How often the source checks the size of the outputs of the program and
+     * records the processes that it started, so that one whose parent has
+     * ended can still be killed. The program stays in the process group of
+     * the JVM, so that a supervisor that kills that group, as
+     * {@code sigillum-testpki generate signed} does, kills them too.
      */
     private static final long POLL_MILLIS = 10;
 
@@ -75,7 +75,7 @@ final class TestPkiTspSource implements TSPSource {
      * @param key the private key of the timestamping authority
      * @param certificate the certificate of the timestamping authority
      * @param time the genTime of every token
-     * @param timeout how long the program may run, until its output and error streams are closed
+     * @param timeout how long the program may run
      */
     TestPkiTspSource(Path program, Path key, Path certificate, Instant time, Duration timeout) {
         this.program = program;
@@ -120,72 +120,135 @@ final class TestPkiTspSource implements TSPSource {
         return new TimestampBinary(token);
     }
 
-    /** Runs the program and returns its standard output. */
+    /**
+     * Runs the program and returns its standard output. Both outputs go to
+     * temporary files rather than pipes, so that the result does not depend
+     * on whether a process that the program started keeps them open, nor on
+     * when the JVM notices that the program has ended.
+     */
     private byte[] run(List<String> command) {
-        Process process;
         Set<ProcessHandle> started = new LinkedHashSet<>();
+        Path output = null;
+        Path error = null;
+        Process process = null;
         try {
-            process = new ProcessBuilder(command).redirectInput(ProcessBuilder.Redirect.PIPE).start();
-        } catch (IOException e) {
-            throw new DSSException("--tsa-program " + command.get(0) + " cannot be run: " + e.getMessage(), e);
-        }
-        try {
+            try {
+                output = Files.createTempFile("sigillum-tsa-", ".der");
+                error = Files.createTempFile("sigillum-tsa-", ".txt");
+            } catch (IOException e) {
+                throw new DSSException("the outputs of --tsa-program cannot be stored: " + e.getMessage(), e);
+            }
+            try {
+                process = new ProcessBuilder(command)
+                        .redirectInput(ProcessBuilder.Redirect.PIPE)
+                        .redirectOutput(output.toFile())
+                        .redirectError(error.toFile())
+                        .start();
+            } catch (IOException e) {
+                throw new DSSException("--tsa-program " + command.get(0) + " cannot be run: " + e.getMessage(), e);
+            }
             process.getOutputStream().close();
-            Drain output = Drain.start(process.getInputStream(), MAX_TOKEN);
-            Drain error = Drain.start(process.getErrorStream(), MAX_ERROR);
             long deadline = System.nanoTime() + timeout.toNanos();
-            boolean finished = waitFor(process, deadline, started);
-            // A process that the program started may keep its streams open after it ends.
-            if (finished) {
-                output.join(Math.max(1, remaining(deadline)));
-                error.join(Math.max(1, remaining(deadline)));
+            switch (waitFor(process, deadline, started, output, error)) {
+                case TIMED_OUT -> throw new DSSException("--tsa-program " + command.get(0)
+                        + " did not finish within " + timeout.toSeconds() + " seconds");
+                case OUTPUT_TOO_LARGE -> throw tooLarge(command);
+                case ERROR_TOO_LARGE -> throw errorTooLarge(command);
+                case FINISHED -> { }
             }
-            if (!finished || output.isAlive() || error.isAlive()) {
-                terminate(process, started);
-                throw new DSSException("--tsa-program " + command.get(0) + " did not finish within "
-                        + timeout.toSeconds() + " seconds");
+            // The limits are checked again, in the same order, so that the
+            // result does not depend on whether the program ended before
+            // the last check while it ran. What a process left by the
+            // program writes after this point is not read.
+            byte[] token = read(output, MAX_TOKEN + 1);
+            byte[] errorOutput = read(error, MAX_ERROR + 1);
+            if (token.length > MAX_TOKEN) {
+                throw tooLarge(command);
             }
-            if (output.failure() != null) {
-                throw output.failure();
+            if (errorOutput.length > MAX_ERROR) {
+                throw errorTooLarge(command);
             }
-            String message = new String(error.bytes(), StandardCharsets.UTF_8).strip();
+            String message = new String(errorOutput, StandardCharsets.UTF_8).strip();
             if (process.exitValue() != 0) {
                 throw new DSSException("--tsa-program " + command.get(0) + " exited with code "
                         + process.exitValue() + (message.isEmpty() ? "" : ": " + message));
             }
-            if (output.truncated()) {
-                throw new DSSException("--tsa-program " + command.get(0) + " wrote more than " + MAX_TOKEN
-                        + " bytes");
-            }
-            if (output.bytes().length == 0) {
+            if (token.length == 0) {
                 throw new DSSException("--tsa-program " + command.get(0) + " wrote no token");
             }
-            return output.bytes();
+            return token;
         } catch (IOException e) {
             throw new DSSException("--tsa-program " + command.get(0) + ": " + e.getMessage(), e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new DSSException("interrupted while --tsa-program ran", e);
         } finally {
-            terminate(process, started);
+            if (process != null) {
+                terminate(process, started);
+            }
+            delete(output);
+            delete(error);
         }
     }
 
+    private static DSSException tooLarge(List<String> command) {
+        return new DSSException("--tsa-program " + command.get(0) + " wrote more than " + MAX_TOKEN + " bytes");
+    }
+
+    private static DSSException errorTooLarge(List<String> command) {
+        return new DSSException("--tsa-program " + command.get(0) + " wrote more than " + MAX_ERROR
+                + " bytes of error output");
+    }
+
+    /** How a run of the program ended. */
+    private enum Ending {
+        FINISHED,
+        TIMED_OUT,
+        OUTPUT_TOO_LARGE,
+        ERROR_TOO_LARGE
+    }
+
     /**
-     * Waits for the program until the deadline, and records every process
-     * that the program starts while it runs.
+     * Waits for the program until the deadline, or until one of its outputs
+     * exceeds its limit, and records every process that the program starts
+     * while it runs.
      */
-    private static boolean waitFor(Process process, long deadline, Set<ProcessHandle> started)
-            throws InterruptedException {
+    private static Ending waitFor(Process process, long deadline, Set<ProcessHandle> started, Path output,
+            Path error) throws InterruptedException, IOException {
         while (true) {
             process.descendants().forEach(started::add);
+            if (Files.size(output) > MAX_TOKEN) {
+                return Ending.OUTPUT_TOO_LARGE;
+            }
+            if (Files.size(error) > MAX_ERROR) {
+                return Ending.ERROR_TOO_LARGE;
+            }
             long left = remaining(deadline);
             if (process.waitFor(Math.min(left, POLL_MILLIS), TimeUnit.MILLISECONDS)) {
-                return true;
+                return Ending.FINISHED;
             }
             if (left == 0) {
-                return false;
+                return Ending.TIMED_OUT;
             }
+        }
+    }
+
+    /** Reads at most {@code limit} bytes from the start of a file. */
+    private static byte[] read(Path file, int limit) throws IOException {
+        try (InputStream in = Files.newInputStream(file)) {
+            return in.readNBytes(limit);
+        }
+    }
+
+    /** Deletes a temporary file, if it was created. */
+    private static void delete(Path file) {
+        if (file == null) {
+            return;
+        }
+        try {
+            Files.deleteIfExists(file);
+        } catch (IOException e) {
+            // A file left in the temporary directory changes no result.
         }
     }
 
@@ -223,57 +286,6 @@ final class TestPkiTspSource implements TSPSource {
             throw new DSSException("--tsa-program wrote a token with the genTime "
                     + ValidationOutput.format(parsed.getTimeStampInfo().getGenTime().toInstant())
                     + ", not " + ValidationOutput.format(time));
-        }
-    }
-
-    /** Reads a stream to its end in a thread of its own, keeping at most a given number of bytes. */
-    private static final class Drain extends Thread {
-        private final InputStream in;
-        private final int limit;
-        private final ByteArrayOutputStream kept = new ByteArrayOutputStream();
-        private boolean truncated;
-        private IOException failed;
-
-        private Drain(InputStream in, int limit) {
-            this.in = in;
-            this.limit = limit;
-            setDaemon(true);
-        }
-
-        static Drain start(InputStream in, int limit) {
-            Drain drain = new Drain(in, limit);
-            drain.start();
-            return drain;
-        }
-
-        @Override
-        public void run() {
-            byte[] buffer = new byte[8192];
-            try (in) {
-                for (int read = in.read(buffer); read >= 0; read = in.read(buffer)) {
-                    int keep = Math.min(read, limit - kept.size());
-                    if (keep > 0) {
-                        kept.write(buffer, 0, keep);
-                    }
-                    if (keep < read) {
-                        truncated = true;
-                    }
-                }
-            } catch (IOException e) {
-                failed = e;
-            }
-        }
-
-        synchronized IOException failure() {
-            return failed;
-        }
-
-        synchronized byte[] bytes() {
-            return kept.toByteArray();
-        }
-
-        synchronized boolean truncated() {
-            return truncated;
         }
     }
 }
