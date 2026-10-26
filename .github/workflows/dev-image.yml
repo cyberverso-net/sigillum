@@ -43,6 +43,9 @@ jobs:
         run: |
           tools/dev-image/run.sh --platform "$PLATFORM" tools/dev-image/smoke.sh
           tools/dev-image/run.sh --platform "$PLATFORM" .github/scripts/check-dependabot-lists.sh
+          # Input piped to run.sh reaches the command.
+          digest=$(printf abc | tools/dev-image/run.sh --platform "$PLATFORM" openssl dgst -sha256 -r)
+          test "${digest%% *}" = ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
       # The portability checks of ci.yml and the fuzz targets, with the
       # targets and the nightly that the image holds.
       - name: Run the portability checks and build the fuzz targets

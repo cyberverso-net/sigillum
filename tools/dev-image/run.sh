@@ -65,7 +65,7 @@ fi
 volumes=$(printf '%s' "$root" | digest)-$arch
 mkdir -p "$root/target" "$root/tools/dss-oracle/target" "$root/crates/sigillum-testpki/fuzz/target"
 options=(
-    --rm --init --platform "$platform"
+    --rm --init --interactive --platform "$platform"
     --env "DEV_IMAGE_UID=$(id -u)" --env "DEV_IMAGE_GID=$(id -g)"
     --volume "$root:/work"
     --volume "sigillum-dev-home-$inputs-$arch:/cache/home"
@@ -77,7 +77,7 @@ if [ "$offline" = true ]; then
     options+=(--network none --env CARGO_NET_OFFLINE=true)
 fi
 if [ -t 0 ] && [ -t 1 ]; then
-    options+=(--interactive --tty)
+    options+=(--tty)
 fi
 
 exec docker run "${options[@]}" "$image" "$@"

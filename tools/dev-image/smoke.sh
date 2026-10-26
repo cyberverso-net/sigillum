@@ -11,10 +11,11 @@ value() {
 }
 
 # Checks that the first line of a command's output contains the expected text.
+# sed reads the whole output, so a long output does not end in SIGPIPE.
 expect() {
     local wanted=$1 line
     shift
-    line=$("$@" 2>&1 | head -n 1)
+    line=$("$@" 2>&1 | sed -n 1p)
     if [[ "$line" == *"$wanted"* ]]; then
         echo "ok: $line"
     else
