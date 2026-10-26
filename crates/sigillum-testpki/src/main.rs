@@ -23,7 +23,7 @@ use verify_cli::VerifyOptions;
 /// Generator and checker of the sigillum test PKI and corpus.
 #[derive(Parser)]
 #[command(version)]
-struct Cli {
+pub struct Cli {
     #[command(subcommand)]
     command: Command,
 }

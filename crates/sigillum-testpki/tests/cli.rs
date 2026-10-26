@@ -50,6 +50,9 @@ fn every_subcommand_has_help() -> std::io::Result<()> {
         ("verify", "--openssl"),
         ("verify", "--openssl-program"),
         ("verify", "--openssl-version"),
+        ("verify", "--dss"),
+        ("verify", "--dss-oracle"),
+        ("verify", "--java"),
     ] {
         let output = run(&[subcommand, "--help"])?;
         assert!(output.status.success(), "{subcommand}");
@@ -58,26 +61,68 @@ fn every_subcommand_has_help() -> std::io::Result<()> {
     Ok(())
 }
 
+/// Without `--openssl` or `--dss`, `verify` runs both checks, and reports
+/// each that cannot run.
 #[test]
-fn verify_needs_a_check() -> std::io::Result<()> {
+fn verify_without_a_check_runs_both() -> std::io::Result<()> {
     let manifest = committed_manifest();
-    let output = run(&["verify", "--manifest", &manifest.to_string_lossy()])?;
-    assert_eq!(output.status.code(), Some(2));
+    let output = run(&[
+        "verify",
+        "--openssl-program",
+        "sigillum-testpki-no-such-openssl",
+        "--java",
+        "sigillum-testpki-no-such-java",
+        "--manifest",
+        &manifest.to_string_lossy(),
+    ])?;
+    assert_eq!(output.status.code(), Some(1));
     let stderr = text(&output.stderr);
-    assert!(stderr.contains("--openssl"), "{stderr}");
+    assert!(
+        stderr.contains("sigillum-testpki-no-such-openssl"),
+        "{stderr}"
+    );
+    assert!(stderr.contains("sigillum-testpki-no-such-java"), "{stderr}");
+    assert!(
+        stderr.contains("tools/dss-oracle cannot be started"),
+        "{stderr}"
+    );
     Ok(())
 }
 
 #[test]
 fn the_openssl_program_is_an_option_of_the_openssl_check() -> std::io::Result<()> {
-    let output = run(&["verify", "--openssl-program", "openssl"])?;
+    let output = run(&["verify", "--dss", "--openssl-program", "openssl"])?;
     assert_eq!(output.status.code(), Some(2));
+    let stderr = text(&output.stderr);
+    assert!(
+        stderr
+            .contains("--openssl-program is an option of the --openssl check, which does not run"),
+        "{stderr}"
+    );
+    assert!(
+        stderr.contains("Usage: sigillum-testpki verify"),
+        "{stderr}"
+    );
+    Ok(())
+}
+
+#[test]
+fn the_java_launcher_and_the_jar_are_options_of_the_dss_check() -> std::io::Result<()> {
+    for option in ["--java", "--dss-oracle"] {
+        let output = run(&["verify", "--openssl", option, "x"])?;
+        assert_eq!(output.status.code(), Some(2), "{option}");
+        assert!(
+            text(&output.stderr).contains(option),
+            "{option}: {}",
+            text(&output.stderr)
+        );
+    }
     Ok(())
 }
 
 #[test]
 fn another_openssl_version_is_an_option_of_the_openssl_check() -> std::io::Result<()> {
-    let output = run(&["verify", "--openssl-version", "4.0.3"])?;
+    let output = run(&["verify", "--dss", "--openssl-version", "4.0.3"])?;
     assert_eq!(output.status.code(), Some(2));
     for version in ["", "four", "4.0.3 ", "4.0.3;x", "-4"] {
         let option = format!("--openssl-version={version}");
@@ -89,6 +134,178 @@ fn another_openssl_version_is_an_option_of_the_openssl_check() -> std::io::Resul
             text(&output.stderr)
         );
     }
+    Ok(())
+}
+
+/// A script in the place of the Java launcher, which prints `line` and
+/// exits with 0 whatever its arguments.
+#[cfg(unix)]
+fn java_printing(name: &str, line: &str) -> std::io::Result<PathBuf> {
+    use std::os::unix::fs::PermissionsExt;
+    let dir = PathBuf::from(env!("CARGO_TARGET_TMPDIR")).join(name);
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir)?;
+    let path = dir.join("java");
+    std::fs::write(&path, format!("#!/bin/sh\necho '{line}'\n"))?;
+    std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o755))?;
+    Ok(path)
+}
+
+#[cfg(unix)]
+#[test]
+fn verify_with_dss_prints_a_summary() -> Result<(), Box<dyn std::error::Error>> {
+    let manifest = corpus("verify_with_dss_prints_a_summary", "")?;
+    let java = java_printing(
+        "verify_with_dss_prints_a_summary_java",
+        "dss-oracle 0.0.0 (DSS 6.5.1)",
+    )?;
+    let output = run(&[
+        "verify",
+        "--dss",
+        "--java",
+        &java.to_string_lossy(),
+        "--manifest",
+        &manifest.to_string_lossy(),
+    ])?;
+    assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
+    assert_eq!(
+        text(&output.stdout),
+        "sigillum-testpki verify --dss: DSS 6.5.1, 0 artefacts, 0 as expected (0 with a recorded divergence), 0 not as expected\n"
+    );
+    Ok(())
+}
+
+/// A script in the place of the Java launcher, which acts as a
+/// `tools/dss-oracle` that validates every artefact as PASSED, or
+/// TOTAL_PASSED for a document, and writes the summary to `--out`.
+#[cfg(unix)]
+fn java_passing_everything(name: &str) -> std::io::Result<PathBuf> {
+    use std::os::unix::fs::PermissionsExt;
+    let dir = PathBuf::from(env!("CARGO_TARGET_TMPDIR")).join(name);
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir)?;
+    let path = dir.join("java");
+    std::fs::write(
+        &path,
+        r#"#!/bin/sh
+shift 4
+if [ "$1" = "--version" ]; then
+    echo 'dss-oracle 0.0.0 (DSS 6.5.1)'
+    exit 0
+fi
+mode=$1
+indication=PASSED
+if [ "$mode" = validate-document ]; then
+    indication=TOTAL_PASSED
+fi
+while [ "$#" -gt 1 ]; do
+    if [ "$1" = --out ]; then
+        out=$2
+    fi
+    shift
+done
+mkdir -p "$out"
+cat > "$out/summary.json" <<END
+{"format-version": 3, "oracle": {"dss-version": "6.5.1"}, "mode": "$mode",
+ "validation-time": "2030-01-15T10:00:00Z", "policy": "aligned-1", "result": "validated",
+ "indication": "$indication", "sub-indication": null}
+END
+"#,
+    )?;
+    std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o755))?;
+    Ok(path)
+}
+
+/// Every artefact that does not expect PASSED or TOTAL-PASSED, and every
+/// recorded divergence, is reported with its run, and counted.
+#[cfg(unix)]
+#[test]
+fn verify_with_dss_reports_each_artefact_not_as_expected() -> Result<(), Box<dyn std::error::Error>>
+{
+    use sigillum_testpki::dss::DIVERGENCES;
+    use sigillum_testpki::manifest::{DssResult, Indication, Kind, Manifest};
+    let java = java_passing_everything("verify_with_dss_reports_each_artefact_not_as_expected")?;
+    let manifest_path = committed_manifest();
+    let manifest = Manifest::load(&manifest_path)?;
+    let output = run(&[
+        "verify",
+        "--dss",
+        "--java",
+        &java.to_string_lossy(),
+        "--manifest",
+        &manifest_path.to_string_lossy(),
+    ])?;
+    assert_eq!(output.status.code(), Some(1));
+    let passing = |artefact: &sigillum_testpki::manifest::Artefact| {
+        let indication = if artefact.kind == Kind::SignedDocument {
+            Indication::TotalPassed
+        } else {
+            Indication::Passed
+        };
+        let result = DIVERGENCES
+            .iter()
+            .find(|d| d.id == artefact.id)
+            .map_or_else(|| artefact.expected_dss.clone(), |d| d.result());
+        matches!(artefact.kind, Kind::PrivateKey | Kind::Document)
+            || result
+                == DssResult::Indication {
+                    indication,
+                    sub_indication: None,
+                }
+    };
+    let mismatches = manifest.artefacts.iter().filter(|a| !passing(a)).count();
+    assert!(mismatches > DIVERGENCES.len());
+    let stderr = text(&output.stderr);
+    assert!(
+        stderr.contains(
+            "sigillum-testpki verify: pki/signer-expired: DSS gives PASSED, the check expects INDETERMINATE with OUT_OF_BOUNDS_NOT_REVOKED, the result of DSS that DIV-5 records; the manifest predicts INDETERMINATE with OUT_OF_BOUNDS_NO_POE\n    tools/dss-oracle validate-certificate --certificate "
+        ),
+        "{stderr}"
+    );
+    // The detail repeats the summary, indented.
+    assert!(
+        stderr.contains("\n     \"indication\": \"PASSED\""),
+        "{stderr}"
+    );
+    assert_eq!(
+        stderr.matches("sigillum-testpki verify: ").count(),
+        mismatches,
+        "{stderr}"
+    );
+    assert_eq!(
+        text(&output.stdout),
+        format!(
+            "sigillum-testpki verify --dss: DSS 6.5.1, {} artefacts, {} as expected (0 with a recorded divergence), {mismatches} not as expected\n",
+            manifest.artefacts.len(),
+            manifest.artefacts.len() - mismatches
+        )
+    );
+    Ok(())
+}
+
+#[cfg(unix)]
+#[test]
+fn verify_refuses_another_dss_version() -> Result<(), Box<dyn std::error::Error>> {
+    let manifest = corpus("verify_refuses_another_dss_version", "")?;
+    let java = java_printing(
+        "verify_refuses_another_dss_version_java",
+        "dss-oracle 0.0.0 (DSS 6.4.0)",
+    )?;
+    let output = run(&[
+        "verify",
+        "--dss",
+        "--java",
+        &java.to_string_lossy(),
+        "--manifest",
+        &manifest.to_string_lossy(),
+    ])?;
+    assert_eq!(output.status.code(), Some(1));
+    let stderr = text(&output.stderr);
+    assert!(
+        stderr.contains("the manifest records the results of DSS 6.5.1, but tools/dss-oracle is built against DSS 6.4.0"),
+        "{stderr}"
+    );
+    assert!(output.stdout.is_empty());
     Ok(())
 }
 

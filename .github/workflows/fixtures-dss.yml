@@ -1,0 +1,62 @@
+name: Fixture verification with DSS
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Fixture verification with DSS
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      CARGO_TERM_COLOR: always
+      RUSTFLAGS: -D warnings
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
+        with:
+          toolchain: stable
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: tools/dss-oracle/pom.xml
+      # The JAR contains DSS (LGPL-2.1) and is never uploaded as an artefact (ADR-0013).
+      # Its own tests run in dss-oracle.yml.
+      - name: Build tools/dss-oracle
+        working-directory: tools/dss-oracle
+        run: mvn -B -ntp package -DskipTests
+      - name: Build sigillum-testpki and its DSS tests
+        run: |
+          cargo build --locked -p sigillum-testpki
+          tests=$(cargo test --locked -p sigillum-testpki --test dss --no-run --message-format=json \
+            | jq -r 'select(.reason == "compiler-artifact" and .target.name == "dss" and .profile.test) | .executable')
+          test -x "$tests"
+          echo "DSS_TESTS=$tests" >> "$GITHUB_ENV"
+      # The checks are built with network access and run in a network
+      # namespace without it.
+      - name: Verify the corpus with DSS, without network
+        run: |
+          offline() {
+            sudo unshare --net -- runuser -u "$(id -un)" -- env "PATH=$PATH" "JAVA_HOME=$JAVA_HOME" \
+              "SIGILLUM_TESTPKI_DSS_ORACLE=$PWD/tools/dss-oracle/target/dss-oracle.jar" \
+              "SIGILLUM_TESTPKI_JAVA=$JAVA_HOME/bin/java" SIGILLUM_TESTPKI_DSS_REQUIRED=1 "$@"
+          }
+          offline true
+          for url in https://github.com https://1.1.1.1; do
+            if offline curl -sS --max-time 5 "$url" > /dev/null; then
+              echo "The network namespace still reaches $url."
+              exit 1
+            fi
+          done
+          offline target/debug/sigillum-testpki verify --dss --java "$JAVA_HOME/bin/java" \
+            --dss-oracle tools/dss-oracle/target/dss-oracle.jar
+          offline "$DSS_TESTS"

@@ -1009,3 +1009,25 @@ proptest::proptest! {
         proptest::prop_assert_eq!(read, manifest);
     }
 }
+
+#[test]
+fn a_dss_result_is_written_in_words() {
+    assert_eq!(DssResult::Rejected.to_string(), "rejected");
+    assert_eq!(DssResult::NotApplicable.to_string(), "not-applicable");
+    assert_eq!(
+        DssResult::Indication {
+            indication: Indication::TotalPassed,
+            sub_indication: None
+        }
+        .to_string(),
+        "TOTAL-PASSED"
+    );
+    assert_eq!(
+        DssResult::Indication {
+            indication: Indication::Indeterminate,
+            sub_indication: Some("REVOKED_NO_POE".to_owned())
+        }
+        .to_string(),
+        "INDETERMINATE with REVOKED_NO_POE"
+    );
+}

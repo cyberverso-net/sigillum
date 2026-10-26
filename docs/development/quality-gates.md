@@ -18,7 +18,7 @@ Every change must pass the gates below before it is merged. Continuous integrati
 | Commit signatures | Verified commit signatures check | Every commit in the pull request has a verified signature |
 | Dependabot lists | `.github/scripts/check-dependabot-lists.sh` | The RustCrypto group and the ignore rules in `dependabot.yml` name the same crates |
 | Fixture verification with OpenSSL | `sigillum-testpki verify --openssl` with the OpenSSL release named in the manifest, and with OpenSSL 4.0.3 through `--openssl-version`, each built from source and run without network, Linux | Every artefact matches the OpenSSL result in its manifest |
-| Fixture verification with DSS (planned with the test PKI, phase 0) | `sigillum-testpki verify` with `tools/dss-oracle` run without network, Linux | Every artefact matches the DSS result in its manifest |
+| Fixture verification with DSS | `sigillum-testpki verify --dss` with `tools/dss-oracle`, built against the DSS release named in the manifest and run without network, Linux | Every artefact matches the DSS result in its manifest, or, for an artefact of a divergence recorded in `docs/design/divergences.md`, the result of DSS that the divergence records |
 | DSS oracle build | `mvn -B verify` in `tools/dss-oracle`, Java 21, Linux; the tool then runs without network | Builds, its tests pass, and it runs offline |
 | Signed corpus | `sigillum-testpki generate documents` and `generate signed` with `tools/dss-oracle`, run without network, Linux | The regenerated `testdata/` is identical, byte for byte, to the committed one |
 | Development image versions | `tools/dev-image/check-versions.sh`, with its tests in `tools/dev-image/test-check-versions.sh` | The versions in `tools/dev-image/versions.env` are those that the workflows, the manifest and `Cargo.toml` pin. A newer stable Rust or Temurin 21 release, or a new Ubuntu release behind `ubuntu-latest`, is reported as a warning |
@@ -95,6 +95,7 @@ tools/dev-image/run.sh cargo test --workspace
 tools/dev-image/run.sh bash -c 'cd tools/dss-oracle && mvn -B verify'
 tools/dev-image/run.sh cargo fetch --locked
 tools/dev-image/run.sh --offline cargo run -p sigillum-testpki -- verify --openssl
+tools/dev-image/run.sh --offline cargo run -p sigillum-testpki -- verify --dss
 ```
 
 The first run builds the image, which takes several minutes. The worktree is mounted at `/work`, and commands run as the user of the host. Build outputs stay in Docker volumes, one set per worktree and architecture, so they do not mix with those of the host. The home directory, with the Maven dependencies that the image holds and the Cargo registry, is a volume of each image. `git` does not work in the container for a worktree, whose repository is outside the mounted directory, so a check such as "Check that nothing changed" of `signed-corpus.yml` runs on the host. `--offline` runs without network, as the workflows run the checks that must work offline; fetch dependencies first. The image runs natively on `linux/arm64` hosts. `--platform linux/amd64` selects the architecture of the workflows, emulated on such hosts, for a step that must match them byte for byte. In the image, `openssl` and `SIGILLUM_TESTPKI_OPENSSL` name OpenSSL 3.5.9, and `SIGILLUM_TESTPKI_OPENSSL_OTHER` names 4.0.3.
