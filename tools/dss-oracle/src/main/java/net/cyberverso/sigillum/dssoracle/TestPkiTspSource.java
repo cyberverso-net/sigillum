@@ -13,7 +13,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HexFormat;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSSignedData;
@@ -38,6 +40,15 @@ final class TestPkiTspSource implements TSPSource {
     static final int MAX_ERROR = 64 * 1024;
     /** How long the program may run, until its output and error streams are closed. */
     static final Duration TIMEOUT = Duration.ofSeconds(60);
+
+    /**
+     * How often the source records the processes that the program started,
+     * so that one whose parent has ended can still be killed. The program
+     * stays in the process group of the JVM, so that a supervisor that kills
+     * that group, as {@code sigillum-testpki generate signed} does, kills
+     * them too.
+     */
+    private static final long POLL_MILLIS = 10;
 
     private final transient Path program;
     private final transient Path key;
@@ -112,6 +123,7 @@ final class TestPkiTspSource implements TSPSource {
     /** Runs the program and returns its standard output. */
     private byte[] run(List<String> command) {
         Process process;
+        Set<ProcessHandle> started = new LinkedHashSet<>();
         try {
             process = new ProcessBuilder(command).redirectInput(ProcessBuilder.Redirect.PIPE).start();
         } catch (IOException e) {
@@ -122,15 +134,14 @@ final class TestPkiTspSource implements TSPSource {
             Drain output = Drain.start(process.getInputStream(), MAX_TOKEN);
             Drain error = Drain.start(process.getErrorStream(), MAX_ERROR);
             long deadline = System.nanoTime() + timeout.toNanos();
-            boolean finished = process.waitFor(remaining(deadline), TimeUnit.MILLISECONDS);
+            boolean finished = waitFor(process, deadline, started);
             // A process that the program started may keep its streams open after it ends.
             if (finished) {
                 output.join(Math.max(1, remaining(deadline)));
                 error.join(Math.max(1, remaining(deadline)));
             }
             if (!finished || output.isAlive() || error.isAlive()) {
-                process.descendants().forEach(ProcessHandle::destroyForcibly);
-                process.destroyForcibly();
+                terminate(process, started);
                 throw new DSSException("--tsa-program " + command.get(0) + " did not finish within "
                         + timeout.toSeconds() + " seconds");
             }
@@ -156,9 +167,36 @@ final class TestPkiTspSource implements TSPSource {
             Thread.currentThread().interrupt();
             throw new DSSException("interrupted while --tsa-program ran", e);
         } finally {
-            process.descendants().forEach(ProcessHandle::destroyForcibly);
-            process.destroyForcibly();
+            terminate(process, started);
         }
+    }
+
+    /**
+     * Waits for the program until the deadline, and records every process
+     * that the program starts while it runs.
+     */
+    private static boolean waitFor(Process process, long deadline, Set<ProcessHandle> started)
+            throws InterruptedException {
+        while (true) {
+            process.descendants().forEach(started::add);
+            long left = remaining(deadline);
+            if (process.waitFor(Math.min(left, POLL_MILLIS), TimeUnit.MILLISECONDS)) {
+                return true;
+            }
+            if (left == 0) {
+                return false;
+            }
+        }
+    }
+
+    /** Kills the program, the processes recorded while it ran, and those found now. */
+    private static void terminate(Process process, Set<ProcessHandle> started) {
+        process.descendants().forEach(started::add);
+        for (ProcessHandle handle : started) {
+            handle.descendants().forEach(ProcessHandle::destroyForcibly);
+            handle.destroyForcibly();
+        }
+        process.destroyForcibly();
     }
 
     /** The milliseconds left before a deadline of {@link System#nanoTime()}, at least zero. */

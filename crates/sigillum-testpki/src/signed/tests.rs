@@ -423,6 +423,25 @@ fn a_java_program_that_cannot_run_is_reported() {
 }
 
 #[test]
+fn the_java_launcher_fixes_identity_hashes_before_the_jar() {
+    let oracle = JavaOracle::new(PathBuf::from("java"), PathBuf::from("dss-oracle.jar"));
+    let argv = oracle.arguments(&[OsString::from("--level"), OsString::from("B-LT")]);
+    assert_eq!(
+        argv,
+        [
+            "-XX:+UnlockExperimentalVMOptions",
+            "-XX:hashCode=2",
+            "-jar",
+            "dss-oracle.jar",
+            "sign",
+            "--level",
+            "B-LT"
+        ]
+        .map(OsString::from)
+    );
+}
+
+#[test]
 fn owns_every_entry_under_its_directory() -> TestResult {
     let mut artefact = fixture("signed/pades-b-b-rsa")?.artefact(b"x");
     assert!(generated_here(&artefact));

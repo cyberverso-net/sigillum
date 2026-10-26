@@ -454,7 +454,7 @@ pub trait Oracle {
     fn sign(&self, arguments: &[OsString]) -> Result<(), String>;
 }
 
-/// `tools/dss-oracle` run as `java -jar <jar> sign ...`, without a shell,
+/// `tools/dss-oracle` run as `java <options> -jar <jar> sign ...`, without a shell,
 /// for at most [`JavaOracle::timeout`] per signature.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct JavaOracle {
@@ -495,15 +495,34 @@ impl JavaOracle {
     }
 }
 
-impl Oracle for JavaOracle {
-    fn sign(&self, arguments: &[OsString]) -> Result<(), String> {
-        let mut argv: Vec<OsString> = vec![
+/// Options of the Java launcher that make every identity hash code 1.
+///
+/// DSS 6.5.1 keeps the validation data that it embeds at B-LT in hash
+/// sets, and the hash code of each token includes the hash code of an
+/// enumeration constant, which is its identity hash code. The order in
+/// which the data are embedded then depends on the JVM. With constant
+/// identity hash codes, it depends only on the data, so the corpus is
+/// reproducible on any JVM that accepts the option, as HotSpot from
+/// Java 21 to 27 does.
+const JVM_OPTIONS: [&str; 2] = ["-XX:+UnlockExperimentalVMOptions", "-XX:hashCode=2"];
+
+impl JavaOracle {
+    /// The arguments of the launcher for the `sign` mode with `arguments`.
+    pub(crate) fn arguments(&self, arguments: &[OsString]) -> Vec<OsString> {
+        let mut argv: Vec<OsString> = JVM_OPTIONS.iter().map(OsString::from).collect();
+        argv.extend([
             "-jar".into(),
             self.jar.as_os_str().to_owned(),
             "sign".into(),
-        ];
+        ]);
         argv.extend(arguments.iter().cloned());
-        run_oracle(&self.program(), &argv)
+        argv
+    }
+}
+
+impl Oracle for JavaOracle {
+    fn sign(&self, arguments: &[OsString]) -> Result<(), String> {
+        run_oracle(&self.program(), &self.arguments(arguments))
     }
 }
 

@@ -1283,7 +1283,7 @@ notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS
 [[artefact]]
 id = "signed/cades-enveloping-b-lt-rsa"
 path = "signed/cades-enveloping-b-lt-rsa.p7m"
-sha256 = "da7a5fc5ae687636db24bcd38cdda6eb5acc493a49be9fe8e24f1ccf4f3f664e"
+sha256 = "658e72d1aaad23eb7b494be38c97bbcb1559106ca225edfa2c97b5486c1663f4"
 kind = "signed-document"
 purpose = "CAdES baseline signature, enveloping, at B-LT, over documents/text, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS."
 expected-openssl = "verified"
@@ -1294,7 +1294,7 @@ notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS
 [[artefact]]
 id = "signed/cades-enveloping-b-lt-rsa-pss"
 path = "signed/cades-enveloping-b-lt-rsa-pss.p7m"
-sha256 = "c8a8b152e00edbdabed7f47818e9fed509264802349adc620a193f385e7feae4"
+sha256 = "c03affe68d45330f85485e12a42c5f295773e6c9c1078afd40f3277c2687fa72"
 kind = "signed-document"
 purpose = "CAdES baseline signature, enveloping, at B-LT, over documents/text, by pki/signer-rsa-pss-sha256 with RSASSA-PSS and SHA-256, created by DSS."
 expected-openssl = "verified"
@@ -1316,7 +1316,7 @@ notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS
 [[artefact]]
 id = "signed/cades-enveloping-b-lt-ed25519"
 path = "signed/cades-enveloping-b-lt-ed25519.p7m"
-sha256 = "7ef3c8a50983fc1b2824c0b0ab501cda0a813eb9cc0ed2bad8d80c8e62cb276a"
+sha256 = "fd9d7cbb3aa2651bb7c88c65e146bb81fb1bef24bae9d0e84383daeb07cefa19"
 kind = "signed-document"
 purpose = "CAdES baseline signature, enveloping, at B-LT, over documents/text, by pki/signer-ed25519 with Ed25519, created by DSS."
 expected-openssl = "verified"
@@ -1415,7 +1415,7 @@ notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS
 [[artefact]]
 id = "signed/cades-detached-b-lt-rsa"
 path = "signed/cades-detached-b-lt-rsa.p7s"
-sha256 = "e337fe41e93ed1e7e7abf6b57fac1f02776c58af64f5f3916a0d3749e3186501"
+sha256 = "3fabf7697478acd07e99a27a78d350525467b0e28230270fa526dbb0d76ce0d3"
 kind = "signed-document"
 purpose = "CAdES baseline signature, detached, at B-LT, over documents/text, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS."
 expected-openssl = "verified"
@@ -1426,7 +1426,7 @@ notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS
 [[artefact]]
 id = "signed/cades-detached-b-lt-rsa-pss"
 path = "signed/cades-detached-b-lt-rsa-pss.p7s"
-sha256 = "4abc5a7241bbbd2c238243e6b04da77cfc4d1748733e063f9f19040daa0272b2"
+sha256 = "4b0a5f05f6f4db339f02cc6a5cf2cb17fc0819d8099ec16f5f91d7a0c73f20c6"
 kind = "signed-document"
 purpose = "CAdES baseline signature, detached, at B-LT, over documents/text, by pki/signer-rsa-pss-sha256 with RSASSA-PSS and SHA-256, created by DSS."
 expected-openssl = "verified"
@@ -1448,7 +1448,7 @@ notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS
 [[artefact]]
 id = "signed/cades-detached-b-lt-ed25519"
 path = "signed/cades-detached-b-lt-ed25519.p7s"
-sha256 = "d1d03f1c9e15301c07d501a099812ae8c7ea052572d062d7b252877a72cdf8ff"
+sha256 = "aa275113a02d7929c4b28515cf33d8881a865cbccf68e724e25fab4039340965"
 kind = "signed-document"
 purpose = "CAdES baseline signature, detached, at B-LT, over documents/text, by pki/signer-ed25519 with Ed25519, created by DSS."
 expected-openssl = "verified"
@@ -1547,7 +1547,7 @@ notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS
 [[artefact]]
 id = "signed/pades-b-lt-rsa"
 path = "signed/pades-b-lt-rsa.pdf"
-sha256 = "ef5591547bde566fdafa941e3f9cc88459d87df968c6dfc87ef7c5ba07710282"
+sha256 = "21f33d6f3113b83e136bd573a942c1e8059e3e6caca9e370cff381d0c8aea61b"
 kind = "signed-document"
 purpose = "PAdES baseline signature, invisible, at B-LT, over documents/simple, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS."
 expected-openssl = "not-applicable"
@@ -1558,7 +1558,7 @@ notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS
 [[artefact]]
 id = "signed/pades-b-lt-rsa-pss"
 path = "signed/pades-b-lt-rsa-pss.pdf"
-sha256 = "5f4e804099c759fed5595f58a63c17a77fc63f794ba9d1fccecb9d2208ea4620"
+sha256 = "7a9ac041984afae5bb8c53a71561a2750361c7c712acc41e34f3fdf1b3c69264"
 kind = "signed-document"
 purpose = "PAdES baseline signature, invisible, at B-LT, over documents/simple, by pki/signer-rsa-pss-sha256 with RSASSA-PSS and SHA-256, created by DSS."
 expected-openssl = "not-applicable"
@@ -1569,7 +1569,7 @@ notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS
 [[artefact]]
 id = "signed/pades-b-lt-p256"
 path = "signed/pades-b-lt-p256.pdf"
-sha256 = "7fe99e4784fe1745c32b0285b22e346ca10cd7a822ad5385cb6d24b8fe5ad19a"
+sha256 = "c1eabc4dab9a1d9f3048de04e4870e93fd79e6de5b64289495ebb2eebd58d37b"
 kind = "signed-document"
 purpose = "PAdES baseline signature, invisible, at B-LT, over documents/simple, by pki/signer-p256 with ECDSA on P-256 and SHA-256, created by DSS."
 expected-openssl = "not-applicable"
@@ -1580,7 +1580,7 @@ notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS
 [[artefact]]
 id = "signed/pades-b-lt-ed25519"
 path = "signed/pades-b-lt-ed25519.pdf"
-sha256 = "b71b7ba7d95e7b932ff865693907284ad3cc8b9b8fc973befff31136585978fe"
+sha256 = "b5c6a1cdc8018af4a60f87a2c3237fdd3d9602024e00fe72a809ac18c3724e69"
 kind = "signed-document"
 purpose = "PAdES baseline signature, invisible, at B-LT, over documents/simple, by pki/signer-ed25519 with Ed25519, created by DSS."
 expected-openssl = "not-applicable"
@@ -1723,7 +1723,7 @@ notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS
 [[artefact]]
 id = "signed/jades-flattened-b-lt-rsa"
 path = "signed/jades-flattened-b-lt-rsa.json"
-sha256 = "121b9cd0a48a3cab63b7b629f645edf9d0b8c95a51e727f4466a735dc4a7190a"
+sha256 = "e068fd8a66022061269ffd6e82832209f9a599c1f5677087829ec96797485cd0"
 kind = "signed-document"
 purpose = "JAdES baseline signature in the flattened JWS JSON serialisation, at B-LT, over documents/payload, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS."
 expected-openssl = "not-applicable"
@@ -1734,7 +1734,7 @@ notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS
 [[artefact]]
 id = "signed/jades-flattened-b-lt-rsa-pss"
 path = "signed/jades-flattened-b-lt-rsa-pss.json"
-sha256 = "c58a4fd3817181c4259870d8270028512bed69286d88e98acbefdf79e185429d"
+sha256 = "abcb0d7275f0620c0c2025394247a62df90de728c08c90eae00d3779944385e6"
 kind = "signed-document"
 purpose = "JAdES baseline signature in the flattened JWS JSON serialisation, at B-LT, over documents/payload, by pki/signer-rsa-pss-sha256 with RSASSA-PSS and SHA-256, created by DSS."
 expected-openssl = "not-applicable"
@@ -1756,7 +1756,7 @@ notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS
 [[artefact]]
 id = "signed/jades-flattened-b-lt-ed25519"
 path = "signed/jades-flattened-b-lt-ed25519.json"
-sha256 = "f9329c3049e9d1701ab08fc10df9b6ba192f08edbd73bb815cf4c04a6e1a35bc"
+sha256 = "5339ee4d099946879c4c995b879e5c3c63750c5575bb1ba2ea230283b3ec0059"
 kind = "signed-document"
 purpose = "JAdES baseline signature in the flattened JWS JSON serialisation, at B-LT, over documents/payload, by pki/signer-ed25519 with Ed25519, created by DSS."
 expected-openssl = "not-applicable"
@@ -1855,7 +1855,7 @@ notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS
 [[artefact]]
 id = "signed/jades-general-b-lt-rsa"
 path = "signed/jades-general-b-lt-rsa.json"
-sha256 = "a0af811e898fedfe174a9e22c11c99ea56b4c8f0d43ac96579ad914cda2cd141"
+sha256 = "404471813357acca92ca4fc8209b9b805d6dacae3e85cdbf53208c38f805db57"
 kind = "signed-document"
 purpose = "JAdES baseline signature in the general JWS JSON serialisation, at B-LT, over documents/payload, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS."
 expected-openssl = "not-applicable"
@@ -1866,7 +1866,7 @@ notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS
 [[artefact]]
 id = "signed/jades-general-b-lt-rsa-pss"
 path = "signed/jades-general-b-lt-rsa-pss.json"
-sha256 = "fc9c341a25d5a671dd8cd7c8492de7823a5d0ec0398cafbbced17b31b61159dc"
+sha256 = "84bb93368bc78eef1d1434a8bf22c58ac255d18f2b5a268b9f596dcf6fbb4d3c"
 kind = "signed-document"
 purpose = "JAdES baseline signature in the general JWS JSON serialisation, at B-LT, over documents/payload, by pki/signer-rsa-pss-sha256 with RSASSA-PSS and SHA-256, created by DSS."
 expected-openssl = "not-applicable"
@@ -1888,7 +1888,7 @@ notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS
 [[artefact]]
 id = "signed/jades-general-b-lt-ed25519"
 path = "signed/jades-general-b-lt-ed25519.json"
-sha256 = "63f1694f22acc4ba93fabf1cdb52e8359c382fd0f08db3f5db8ed1ba297f574b"
+sha256 = "5f4a342a4141688f8b7840a74d6df6fce05adebb8bc9149ec5c78eeb4d31787a"
 kind = "signed-document"
 purpose = "JAdES baseline signature in the general JWS JSON serialisation, at B-LT, over documents/payload, by pki/signer-ed25519 with Ed25519, created by DSS."
 expected-openssl = "not-applicable"
