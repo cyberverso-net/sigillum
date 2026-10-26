@@ -1,0 +1,1 @@
+sigillum test corpus: the text payload of the signed corpus under signed/.

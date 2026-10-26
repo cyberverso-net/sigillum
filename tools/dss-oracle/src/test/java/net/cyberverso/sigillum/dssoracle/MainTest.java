@@ -120,11 +120,10 @@ class MainTest {
     }
 
     @Test
-    void theDefaultRunnerImplementsTheValidationModesOnly() {
-        assertEquals(ExitCodes.USAGE, run(Modes.RUNNER, "validate-timestamp"));
-        assertEquals(ExitCodes.USAGE, run(Modes.RUNNER, "validate-certificate"));
-        assertEquals(ExitCodes.USAGE, run(Modes.RUNNER, "validate-document"));
-        assertEquals(ExitCodes.NOT_IMPLEMENTED, run(Modes.RUNNER, "sign"));
+    void theDefaultRunnerImplementsEveryMode() {
+        for (Mode mode : Mode.values()) {
+            assertEquals(ExitCodes.USAGE, run(Modes.RUNNER, mode.commandName()), mode.commandName());
+        }
     }
 
     @Test
@@ -132,6 +131,14 @@ class MainTest {
         assertEquals(ExitCodes.SUCCESS, run("--help"));
         for (String option : List.of("--document", "--detached", "--policy")) {
             assertTrue(stdout().contains(option), stdout());
+        }
+    }
+
+    @Test
+    void helpListsTheSignOptions() {
+        assertEquals(ExitCodes.SUCCESS, run("--help"));
+        for (String option : SignArguments.OPTIONS) {
+            assertTrue(stdout().contains(option + " "), option);
         }
     }
 

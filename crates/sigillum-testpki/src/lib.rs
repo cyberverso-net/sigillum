@@ -7,7 +7,9 @@
 
 #![forbid(unsafe_code)]
 
+pub mod documents;
 pub mod manifest;
 pub mod openssl;
 pub mod pki;
+pub mod signed;
 pub mod timestamp;

@@ -699,6 +699,7 @@ fn response_file(spec: &OcspSpec, der: Vec<u8>) -> Result<GeneratedFile, PkiErro
                 chain,
                 revocation: Vec::new(),
                 content: None,
+                timestamp_chain: Vec::new(),
             }
         }
         Body::Unsuccessful(_) => Links::default(),

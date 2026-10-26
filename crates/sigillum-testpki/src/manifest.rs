@@ -117,6 +117,10 @@ pub struct Links {
     pub revocation: Vec<String>,
     /// The signed content of a detached signature, or the data a timestamp covers.
     pub content: Option<String>,
+    /// For a signed document with a signature timestamp: the certificate of
+    /// the timestamping authority and the chain above it, up to the trust
+    /// anchor, without repetition.
+    pub timestamp_chain: Vec<String>,
 }
 
 /// The kind of an artefact.
@@ -503,6 +507,12 @@ impl Artefact {
         if !links.chain.is_empty() {
             fields.push(format!("chain = {}", list(&links.chain)));
         }
+        if !links.timestamp_chain.is_empty() {
+            fields.push(format!(
+                "timestamp-chain = {}",
+                list(&links.timestamp_chain)
+            ));
+        }
         if !links.revocation.is_empty() {
             fields.push(format!("revocation = {}", list(&links.revocation)));
         }
@@ -554,6 +564,11 @@ impl Artefact {
                 &certificate as &dyn Fn(Kind) -> bool,
             ),
             ("revocation", self.links.revocation.as_slice(), &revocation),
+            (
+                "timestamp-chain",
+                self.links.timestamp_chain.as_slice(),
+                &certificate as &dyn Fn(Kind) -> bool,
+            ),
         ];
         for (link, targets, fits) in single.into_iter().chain(many) {
             let mut seen = HashSet::new();
@@ -730,6 +745,8 @@ struct RawLinks {
     #[serde(default)]
     revocation: Vec<String>,
     content: Option<String>,
+    #[serde(default, rename = "timestamp-chain")]
+    timestamp_chain: Vec<String>,
 }
 
 impl RawArtefact {
@@ -795,6 +812,7 @@ impl RawArtefact {
                 chain: self.links.chain,
                 revocation: self.links.revocation,
                 content: self.links.content,
+                timestamp_chain: self.links.timestamp_chain,
             },
             notes,
         })

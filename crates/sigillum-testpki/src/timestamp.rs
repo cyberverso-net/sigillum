@@ -788,6 +788,7 @@ fn token_file(spec: &TokenSpec, token: Vec<u8>) -> Result<GeneratedFile, TsaErro
                 chain,
                 revocation: Vec::new(),
                 content: Some(CONTENT_ID.to_owned()),
+                timestamp_chain: Vec::new(),
             },
             notes: Some(spec.notes.to_owned()),
         },

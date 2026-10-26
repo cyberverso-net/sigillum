@@ -50,7 +50,8 @@ jobs:
           offline java -jar target/dss-oracle.jar sign
           code=$?
           set -e
-          test "$code" -eq 3
+          # Every mode is implemented: sign without options is a usage error.
+          test "$code" -eq 2
           out="$RUNNER_TEMP/validate-timestamp"
           offline java -Xmx512m -XX:+UseSerialGC -jar target/dss-oracle.jar validate-timestamp \
             --timestamp ../../testdata/timestamps/valid.tst \

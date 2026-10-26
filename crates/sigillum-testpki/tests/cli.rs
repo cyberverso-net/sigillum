@@ -39,6 +39,10 @@ fn every_subcommand_has_help() -> std::io::Result<()> {
         ("generate", "crls"),
         ("generate", "timestamps"),
         ("generate", "ocsp"),
+        ("generate", "documents"),
+        ("generate", "signed"),
+        ("generate", "--dss-oracle"),
+        ("generate", "--java"),
         ("tsa", "--tsa-cert"),
         ("tsa", "--digest-algorithm"),
         ("tsa", "--digest"),
@@ -861,11 +865,16 @@ fn generate_crls_writes_the_crls_and_links_the_certificates()
     assert!(text(&output.stderr).is_empty(), "{}", text(&output.stderr));
     let written = std::fs::read_to_string(&manifest)?;
     // The entries are those of the committed corpus, which also holds
-    // the timestamp tokens and the OCSP responses, and the links to them.
+    // the timestamp tokens, the OCSP responses, the base documents and the
+    // signed corpus, and the links to them.
     let committed: Vec<_> = load(&committed_manifest())?
         .artefacts
         .into_iter()
-        .filter(|a| !a.id.starts_with("timestamps/") && !a.id.starts_with("ocsp/"))
+        .filter(|a| {
+            ["timestamps/", "ocsp/", "documents/", "signed/"]
+                .iter()
+                .all(|prefix| !a.id.starts_with(prefix))
+        })
         .map(|mut a| {
             a.links.revocation.retain(|r| !r.starts_with("ocsp/"));
             a
@@ -1004,23 +1013,26 @@ fn generate_crls_keeps_the_revocation_links_of_its_entries()
     Ok(())
 }
 
-/// The four generators, run in the documented order on a manifest with
-/// only a header, reproduce the committed manifest byte for byte.
+/// The generators that need no Java, run in the documented order on a
+/// manifest with only a header, reproduce the committed manifest byte for
+/// byte, apart from the signed corpus, which `generate signed` adds last
+/// with DSS. The signed-corpus workflow checks that step.
 #[test]
 fn the_generators_in_order_reproduce_the_committed_manifest()
 -> Result<(), Box<dyn std::error::Error>> {
     let manifest = corpus("the_generators_in_order_reproduce_the_manifest", "")?;
     let dir = manifest.parent().ok_or("no parent")?.to_path_buf();
     let path = manifest.to_string_lossy().into_owned();
-    for target in ["pki", "crls", "timestamps", "ocsp"] {
+    for target in ["pki", "crls", "timestamps", "ocsp", "documents"] {
         let output = run(&["generate", target, "--manifest", &path])?;
         assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
         assert!(text(&output.stderr).is_empty(), "{}", text(&output.stderr));
     }
-    assert_eq!(
-        std::fs::read_to_string(&manifest)?,
-        std::fs::read_to_string(committed_manifest())?
-    );
+    let mut committed = load(&committed_manifest())?;
+    committed
+        .artefacts
+        .retain(|artefact| !artefact.id.starts_with("signed/"));
+    assert_eq!(std::fs::read_to_string(&manifest)?, committed.to_toml());
     let committed = committed_manifest();
     let testdata = committed.parent().ok_or("no parent")?;
     for artefact in &load(&manifest)?.artefacts {
@@ -1173,5 +1185,113 @@ fn generate_ocsp_prunes_stale_responses_and_the_links_to_them()
     assert_eq!(doc.links.revocation, ["crl/other"]);
     assert!(dir.join("ocsp/old.der").is_file());
     let _ = std::fs::remove_dir_all(&dir);
+    Ok(())
+}
+
+#[test]
+fn generate_documents_writes_the_documents_and_the_manifest()
+-> Result<(), Box<dyn std::error::Error>> {
+    let manifest = corpus("generate_documents_writes_the_documents", "")?;
+    let dir = manifest.parent().ok_or("no parent")?.to_path_buf();
+    let output = run(&[
+        "generate",
+        "documents",
+        "--manifest",
+        &manifest.to_string_lossy(),
+    ])?;
+    assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
+    assert!(text(&output.stdout).contains("wrote 4 files"));
+    let ids: Vec<String> = load(&manifest)?
+        .artefacts
+        .into_iter()
+        .map(|a| a.id)
+        .collect();
+    assert_eq!(
+        ids,
+        [
+            "documents/simple",
+            "documents/signature-field",
+            "documents/text",
+            "documents/payload"
+        ]
+    );
+    assert!(std::fs::read(dir.join("documents/simple.pdf"))?.starts_with(b"%PDF-1.7"));
+    let _ = std::fs::remove_dir_all(&dir);
+    Ok(())
+}
+
+#[test]
+fn generate_signed_needs_the_corpus_it_signs() -> Result<(), Box<dyn std::error::Error>> {
+    let manifest = corpus("generate_signed_needs_the_corpus", "")?;
+    let before = std::fs::read_to_string(&manifest)?;
+    let output = run(&[
+        "generate",
+        "signed",
+        "--manifest",
+        &manifest.to_string_lossy(),
+    ])?;
+    assert_eq!(output.status.code(), Some(1));
+    let stderr = text(&output.stderr);
+    assert!(
+        stderr.contains("the manifest does not list pki/signer-rsa-2048"),
+        "{stderr}"
+    );
+    assert_eq!(std::fs::read_to_string(&manifest)?, before);
+    let _ = std::fs::remove_dir_all(manifest.parent().ok_or("no parent")?);
+    Ok(())
+}
+
+#[test]
+fn generate_signed_reports_a_java_launcher_that_cannot_run()
+-> Result<(), Box<dyn std::error::Error>> {
+    let manifest = corpus("generate_signed_reports_the_launcher", "")?;
+    std::fs::copy(committed_manifest(), &manifest)?;
+    let before = std::fs::read_to_string(&manifest)?;
+    let output = run(&[
+        "generate",
+        "signed",
+        "--manifest",
+        &manifest.to_string_lossy(),
+        "--java",
+        "no-such-java-launcher-for-sigillum",
+        "--dss-oracle",
+        "dss-oracle.jar",
+    ])?;
+    assert_eq!(output.status.code(), Some(1));
+    let stderr = text(&output.stderr);
+    assert!(
+        stderr.contains("tools/dss-oracle cannot sign signed/cades-enveloping-b-b-rsa"),
+        "{stderr}"
+    );
+    assert!(
+        stderr.contains("cannot be started: no-such-java-launcher-for-sigillum"),
+        "{stderr}"
+    );
+    assert_eq!(std::fs::read_to_string(&manifest)?, before);
+    let _ = std::fs::remove_dir_all(manifest.parent().ok_or("no parent")?);
+    Ok(())
+}
+
+#[test]
+fn generate_signed_reports_an_oracle_that_fails() -> Result<(), Box<dyn std::error::Error>> {
+    // This program stands in for Java: it refuses the options of the oracle as a usage error.
+    let manifest = corpus("generate_signed_reports_the_oracle", "")?;
+    std::fs::copy(committed_manifest(), &manifest)?;
+    let output = run(&[
+        "generate",
+        "signed",
+        "--manifest",
+        &manifest.to_string_lossy(),
+        "--java",
+        env!("CARGO_BIN_EXE_sigillum-testpki"),
+    ])?;
+    assert_eq!(output.status.code(), Some(1));
+    let stderr = text(&output.stderr);
+    assert!(
+        stderr.contains("tools/dss-oracle cannot sign signed/cades-enveloping-b-b-rsa: failed:"),
+        "{stderr}"
+    );
+    assert!(stderr.contains("unexpected argument"), "{stderr}");
+    let _ = std::fs::remove_dir_all(manifest.parent().ok_or("no parent")?);
     Ok(())
 }

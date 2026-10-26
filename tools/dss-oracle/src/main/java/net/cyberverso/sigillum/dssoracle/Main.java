@@ -116,6 +116,23 @@ public final class Main {
                 "  --data <file>                      data covered by the token",
                 "  --digest <hex>                     digest of the data covered by the token",
                 "  --digest-algorithm <name>          algorithm of --digest, such as SHA256",
+                "sign options (--certificate is the signing certificate, --out the signed file):",
+                "  --format <cades|pades|jades>       signature format",
+                "  --level <B-B|B-T|B-LT>             baseline level",
+                "  --key <file>                       PKCS#8 private key of the signer",
+                "  --chain <file>                     certificate above the signing certificate (repeatable)",
+                "  --signing-time <RFC 3339 time>     signing time, in whole seconds",
+                "  --document <file>                  document to sign",
+                "  --packaging <enveloping|detached>  CAdES and JAdES packaging, enveloping by default",
+                "  --serialisation <compact|flattened|general>  JWS serialisation, required for JAdES",
+                "  --signature-algorithm <name>       DSS signature algorithm, such as RSA_SSA_PSS_SHA256_MGF1",
+                "  --tsa-program <file>               path of sigillum-testpki, or the variable " + Sign.PROGRAM_VARIABLE,
+                "  --tsa-key <file>                   private key of the timestamping authority",
+                "  --tsa-cert <file>                  certificate of the timestamping authority",
+                "  --tsa-chain <file>                 certificate above the TSA certificate, B-LT only (repeatable)",
+                "  --timestamp-time <RFC 3339 time>   genTime of the signature timestamp, in whole seconds",
+                "  At B-LT, --validation-time is the time at which DSS checks the validation data,",
+                "  --trust-anchor is required, and --crl and --ocsp give the revocation data to embed.",
                 "Exit codes: 0 success, 1 failure, 2 usage error, 3 mode not implemented, 4 network access attempted.");
     }
 }

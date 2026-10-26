@@ -39,7 +39,7 @@ final class Manifest {
     private static final Pattern STRING = Pattern.compile("^([a-z-]+) = (?:\"(.*)\"|'(.*)')$");
     private static final Pattern DSS_TABLE = Pattern.compile(
             "^expected-dss = \\{ indication = \"([A-Z_-]+)\"(?:, sub-indication = \"([A-Z_]+)\")? \\}$");
-    private static final Pattern LIST = Pattern.compile("([a-z]+) = \\[([^\\]]*)\\]");
+    private static final Pattern LIST = Pattern.compile("([a-z-]+) = \\[([^\\]]*)\\]");
     private static final Pattern COVERED = Pattern.compile("^Covered certificate: (pki/[a-z0-9-]+)\\.");
 
     private final Map<String, Artefact> artefacts;

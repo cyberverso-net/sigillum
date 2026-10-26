@@ -942,11 +942,6 @@ class ValidateTimestampTest {
     }
 
     @Test
-    void signIsNotImplementedYet() {
-        assertEquals(ExitCodes.NOT_IMPLEMENTED, run(List.of(Mode.SIGN.commandName())));
-    }
-
-    @Test
     void theSummaryNamesNoSubIndicationAsNull() throws Exception {
         Path result = temp.resolve("null");
         assertEquals(ExitCodes.SUCCESS, run(arguments("valid",

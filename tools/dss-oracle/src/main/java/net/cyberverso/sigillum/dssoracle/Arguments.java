@@ -38,6 +38,7 @@ import java.util.Optional;
  * @param detached the detached content of the signed document, if given
  *        (validate-document only)
  * @param timeout the time limit of the validation, in seconds, if given
+ * @param sign the options of the sign mode, empty in the other modes
  */
 public record Arguments(
         Mode mode,
@@ -54,7 +55,8 @@ public record Arguments(
         Optional<PolicyOption> policy,
         Optional<Path> document,
         Optional<Path> detached,
-        Optional<Integer> timeout) {
+        Optional<Integer> timeout,
+        SignArguments sign) {
 
     /** The largest time limit accepted, one day in seconds. */
     public static final int MAX_TIMEOUT_SECONDS = 86_400;
@@ -88,6 +90,7 @@ public record Arguments(
         List<Path> certificates = new ArrayList<>();
         List<Path> crls = new ArrayList<>();
         List<Path> ocspResponses = new ArrayList<>();
+        SignArguments.Builder sign = new SignArguments.Builder();
         for (int i = 1; i < args.size(); i += 2) {
             String option = args.get(i);
             String value = valueOf(args, i);
@@ -96,7 +99,7 @@ public record Arguments(
                     if (validationTime != null) {
                         throw new UsageException("--validation-time is given more than once.");
                     }
-                    validationTime = rfc3339(value);
+                    validationTime = rfc3339(option, value);
                 }
                 case "--out" -> {
                     if (out != null) {
@@ -110,7 +113,14 @@ public record Arguments(
                 case "--digest" -> digest = once(digest, option, mode, Mode.VALIDATE_TIMESTAMP, value);
                 case "--digest-algorithm" ->
                         digestAlgorithm = once(digestAlgorithm, option, mode, Mode.VALIDATE_TIMESTAMP, value);
-                case "--document" -> document = Path.of(once(document, option, mode, Mode.VALIDATE_DOCUMENT, value));
+                case "--document" -> {
+                    // The document to sign in the sign mode, the signed document in validate-document.
+                    if (mode == Mode.SIGN) {
+                        sign.add(option, value);
+                    } else {
+                        document = Path.of(once(document, option, mode, Mode.VALIDATE_DOCUMENT, value));
+                    }
+                }
                 case "--detached" -> detached = Path.of(once(detached, option, mode, Mode.VALIDATE_DOCUMENT, value));
                 case "--policy" -> {
                     if (mode == Mode.SIGN) {
@@ -134,14 +144,23 @@ public record Arguments(
                 case "--certificate" -> certificates.add(Path.of(value));
                 case "--crl" -> crls.add(Path.of(value));
                 case "--ocsp" -> ocspResponses.add(Path.of(value));
-                default -> throw new UsageException("Unknown option: " + option);
+                default -> {
+                    if (!SignArguments.OPTIONS.contains(option)) {
+                        throw new UsageException("Unknown option: " + option);
+                    }
+                    if (mode != Mode.SIGN) {
+                        throw new UsageException(option + " is valid only in the mode " + Mode.SIGN.commandName()
+                                + ".");
+                    }
+                    sign.add(option, value);
+                }
             }
         }
         return new Arguments(mode, Optional.ofNullable(validationTime), List.copyOf(trustAnchors),
                 List.copyOf(certificates), List.copyOf(crls), List.copyOf(ocspResponses), Optional.ofNullable(out),
                 Optional.ofNullable(timestamp), Optional.ofNullable(data), Optional.ofNullable(digest),
                 Optional.ofNullable(digestAlgorithm), Optional.ofNullable(policy), Optional.ofNullable(document),
-                Optional.ofNullable(detached), Optional.ofNullable(timeout));
+                Optional.ofNullable(detached), Optional.ofNullable(timeout), sign.build());
     }
 
     /**
@@ -199,14 +218,22 @@ public record Arguments(
             .toFormatter()
             .withResolverStyle(ResolverStyle.STRICT);
 
-    private static Instant rfc3339(String value) throws UsageException {
+    /**
+     * Parses the value of a time option.
+     *
+     * @param option the option, for the error message
+     * @param value the value
+     * @return the time
+     * @throws UsageException if the value is not an RFC 3339 time with an offset, or is a leap second
+     */
+    static Instant rfc3339(String option, String value) throws UsageException {
         if (value.length() >= 19 && value.substring(17, 19).equals("60")) {
-            throw new UsageException("--validation-time: leap seconds are not supported: " + value);
+            throw new UsageException(option + ": leap seconds are not supported: " + value);
         }
         try {
             return OffsetDateTime.parse(value, RFC_3339).toInstant();
         } catch (DateTimeParseException e) {
-            throw new UsageException("--validation-time is not an RFC 3339 time with an offset: " + value);
+            throw new UsageException(option + " is not an RFC 3339 time with an offset: " + value);
         }
     }
 }
