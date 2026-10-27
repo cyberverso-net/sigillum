@@ -99,6 +99,20 @@ Issue type, milestone and status are not duplicated as labels.
 
 Versions follow Semantic Versioning. Before 1.0, minor versions may contain breaking changes, which are listed in the changelog. A release is tagged `vX.Y.Z` from `main` once its milestone's exit criteria, or the subset planned for that release, are met. When a release is prepared, the changelog fragments in `changelog.d/` are compiled into [CHANGELOG.md](../../CHANGELOG.md).
 
+## Dependency updates
+
+Dependabot proposes version updates weekly, as configured in `.github/dependabot.yml`. Its pull requests pass the same checks as any other.
+
+| Entry | Groups | Review |
+| --- | --- | --- |
+| `cargo` | `rustcrypto-dalek`, which moves the RustCrypto and dalek crates together within the generation that [ADR-0011](../design/adr/0011-asn1-x509-cms-foundations.md) pins | The normal checks, with `cargo vet` as described in [quality-gates.md](quality-gates.md) |
+| `maven` | `dss` for the DSS artefacts, and `maven-routine` for the plugins and the other libraries | `dss`: an oracle change, as below. `maven-routine`: the normal checks, and the licence table in [tools/dss-oracle/README.md](../../tools/dss-oracle/README.md) |
+| `github-actions` | None | The normal checks |
+
+A DSS update is an oracle change, never a routine update ([ADR-0013](../design/adr/0013-dss-oracle-command-line-tool.md)). Its pull request reruns the whole corpus through the oracle, reviews every changed result against the predictions of `testdata/manifest.toml`, and updates `dss-version` in the header of the manifest. The steps are listed under "Dependency updates" in [tools/dss-oracle/README.md](../../tools/dss-oracle/README.md).
+
+The `maven` entry lists every directory of the repository that holds a `pom.xml`. Dependabot's current implementation makes one pull request per group across all the directories of an entry, so the `dss` group is expected to move every DSS pin in the same pull request. GitHub's documentation does not state this, so any other build that pins DSS must have a test that its pin equals that of `tools/dss-oracle`. The check `.github/scripts/check-dependabot-lists.sh` fails when a `pom.xml` is added without its directory, or when the `maven-routine` group could take a DSS artefact.
+
 ## Raising the minimum supported Rust version
 
 The minimum supported Rust version (MSRV) is raised only in a minor release, as stated in [architecture.md](../design/architecture.md). A raise follows these steps:
