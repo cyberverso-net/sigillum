@@ -1,6 +1,6 @@
 # Measurements for goal G4
 
-This document sets the protocol for measuring signing latency, memory and binary size, so that the targets of goal G4 in the [charter](charter.md) rest on comparable figures. The same protocol applies to the reference stacks measured in phase 0 and to sigillum later. The results are recorded in this document, under *Results*, as they are produced.
+This document sets the protocol for measuring signing latency, memory and binary size, so that the targets of goal G4 in the [charter](charter.md) rest on comparable figures. The same protocol applies to the reference stacks and, later, to sigillum. DSS on a JVM is measured in phase 0, and the EUDI reference stack on Android and iOS at the start of phase 1. The results are recorded in this document, under *Results*, as they are produced.
 
 ## Operations
 
