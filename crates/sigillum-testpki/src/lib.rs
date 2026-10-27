@@ -8,6 +8,7 @@
 #![forbid(unsafe_code)]
 
 pub mod documents;
+pub mod dss;
 pub mod manifest;
 pub mod openssl;
 pub mod pki;

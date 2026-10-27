@@ -23,3 +23,11 @@ cargo +nightly fuzz run openssl_output corpus/openssl_output seeds/openssl_outpu
 ```
 
 `seeds/openssl_output` holds the output of `openssl version` of OpenSSL 3.5.9, which names the library, and of OpenSSL 1.1.1w, which does not, the times of a CRL, outputs of `openssl ocsp` for a response with a warning on its times and for a revoked certificate, each after the line that names the certificate, notes that name a covered certificate, a CAdES signature of the corpus, `signed/cades-detached-b-b-p256`, and a 21-byte ContentInfo of type SignedData whose content declares about 256 MiB, for the peek at the content type of a signed document. `openssl_output.dict` holds the words that the readers look for.
+
+The target `dss_output` feeds arbitrary text to the readers of `verify --dss`: `parse_version`, which reads the version line of `tools/dss-oracle --version`, and `read_summary`, which reads the `summary.json` of a validation, once for each validation mode, at the validation time and DSS version of the corpus:
+
+```
+cargo +nightly fuzz run dss_output corpus/dss_output seeds/dss_output -- -dict=dss_output.dict -max_total_time=600
+```
+
+`seeds/dss_output` holds the version line of the tool and summaries that it wrote for the corpus: a certificate validated with CRLs, a timestamp token whose imprint does not match its data, a JAdES signature, and an OCSP response that DSS rejects, with the paths of the files made relative to the repository. It also holds a summary of a run that exceeded the time limit, written by hand in the form that the README of the tool describes. `dss_output.dict` holds the members and values of `summary.json`.

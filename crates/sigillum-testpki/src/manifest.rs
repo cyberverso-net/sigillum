@@ -201,6 +201,26 @@ pub enum DssResult {
     },
 }
 
+/// The result in words: `rejected`, `not-applicable`, an indication, or an
+/// indication with its sub-indication, such as `INDETERMINATE with
+/// REVOKED_NO_POE`.
+impl fmt::Display for DssResult {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Rejected => f.write_str("rejected"),
+            Self::NotApplicable => f.write_str("not-applicable"),
+            Self::Indication {
+                indication,
+                sub_indication: None,
+            } => f.write_str(indication.as_str()),
+            Self::Indication {
+                indication,
+                sub_indication: Some(sub),
+            } => write!(f, "{} with {sub}", indication.as_str()),
+        }
+    }
+}
+
 /// An indication of ETSI EN 319 102-1 V1.4.1, clause 5.1.3.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
 pub enum Indication {
