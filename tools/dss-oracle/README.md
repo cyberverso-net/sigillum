@@ -533,3 +533,24 @@ mvn org.codehaus.mojo:license-maven-plugin:2.7.1:add-third-party -Dlicense.exclu
 ```
 
 The list is written to `target/generated-sources/license/THIRD-PARTY.txt`.
+
+## Dependency updates
+
+Dependabot watches `pom.xml` weekly, through the `maven` entry of `.github/dependabot.yml`, and opens grouped pull requests of two kinds.
+
+| Group | Artefacts | Review |
+| --- | --- | --- |
+| `dss` | Every artefact of `eu.europa.ec.joinup.sd-dss`, which all take their version from the property `dss.version` | An oracle change, as described below |
+| `maven-routine` | The Maven plugins and every other library declared in `pom.xml`, such as JUnit | The normal checks, and the licence table above |
+
+A DSS update is an oracle change, because the results of the tool are those of the DSS version it is built against, and those results decide the expected results of the corpus and the differential tests ([ADR-0013](../../docs/design/adr/0013-dss-oracle-command-line-tool.md)). Its pull request is never merged as a routine update. The maintainer completes it on the Dependabot branch:
+
+1. Rerun the whole corpus through the oracle with the new version. The workflows `dss-oracle.yml`, `fixtures-dss.yml`, `signed-corpus.yml` and `differential.yml` do so on the pull request, through the tests of `mvn -B verify`, `sigillum-testpki verify --dss`, `generate signed` and the differential tests of `sigillum-oracle`.
+2. Review every result that changes against the prediction of `testdata/manifest.toml`. A result that now meets the prediction closes the divergence that recorded it, in [divergences.md](../../docs/design/divergences.md) and in `dss-divergence`. A result that departs from the prediction is either a fault in the prediction, corrected in its generator with the reason, or a divergence recorded in `divergences.md` and named in `dss-divergence`. The prediction is never changed only to match DSS.
+3. Update `dss-version` in the header of `testdata/manifest.toml`. Until it names the new version, `sigillum-testpki verify --dss` stops on the Dependabot branch, so the pull request cannot pass unchanged.
+4. Regenerate the signed corpus with `generate signed` if `signed-corpus.yml` reports a difference, and review the difference.
+5. Update the licence table above, and the DSS version where this README, `testdata/README.md` and `divergences.md` state a result of that version.
+
+The pull request states the old and new DSS versions, each result that changed and how it was resolved. A security update of a DSS artefact is reviewed the same way. Groups apply to version updates only, so a security update may arrive as a separate pull request for one artefact; it still changes the shared property, and is completed on its branch like a version update.
+
+The PDF backend, Apache PDFBox, is not declared in `pom.xml`. It comes with DSS, at the version that DSS requires, so it changes with a DSS update. A library that `pom.xml` declares directly, other than DSS, belongs to `maven-routine`, even when DSS also depends on it.

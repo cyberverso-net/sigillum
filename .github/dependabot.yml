@@ -112,6 +112,30 @@ updates:
         update-types: [version-update:semver-major]
       - dependency-name: x509-tsp
         update-types: [version-update:semver-major]
+  # The Maven builds that pin DSS: tools/dss-oracle, the test oracle
+  # (ADR-0013). List each such directory here, one per line; CI checks
+  # that every pom.xml of the repository is listed. Dependabot makes one
+  # pull request per group across all the listed directories, so the dss
+  # group moves every DSS pin in the same pull request.
+  - package-ecosystem: maven
+    directories:
+      - /tools/dss-oracle
+    schedule:
+      interval: weekly
+    groups:
+      # A DSS update is an oracle change, reviewed as described in
+      # tools/dss-oracle/README.md. Every DSS artefact shares the property
+      # dss.version, which Dependabot updates for all of them at once.
+      dss:
+        patterns:
+          - eu.europa.ec.joinup.sd-dss:*
+      # Plugins and the other libraries. The exclusion keeps DSS out of
+      # this group whatever the order of the groups.
+      maven-routine:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - eu.europa.ec.joinup.sd-dss:*
   - package-ecosystem: github-actions
     directory: /
     schedule:

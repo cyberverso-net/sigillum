@@ -16,7 +16,7 @@ Every change must pass the gates below before it is merged. Continuous integrati
 | Dependency audits | `cargo vet --locked` | Every third-party dependency is covered by an audit or a recorded exemption, as described below |
 | Sign-off | DCO check | Every commit signed off |
 | Commit signatures | Verified commit signatures check | Every commit in the pull request has a verified signature |
-| Dependabot lists | `.github/scripts/check-dependabot-lists.sh` | The RustCrypto group and the ignore rules in `dependabot.yml` name the same crates |
+| Dependabot lists | `.github/scripts/check-dependabot-lists.sh`, with its tests in `.github/scripts/test-check-dependabot-lists.sh` | The RustCrypto group and the ignore rules in `dependabot.yml` name the same crates. The Maven entry lists every directory with a `pom.xml`, and its `maven-routine` group excludes the DSS artefacts of the `dss` group |
 | Fixture verification with OpenSSL | `sigillum-testpki verify --openssl` with the OpenSSL release named in the manifest, and with OpenSSL 4.0.3 through `--openssl-version`, each built from source and run without network, Linux | Every artefact matches the OpenSSL result in its manifest |
 | Fixture verification with DSS | `sigillum-testpki verify --dss` with `tools/dss-oracle`, built against the DSS release named in the manifest and run without network, Linux | Every artefact matches the DSS result in its manifest, or, for an artefact whose `dss-divergence` names a divergence recorded in `docs/design/divergences.md`, the result of DSS that the field records |
 | DSS oracle build | `mvn -B verify` in `tools/dss-oracle`, Java 21, Linux; the tool then runs without network | Builds, its tests pass, and it runs offline |
