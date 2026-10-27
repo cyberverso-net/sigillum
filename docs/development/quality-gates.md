@@ -14,8 +14,9 @@ Every change must pass the gates below before it is merged. Continuous integrati
 | Portability | `cargo check` for `wasm32-unknown-unknown`, `aarch64-apple-ios`, `aarch64-linux-android` | Builds |
 | Dependencies | `cargo deny check` | No licence, advisory or source violations |
 | Dependency audits | `cargo vet --locked` | Every third-party dependency is covered by an audit or a recorded exemption, as described below |
-| Sign-off | DCO check | Every commit signed off |
-| Commit signatures | Verified commit signatures check | Every commit in the pull request has a verified signature |
+| Sign-off | DCO check | Every commit of the pull request signed off. In the merge queue the check relies on the pull request, as described in [process.md](process.md#merging-through-the-merge-queue) |
+| Commit signatures | Verified commit signatures check | Every commit in the pull request has a verified signature. In the merge queue the check relies on the pull request, as for the sign-off |
+| Code scanning | CodeQL default setup and the code scanning rule of the ruleset on `main`, as described below | No CodeQL security alert of high or critical severity on the lines that the pull request changes |
 | Dependabot lists | `.github/scripts/check-dependabot-lists.sh` | The RustCrypto group and the ignore rules in `dependabot.yml` name the same crates |
 | Fixture verification with OpenSSL | `sigillum-testpki verify --openssl` with the OpenSSL release named in the manifest, and with OpenSSL 4.0.3 through `--openssl-version`, each built from source and run without network, Linux | Every artefact matches the OpenSSL result in its manifest |
 | Fixture verification with DSS | `sigillum-testpki verify --dss` with `tools/dss-oracle`, built against the DSS release named in the manifest and run without network, Linux | Every artefact matches the DSS result in its manifest, or, for an artefact whose `dss-divergence` names a divergence recorded in `docs/design/divergences.md`, the result of DSS that the field records |
@@ -26,6 +27,19 @@ Every change must pass the gates below before it is merged. Continuous integrati
 | Differential tests | `cargo test -p sigillum-oracle --features dss` in `differential.yml` on Linux, with Java and Maven, running `tools/dss-oracle` without network | Pass: every artefact of the corpus that DSS processes gives its expected result, or the result of its recorded divergence, and two runs of the whole corpus give the same `summary.json`, byte for byte |
 
 The `dss` feature of `sigillum-oracle` is excluded from the cross-platform test job, which tests `sigillum-oracle` with its default features only.
+
+Each required check runs on the pull request and again on the merge group in the merge queue, except where the table says otherwise. [process.md](process.md#merging-through-the-merge-queue) describes the queue.
+
+## Code scanning merge protection
+
+CodeQL runs through the default setup of code scanning. The ruleset on `main` holds a code scanning rule: a pull request cannot be merged while CodeQL reports a security alert of high or critical severity, while its analysis is in progress, or if CodeQL is not configured. The rule is not a status check, and it has two limits, both accepted:
+
+- **Merge groups.** The rule does not apply to merge groups in the merge queue. It is expected to be enforced on the pull request before the pull request can be queued, so that the queue combines only pull requests that passed it. GitHub's documentation does not state this; the first pull request merged through the queue confirms it, and this text is corrected if it does not hold.
+- **Lines in the diff.** The rule considers only an alert whose lines are all in the pull request diff, which means a new finding. An alert that already exists on `main` does not block a pull request. It goes through triage in the code scanning alerts of the repository instead.
+
+The rule also does not apply to Dependabot pull requests analysed by the default setup.
+
+GitHub documents these limits in [Code scanning merge protection](https://docs.github.com/en/code-security/concepts/code-scanning/merge-protection).
 
 ## Dependency audits
 
