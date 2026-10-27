@@ -135,7 +135,7 @@ The reviewer, and the author before requesting review, checks that:
 4. Errors are typed and informative, and do not leak secret material.
 5. Cryptographic comparisons that involve secrets run in constant time.
 6. Unsupported input yields an explicit "not supported" result, never a pass.
-7. The public API is consistent with existing crates and with [ADR-0005](../design/adr/0005-two-step-signing.md) and [ADR-0006](../design/adr/0006-no-network-access-in-core.md).
+7. The public API is consistent with existing crates and with [ADR-0005](../design/adr/0005-two-step-signing.md), [ADR-0006](../design/adr/0006-no-network-access-in-core.md) and the conventions of [ADR-0026](../design/adr/0026-public-api-conventions.md). External evidence is obtained through the request and response loop of ADR-0026, decision 2, and the core performs no network access.
 8. New dependencies are justified and pass `cargo deny` and `cargo vet`.
 9. The provenance rule in [CONTRIBUTING.md](../../CONTRIBUTING.md) is respected: no code or test data under incompatible licences.
 10. Documentation and comments follow the [style guide](style-guide.md).

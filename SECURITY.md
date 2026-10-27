@@ -23,6 +23,6 @@ Of particular interest are issues that could lead to:
 - acceptance of a forged, altered or otherwise invalid signature;
 - a signature that appears to cover content it does not cover, including PDF shadow and incremental-update attacks;
 - crashes, excessive resource use or memory-safety issues on malformed input;
-- leakage of signing material through the signer or fetcher interfaces.
+- leakage of signing material through the signer or fetcher interfaces, or through the evidence requests and responses exchanged with the caller.
 
 Vulnerabilities in third-party dependencies should be reported to their maintainers; please also let us know if sigillum is affected.

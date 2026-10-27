@@ -6,7 +6,7 @@ This document gives an overview of the workspace, its dependencies and its main 
 
 | Component | Role | Published |
 | --- | --- | --- |
-| `sigillum-pki` | Cryptographic provider interface, certificates, path building and validation, OCSP, CRL, RFC 3161 timestamps, signer and fetcher interfaces | Yes |
+| `sigillum-pki` | Cryptographic provider interface, certificates, path building and validation, OCSP, CRL, RFC 3161 timestamps, sigillum's own OCSP and timestamp structures, the types shared by the format crates (context, limits, errors, evidence requests and responses), signer and fetcher interfaces | Yes |
 | `sigillum-cms` | CMS SignedData, EnvelopedData and AuthEnvelopedData construction and parsing, CAdES signed and unsigned attributes | Yes |
 | `sigillum-pdf` | Minimal PDF reader, append-only incremental-update writer, revision analysis (planned, [ADR-0015](adr/0015-pdf-reader-and-incremental-writer.md)) | Yes |
 | `sigillum-cades` | CAdES profiles: BES, baseline B-B, B-T, B-LT | Yes |
@@ -22,14 +22,14 @@ The crate names `sigillum` and `sigillum-core` on crates.io belong to an unrelat
 
 ## Structure and dependencies
 
-The library is layered. Format crates depend on the shared PKI, CMS and PDF layers and never on each other. Rust applications use the format crates directly; applications in other languages go through `sigillum-ffi`. Private keys stay with a signer and network access stays with the calling application.
+The library is layered. Format crates depend on the shared PKI, CMS and PDF layers and never on each other. Rust applications use the format crates directly; applications in other languages go through `sigillum-ffi`. Private keys stay with a signer and network access stays with the calling application. When `assemble` needs a timestamp, revocation data or a certificate, it returns the requests to the caller, who performs them and passes the responses to `resume`, with the document, the signer chain and the options again ([ADR-0026](adr/0026-public-api-conventions.md), decision 2). The `Fetcher` interface is a convenience over this loop for Rust callers with blocking network access.
 
 ```mermaid
 flowchart TB
     subgraph app["Calling application"]
         A["Android, iOS, desktop or web application"]
         S["Signer: platform keystore or smart card"]
-        F["Fetcher: HTTP(S) retrieval of timestamps, OCSP, CRLs and certificates"]
+        F["Network access of the application, directly or through a Fetcher: HTTP(S) retrieval of timestamps, OCSP, CRLs and certificates"]
         H["HTTP client of the application"]
     end
 
@@ -42,13 +42,13 @@ flowchart TB
         JADES["sigillum-jades"]
         CMS["sigillum-cms"]
         PDF["sigillum-pdf"]
-        PKI["sigillum-pki: provider, certificates, revocation, timestamps, Signer and Fetcher interfaces"]
+        PKI["sigillum-pki: provider, certificates, revocation, own OCSP and timestamp structures, shared types, Signer and Fetcher interfaces"]
         CSC["CSC API signer adapter (hosting crate to be decided)"]
     end
 
     subgraph ext["External crates"]
         UNIFFI["uniffi, wasm-bindgen"]
-        FORMATS["der, spki, x509-cert, x509-ocsp, x509-tsp, cms (der 0.7 generation)"]
+        FORMATS["der, spki, x509-cert, cms (der 0.8 generation)"]
         RC["RustCrypto primitives and ed25519-dalek"]
         JSON["serde_json"]
     end
@@ -63,7 +63,7 @@ flowchart TB
     PKI --> FORMATS & RC
     FFI --> UNIFFI
     S -. "implements Signer" .-> PKI
-    F -. "implements Fetcher" .-> PKI
+    F -. "answers evidence requests, or implements Fetcher" .-> PKI
     CSC -. "implements Signer" .-> PKI
     CSC -- "caller-supplied transport" --> H --> QTSP
 ```
@@ -74,7 +74,7 @@ The test tooling sits outside the library and is never a dependency of it.
 
 ```mermaid
 flowchart LR
-    TPKI["sigillum-testpki (x509-cert, cms, x509-ocsp)"] --> DATA["testdata/ and manifest"]
+    TPKI["sigillum-testpki (x509-cert, cms, x509-ocsp, x509-tsp; der 0.7 generation)"] --> DATA["testdata/ and manifest"]
     PKITS["NIST PKITS, downloaded at test time"] --> TESTS
     SAMPLES["Public samples with recorded licences"] --> DATA
     CLI -- "sign mode" --> DATA
@@ -90,7 +90,7 @@ flowchart LR
     REPORTS --> ORACLE
 ```
 
-`sigillum-oracle` depends on `sigillum-testpki` for the reader of the manifest and the runner of `tools/dss-oracle`. The reverse dependency cannot exist: `sigillum-testpki` depends on no sigillum crate, because they are the code under test ([ADR-0014](adr/0014-test-pki-and-corpus.md)), and `sigillum-oracle` will depend on the library to compare its results with those of DSS.
+`sigillum-oracle` depends on `sigillum-testpki` for the reader of the manifest and the runner of `tools/dss-oracle`. The reverse dependency cannot exist: `sigillum-testpki` depends on no sigillum crate, because they are the code under test ([ADR-0014](adr/0014-test-pki-and-corpus.md)), and `sigillum-oracle` will depend on the library to compare its results with those of DSS. `sigillum-testpki` stays on the `der` 0.7 generation and keeps its own DER length walk. `sigillum-oracle` runs it and the walk of `sigillum-pki` over the same inputs and compares only their structural checks of identifier octets, length octets, nesting and trailing data, with the library walk in whole-input mode and at the depth limit of 32 of `sigillum-testpki`. The object identifier checks and the configurable depth of the library walk are mapped as expected differences ([ADR-0025](adr/0025-build-phase-1-on-der-0-8.md), rule 5).
 
 ## Design overview
 
@@ -102,22 +102,23 @@ The security objectives, trust boundaries and threats that these choices address
 | Licence and contributions | Apache-2.0 OR MIT; Developer Certificate of Origin | [ADR-0003](adr/0003-licence-and-contribution-terms.md) |
 | Relationship with DSS | External test oracle only; no DSS code or test data | [ADR-0004](adr/0004-dss-as-test-oracle.md) |
 | Divergences from DSS | Three classes: required or permitted by the standard, DSS defects, intentional restrictions decided in an ADR; Ed25519 public keys of small order restricted | [ADR-0019](adr/0019-divergence-classes-and-intentional-restrictions.md) |
-| Signing flow | Two steps, `prepare` and `assemble`; keys stay with an external signer | [ADR-0005](adr/0005-two-step-signing.md) |
-| Network access | None in the core; caller-supplied `Fetcher` | [ADR-0006](adr/0006-no-network-access-in-core.md) |
+| Signing flow | `prepare`, then `assemble` with the signature value, then `resume` for each round of evidence requests; keys stay with an external signer | [ADR-0005](adr/0005-two-step-signing.md), [ADR-0026](adr/0026-public-api-conventions.md) |
+| Public signing API | One shape for every format crate (`prepare`, `assemble`, `resume`); states never authoritative: `assemble` and `resume` recompute everything signed from the re-supplied document, signer chain, options and signing time, and verify the signature value over it; evidence requests returned to the caller; explicit times; one shared context and error type; opaque DER states; signature values with a stated encoding; bytes and sigillum types only | [ADR-0026](adr/0026-public-api-conventions.md) |
+| Network access | None in the core; evidence requests returned to the caller, with a `Fetcher` convenience for blocking Rust callers | [ADR-0006](adr/0006-no-network-access-in-core.md), [ADR-0026](adr/0026-public-api-conventions.md) |
 | Scope and unsupported input | Baseline-first creation; explicit "not supported" results | [ADR-0007](adr/0007-asymmetric-scope.md) |
 | JAdES | Baseline B-B to B-LT in scope, after CAdES and PAdES | [ADR-0008](adr/0008-include-jades-baseline.md) |
 | JAdES payloads and detached mechanisms | Unencoded payloads and `HttpHeaders` excluded; `ObjectIdByURI` with one object only | [ADR-0018](adr/0018-restrict-jades-payloads-and-detached-mechanisms.md) |
 | XAdES | Deferred; reviewed once the phase 3 XML component for trusted lists exists | [ADR-0009](adr/0009-keep-xades-deferred.md) |
 | Cryptographic backend | RustCrypto behind a provider interface; `rsa` for public-key operations only, enforced by lint | [ADR-0010](adr/0010-cryptographic-backend.md) |
-| ASN.1, X.509 and CMS | RustCrypto formats crates, stable `der` 0.7 generation, not exposed in the public API | [ADR-0011](adr/0011-asn1-x509-cms-foundations.md) |
+| ASN.1, X.509 and CMS | RustCrypto formats crates, not exposed in the public API; the `der` 0.8 generation in the library, with `cms` and `rsa` at pinned release candidates; own OCSP and RFC 3161 structures; `sigillum-testpki` on the `der` 0.7 generation | [ADR-0011](adr/0011-asn1-x509-cms-foundations.md), [ADR-0025](adr/0025-build-phase-1-on-der-0-8.md) |
 | Untrusted input | Caller-configurable size limits; DER length walk in `sigillum-pki` before decoding; untrusted object identifiers checked before parsing, with arcs below 2^28 (DIV-2); fuzz target per entry point | [ADR-0024](adr/0024-bounded-decoding-of-untrusted-input.md) |
-| Accepted advisories | RUSTSEC-2023-0071 and RUSTSEC-2026-0387, public data and test keys only; no elliptic-curve operation on secret values before the der 0.8 migration | [ADR-0020](adr/0020-accepted-advisories-der-0-7.md) |
+| Accepted advisories | RUSTSEC-2023-0071 and RUSTSEC-2026-0387, public data and test keys only; no elliptic-curve operation on secret values before the der 0.8 migration (#21), after which RUSTSEC-2026-0387 covers `sigillum-testpki` only | [ADR-0020](adr/0020-accepted-advisories-der-0-7.md), [ADR-0025](adr/0025-build-phase-1-on-der-0-8.md) |
 | Certificate path validation | Own implementation of RFC 5280 at an explicit validation time, with results in AdES terms | [ADR-0012](adr/0012-certificate-path-validation.md) |
 | DSS execution | Purpose-built Java command-line tool against a pinned DSS release; Linux-only job | [ADR-0013](adr/0013-dss-oracle-command-line-tool.md) |
 | Test PKI and corpus | PKI artefacts generated in Rust, signed documents by DSS; checked by OpenSSL and DSS in CI; committed with a manifest | [ADR-0014](adr/0014-test-pki-and-corpus.md) |
 | PDF | Own minimal reader and append-only incremental writer | [ADR-0015](adr/0015-pdf-reader-and-incremental-writer.md) |
 | JAdES implementation | Own implementation on `sigillum-pki`; duplicate header names rejected | [ADR-0016](adr/0016-jades-implementation-basis.md) |
-| Defensive API rules | Verify after signing; re-supplied document; restricted and bounded fetcher; explicit valid outcome with conformance findings; DocMDP respected; evidence checked before embedding; no B-LT on a revoked certificate | [ADR-0017](adr/0017-defensive-api-rules.md) |
+| Defensive API rules | Verify after signing; re-supplied document; evidence requests restricted to `http` and `https` URLs, bounded in number and response size; explicit valid outcome with conformance findings; DocMDP respected; evidence checked before embedding; no B-LT on a revoked certificate | [ADR-0017](adr/0017-defensive-api-rules.md) |
 
 ### Errors, not panics
 

@@ -1,6 +1,6 @@
 # ADR-0006: No network access in the core
 
-- **Status:** Accepted
+- **Status:** Accepted; retrieval through a `Fetcher` during signature creation superseded by [ADR-0026](0026-public-api-conventions.md)
 - **Date:** 2026-10-22
 
 ## Context
@@ -21,3 +21,7 @@ The core crates never open network connections. All retrieval goes through a `Fe
 ## Consequences
 
 The core has no HTTP or TLS dependency. Examples and the optional adapter show how to implement the fetcher. Offline operation is the default mode for tests and for the differential harness.
+
+## Notes
+
+- **2026-10-27.** [ADR-0026](0026-public-api-conventions.md), decision 2, replaces the rule that all retrieval goes through a `Fetcher`, for retrieval during signature creation. The format crates return evidence requests to the caller, who performs them and passes the responses back. The `Fetcher` becomes a convenience over that loop for Rust callers with blocking network access. The core still performs no network access and has no HTTP or TLS dependency. Retrieval during verification is decided in phase 2. This note does not change the record above.

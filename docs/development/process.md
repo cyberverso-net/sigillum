@@ -38,7 +38,7 @@ A story may move to *Ready* when:
 - if it performs elliptic-curve operations on secret values, it names #21 as a dependency in the issue;
 - it fits within [scope.md](../project/scope.md).
 
-[ADR-0020](../design/adr/0020-accepted-advisories-der-0-7.md) accepts RUSTSEC-2026-0387 only while no library code performs such operations. Such a story therefore cannot be ready until #21 is done.
+[ADR-0020](../design/adr/0020-accepted-advisories-der-0-7.md) accepts RUSTSEC-2026-0387 only while no library code performs such operations. Such a story therefore cannot be ready until #21 is done. [ADR-0025](../design/adr/0025-build-phase-1-on-der-0-8.md) ends that acceptance for the library when #21 moves the library crates to the `der` 0.8 generation, and keeps it for `sigillum-testpki` only.
 
 ## Workflow
 
@@ -86,7 +86,7 @@ A story is done when:
 
 | Label | Use |
 | --- | --- |
-| `area: pki`, `area: cms`, `area: cades`, `area: pades`, `area: ffi`, `area: oracle`, `area: docs`, `area: ci` | The crate or area concerned |
+| `area: pki`, `area: cms`, `area: cades`, `area: pades`, `area: jades`, `area: ffi`, `area: testpki`, `area: oracle`, `area: measurements`, `area: docs`, `area: ci` | The crate or area concerned |
 | `priority: high`, `priority: low` | Deviation from normal priority |
 | `needs: adr` | A decision must be recorded before work can proceed |
 | `needs: discussion` | Scope or approach not yet agreed |
