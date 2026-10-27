@@ -1,0 +1,58 @@
+name: Differential tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  differential:
+    name: Differential tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      CARGO_TERM_COLOR: always
+      RUSTFLAGS: -D warnings
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
+        with:
+          toolchain: stable
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: tools/dss-oracle/pom.xml
+      # The JAR contains DSS (LGPL-2.1) and is never uploaded as an artefact (ADR-0013).
+      # Its own tests run in dss-oracle.yml.
+      - name: Build tools/dss-oracle
+        working-directory: tools/dss-oracle
+        run: mvn -B -ntp package -DskipTests
+      - name: Build the differential tests
+        run: cargo test --locked -p sigillum-oracle --features dss --no-run
+      # The tests are built with network access and run in a network
+      # namespace without it. They run the whole corpus twice and fail on
+      # any result other than the expected one, and on any summary that
+      # differs between the two runs.
+      - name: Run the differential tests, without network
+        run: |
+          offline() {
+            sudo unshare --net -- runuser -u "$(id -un)" -- env "PATH=$PATH" "HOME=$HOME" \
+              "JAVA_HOME=$JAVA_HOME" "RUSTFLAGS=$RUSTFLAGS" "CARGO_TERM_COLOR=$CARGO_TERM_COLOR" \
+              "SIGILLUM_ORACLE_JAR=$PWD/tools/dss-oracle/target/dss-oracle.jar" \
+              "SIGILLUM_ORACLE_JAVA=$JAVA_HOME/bin/java" "$@"
+          }
+          offline true
+          for url in https://github.com https://1.1.1.1; do
+            if offline curl -sS --max-time 5 "$url" > /dev/null; then
+              echo "The network namespace still reaches $url."
+              exit 1
+            fi
+          done
+          offline cargo test --locked --offline -p sigillum-oracle --features dss -- --nocapture

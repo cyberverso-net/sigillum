@@ -45,10 +45,12 @@ use x509_ocsp::{
     RevokedInfo, SingleResponse,
 };
 
-use super::hierarchy::{self, CERTIFICATES, CertSpec, Offset, Revocation};
+use super::hierarchy::{self, CERTIFICATES, CertSpec, DssDivergence, Offset, Revocation};
 use super::keys::{CertSigner, KeyPair, KeyType, SignatureAlgorithm, SignatureBytes, to_der};
 use super::{GenerateError, GeneratedFile, PkiError, Summary, certificate_id, sha256_hex};
-use crate::manifest::{Artefact, DssResult, Indication, Kind, Links, Manifest, OpensslResult};
+use crate::manifest::{
+    Artefact, Divergence, DssResult, Indication, Kind, Links, Manifest, OpensslResult,
+};
 
 /// The directory of the OCSP responses, relative to the manifest.
 pub const DIRECTORY: &str = "ocsp";
@@ -169,6 +171,9 @@ pub struct OcspSpec {
     pub expected_dss: DssResult,
     /// Remarks for the manifest, after the covered certificate.
     pub notes: Option<String>,
+    /// The result that DSS gives in place of `expected_dss`, recorded as a
+    /// divergence, or `None` when DSS gives the expected result.
+    pub dss_divergence: Option<Divergence>,
 }
 
 /// The last sentence of the notes of every response with a status.
@@ -286,6 +291,8 @@ fn regular(spec: &CertSpec, validation_time: OffsetDateTime) -> Result<OcspSpec,
             indication: spec.expected_dss.indication,
             sub_indication: spec.expected_dss.sub_indication.map(str::to_owned),
         },
+        // The covered certificate's divergence, for the same reason.
+        dss_divergence: spec.dss_divergence.map(DssDivergence::to_manifest),
         notes: if spec.name == "signer-expired" {
             Some("thisUpdate equals the notAfter of pki/signer-expired, and the response carries no archiveCutoff, so it shows no status after the certificate expired, as ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, NOTE 8, describes for a certificate known not to have been revoked. Step 7 then gives OUT_OF_BOUNDS_NO_POE. DSS 6.5.1 gives OUT_OF_BOUNDS_NOT_REVOKED, a class 2 divergence recorded as DIV-5 in docs/design/divergences.md.".to_owned())
         } else {
@@ -315,6 +322,7 @@ fn case(
         expected_openssl: expected.0,
         expected_dss: expected.1,
         notes: Some(notes.to_owned()),
+        dss_divergence: None,
     }
 }
 
@@ -438,6 +446,7 @@ pub fn responses(validation_time: OffsetDateTime) -> Result<Vec<OcspSpec>, PkiEr
                 sub_indication: Some("OUT_OF_BOUNDS_NO_POE".to_owned()),
             },
             notes: Some("thisUpdate is two days and nextUpdate five days from the validation time, so the response is fresh under clause 5.2.5.4 of ETSI EN 319 102-1 V1.4.1. It was issued one day before pki/signer-expired expired, so it shows no status after expiry, as clause 5.2.6.4, NOTE 8, describes for a certificate known not to have been revoked, and step 7 gives OUT_OF_BOUNDS_NO_POE. DIV-5 in docs/design/divergences.md records the result of DSS 6.5.1.".to_owned()),
+            dss_divergence: Some(hierarchy::DIV_5.to_manifest()),
         },
     ]);
     Ok(specs)
@@ -718,6 +727,7 @@ fn response_file(spec: &OcspSpec, der: Vec<u8>) -> Result<GeneratedFile, PkiErro
         expected_openssl: spec.expected_openssl,
         expected_dss: spec.expected_dss.clone(),
         links,
+        dss_divergence: spec.dss_divergence.clone(),
         notes: Some(
             [Some(covered.as_str()), spec.notes.as_deref(), freshness]
                 .into_iter()

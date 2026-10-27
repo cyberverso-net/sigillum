@@ -1,12 +1,12 @@
 # Fuzz targets of sigillum-testpki
 
-The target `manifest` feeds arbitrary text to the manifest parser. It needs the nightly toolchain and `cargo-fuzz`:
+The target `manifest` feeds arbitrary text to the manifest parser. A manifest that parses is written back with `Manifest::to_toml` and must read back unchanged, as the generators rely on. It needs the nightly toolchain and `cargo-fuzz`:
 
 ```
 cargo +nightly fuzz run manifest corpus/manifest seeds/manifest -- -dict=manifest.dict -max_total_time=600
 ```
 
-`seeds/manifest` holds valid manifests to start from, and `manifest.dict` the field names and values of the format.
+`seeds/manifest` holds manifests of the current format to start from, one with a `dss-divergence`, and `manifest.dict` the field names and values of the format.
 
 The target `tsa_input` feeds arbitrary bytes to the input handling of the `tsa` subcommand: the module `timestamp::input` and `Tsa::from_pem`. The whole input goes to `check_der`, which checks that every DER length fits its parent and the input before any owned decoding. Valid UTF-8 also goes to the parsers of the digest algorithm, the digest and the time. The first byte then chooses what the remaining bytes stand for. When it is even, they are the key file, read with the committed certificate of `pki/tsa`. When it is odd, they are the certificate file, read with the committed test key of `pki/tsa`, so that certificate parsing and the check that the key matches the certificate are reached:
 

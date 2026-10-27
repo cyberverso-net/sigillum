@@ -745,23 +745,6 @@ class ValidateCertificateTest {
         return cases;
     }
 
-    /** A result of DSS 6.5.1 that differs from the prediction, with its entry in docs/design/divergences.md. */
-    private record Divergence(String result, String entry) {
-    }
-
-    /**
-     * The results of DSS 6.5.1 under the aligned policy (ADR-0023) that
-     * differ from the predictions of testdata/manifest.toml, by identifier.
-     * Each is recorded in docs/design/divergences.md. Every other case must
-     * give the result that the manifest predicts.
-     */
-    private static final Map<String, Divergence> KNOWN_DIVERGENCES = Map.ofEntries(
-            Map.entry("pki/signer-expired", new Divergence("INDETERMINATE OUT_OF_BOUNDS_NOT_REVOKED", "DIV-5")),
-            Map.entry("ocsp/signer-expired", new Divergence("INDETERMINATE OUT_OF_BOUNDS_NOT_REVOKED", "DIV-5")),
-            Map.entry("pki/ca-expired", new Divergence("INDETERMINATE OUT_OF_BOUNDS_NOT_REVOKED", "DIV-5")),
-            Map.entry("ocsp/signer-expired-before-expiry",
-                    new Divergence("INDETERMINATE OUT_OF_BOUNDS_NOT_REVOKED", "DIV-5")));
-
     private static String result(Map<String, Object> summary) {
         return "rejected".equals(summary.get("result")) ? "rejected"
                 : summary.get("sub-indication") == null ? (String) summary.get("indication")
@@ -780,7 +763,6 @@ class ValidateCertificateTest {
         Map<String, List<String>> cases = corpusCases(manifest);
         assertEquals(manifest.ofKind("certificate").size() + manifest.ofKind("crl").size()
                 + manifest.ofKind("ocsp-response").size(), cases.size());
-        assertTrue(cases.keySet().containsAll(KNOWN_DIVERGENCES.keySet()), KNOWN_DIVERGENCES.keySet().toString());
         StringBuilder table = new StringBuilder();
         List<String> failures = new ArrayList<>();
         Set<String> policyDependent = new java.util.TreeSet<>();
@@ -812,10 +794,13 @@ class ValidateCertificateTest {
                 policyDependent.add(entry.getKey());
             }
             String predicted = manifest.get(entry.getKey()).expectedDss().replace('-', '_');
-            Divergence divergence = KNOWN_DIVERGENCES.get(entry.getKey());
-            assertTrue(divergence == null || !divergence.result().equals(predicted),
+            // A result of DSS that differs from the prediction is recorded in docs/design/divergences.md
+            // and named by the field dss-divergence of the artefact in the manifest.
+            Manifest.Divergence divergence = manifest.get(entry.getKey()).divergence();
+            String recorded = divergence == null ? null : divergence.result().replace('-', '_');
+            assertTrue(recorded == null || !recorded.equals(predicted),
                     entry.getKey() + " is listed as a divergence but matches the manifest");
-            String expected = divergence == null ? predicted : divergence.result();
+            String expected = recorded == null ? predicted : recorded;
             table.append(String.format("| `%s` | %s | %s | %s |%n", entry.getKey(), predicted, actual,
                     byDefault));
             if (!expected.equals(actual)) {

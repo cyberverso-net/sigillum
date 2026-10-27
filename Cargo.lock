@@ -1196,6 +1196,12 @@ version = "0.0.0"
 [[package]]
 name = "sigillum-oracle"
 version = "0.0.0"
+dependencies = [
+ "proptest",
+ "serde_json",
+ "sigillum-testpki",
+ "time",
+]
 
 [[package]]
 name = "sigillum-pades"

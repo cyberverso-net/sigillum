@@ -1335,6 +1335,7 @@ fn documents_are_not_applicable_and_run_nothing() -> TestResult {
         expected_dss: DssResult::NotApplicable,
         links: Links::default(),
         notes: None,
+        dss_divergence: None,
     });
     let dir = scratch("documents")?;
     let oracle = Oracle::new(&manifest);

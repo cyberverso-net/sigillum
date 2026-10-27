@@ -90,6 +90,8 @@ flowchart LR
     REPORTS --> ORACLE
 ```
 
+`sigillum-oracle` depends on `sigillum-testpki` for the reader of the manifest and the runner of `tools/dss-oracle`. The reverse dependency cannot exist: `sigillum-testpki` depends on no sigillum crate, because they are the code under test ([ADR-0014](adr/0014-test-pki-and-corpus.md)), and `sigillum-oracle` will depend on the library to compare its results with those of DSS.
+
 ## Design overview
 
 The security objectives, trust boundaries and threats that these choices address are described in the [threat model](threat-model.md).

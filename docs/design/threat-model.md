@@ -21,7 +21,7 @@ This document states what sigillum protects, against whom, and how. Each threat 
 - A trust service provider whose keys are valid but whose service is compromised. Examples are a certification authority issuing certificates to an impostor, or a timestamping authority issuing false times. The library verifies what the trust anchors attest; it cannot detect a trusted party that lies.
 - Presentation to the user: showing the user exactly what is signed, and the signed revision of a PDF, is the application's responsibility. The library supplies the information needed to do it (threat R2).
 - Side channels in cryptographic primitives beyond what [ADR-0010](adr/0010-cryptographic-backend.md) states.
-- The security of the test tooling (`sigillum-testpki`, `tools/dss-oracle`), which is never shipped.
+- The security of the test tooling (`sigillum-testpki`, `sigillum-oracle`, `tools/dss-oracle`), which is never shipped.
 
 ## System and trust boundaries
 

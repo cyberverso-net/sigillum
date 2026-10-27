@@ -1,0 +1,26 @@
+[package]
+name = "sigillum-oracle-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+serde_json = "1.0.154"
+
+[dependencies.sigillum-oracle]
+path = ".."
+
+[[bin]]
+name = "summary"
+path = "fuzz_targets/summary.rs"
+test = false
+doc = false
+bench = false
+
+# The fuzz targets form their own workspace, built with the nightly toolchain.
+[workspace]
+members = ["."]
