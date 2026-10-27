@@ -48,7 +48,7 @@ You can sign with an SSH or a GPG key:
 
 The "Verified commit signatures" check fails a pull request that contains any commit without a verified signature. Commits made through the GitHub web interface, including those from Dependabot, are signed by GitHub and pass the check.
 
-Pull requests are merged by squash, and GitHub signs the resulting commit on `main`. The ruleset on `main` rejects commits pushed directly to `main` without a verified signature. Repository administrators can bypass the ruleset, including its required checks.
+Pull requests are merged by squash through the merge queue, as described in the [development process](docs/development/process.md), and GitHub signs the resulting commit on `main`. The ruleset on `main` rejects commits pushed directly to `main` without a verified signature. Repository administrators can bypass the ruleset, including its required checks.
 
 ## Code standards
 
