@@ -407,6 +407,7 @@ impl Fixture {
                     ]
                 },
             },
+            dss_divergence: None,
             notes: Some(self.notes()),
         }
     }

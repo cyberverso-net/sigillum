@@ -15,7 +15,7 @@ use x509_cert::ext::pkix::crl::CrlReason;
 
 use super::PkiError;
 use super::keys::{KeyType, SignatureAlgorithm};
-use crate::manifest::{Indication, OpensslResult};
+use crate::manifest::{Divergence, Indication, OpensslResult};
 use KeyType::{Ed25519, P256, P384, P521, Rsa};
 use SignatureAlgorithm as Sig;
 
@@ -150,7 +150,42 @@ pub struct CertSpec {
     pub notes: Option<&'static str>,
     /// The revocation of the certificate, or `None` if it is not revoked.
     pub revocation: Option<Revocation>,
+    /// The result that DSS gives in place of `expected_dss`, recorded as a
+    /// divergence, or `None` when DSS gives the expected result.
+    pub dss_divergence: Option<DssDivergence>,
 }
+
+/// A result of DSS that differs from the expected one, with the entry of
+/// `docs/design/divergences.md` that records it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct DssDivergence {
+    /// The identifier of the entry, such as `DIV-5`.
+    pub entry: &'static str,
+    /// The result that DSS gives.
+    pub result: ExpectedDss,
+}
+
+impl DssDivergence {
+    /// The divergence as the manifest records it.
+    pub fn to_manifest(self) -> Divergence {
+        Divergence {
+            entry: self.entry.to_owned(),
+            indication: self.result.indication,
+            sub_indication: self.result.sub_indication.map(str::to_owned),
+        }
+    }
+}
+
+/// DIV-5 of `docs/design/divergences.md`: for an expired certificate whose
+/// revocation data show no status after it expired, DSS 6.5.1 gives
+/// OUT_OF_BOUNDS_NOT_REVOKED where OUT_OF_BOUNDS_NO_POE is predicted.
+pub const DIV_5: DssDivergence = DssDivergence {
+    entry: "DIV-5",
+    result: ExpectedDss {
+        indication: Indication::Indeterminate,
+        sub_indication: Some("OUT_OF_BOUNDS_NOT_REVOKED"),
+    },
+};
 
 const PASSED: ExpectedDss = ExpectedDss {
     indication: Indication::Passed,
@@ -213,6 +248,7 @@ pub(super) const fn signer(
         expected_dss: PASSED,
         notes: None,
         revocation: None,
+        dss_divergence: None,
     }
 }
 
@@ -412,6 +448,7 @@ pub const CERTIFICATES: [CertSpec; 32] = [
         not_after: Offset::days(-1),
         expected_openssl: OpensslResult::Rejected,
         expected_dss: OUT_OF_BOUNDS,
+        dss_divergence: Some(DIV_5),
         notes: Some(
             "Its revocation data, crl/ca-ecdsa and ocsp/signer-expired, were issued at the instant it expired, within its validity, because notAfter is inclusive (RFC 5280, section 4.1.2.5). Neither carries expiredCertsOnCRL or archiveCutoff, so neither shows its status after it expired, as ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, NOTE 8, describes for a certificate known not to have been revoked. Step 7 then gives OUT_OF_BOUNDS_NO_POE. DSS 6.5.1 gives OUT_OF_BOUNDS_NOT_REVOKED, a class 2 divergence recorded as DIV-5 in docs/design/divergences.md.",
         ),
@@ -453,6 +490,7 @@ pub const CERTIFICATES: [CertSpec; 32] = [
         not_after: Offset::days(-1),
         expected_openssl: OpensslResult::Rejected,
         expected_dss: OUT_OF_BOUNDS,
+        dss_divergence: Some(DIV_5),
         notes: Some(
             "Its revocation data, crl/root-ca, was issued at the instant it expired, within its validity, because notAfter is inclusive (RFC 5280, section 4.1.2.5). The CRL carries no expiredCertsOnCRL, so it does not show its status after it expired, as ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, NOTE 8, describes for a certificate known not to have been revoked. Step 7 then gives OUT_OF_BOUNDS_NO_POE. DSS 6.5.1 gives OUT_OF_BOUNDS_NOT_REVOKED, a class 2 divergence recorded as DIV-5 in docs/design/divergences.md.",
         ),

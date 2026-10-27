@@ -965,7 +965,7 @@ fn every_file_has_a_manifest_entry() -> TestResult {
     let files = generated()?;
     assert_eq!(files.len(), 2 * CERTIFICATES.len());
     let mut manifest = Manifest::parse(
-        "[header]\nformat-version = 1\nvalidation-time = \"2030-01-15T10:00:00Z\"\nopenssl-version = \"3.5.9\"\ndss-version = \"6.5.1\"\n",
+        "[header]\nformat-version = 2\nvalidation-time = \"2030-01-15T10:00:00Z\"\nopenssl-version = \"3.5.9\"\ndss-version = \"6.5.1\"\n",
     )?;
     for file in files {
         let artefact = &file.artefact;

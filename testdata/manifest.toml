@@ -1,7 +1,7 @@
 # Manifest of the test corpus. The format is described in README.md.
 
 [header]
-format-version = 1
+format-version = 2
 validation-time = "2030-01-15T10:00:00Z"
 openssl-version = "3.5.9"
 dss-version = "6.5.1"
@@ -336,6 +336,7 @@ kind = "certificate"
 purpose = "End-entity signing certificate that expired one day before the validation time."
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
+dss-divergence = { entry = "DIV-5", indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NOT_REVOKED" }
 links = { issuer = "pki/ca-ecdsa", chain = ["pki/ca-ecdsa", "pki/root-ca"], revocation = ["crl/ca-ecdsa", "ocsp/signer-expired"] }
 notes = "Its revocation data, crl/ca-ecdsa and ocsp/signer-expired, were issued at the instant it expired, within its validity, because notAfter is inclusive (RFC 5280, section 4.1.2.5). Neither carries expiredCertsOnCRL or archiveCutoff, so neither shows its status after it expired, as ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, NOTE 8, describes for a certificate known not to have been revoked. Step 7 then gives OUT_OF_BOUNDS_NO_POE. DSS 6.5.1 gives OUT_OF_BOUNDS_NOT_REVOKED, a class 2 divergence recorded as DIV-5 in docs/design/divergences.md."
 
@@ -376,6 +377,7 @@ kind = "certificate"
 purpose = "Intermediate CA that expired one day before the validation time."
 expected-openssl = "rejected"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
+dss-divergence = { entry = "DIV-5", indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NOT_REVOKED" }
 links = { issuer = "pki/root-ca", chain = ["pki/root-ca"], revocation = ["crl/root-ca"] }
 notes = "Its revocation data, crl/root-ca, was issued at the instant it expired, within its validity, because notAfter is inclusive (RFC 5280, section 4.1.2.5). The CRL carries no expiredCertsOnCRL, so it does not show its status after it expired, as ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, NOTE 8, describes for a certificate known not to have been revoked. Step 7 then gives OUT_OF_BOUNDS_NO_POE. DSS 6.5.1 gives OUT_OF_BOUNDS_NOT_REVOKED, a class 2 divergence recorded as DIV-5 in docs/design/divergences.md."
 
@@ -935,6 +937,7 @@ kind = "ocsp-response"
 purpose = "OCSP response of pki/ocsp-responder for pki/signer-expired, whose status is good."
 expected-openssl = "verified"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
+dss-divergence = { entry = "DIV-5", indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NOT_REVOKED" }
 links = { issuer = "pki/ocsp-responder", chain = ["pki/ocsp-responder", "pki/ca-ecdsa", "pki/root-ca"] }
 notes = "Covered certificate: pki/signer-expired. thisUpdate equals the notAfter of pki/signer-expired, and the response carries no archiveCutoff, so it shows no status after the certificate expired, as ETSI EN 319 102-1 V1.4.1, clause 5.2.6.4, NOTE 8, describes for a certificate known not to have been revoked. Step 7 then gives OUT_OF_BOUNDS_NO_POE. DSS 6.5.1 gives OUT_OF_BOUNDS_NOT_REVOKED, a class 2 divergence recorded as DIV-5 in docs/design/divergences.md. openssl ocsp compares thisUpdate and nextUpdate with the current time only, so the expected OpenSSL result covers the parsing of the response, its signature and the path of its signer at the validation time, and not its freshness."
 
@@ -1153,6 +1156,7 @@ kind = "ocsp-response"
 purpose = "OCSP response of pki/ocsp-responder for pki/signer-expired, whose status is good, issued two days before the validation time, before the certificate expired."
 expected-openssl = "verified"
 expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
+dss-divergence = { entry = "DIV-5", indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NOT_REVOKED" }
 links = { issuer = "pki/ocsp-responder", chain = ["pki/ocsp-responder", "pki/ca-ecdsa", "pki/root-ca"] }
 notes = "Covered certificate: pki/signer-expired. thisUpdate is two days and nextUpdate five days from the validation time, so the response is fresh under clause 5.2.5.4 of ETSI EN 319 102-1 V1.4.1. It was issued one day before pki/signer-expired expired, so it shows no status after expiry, as clause 5.2.6.4, NOTE 8, describes for a certificate known not to have been revoked, and step 7 gives OUT_OF_BOUNDS_NO_POE. DIV-5 in docs/design/divergences.md records the result of DSS 6.5.1. openssl ocsp compares thisUpdate and nextUpdate with the current time only, so the expected OpenSSL result covers the parsing of the response, its signature and the path of its signer at the validation time, and not its freshness."
 

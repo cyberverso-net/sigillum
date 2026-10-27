@@ -1,7 +1,7 @@
 # Manifest of the test corpus. The format is described in README.md.
 
 [header]
-format-version = 1
+format-version = 2
 validation-time = "2030-01-15T10:00:00Z"
 openssl-version = "3.0.13"
 dss-version = "6.5.1"

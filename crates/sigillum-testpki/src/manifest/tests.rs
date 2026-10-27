@@ -6,7 +6,7 @@ use super::*;
 
 const HEADER: &str = r#"
 [header]
-format-version = 1
+format-version = 2
 validation-time = "2030-01-15T10:00:00Z"
 openssl-version = "3.5.9"
 dss-version = "6.5.1"
@@ -64,7 +64,7 @@ fn is_syntax(error: Option<ManifestError>) -> bool {
 #[test]
 fn parses_header_only() -> Result<(), ManifestError> {
     let manifest = Manifest::parse(HEADER)?;
-    assert_eq!(manifest.header.format_version, 1);
+    assert_eq!(manifest.header.format_version, 2);
     assert_eq!(
         manifest.header.validation_time,
         datetime!(2030-01-15 10:00:00 UTC)
@@ -93,6 +93,7 @@ fn parses_an_artefact() -> Result<(), ManifestError> {
             },
             links: Links::default(),
             notes: None,
+            dss_divergence: None,
         }]
     );
     Ok(())
@@ -333,17 +334,19 @@ fn rejects_missing_fields() {
     }
     assert!(is_syntax(parse_err(ROOT)));
     assert!(is_syntax(parse_err(
-        &HEADER.replace("format-version = 1\n", "")
+        &HEADER.replace("format-version = 2\n", "")
     )));
 }
 
 #[test]
 fn rejects_other_format_versions() {
-    let text = HEADER.replace("format-version = 1", "format-version = 2");
-    assert_eq!(
-        parse_err(&text),
-        Some(ManifestError::UnsupportedFormatVersion(2))
-    );
+    for version in [1, 3] {
+        let text = HEADER.replace("format-version = 2", &format!("format-version = {version}"));
+        assert_eq!(
+            parse_err(&text),
+            Some(ManifestError::UnsupportedFormatVersion(version))
+        );
+    }
 }
 
 #[test]
@@ -711,8 +714,8 @@ fn errors_display_the_cause() {
             "the manifest is not valid: bad",
         ),
         (
-            ManifestError::UnsupportedFormatVersion(2),
-            "the manifest format version 2 is not supported; this program reads version 1",
+            ManifestError::UnsupportedFormatVersion(3),
+            "the manifest format version 3 is not supported; this program reads version 2",
         ),
         (
             ManifestError::ValidationTime("t".into()),
@@ -837,6 +840,28 @@ fn the_committed_manifest_is_valid() -> Result<(), ManifestError> {
     Ok(())
 }
 
+/// A divergence for every third artefact that DSS processes, with a result
+/// other than `expected`.
+fn divergence(expected: &DssResult, index: usize) -> Option<Divergence> {
+    let other = if *expected
+        == (DssResult::Indication {
+            indication: Indication::Passed,
+            sub_indication: None,
+        }) {
+        (
+            Indication::Indeterminate,
+            Some("OUT_OF_BOUNDS_NOT_REVOKED".to_owned()),
+        )
+    } else {
+        (Indication::Passed, None)
+    };
+    (index.is_multiple_of(3) && *expected != DssResult::NotApplicable).then(|| Divergence {
+        entry: format!("DIV-{}", index + 1),
+        indication: other.0,
+        sub_indication: other.1,
+    })
+}
+
 /// A manifest with every kind, result and link, and text that needs escaping.
 fn varied_manifest() -> Result<Manifest, ManifestError> {
     let mut manifest = Manifest::parse(&with_artefacts(ROOT))?;
@@ -901,6 +926,7 @@ fn varied_manifest() -> Result<Manifest, ManifestError> {
             expected_dss: dss[index % dss.len()].clone(),
             links,
             notes: (index % 2 == 0).then(|| "Line one.\nLine 'two'.".to_owned()),
+            dss_divergence: divergence(&dss[index % dss.len()], index),
         });
     }
     Ok(manifest)
@@ -912,8 +938,14 @@ fn writing_and_reading_a_manifest_gives_it_back() -> Result<(), ManifestError> {
     let text = manifest.to_toml();
     assert_eq!(Manifest::parse(&text)?, manifest);
     assert!(text.starts_with(
-        "# Manifest of the test corpus. The format is described in README.md.\n\n[header]\nformat-version = 1\nvalidation-time = \"2030-01-15T10:00:00Z\"\n"
+        "# Manifest of the test corpus. The format is described in README.md.\n\n[header]\nformat-version = 2\nvalidation-time = \"2030-01-15T10:00:00Z\"\n"
     ));
+    assert!(
+        manifest
+            .artefacts
+            .iter()
+            .any(|a| a.dss_divergence.is_some())
+    );
     let header_only = Manifest::parse(HEADER)?;
     assert_eq!(Manifest::parse(&header_only.to_toml())?, header_only);
     assert_eq!(header_only.to_toml().matches("[[artefact]]").count(), 0);
@@ -1030,4 +1062,239 @@ fn a_dss_result_is_written_in_words() {
         .to_string(),
         "INDETERMINATE with REVOKED_NO_POE"
     );
+}
+
+// The field dss-divergence, added in format version 2.
+
+const DIVERGENT: &str = r#"dss-divergence = { entry = "DIV-5", indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NOT_REVOKED" }"#;
+
+#[test]
+fn parses_a_dss_divergence() -> Result<(), ManifestError> {
+    let manifest = Manifest::parse(&with_artefacts(&format!("{ROOT}{DIVERGENT}\n")))?;
+    let divergence = Divergence {
+        entry: "DIV-5".into(),
+        indication: Indication::Indeterminate,
+        sub_indication: Some("OUT_OF_BOUNDS_NOT_REVOKED".into()),
+    };
+    assert_eq!(
+        manifest.artefacts[0].dss_divergence,
+        Some(divergence.clone())
+    );
+    assert_eq!(
+        divergence.result(),
+        DssResult::Indication {
+            indication: Indication::Indeterminate,
+            sub_indication: Some("OUT_OF_BOUNDS_NOT_REVOKED".into()),
+        }
+    );
+    let without = Manifest::parse(&with_artefacts(&format!(
+        "{ROOT}dss-divergence = {{ entry = \"DIV-12\", indication = \"FAILED\" }}\n"
+    )))?;
+    assert_eq!(
+        without.artefacts[0].dss_divergence,
+        Some(Divergence {
+            entry: "DIV-12".into(),
+            indication: Indication::Failed,
+            sub_indication: None,
+        })
+    );
+    Ok(())
+}
+
+#[test]
+fn writes_a_dss_divergence_after_the_expected_result() -> Result<(), ManifestError> {
+    let text = Manifest::parse(&with_artefacts(&format!(
+        "{ROOT}notes = \"n\"\n{DIVERGENT}\n"
+    )))?
+    .to_toml();
+    let expected =
+        format!("expected-dss = {{ indication = \"PASSED\" }}\n{DIVERGENT}\nnotes = \"n\"\n");
+    assert!(text.ends_with(&expected), "{text}");
+    let without = Manifest::parse(&with_artefacts(&format!(
+        "{ROOT}dss-divergence = {{ entry = \"DIV-1\", indication = \"FAILED\" }}\n"
+    )))?
+    .to_toml();
+    assert!(
+        without.ends_with("\ndss-divergence = { entry = \"DIV-1\", indication = \"FAILED\" }\n"),
+        "{without}"
+    );
+    Ok(())
+}
+
+#[test]
+fn rejects_a_divergence_entry_that_is_not_a_div_number() {
+    for entry in [
+        "", "DIV-", "DIV-x", "div-5", "DIV-05", "DIV-0", "DIV-5a", " DIV-5", "DIV--5", "DIV-٥",
+    ] {
+        let text = with_artefacts(&format!(
+            "{ROOT}dss-divergence = {{ entry = \"{entry}\", indication = \"FAILED\" }}\n"
+        ));
+        assert_eq!(
+            parse_err(&text),
+            Some(ManifestError::InvalidDivergenceEntry {
+                id: "pki/root".into(),
+                value: entry.into(),
+            }),
+            "{entry:?}"
+        );
+    }
+}
+
+#[test]
+fn rejects_a_divergence_sub_indication_of_another_indication() {
+    let text = with_artefacts(&format!(
+        "{ROOT}dss-divergence = {{ entry = \"DIV-5\", indication = \"FAILED\", sub-indication = \"NO_POE\" }}\n"
+    ));
+    assert_eq!(
+        parse_err(&text),
+        Some(ManifestError::InvalidSubIndication {
+            id: "pki/root".into(),
+            indication: "FAILED",
+            value: "NO_POE".into(),
+        })
+    );
+    let passed = with_artefacts(&format!(
+        "{ROOT}dss-divergence = {{ entry = \"DIV-5\", indication = \"TOTAL-PASSED\", sub-indication = \"CUSTOM\" }}\n"
+    ));
+    assert!(matches!(
+        parse_err(&passed),
+        Some(ManifestError::InvalidSubIndication { .. })
+    ));
+}
+
+#[test]
+fn rejects_a_divergence_that_gives_the_predicted_result() {
+    let text = with_artefacts(&format!(
+        "{ROOT}dss-divergence = {{ entry = \"DIV-5\", indication = \"PASSED\" }}\n"
+    ));
+    assert_eq!(
+        parse_err(&text),
+        Some(ManifestError::StaleDivergence {
+            id: "pki/root".into()
+        })
+    );
+    // Another sub-indication, or none, is another result.
+    let predicted = ROOT.replace(
+        "{ indication = \"PASSED\" }",
+        "{ indication = \"INDETERMINATE\", sub-indication = \"NO_POE\" }",
+    );
+    for divergence in [
+        "{ entry = \"DIV-5\", indication = \"INDETERMINATE\", sub-indication = \"CUSTOM\" }",
+        "{ entry = \"DIV-5\", indication = \"INDETERMINATE\" }",
+    ] {
+        let text = with_artefacts(&format!("{predicted}dss-divergence = {divergence}\n"));
+        assert!(Manifest::parse(&text).is_ok(), "{divergence}");
+    }
+    let same = with_artefacts(&format!(
+        "{predicted}dss-divergence = {{ entry = \"DIV-5\", indication = \"INDETERMINATE\", sub-indication = \"NO_POE\" }}\n"
+    ));
+    assert!(matches!(
+        parse_err(&same),
+        Some(ManifestError::StaleDivergence { .. })
+    ));
+}
+
+#[test]
+fn rejects_a_divergence_of_an_artefact_that_dss_does_not_process() {
+    let text = with_artefacts(&format!(
+        "{}dss-divergence = {{ entry = \"DIV-5\", indication = \"PASSED\" }}\n",
+        ROOT.replace("{ indication = \"PASSED\" }", "\"not-applicable\"")
+    ));
+    assert_eq!(
+        parse_err(&text),
+        Some(ManifestError::DivergenceNotApplicable {
+            id: "pki/root".into()
+        })
+    );
+    // A divergence from a predicted rejection is a divergence.
+    let rejected = with_artefacts(&format!(
+        "{}dss-divergence = {{ entry = \"DIV-5\", indication = \"PASSED\" }}\n",
+        ROOT.replace("{ indication = \"PASSED\" }", "\"rejected\"")
+    ));
+    assert!(Manifest::parse(&rejected).is_ok());
+}
+
+#[test]
+fn rejects_a_malformed_divergence_table() {
+    for table in [
+        "{ indication = \"FAILED\" }",
+        "{ entry = \"DIV-5\" }",
+        "{ entry = \"DIV-5\", indication = \"FAILED\", colour = \"red\" }",
+        "{ entry = \"DIV-5\", indication = \"GOOD\" }",
+        "{ entry = 5, indication = \"FAILED\" }",
+        "\"DIV-5\"",
+        "\"rejected\"",
+    ] {
+        let text = with_artefacts(&format!("{ROOT}dss-divergence = {table}\n"));
+        assert!(is_syntax(parse_err(&text)), "{table}");
+    }
+}
+
+#[test]
+fn divergence_errors_name_the_artefact_and_the_field() {
+    let entry = ManifestError::InvalidDivergenceEntry {
+        id: "pki/root".into(),
+        value: "DIV-x".into(),
+    };
+    assert_eq!(
+        entry.to_string(),
+        "the dss-divergence entry \"DIV-x\" of \"pki/root\" is not of the form DIV-<number>"
+    );
+    assert_eq!(
+        ManifestError::StaleDivergence {
+            id: "pki/root".into()
+        }
+        .to_string(),
+        "the dss-divergence of \"pki/root\" gives the result that expected-dss predicts, so it records no divergence"
+    );
+    assert_eq!(
+        ManifestError::DivergenceNotApplicable {
+            id: "pki/root".into()
+        }
+        .to_string(),
+        "\"pki/root\" has a dss-divergence, but its expected-dss is not-applicable"
+    );
+}
+
+/// The committed manifest records at least one divergence, and reads
+/// every `dss-divergence` line that it holds. The divergences themselves
+/// are listed in the manifest only.
+#[test]
+fn the_committed_manifest_reads_every_divergence_it_holds() -> Result<(), ManifestError> {
+    let text = include_str!("../../../../testdata/manifest.toml");
+    let manifest = Manifest::parse(text)?;
+    let read = manifest
+        .artefacts
+        .iter()
+        .filter(|a| a.dss_divergence.is_some())
+        .count();
+    let lines = text
+        .lines()
+        .filter(|line| line.starts_with("dss-divergence = "))
+        .count();
+    assert!(read > 0, "the manifest records no divergence");
+    assert_eq!(read, lines);
+    Ok(())
+}
+
+proptest::proptest! {
+    /// Any divergence entry and result survives writing and reading back.
+    #[test]
+    fn written_divergences_read_back_unchanged(
+        number in 1u32..100_000,
+        sub in proptest::option::of(proptest::sample::select(INDETERMINATE_SUB_INDICATIONS.to_vec())),
+    ) {
+        let mut manifest = Manifest::parse(&with_artefacts(ROOT))
+            .map_err(|e| proptest::test_runner::TestCaseError::fail(e.to_string()))?;
+        let mut artefact = manifest.artefacts[0].clone();
+        artefact.dss_divergence = Some(Divergence {
+            entry: format!("DIV-{number}"),
+            indication: Indication::Indeterminate,
+            sub_indication: sub.map(str::to_owned),
+        });
+        manifest.upsert(artefact);
+        let read = Manifest::parse(&manifest.to_toml())
+            .map_err(|e| proptest::test_runner::TestCaseError::fail(e.to_string()))?;
+        proptest::prop_assert_eq!(read, manifest);
+    }
 }

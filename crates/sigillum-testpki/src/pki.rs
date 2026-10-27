@@ -155,6 +155,9 @@ fn certificate_file(spec: &CertSpec, certificate: &[u8]) -> Result<GeneratedFile
             content: None,
             timestamp_chain: Vec::new(),
         },
+        dss_divergence: spec
+            .dss_divergence
+            .map(hierarchy::DssDivergence::to_manifest),
         notes: spec.notes.map(str::to_owned),
     };
     Ok(GeneratedFile {
@@ -177,6 +180,7 @@ fn key_file(spec: &CertSpec, key: &KeyPair) -> Result<GeneratedFile, PkiError> {
         expected_openssl: OpensslResult::Parsed,
         expected_dss: DssResult::NotApplicable,
         links: Links::default(),
+        dss_divergence: None,
         notes: None,
     };
     Ok(GeneratedFile {

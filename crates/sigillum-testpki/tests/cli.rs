@@ -222,7 +222,6 @@ END
 #[test]
 fn verify_with_dss_reports_each_artefact_not_as_expected() -> Result<(), Box<dyn std::error::Error>>
 {
-    use sigillum_testpki::dss::DIVERGENCES;
     use sigillum_testpki::manifest::{DssResult, Indication, Kind, Manifest};
     let java = java_passing_everything("verify_with_dss_reports_each_artefact_not_as_expected")?;
     let manifest_path = committed_manifest();
@@ -242,9 +241,9 @@ fn verify_with_dss_reports_each_artefact_not_as_expected() -> Result<(), Box<dyn
         } else {
             Indication::Passed
         };
-        let result = DIVERGENCES
-            .iter()
-            .find(|d| d.id == artefact.id)
+        let result = artefact
+            .dss_divergence
+            .as_ref()
             .map_or_else(|| artefact.expected_dss.clone(), |d| d.result());
         matches!(artefact.kind, Kind::PrivateKey | Kind::Document)
             || result
@@ -254,7 +253,13 @@ fn verify_with_dss_reports_each_artefact_not_as_expected() -> Result<(), Box<dyn
                 }
     };
     let mismatches = manifest.artefacts.iter().filter(|a| !passing(a)).count();
-    assert!(mismatches > DIVERGENCES.len());
+    let divergent = manifest
+        .artefacts
+        .iter()
+        .filter(|a| a.dss_divergence.is_some())
+        .count();
+    assert!(divergent > 0);
+    assert!(mismatches > divergent);
     let stderr = text(&output.stderr);
     assert!(
         stderr.contains(
@@ -387,7 +392,7 @@ fn corpus(name: &str, artefacts: &str) -> std::io::Result<PathBuf> {
     std::fs::write(
         &path,
         format!(
-            "[header]\nformat-version = 1\nvalidation-time = \"2030-01-15T10:00:00Z\"\nopenssl-version = \"3.5.9\"\ndss-version = \"6.5.1\"\n{artefacts}"
+            "[header]\nformat-version = 2\nvalidation-time = \"2030-01-15T10:00:00Z\"\nopenssl-version = \"3.5.9\"\ndss-version = \"6.5.1\"\n{artefacts}"
         ),
     )?;
     Ok(path)
@@ -993,7 +998,7 @@ fn an_invalid_manifest_is_reported() -> std::io::Result<()> {
     let path = dir.join("manifest.toml");
     std::fs::write(
         &path,
-        "[header]\nformat-version = 1\nvalidation-time = \"soon\"\nopenssl-version = \"3\"\ndss-version = \"6\"\n",
+        "[header]\nformat-version = 2\nvalidation-time = \"soon\"\nopenssl-version = \"3\"\ndss-version = \"6\"\n",
     )?;
     let output = run(&["generate", "pki", "--manifest", &path.to_string_lossy()])?;
     let _ = std::fs::remove_dir_all(&dir);
