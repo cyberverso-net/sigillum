@@ -609,7 +609,7 @@ class ValidateDocumentTest {
                 + "\nAll:\n" + String.join("\n", outcomes));
         // The probes of counter signatures make DSS alone fail; those of ignored members do not.
         for (String failing : List.of("csig-compact-b64", "csig-clear-obj", "csig-clear-compact", "csig-nested",
-                "csig-string-json")) {
+                "csig-string-json", "csig-general-clear-obj")) {
             assertTrue(outcomes.stream().anyMatch(line -> line.startsWith(failing + ": rejected")), failing);
         }
         for (String passing : List.of("etsiu-lenient", "etsiu-mixed", "general-plus-top",
@@ -620,7 +620,7 @@ class ValidateDocumentTest {
         }
         // The walk itself finds the counter signatures, before DSS parses them.
         for (String counterSignature : List.of("csig-compact-b64", "csig-clear-obj", "csig-clear-compact",
-                "csig-nested", "csig-string-json")) {
+                "csig-nested", "csig-string-json", "csig-general-clear-obj")) {
             String message = (String) summary(temp.resolve("crafted-" + counterSignature)).get("message");
             assertTrue(message.contains("a counter signature"), counterSignature + ": " + message);
         }

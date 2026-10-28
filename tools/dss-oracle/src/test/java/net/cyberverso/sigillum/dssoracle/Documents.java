@@ -365,6 +365,9 @@ final class Documents {
         documents.put("skipped-flattened-empty-signature", "{\"payload\":\"e30\",\"protected\":\"" + deepHeader
                 + "\",\"signature\":\"\"}");
         documents.put("read-entry-numeric-signature", general + ",\"signature\":0}]}");
+        // A counter signature as an object in a clear etsiU component of the general syntax, six levels down.
+        documents.put("csig-general-clear-obj", "{\"payload\":\"e30\",\"signatures\":[{\"protected\":\"" + ok
+                + "\",\"header\":{\"etsiU\":[{\"cSig\":" + flatDeep + "}]},\"signature\":\"AAAA\"}]}");
         java.util.Map<String, byte[]> bytes = new java.util.LinkedHashMap<>();
         documents.forEach((name, text) -> bytes.put(name, text.getBytes(StandardCharsets.UTF_8)));
         return bytes;

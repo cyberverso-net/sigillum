@@ -636,10 +636,9 @@ class ValidateTimestampTest {
     }
 
     /** Runs the valid token with the given number of copies of its certificates, and returns the time taken. */
-    private long copiesRun(int copies) throws Exception {
-        Path token = Files.write(temp.resolve("copies-" + copies + ".tst"), Tokens.withCopiesOfItsCertificates(
-                Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst")), copies));
-        Path result = temp.resolve("copies-" + copies);
+    private long copiesRun(byte[] content, String name) throws Exception {
+        Path token = Files.write(temp.resolve(name + ".tst"), content);
+        Path result = temp.resolve(name);
         List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"), "--out", result.toString());
         args.set(args.indexOf("--timestamp") + 1, token.toString());
         long start = System.nanoTime();
@@ -650,19 +649,28 @@ class ValidateTimestampTest {
     }
 
     /**
-     * Issue #72, case 5: a token holding thousands of copies of one
-     * certificate. DSS keeps one, so the checks of the tool must take time
-     * in proportion to the input, not to the square of the copies: four
-     * times the copies may not take more than eight times as long, with a
-     * second of margin. Before the fix, the ratio was about sixteen.
+     * Issue #72, case 5: a token holding 3,000 copies of its certificate.
+     * DSS keeps one, and validates the token in about the time it takes for
+     * one copy; the checks of the tool must not make the run much slower
+     * than DSS alone: at most three times as long, with two seconds of
+     * margin. Before the fix, it took about twelve times as long.
      */
     @Test
-    void copiesOfACertificateInATokenTakeTimeInProportionToTheirNumber() throws Exception {
-        copiesRun(100);
-        long thousand = copiesRun(1000);
-        long fourThousand = copiesRun(4000);
-        assertTrue(fourThousand < 8 * thousand + 1_000_000_000L,
-                "1000 copies: " + thousand / 1_000_000 + " ms; 4000 copies: " + fourThousand / 1_000_000 + " ms");
+    void copiesOfACertificateInATokenDoNotMakeTheChecksSlowerThanDss() throws Exception {
+        byte[] valid = Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst"));
+        byte[] copies = Tokens.withCopiesOfItsCertificates(valid, 3000);
+        // Warm up both paths once, so that neither pays for loading classes.
+        copiesRun(Tokens.withCopiesOfItsCertificates(valid, 10), "copies-warm-up");
+        MutationTest.rawDss(MutationTest.Setup.corpus(Tokens.withCopiesOfItsCertificates(valid, 10)));
+        long start = System.nanoTime();
+        MutationTest.RawResult alone = MutationTest.rawDss(MutationTest.Setup.corpus(copies));
+        long dss = System.nanoTime() - start;
+        assertNull(alone.failure());
+        assertTrue(alone.indication().startsWith("PASSED"), alone.indication());
+        long tool = copiesRun(copies, "copies");
+        String timings = "3000 copies: tool " + tool / 1_000_000 + " ms, DSS alone " + dss / 1_000_000 + " ms";
+        System.out.println(timings);
+        assertTrue(tool < 3 * dss + 2_000_000_000L, timings);
     }
 
     /** Asserts that the tool rejects the token, and that DSS alone fails on it at the same stage. */
