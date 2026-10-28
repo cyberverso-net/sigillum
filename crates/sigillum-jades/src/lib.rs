@@ -4,6 +4,8 @@
 //! and B-LT defined in ETSI TS 119 182-1: JWS JSON serialisation (flattened and
 //! general) and compact serialisation for B-B, enveloping and detached signatures,
 //! the ETSI header parameters, and unsigned properties in the `etsiU` header, using
-//! the two-step prepare and assemble flow described in `docs/design/architecture.md`.
+//! the signing flow described in `docs/design/architecture.md`: `prepare`, then
+//! `assemble` with the signature value, then `resume` for each round of evidence
+//! requests.
 
 #![forbid(unsafe_code)]

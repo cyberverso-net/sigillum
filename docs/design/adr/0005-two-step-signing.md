@@ -1,6 +1,6 @@
 # ADR-0005: Two-step signing with an external signer
 
-- **Status:** Accepted
+- **Status:** Accepted; retrieval by `assemble` and binding of the inputs by the state superseded by [ADR-0026](0026-public-api-conventions.md)
 - **Date:** 2026-10-22
 
 ## Context
@@ -24,3 +24,7 @@ A convenience `Signer` interface wraps both calls for callers whose key holder i
 ## Consequences
 
 The prepared state must be serialisable and must bind all inputs, so that `assemble` cannot be called with a mismatched document or certificate. Binding layers expose both calls directly.
+
+## Notes
+
+- **2026-10-27.** [ADR-0026](0026-public-api-conventions.md), decision 2, changes how `assemble` obtains timestamps and revocation data. `assemble` no longer retrieves them. When it needs evidence from outside, it returns the requests to the caller, who performs them and passes the responses to `resume`. Decision 6 of ADR-0026 also replaces the binding described in the Consequences: the prepared state is never authoritative. `assemble` and `resume` receive the document, the signer chain and the options again, recompute everything that is signed, and accept the signature value only if it verifies over the recomputed data. The two steps, the external key holder and the `Signer` convenience stay as decided above. This note does not change the record above.

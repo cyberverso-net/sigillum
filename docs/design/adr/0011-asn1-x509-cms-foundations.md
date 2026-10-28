@@ -1,6 +1,6 @@
 # ADR-0011: Build ASN.1, X.509 and CMS on the RustCrypto formats crates
 
-- **Status:** Accepted
+- **Status:** Accepted; choice of generation and of `x509-ocsp` and `x509-tsp` superseded by [ADR-0025](0025-build-phase-1-on-der-0-8.md)
 - **Date:** 2026-10-23
 - **Issue:** #19
 
@@ -32,3 +32,7 @@ The public API of sigillum never exposes types from these crates. Moving to the 
 An internal adapter layer converts between RustCrypto types and sigillum's own types. Dependabot groups the RustCrypto updates so that the set moves together, and major-version updates of this set are handled by the migration issue, not by individual Dependabot pull requests.
 
 The rules for decoding untrusted input with these crates are set by [ADR-0024](0024-bounded-decoding-of-untrusted-input.md).
+
+## Notes
+
+- **2026-10-27.** [ADR-0025](0025-build-phase-1-on-der-0-8.md) supersedes the choice of the `der` 0.7 generation for the library crates. Phase 1 library code is written on the `der` 0.8 generation, with `cms` and `rsa` at pinned release candidates. sigillum defines the OCSP and RFC 3161 structures itself, instead of using `x509-ocsp` and `x509-tsp`. `sigillum-testpki` stays on the 0.7 generation. The other rules of this record stay in force: the public API exposes no type of these crates, and missing structures are defined in sigillum with the same conventions. This note does not change the record above.

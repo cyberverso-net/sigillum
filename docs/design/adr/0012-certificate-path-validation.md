@@ -1,6 +1,6 @@
 # ADR-0012: Implement certificate path validation in sigillum
 
-- **Status:** Accepted
+- **Status:** Accepted; retrieval through the caller's fetcher during signature creation superseded by [ADR-0026](0026-public-api-conventions.md)
 - **Date:** 2026-10-23
 - **Issue:** #19
 
@@ -39,3 +39,7 @@ The implementation covers signature verification, validity periods, basic constr
 ## Consequences
 
 Path validation is a critical module subject to the mutation-testing threshold in the quality gates. The NIST PKITS test vectors are used where they apply. Because PKITS states no licence and includes private keys, the vectors are downloaded at test time and checked against a recorded digest, not committed ([ADR-0014](0014-test-pki-and-corpus.md)).
+
+## Notes
+
+- **2026-10-27.** [ADR-0026](0026-public-api-conventions.md), decision 2, replaces the caller's fetcher as the only route for retrieval during signature creation. There, missing intermediate certificates of the chains of evidence, such as those of a TSA or an OCSP responder, are requested through the evidence requests that the format crates return to the caller, who passes the responses back. The chain of the signing certificate is never completed by retrieval: the caller supplies it in full, and an incomplete chain is refused with `InvalidInput`. The `Fetcher` is a convenience over that loop. The core still performs no network access. Retrieval during verification is decided in phase 2. This note does not change the record above.

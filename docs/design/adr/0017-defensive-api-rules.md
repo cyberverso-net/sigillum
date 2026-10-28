@@ -1,6 +1,6 @@
 # ADR-0017: Apply defensive rules to the signing and verification API
 
-- **Status:** Accepted
+- **Status:** Accepted; fetcher interface of rules 3 and 8 and the state check of rule 2 superseded by [ADR-0026](0026-public-api-conventions.md)
 - **Date:** 2026-10-23
 - **Issue:** #9
 
@@ -47,3 +47,7 @@ For JAdES, threat J4 requires that a signature without the `x5c` header paramete
 ## Consequences
 
 This refines [ADR-0005](0005-two-step-signing.md): `assemble` takes the document as well as the state and the signature value. Phase 1 stories for `prepare` and `assemble` include tests for a wrong signature value, a value from another key, a malformed value, an altered document and an altered state. The fetcher interface carries the URL origin and a maximum response size, and the request bound is configurable. Phase 1 stories for PAdES, for B-T and B-LT and for the fetcher include tests for rules 5 to 8. Phase 2 stories define the result types so that only TOTAL-PASSED is a valid outcome, with a list of conformance findings beside the indication. The cost of the extra verification is included in the measurements of goal G4.
+
+## Notes
+
+- **2026-10-27.** [ADR-0026](0026-public-api-conventions.md), decision 2, replaces the fetcher interface by evidence requests that the format crates return to the caller, with the `Fetcher` as a convenience over that loop. The restrictions of rule 3 and the bound of rule 8 now apply to these requests and responses: each request carries an `http` or `https` URL only, and states the certificate extension it came from, when it came from one, and the maximum response size, and the number of rounds and requests is bounded by the context for each call, and across calls only while the caller passes the state on unchanged; the caller, or the driver `sign_with`, keeps the budget across calls (decision 6 of ADR-0026). Decision 6 of ADR-0026 replaces the comparison of rule 2 with the prepared state: the states are never authoritative. `assemble` and `resume` receive the document, the signer chain and the options again, recompute everything that is signed, and accept the signature value only if it verifies over the recomputed data with the key of the re-supplied signing certificate (rule 1). Rule 2 is thereby met without trusting the state. Evidence kept in a state is validated again as rule 6 requires. Rule 6 is extended by one check that does not depend on the state: a signature timestamp is accepted only if its `genTime`, widened by its stated accuracy, does not precede the signing time supplied by the caller (decision 2 of ADR-0026). Rules 1, 2, 6 and 7 apply to `resume` as to `assemble`. This note does not change the record above.

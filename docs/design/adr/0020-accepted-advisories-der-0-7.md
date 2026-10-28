@@ -1,6 +1,6 @@
 # ADR-0020: Accepted advisories on the der 0.7 generation
 
-- **Status:** Accepted
+- **Status:** Accepted; rule 4 superseded by [ADR-0025](0025-build-phase-1-on-der-0-8.md)
 - **Date:** 2026-10-24
 - **Issue:** #27
 
@@ -32,3 +32,7 @@
 ## Consequences
 
 `deny.toml` lists both advisories with a reason that names this ADR. Reviews of library code check that no elliptic-curve operation on secret values is added before #21. Issue #21 records that the RUSTSEC-2026-0387 entry is removed by the migration, and that stories with elliptic-curve operations on secret values depend on it.
+
+## Notes
+
+- **2026-10-27.** [ADR-0025](0025-build-phase-1-on-der-0-8.md), rule 6, changes the scope of the acceptance of RUSTSEC-2026-0387. The acceptance ends for the library when the library crates move to the `der` 0.8 generation (#21). From then on, rule 3 no longer blocks elliptic-curve operations on secret values in library code. The `deny.toml` entry stays for `sigillum-testpki`, which uses test keys only, until `sigillum-testpki` moves to the 0.8 generation; until then, the acceptance is reviewed before each release in the release checklist in #55. Because `deny.toml` ignores apply to the whole workspace, a CI check fails if `crypto-bigint` 0.5 enters the dependency graph of a library crate. This replaces rule 4, which removed the entry when #21 merged. The check of rule 4 in `Cargo.lock` also changes: `crypto-bigint` must resolve to 0.7.9 or later instead of 0.7.6 or later, because releases 0.7.0 to 0.7.8 are yanked. The sentence of the Consequences that #21 records the removal of the RUSTSEC-2026-0387 entry no longer holds, because the entry stays for `sigillum-testpki`. The acceptance of RUSTSEC-2023-0071 is unchanged. This note does not change the record above.

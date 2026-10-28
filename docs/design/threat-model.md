@@ -33,7 +33,7 @@ flowchart LR
     end
     subgraph semi["Partly trusted"]
         SIGNER["Signer: keystore, smart card, remote signing service"]
-        STATE["Prepared state held by the application"]
+        STATE["Prepared and assembly states held by the application"]
     end
     subgraph trusted["Trusted by the library"]
         CALLER["Calling application: trust anchors, validation time, policy"]
@@ -44,7 +44,7 @@ flowchart LR
         API["Public API and bindings"]
     end
     DOC -->|B1| PARSE
-    NET -->|B2, through the caller's Fetcher| PARSE
+    NET -->|B2, as the caller's responses to evidence requests| PARSE
     SIGNER -->|B3: signature value| API
     STATE -->|B4| API
     CALLER -->|B5: configuration| API
@@ -56,9 +56,9 @@ Boundary B6, the supply chain, is not drawn. It is described in the table below 
 | Boundary | What crosses it | Trust |
 | --- | --- | --- |
 | B1 | Documents to sign and to verify, CMS structures, JWS, embedded certificates, CRLs, OCSP responses and timestamp tokens | None. Every byte may be crafted, including a document that another party asks the user to sign. |
-| B2 | Data returned by the caller's fetcher | None, even over TLS. Fetched data is trusted only through its own signatures. |
+| B2 | Responses that the caller returns to the library's evidence requests, retrieved directly or through a `Fetcher` ([ADR-0026](adr/0026-public-api-conventions.md), decision 2) | None, even over TLS. Fetched data is trusted only through its own signatures. |
 | B3 | Signature values and certificates returned by the signer | Partial. A remote service or a faulty token may return a wrong value. |
-| B4 | The state serialised between `prepare` and `assemble` | Partial. It is stored by the application, where it may be altered. |
+| B4 | The states serialised between the steps: the prepared state between `prepare` and `assemble`, and the assembly state between `assemble` and `resume` and between rounds of `resume` ([ADR-0026](adr/0026-public-api-conventions.md), decision 6) | Partial. They are stored by the application, where they may be altered. The library never treats them as authoritative: nothing signed is taken from them, and evidence kept in them is validated again ([ADR-0026](adr/0026-public-api-conventions.md), decision 6). |
 | B5 | Trust anchors, validation time, policy, the choice of what to sign, and the recipients to encrypt for | Trusted, but the API must make misuse hard. |
 | B6 | Dependencies, build and release pipeline | Trusted only after review and verification (threats S1 to S6). |
 
@@ -69,7 +69,7 @@ Boundary B6, the supply chain, is not drawn. It is described in the table below 
 | A1 | Crafts any document, signature or PKI artefact the library will read | Sends a manipulated PDF or `.p7m` to a recipient who verifies it |
 | A2 | Controls the data the fetcher returns | Network attacker, compromised responder, or malicious URL in a certificate |
 | A3 | Holds a valid certificate under a trusted anchor | A real signer who wants a signature to appear to cover other content, or another time |
-| A4 | Can modify the application's stored state between `prepare` and `assemble` | Malware with storage access but without process control |
+| A4 | Can modify the application's stored states between the steps of signing | Malware with storage access but without process control |
 | A5 | Compromises a dependency, a build tool or the release path | Malicious crate update |
 | A6 | Operates or compromises a signer or remote signing service used by the caller | A faulty token, or a remote service that returns a value made with another key |
 
@@ -157,21 +157,21 @@ The attack classes below are documented in *1 Trillion Dollar Refund: How To Spo
 
 | Id | Threat | Mitigation | Evidence |
 | --- | --- | --- | --- |
-| G1 | A4 alters the prepared state so that the user signs data for another document | The state binds the document digest, the certificate and every signed attribute; `assemble` requires the document again and rejects it if its digest differs from the state ([ADR-0017](adr/0017-defensive-api-rules.md), rule 2) | Unit tests; phase 1 |
-| G2 | A6 returns a value from another key, or a malformed value | `assemble` verifies the signature value against the data to be signed and the certificate's public key before producing output, and fails otherwise ([ADR-0017](adr/0017-defensive-api-rules.md), rule 1) | Unit tests; phase 1 |
+| G1 | A4 alters the prepared state, or alters or swaps the assembly state, so that the user signs data for another document or receives a signature over another document or by another signer | No state is authoritative. `assemble` and `resume` receive the document, the signer chain, the options and the signing time again, recompute everything that is signed from them, and accept the signature value only if it verifies over the recomputed data with the key of the re-supplied signing certificate. A change of the options, the signer chain or the supplied evidence for signed elements is refused first by the early consistency check with `StateMismatch`; any other change that alters what is signed or the signer ends in `SignatureMismatch`. The chain is validated again at every call. Replacing kept evidence with other valid evidence is accepted, and harmless ([ADR-0017](adr/0017-defensive-api-rules.md), rules 1 and 2; [ADR-0026](adr/0026-public-api-conventions.md), decision 6) | Unit tests; phase 1 |
+| G2 | A6 returns a value from another key, or a malformed value | `assemble` verifies the signature value against the data to be signed and the certificate's public key before producing output, and fails otherwise. `resume` verifies the value kept in the assembly state again, at every call, against the data recomputed from the re-supplied inputs, before it issues a request or returns the signed object ([ADR-0017](adr/0017-defensive-api-rules.md), rule 1; [ADR-0026](adr/0026-public-api-conventions.md), decision 6) | Unit tests; phase 1 |
 | G3 | The caller requests a weak or out-of-scope algorithm or level | Creation refuses with a typed "not supported" error | Unit tests; phase 1 |
-| G4 | Signing with a certificate whose key usage does not allow it | `prepare` checks the key usage and reports a typed error | Fixture without `nonRepudiation` (#27); phase 1 |
-| G5 | A2 supplies a timestamp token that does not cover the signature value, comes from an unexpected TSA or carries a wrong nonce | Before embedding, `assemble` checks the token as in K4: the message imprint against the signature value, the critical `id-kp-timeStamping` purpose and the TSA chain to a caller-supplied anchor. It also checks the nonce when one was sent. Any failure is an error ([ADR-0017](adr/0017-defensive-api-rules.md), rule 6) | Fixtures (#30); phase 1 |
-| G6 | A2 supplies revocation data that is forged, stale or for another certificate, which B-LT would embed as evidence | Revocation data is validated exactly as in verification (K2, K10) before it is embedded ([ADR-0017](adr/0017-defensive-api-rules.md), rule 6) | Fixtures (#28, #29); phase 1 |
-| G7 | The signing certificate is already revoked, or its status is unknown, when signing at B-LT | `assemble` refuses to produce B-LT with a revoked certificate, and reports an unknown status as an error unless the caller explicitly accepts a lower level ([ADR-0017](adr/0017-defensive-api-rules.md), rule 7) | Fixtures; phase 1 |
+| G4 | Signing with a certificate whose key usage does not allow it | `prepare`, `assemble` and `resume` each check the key usage of the re-supplied signing certificate and report a typed error ([ADR-0026](adr/0026-public-api-conventions.md), decision 1) | Fixture without `nonRepudiation` (#27); phase 1 |
+| G5 | A2 supplies a timestamp token that does not cover the signature value, comes from an unexpected TSA or carries a wrong nonce | Before embedding, `assemble` or `resume`, whichever receives the token, checks it as in K4: the message imprint against the signature value, the critical `id-kp-timeStamping` purpose and the TSA chain to a caller-supplied anchor. It also checks the nonce when the state records one. Whether a nonce was sent is known only from the state, which is not trusted, so the nonce check cannot detect a replayed token whose nonce was removed or replaced in the state; the message imprint, the purpose and the TSA chain are still checked, and, independently of the state, the `genTime` of a signature timestamp, widened by its stated accuracy, must not precede the signing time supplied by the caller. Any failure is an error ([ADR-0017](adr/0017-defensive-api-rules.md), rule 6; [ADR-0026](adr/0026-public-api-conventions.md), decision 6) | Fixtures (#30); phase 1 |
+| G6 | A2 supplies revocation data that is forged, stale or for another certificate, which B-LT would embed as evidence | Revocation data is validated exactly as in verification (K2, K10) by `assemble` or `resume`, whichever receives it, before it is embedded ([ADR-0017](adr/0017-defensive-api-rules.md), rule 6) | Fixtures (#28, #29); phase 1 |
+| G7 | The signing certificate is already revoked, or its status is unknown, when signing at B-LT | `assemble` and `resume` refuse to produce B-LT with a revoked certificate, and report an unknown status as an error unless the caller explicitly accepts a lower level ([ADR-0017](adr/0017-defensive-api-rules.md), rule 7). An OCSP nonce removed or replaced in the state lets a replayed "good" response pass the nonce check; the other checks of rule 6, including those of `thisUpdate` and `nextUpdate`, still apply ([ADR-0026](adr/0026-public-api-conventions.md), decision 6) | Fixtures; phase 1 |
 
 ### Fetcher
 
 | Id | Threat | Mitigation | Evidence |
 | --- | --- | --- | --- |
-| F1 | A2 returns oversized or malformed data | The fetcher interface carries a maximum response size, so that the caller's fetcher can stop reading early. The library rejects larger responses ([ADR-0017](adr/0017-defensive-api-rules.md), rule 8). The same hardened parsers; fetched data trusted only through its signatures | Fuzz; phase 1 |
-| F2 | A1 places URLs in certificates (AIA, CRL distribution points, OCSP) that make the caller's fetcher reach internal or unexpected addresses | The core never fetches ([ADR-0006](adr/0006-no-network-access-in-core.md)); each request states the URL and the extension it came from; only `http` and `https` URLs are passed to the fetcher, and the number of requests per operation is bounded ([ADR-0017](adr/0017-defensive-api-rules.md), rule 3) | Unit tests; phase 1 |
-| F3 | Revocation requests reveal to responders which signatures are being verified | The caller controls the fetcher and can work offline with embedded data | Documentation |
+| F1 | A2 returns oversized or malformed data | Each evidence request carries a maximum response size, so that the caller, or its fetcher, can stop reading early ([ADR-0026](adr/0026-public-api-conventions.md), decision 2). The library rejects larger responses ([ADR-0017](adr/0017-defensive-api-rules.md), rule 8). The same hardened parsers; fetched data trusted only through its signatures | Fuzz; phase 1 |
+| F2 | A1 places URLs in certificates (AIA, CRL distribution points, OCSP) that make the caller, or its fetcher, reach internal or unexpected addresses | The core never fetches ([ADR-0006](adr/0006-no-network-access-in-core.md)); each request states the URL and the extension it came from; only `http` and `https` URLs are placed in evidence requests, and the number of requests is bounded for each call, and across calls while the caller passes the state on unchanged, with the caller or the driver keeping the budget ([ADR-0026](adr/0026-public-api-conventions.md), decision 2; [ADR-0017](adr/0017-defensive-api-rules.md), rule 3) | Unit tests; phase 1 |
+| F3 | Revocation requests reveal to responders which signatures are being verified | The caller performs the requests, or decides not to, and can work offline with embedded data | Documentation |
 
 ### Results and bindings
 
@@ -200,13 +200,14 @@ The attack classes below are documented in *1 Trillion Dollar Refund: How To Spo
 2. Differences between what a PDF viewer displays and what the document structure contains, for example through fonts or optional content.
 3. A defect shared by sigillum, OpenSSL and DSS, which the conformance strategy cannot detect ([ADR-0014](adr/0014-test-pki-and-corpus.md)).
 4. Errors in the caller's trust configuration.
-5. An attacker who can alter both the prepared state and the document the application stores defeats the check of threat G1.
+5. An attacker who alters the document before `prepare` is called, so that what the application presents to the user is not what is signed, or who makes a consistent alteration of all stored inputs, the document, the chain, the options, the signing time, the supplied evidence for signed elements and the state, before signing or before `resume`. The library signs what it receives and cannot detect either. Any other change after `prepare` that alters what is signed or the signer, made to some of the inputs or to a stored state, ends in an error, because everything signed is recomputed and the signature value must verify over it ([ADR-0026](adr/0026-public-api-conventions.md), decision 6).
 6. A compromised trust service whose keys remain valid (see *Outside the model*).
 7. Compromise of the single maintainer's account or signing key (threat S6).
+8. A replayed timestamp token over the same signature value, or a replayed OCSP response, accepted because the nonce recorded in an altered state was removed or replaced (threats G5 and G7). The other checks of the token or response still apply, including the `genTime` of a signature timestamp against the signing time and the `thisUpdate` and `nextUpdate` of an OCSP response ([ADR-0026](adr/0026-public-api-conventions.md), decision 6).
 
 ## Decisions
 
-[ADR-0017](adr/0017-defensive-api-rules.md) records the rules that shape the public API in response to threats G1, G2, F2, R1, D12, G5, G6, G7 and F1. It also records the conformance findings of J4. The exclusion of unencoded JAdES payloads and of the `HttpHeaders` mechanism, and the restriction of `ObjectIdByURI` to one object (J5, J6), are recorded in [ADR-0018](adr/0018-restrict-jades-payloads-and-detached-mechanisms.md). The rules for decoding untrusted input (P2) are recorded in [ADR-0024](adr/0024-bounded-decoding-of-untrusted-input.md). The exclusion of encrypted PDF documents (D7) and the default to authenticated encryption (E2) are recorded in [scope.md](../project/scope.md).
+[ADR-0017](adr/0017-defensive-api-rules.md) records the rules that shape the public API in response to threats G1, G2, F2, R1, D12, G5, G6, G7 and F1. It also records the conformance findings of J4. The exclusion of unencoded JAdES payloads and of the `HttpHeaders` mechanism, and the restriction of `ObjectIdByURI` to one object (J5, J6), are recorded in [ADR-0018](adr/0018-restrict-jades-payloads-and-detached-mechanisms.md). [ADR-0026](adr/0026-public-api-conventions.md) records the request and response loop through which evidence crosses boundary B2 (F1, F2), and the state model, in which no state is authoritative and every signed element is recomputed from re-supplied inputs and bound by verifying the signature value (G1, G2, B4). The rules for decoding untrusted input (P2) are recorded in [ADR-0024](adr/0024-bounded-decoding-of-untrusted-input.md). The exclusion of encrypted PDF documents (D7) and the default to authenticated encryption (E2) are recorded in [scope.md](../project/scope.md).
 
 ## References
 

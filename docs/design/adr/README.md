@@ -21,6 +21,7 @@ Routine implementation choices do not need an ADR.
 3. Discussion happens on the pull request. When the maintainer approves, set the status to *Accepted* and merge.
 4. An accepted ADR is not edited in substance. To change a decision, write a new ADR that supersedes it, and set the old one's status to *Superseded by ADR-NNNN*.
 5. An accepted ADR may be corrected for factual accuracy without a superseding ADR, provided the decision itself does not change. Examples are a version number, a reference or a statement about a third-party project. The pull request states what was corrected and why.
+6. A later ADR that changes part of an earlier one adds a dated note to the earlier ADR, under a `## Notes` heading, without editing the record. When the later ADR supersedes part of the record, the status line of the earlier ADR and its index row name that part, for example *Accepted; choice of generation and of `x509-ocsp` and `x509-tsp` superseded by ADR-0025*.
 
 When the lead maintainer accepts an ADR directly, without a *Proposed* stage, the pull request states this and why. When the ADR also changes the charter, scope or roadmap, the comment period in GOVERNANCE.md applies, and it may be shortened only under the provision there.
 
@@ -32,6 +33,7 @@ When the lead maintainer accepts an ADR directly, without a *Proposed* stage, th
 | Accepted | In force |
 | Rejected | Considered and not adopted; kept for the record |
 | Superseded | Replaced by a later ADR, named in the status |
+| Accepted; *part* superseded by ADR-NNNN | In force, except for the named part of the record, which a later ADR replaces; a dated note in the record says how |
 
 ## Index
 
@@ -41,23 +43,25 @@ When the lead maintainer accepts an ADR directly, without a *Proposed* stage, th
 | [0002](0002-implement-in-rust.md) | Implement in Rust | Accepted |
 | [0003](0003-licence-and-contribution-terms.md) | Licence under Apache-2.0 OR MIT with a Developer Certificate of Origin | Accepted |
 | [0004](0004-dss-as-test-oracle.md) | Use DSS as a test oracle | Accepted |
-| [0005](0005-two-step-signing.md) | Two-step signing with an external signer | Accepted |
-| [0006](0006-no-network-access-in-core.md) | No network access in the core | Accepted |
+| [0005](0005-two-step-signing.md) | Two-step signing with an external signer | Accepted; retrieval by `assemble` and binding of the inputs by the state superseded by [ADR-0026](0026-public-api-conventions.md) |
+| [0006](0006-no-network-access-in-core.md) | No network access in the core | Accepted; retrieval through a `Fetcher` during signature creation superseded by [ADR-0026](0026-public-api-conventions.md) |
 | [0007](0007-asymmetric-scope.md) | Asymmetric scope and explicit unsupported results | Accepted |
 | [0008](0008-include-jades-baseline.md) | Include JAdES baseline in scope | Accepted |
 | [0009](0009-keep-xades-deferred.md) | Keep XAdES deferred | Accepted |
 | [0010](0010-cryptographic-backend.md) | Use RustCrypto as the cryptographic backend | Accepted |
-| [0011](0011-asn1-x509-cms-foundations.md) | Build ASN.1, X.509 and CMS on the RustCrypto formats crates | Accepted |
-| [0012](0012-certificate-path-validation.md) | Implement certificate path validation in sigillum | Accepted |
+| [0011](0011-asn1-x509-cms-foundations.md) | Build ASN.1, X.509 and CMS on the RustCrypto formats crates | Accepted; choice of generation and of `x509-ocsp` and `x509-tsp` superseded by [ADR-0025](0025-build-phase-1-on-der-0-8.md) |
+| [0012](0012-certificate-path-validation.md) | Implement certificate path validation in sigillum | Accepted; retrieval through the caller's fetcher during signature creation superseded by [ADR-0026](0026-public-api-conventions.md) |
 | [0013](0013-dss-oracle-command-line-tool.md) | Run DSS through a purpose-built command-line tool | Accepted |
 | [0014](0014-test-pki-and-corpus.md) | Generate the test PKI and corpus, and verify them independently | Accepted |
 | [0015](0015-pdf-reader-and-incremental-writer.md) | Implement a minimal PDF reader and an incremental-update writer | Accepted |
 | [0016](0016-jades-implementation-basis.md) | Implement JAdES on sigillum's own foundations | Accepted |
-| [0017](0017-defensive-api-rules.md) | Apply defensive rules to the signing and verification API | Accepted |
+| [0017](0017-defensive-api-rules.md) | Apply defensive rules to the signing and verification API | Accepted; fetcher interface of rules 3 and 8 and the state check of rule 2 superseded by [ADR-0026](0026-public-api-conventions.md) |
 | [0018](0018-restrict-jades-payloads-and-detached-mechanisms.md) | Exclude unencoded JAdES payloads and restrict detached mechanisms | Accepted |
 | [0019](0019-divergence-classes-and-intentional-restrictions.md) | Divergence classes and intentional restrictions | Accepted |
-| [0020](0020-accepted-advisories-der-0-7.md) | Accepted advisories on the der 0.7 generation | Accepted |
+| [0020](0020-accepted-advisories-der-0-7.md) | Accepted advisories on the der 0.7 generation | Accepted; rule 4 superseded by [ADR-0025](0025-build-phase-1-on-der-0-8.md) |
 | [0021](0021-x509-cert-builder-for-test-certificates.md) | Assemble test certificates with the x509-cert builder only | Accepted |
 | [0022](0022-x509-cert-structures-for-test-crls.md) | Build test CRLs from x509-cert structures only | Accepted |
 | [0023](0023-validation-policy-of-the-dss-oracle.md) | Validation policy of the DSS oracle | Accepted |
-| [0024](0024-bounded-decoding-of-untrusted-input.md) | Bounded decoding of untrusted input | Accepted |
+| [0024](0024-bounded-decoding-of-untrusted-input.md) | Bounded decoding of untrusted input | Accepted; move of `check_der` to `sigillum-pki` superseded by [ADR-0025](0025-build-phase-1-on-der-0-8.md) |
+| [0025](0025-build-phase-1-on-der-0-8.md) | Build phase 1 on the der 0.8 generation | Accepted |
+| [0026](0026-public-api-conventions.md) | Set the conventions of the public signing API | Accepted |

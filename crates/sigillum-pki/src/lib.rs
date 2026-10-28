@@ -9,8 +9,10 @@
 //! - RFC 3161 timestamp requests and responses;
 //! - the `Signer` interface, through which private-key operations are delegated to a
 //!   platform keystore, a smart card or a remote signing service;
-//! - the `Fetcher` interface, through which all network retrieval is delegated to the
-//!   caller.
+//! - the evidence requests and responses through which the format crates ask the
+//!   caller for timestamps, revocation data and certificates, and the `Fetcher`
+//!   interface, a convenience for Rust callers that perform these requests with
+//!   blocking network access (ADR-0026, decision 2).
 //!
 //! The crate performs no network access of its own. See `docs/design/architecture.md`.
 
