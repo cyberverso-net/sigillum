@@ -43,12 +43,20 @@ jobs:
       # tools/dss-oracle, run in their own workflows. cargo llvm-cov leaves
       # tests out of the report by default (tests, examples and benches
       # directories, and tests.rs files).
+      #
+      # Some tests of sigillum-testpki stop child copies of their own test
+      # binary at a deadline, and one leaves a child running. Such a child
+      # can leave a partial profile, which llvm-profdata cannot read. With
+      # --failure-mode all, the merge skips those profiles with a warning and
+      # fails only when no profile can be merged. A skipped profile can only
+      # lower the coverage reported, never raise it.
       - name: Measure line coverage
         run: |
           mkdir -p target/coverage
-          cargo llvm-cov --locked --workspace --lcov --output-path target/coverage/lcov.info
+          cargo llvm-cov --locked --workspace --failure-mode all \
+            --lcov --output-path target/coverage/lcov.info
       - name: Write the HTML report
-        run: cargo llvm-cov report --html --output-dir target/coverage
+        run: cargo llvm-cov report --failure-mode all --html --output-dir target/coverage
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: coverage-${{ github.run_number }}-${{ github.run_attempt }}
