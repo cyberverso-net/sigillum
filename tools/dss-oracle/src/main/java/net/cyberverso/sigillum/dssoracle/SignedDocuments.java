@@ -173,21 +173,24 @@ final class SignedDocuments {
      */
     private static List<CertificateToken> withIssuers(List<CertificateToken> certificates,
             List<CertificateToken> pool) {
-        List<CertificateToken> result = new ArrayList<>();
+        // Copies count once, and issuers are found by their subject, so the work grows with the pairs.
+        java.util.Map<javax.security.auth.x500.X500Principal, List<CertificateToken>> bySubject =
+                new java.util.HashMap<>();
+        for (CertificateToken issuer : new java.util.LinkedHashSet<>(pool)) {
+            bySubject.computeIfAbsent(issuer.getSubject().getPrincipal(), subject -> new ArrayList<>()).add(issuer);
+        }
+        java.util.Set<CertificateToken> result = new java.util.LinkedHashSet<>();
         java.util.Deque<CertificateToken> pending = new java.util.ArrayDeque<>(certificates);
         while (!pending.isEmpty()) {
             CertificateToken certificate = pending.pop();
-            if (result.contains(certificate)) {
+            if (!result.add(certificate)) {
                 continue;
             }
-            result.add(certificate);
-            for (CertificateToken issuer : pool) {
-                if (issuer.getSubject().getPrincipal().equals(certificate.getIssuer().getPrincipal())) {
-                    pending.push(issuer);
-                }
+            for (CertificateToken issuer : bySubject.getOrDefault(certificate.getIssuer().getPrincipal(), List.of())) {
+                pending.push(issuer);
             }
         }
-        return result;
+        return new ArrayList<>(result);
     }
 
     private static void addWithCounterSignatures(AdvancedSignature signature, List<AdvancedSignature> all) {

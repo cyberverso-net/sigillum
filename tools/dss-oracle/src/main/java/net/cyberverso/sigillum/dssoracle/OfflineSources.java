@@ -23,11 +23,15 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiFunction;
+import javax.security.auth.x500.X500Principal;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.ocsp.BasicOCSPResp;
@@ -256,16 +260,18 @@ public final class OfflineSources {
         return inputs;
     }
 
-    /** Makes the revocation tokens of a source for every pair of a certificate and its issuer. */
+    /**
+     * Makes the revocation tokens of a source for every pair of a certificate
+     * and its issuer. Copies of a certificate count once, as DSS keeps one
+     * certificate token for them, and issuers are found by their subject, so
+     * the work grows with the pairs, not with the square of the certificates.
+     */
     private static void makeRevocationTokens(Input input, List<CertificateToken> certificates,
             BiFunction<CertificateToken, CertificateToken, ?> tokens) throws RejectedInputException {
-        for (CertificateToken certificate : certificates) {
-            for (CertificateToken issuer : certificates) {
-                if (!issuer.getSubject().getPrincipal().equals(certificate.getIssuer().getPrincipal())) {
-                    continue;
-                }
+        for (Map.Entry<CertificateToken, List<CertificateToken>> pair : issuers(certificates).entrySet()) {
+            for (CertificateToken issuer : pair.getValue()) {
                 try {
-                    tokens.apply(certificate, issuer);
+                    tokens.apply(pair.getKey(), issuer);
                 } catch (DSSException | IllegalArgumentException | IllegalStateException
                         | NegativeArraySizeException e) {
                     // NegativeArraySizeException: DSS fails so on a CRL entry of indefinite length.
@@ -273,6 +279,27 @@ public final class OfflineSources {
                 }
             }
         }
+    }
+
+    /**
+     * Returns, for each distinct certificate, in their order, the distinct
+     * certificates whose subject is its issuer name.
+     *
+     * @param certificates the certificates, possibly with copies
+     * @return the issuers of each certificate
+     */
+    static Map<CertificateToken, List<CertificateToken>> issuers(List<CertificateToken> certificates) {
+        Set<CertificateToken> distinct = new LinkedHashSet<>(certificates);
+        Map<X500Principal, List<CertificateToken>> bySubject = new HashMap<>();
+        for (CertificateToken certificate : distinct) {
+            bySubject.computeIfAbsent(certificate.getSubject().getPrincipal(), subject -> new ArrayList<>())
+                    .add(certificate);
+        }
+        Map<CertificateToken, List<CertificateToken>> issuers = new LinkedHashMap<>();
+        for (CertificateToken certificate : distinct) {
+            issuers.put(certificate, bySubject.getOrDefault(certificate.getIssuer().getPrincipal(), List.of()));
+        }
+        return issuers;
     }
 
     /**
