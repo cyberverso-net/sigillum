@@ -219,14 +219,14 @@ fn check_value(input: &[u8], depth: usize) -> Result<&[u8], DerError> {
         }
     }
     // X.690, clause 8.1.3: the short form, or the long form with the
-    // number of length octets in bits 7 to 1 of the first.
-    let (&first, next) = rest.split_first().ok_or(DerError::Truncated)?;
+    // number of length octets in bits 7 to 1 of the initial.
+    let (&initial, next) = rest.split_first().ok_or(DerError::Truncated)?;
     rest = next;
-    let len = match first {
+    let len = match initial {
         0x80 => return Err(DerError::IndefiniteLength),
-        0x00..=0x7f => usize::from(first),
+        0x00..=0x7f => usize::from(initial),
         _ => {
-            let count = usize::from(first & 0x7f);
+            let count = usize::from(initial & 0x7f);
             if count > 4 {
                 return Err(DerError::LengthTooLong);
             }
