@@ -145,7 +145,7 @@ jobs:
       - name: Minimise the corpus
         working-directory: ${{ matrix.directory }}
         env:
-          MINIMISE: ${{ inputs.minimise }}
+          MINIMISE: true
         run: |
           if [ "$MINIMISE" != true ] && [ "$(date -u +%u)" != 7 ]; then
             echo "The corpus is minimised on Sundays, or when the run is started with minimise."
