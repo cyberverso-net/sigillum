@@ -72,25 +72,40 @@ COVERAGE_ROOT=$root/ awk '
 
 # The changed lines: "L" TAB <path> TAB <line> for each line added or
 # changed, and "F" TAB <path> for each file added or changed. The options
-# set every part of the output that Git settings could change.
+# set every part of the output that Git settings could change, such as
+# diff.context, diff.interHunkContext, diff.renames and diff.noprefix.
 git -c core.quotePath=false diff --no-ext-diff --no-textconv --no-color \
-  --unified=0 --find-renames --diff-filter=d --src-prefix=a/ --dst-prefix=b/ \
+  --unified=0 --inter-hunk-context=0 --find-renames --src-prefix=a/ --dst-prefix=b/ \
   "$base" HEAD > "$scratch/diff" || fail "git diff failed"
 awk '
   # In the body of a hunk, every line is content, whatever it looks like.
+  # A context line, which the options above should exclude, is counted in
+  # both files.
   old > 0 || new > 0 {
     c = substr($0, 1, 1)
     if (c == "-") old--
-    else if (c == "+") { new--; print "L\t" path "\t" line++ }
+    else if (c == "+") {
+      new--
+      if (path != "") print "L\t" path "\t" line
+      line++
+    }
+    else if (c == " ") { old--; new--; line++ }
     next
   }
   /^diff --git / { path = ""; next }
   /^\+\+\+ / {
     name = substr($0, 5)
     if (name == "/dev/null") { path = ""; next }
+    # Git quotes a name with a tab, a newline, a quote or a backslash. The
+    # report cannot be matched with such a name: a Rust file is an error,
+    # any other file is skipped.
     if (substr(name, 1, 1) == "\"") {
-      printf "diff-coverage: Git quoted the file name %s, which cannot be matched with the report\n", name > "/dev/stderr"
-      exit 2
+      if (name ~ /\.rs"$/) {
+        printf "diff-coverage: Git quoted the file name %s, which cannot be matched with the report\n", name > "/dev/stderr"
+        exit 2
+      }
+      path = ""
+      next
     }
     # Git ends a name that contains a space with a tab.
     sub(/\t$/, "", name)

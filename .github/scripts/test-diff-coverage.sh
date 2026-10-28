@@ -221,6 +221,26 @@ git -C "$repo" config diff.context 5
 lcov "src/with space.rs:1=1,2=0"
 expect 0 "a name with a space and unusual Git settings" "| \`src/with space.rs\` | 0 | 1 | 0.00% | 2 |"
 
+# Git can join nearby hunks with the lines between them as context, even
+# with --unified=0, when diff.interHunkContext is set.
+new_repo src/a.rs=10
+change_line src/a.rs 2
+change_line src/a.rs 5
+commit
+git -C "$repo" config diff.interHunkContext 10
+lcov "src/a.rs:2=1,3=1,4=1,5=0"
+expect 0 "hunks joined by diff.interHunkContext" "| Changed lines | 1 | 2 | 50.00% |" "| \`src/a.rs\` | 1 | 2 | 50.00% | 5 |"
+
+# Renames are found even when diff.renames is off, so a renamed file counts
+# only its changed lines.
+new_repo src/old.rs=8
+git -C "$repo" mv src/old.rs src/new.rs
+change_line src/new.rs 7
+commit
+git -C "$repo" config diff.renames false
+lcov "src/new.rs:1=1,2=1,3=1,4=1,5=1,6=1,7=0,8=1"
+expect 0 "renames found with diff.renames off" "| \`src/new.rs\` | 0 | 1 | 0.00% | 7 |"
+
 # Refused inputs.
 new_repo src/a.rs=3
 change_line src/a.rs 1
@@ -250,8 +270,56 @@ if touch "$scratch/probe$(printf '\t')name" 2> /dev/null; then
   printf 'x\n' > "$repo/src/tab$(printf '\t')name.rs"
   commit
   lcov "src/a.rs:1=1"
-  expect 2 "a file name that Git quotes" "quoted"
+  expect 2 "a Rust file name that Git quotes" "quoted"
+
+  # Other quoted names are not in the report, and are skipped.
+  new_repo src/a.rs=3
+  change_line src/a.rs 1
+  printf 'x\n' > "$repo/doc$(printf '\t')name.md"
+  commit
+  lcov "src/a.rs:1=1"
+  expect 0 "another file name that Git quotes" "| \`src/a.rs\` | 1 | 1 | 100.00% |  |" "!doc"
 fi
+
+# The base of the comparison for each event, from coverage-base.sh.
+base_script=$here/coverage-base.sh
+# expect_base <exit code> <name> <wanted base, or empty> <variable=value>...
+expect_base() {
+  local wanted_code=$1 name=$2 wanted=$3 code=0 got
+  shift 3
+  got=$(cd "$repo" && env -u EVENT -u GROUP_BASE -u BEFORE "$@" bash "$base_script" 2> "$scratch/output") || code=$?
+  if [ "$code" -ne "$wanted_code" ]; then
+    echo "FAIL: $name: exit code $code, expected $wanted_code" >&2
+    sed 's/^/  /' "$scratch/output" >&2
+    failures=$((failures + 1))
+  elif [ "$code" -eq 0 ] && [ "$got" != "$wanted" ]; then
+    echo "FAIL: $name: base $got, expected $wanted" >&2
+    failures=$((failures + 1))
+  else
+    echo "ok: $name"
+  fi
+}
+new_repo src/a.rs=3
+first=$base
+git -C "$repo" checkout -q -b topic
+change_line src/a.rs 1
+commit
+topic=$(git -C "$repo" rev-parse HEAD)
+git -C "$repo" checkout -q main
+change_line src/a.rs 3
+commit
+main_tip=$(git -C "$repo" rev-parse HEAD)
+git -C "$repo" merge -q --no-ff --no-edit topic
+head=$(git -C "$repo" rev-parse HEAD)
+expect_base 0 "a pull request: the first parent of the merge commit" "$main_tip" EVENT=pull_request
+expect_base 0 "a merge group: its base" "$first" EVENT=merge_group "GROUP_BASE=$first"
+expect_base 2 "a merge group without a base" "" EVENT=merge_group
+expect_base 0 "a push: the commit before it" "$topic" EVENT=push "BEFORE=$topic"
+expect_base 0 "a push of a new branch: no base" "$head" EVENT=push BEFORE=0000000000000000000000000000000000000000
+expect_base 0 "a push whose previous commit is unknown: no base" "$head" EVENT=push BEFORE=1234567890123456789012345678901234567890
+expect_base 0 "another event: no base" "$head" EVENT=workflow_dispatch
+git -C "$repo" checkout -q "$topic"
+expect_base 2 "a pull request whose head is not a merge commit" "" EVENT=pull_request
 
 if [ "$failures" -ne 0 ]; then
   echo "$failures case(s) failed" >&2

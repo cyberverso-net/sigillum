@@ -2,7 +2,7 @@ name: Coverage
 
 on:
   push:
-    branches: [main]
+    branches: [main, task/79-coverage-ci]
   pull_request:
   # The job does not fail on the coverage threshold yet. The trigger lets it
   # become a required check without a change to the workflow; the merge
@@ -18,6 +18,9 @@ jobs:
     name: Line coverage
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
     env:
       CARGO_TERM_COLOR: always
       RUSTFLAGS: -D warnings
@@ -27,7 +30,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Test the changed-line report
+      - name: Test the coverage scripts
         run: .github/scripts/test-diff-coverage.sh
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
         with:
@@ -40,22 +43,47 @@ jobs:
       # The tests of the cross-platform test job, with default features: the
       # dss feature of sigillum-oracle, and the tests that need OpenSSL or
       # tools/dss-oracle, run in their own workflows. cargo llvm-cov leaves
-      # tests out of the report by default (tests, examples and benches
-      # directories, and tests.rs files).
-      #
+      # tests out of the report by default: files under tests, examples and
+      # benches directories, and files named tests.rs or ending in _tests.rs
+      # or -tests.rs.
+      - name: Run the tests with coverage
+        run: cargo llvm-cov --locked --workspace --no-report
       # Some tests of sigillum-testpki stop child copies of their own test
-      # binary at a deadline, and one leaves a child running. Such a child
-      # can leave a partial profile, which llvm-profdata cannot read. With
-      # --failure-mode all, the merge skips those profiles with a warning and
-      # fails only when no profile can be merged. A skipped profile can only
-      # lower the coverage reported, never raise it.
-      - name: Measure line coverage
+      # binary at a deadline, and one leaves a child running for 30 s. The
+      # profiles are merged once every test process has ended, and only
+      # once: the lcov report merges them, the profiles are then moved away,
+      # and the HTML report reads the same merged data, as cargo llvm-cov
+      # does when no profile is left (merge_profraw in src/report.rs).
+      #
+      # A stopped child can leave a partial profile, which llvm-profdata
+      # cannot read. With --failure-mode all, the merge skips it with a
+      # warning and fails only when no profile can be merged. A skipped
+      # profile can only lower the coverage reported, and is reported.
+      - name: Write the lcov and HTML reports
         run: |
-          mkdir -p target/coverage
-          cargo llvm-cov --locked --workspace --failure-mode all \
-            --lcov --output-path target/coverage/lcov.info
-      - name: Write the HTML report
-        run: cargo llvm-cov report --failure-mode all --html --output-dir target/coverage
+          profiles=target/llvm-cov-target
+          for _ in $(seq 1 60); do
+            pgrep -f "$PWD/$profiles/" > /dev/null || break
+            sleep 1
+          done
+          if pgrep -f "$PWD/$profiles/" > /dev/null; then
+            echo "::error::Test processes still run 60 s after the tests ended."
+            exit 1
+          fi
+          mkdir -p target/coverage target/coverage-profiles
+          cargo llvm-cov report --failure-mode all --lcov --output-path target/coverage/lcov.info \
+            2> target/coverage-profiles/merge.log || { cat target/coverage-profiles/merge.log >&2; exit 1; }
+          cat target/coverage-profiles/merge.log >&2
+          grep -E 'warning: .*\.profraw: ' target/coverage-profiles/merge.log > target/coverage-profiles/skipped || true
+          if [ -s target/coverage-profiles/skipped ]; then
+            echo "::warning::$(wc -l < target/coverage-profiles/skipped) profile(s) could not be read and were skipped: the coverage may be understated."
+          fi
+          mv "$profiles"/*.profraw target/coverage-profiles/
+          cargo llvm-cov report --html --output-dir target/coverage
+          if compgen -G "$profiles/*.profraw" > /dev/null; then
+            echo "::error::A profile was written after the merge."
+            exit 1
+          fi
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: coverage-${{ github.run_number }}-${{ github.run_attempt }}
@@ -65,27 +93,25 @@ jobs:
           if-no-files-found: error
           retention-days: 30
       # The changed lines are those of the pull request merged into its base,
-      # of the merge group over its base, or of the push.
+      # of the merge group over its base, or of the push since the tip of the
+      # branch before it. .github/scripts/coverage-base.sh chooses the base.
       - name: Report the coverage of the changed lines
         env:
           EVENT: ${{ github.event_name }}
           GROUP_BASE: ${{ github.event.merge_group.base_sha }}
           BEFORE: ${{ github.event.before }}
         run: |
-          case "$EVENT" in
-            pull_request) base=$(git rev-parse HEAD^1) ;;
-            merge_group) base=$GROUP_BASE ;;
-            push) base=$BEFORE ;;
-            *) base= ;;
-          esac
-          if [ -z "$base" ] || ! git rev-parse --quiet --verify "$base^{commit}" > /dev/null; then
-            # A dispatched run, or a push whose previous commit is not known.
-            base=$(git rev-parse HEAD)
-            echo "::notice::No base to compare with: the changed lines are not reported."
+          base=$(.github/scripts/coverage-base.sh)
+          if [ "$base" = "$(git rev-parse HEAD)" ]; then
+            echo "::notice::No base to compare with: no line counts as changed."
           fi
-          .github/scripts/diff-coverage.sh target/coverage/lcov.info "$base" >> "$GITHUB_STEP_SUMMARY"
+          .github/scripts/diff-coverage.sh target/coverage/lcov.info "$base" | tee -a "$GITHUB_STEP_SUMMARY"
           {
             echo
+            if [ -s target/coverage-profiles/skipped ]; then
+              echo "**$(wc -l < target/coverage-profiles/skipped) profile(s) could not be read and were skipped: the coverage may be understated.** The log of the step that writes the reports names them."
+              echo
+            fi
             echo "The lcov and HTML reports are in the artefact coverage-$GITHUB_RUN_NUMBER-$GITHUB_RUN_ATTEMPT of this run."
             echo "The threshold of docs/development/quality-gates.md, 90% of the changed lines, is checked by the reviewer; this job does not enforce it."
-          } >> "$GITHUB_STEP_SUMMARY"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
