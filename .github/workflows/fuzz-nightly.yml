@@ -36,7 +36,7 @@ env:
   RUST_NIGHTLY: nightly-2026-10-25
   CARGO_FUZZ_VERSION: 0.13.2
   CORPUS_BRANCH: fuzz-corpus-test-81
-  FUZZ_SECONDS: 60
+  FUZZ_SECONDS: 600
   # Gives git the token of the job, from the environment, when GitHub asks
   # for credentials, so that the token never appears in a command line.
   CREDENTIAL_HELPER: >-
@@ -147,7 +147,7 @@ jobs:
       - name: Minimise the corpus
         working-directory: ${{ matrix.directory }}
         env:
-          MINIMISE: true
+          MINIMISE: ${{ inputs.minimise }}
         run: |
           if [ "$MINIMISE" != true ] && [ "$(date -u +%u)" != 7 ]; then
             echo "The corpus is minimised on Sundays, or when the run is started with minimise."
