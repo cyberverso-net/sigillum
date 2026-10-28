@@ -2,14 +2,13 @@ name: Coverage
 
 on:
   push:
-    branches: [main, task/79-coverage-ci]
+    branches: [main]
   pull_request:
   # The job does not fail on the coverage threshold yet. The trigger lets it
   # become a required check without a change to the workflow; the merge
   # queue does not merge a group until every required check is reported.
   merge_group:
     types: [checks_requested]
-  workflow_dispatch:
 
 permissions:
   contents: read
