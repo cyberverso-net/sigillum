@@ -12,14 +12,14 @@ The European Digital Identity Wallet brings qualified electronic signatures to m
 
 ## Goals
 
-Each goal has a criterion by which it is judged met. Criteria marked *to be set in phase 0* depend on measurements that have not yet been taken.
+Each goal has a criterion by which it is judged met. Criteria marked *to be set at the start of phase 1* depend on measurements that have not yet been taken.
 
 | Id | Goal | Criterion |
 | --- | --- | --- |
 | G1 | **Interoperability.** Signatures created by sigillum are accepted by the reference implementation. | Every signature in the test corpus validates in the latest DSS release with the expected indication; zero unexplained divergences. |
 | G2 | **Portability.** One core serves every target platform. | The same crates build and pass tests on Android, iOS, macOS, Windows, Linux and `wasm32`; no Java runtime and no C or C++ dependency in the default build. |
 | G3 | **Safety.** Parsing hostile input cannot compromise the host or produce a false acceptance. | `#![forbid(unsafe_code)]` in every crate except the binding layer; every parser covered by continuous fuzzing; an independent security review before any validation feature is declared stable. |
-| G4 | **Efficiency.** The library is small and fast enough for mobile use. | Binary size and signing latency targets, *to be set in phase 0* from measurements of current mobile and JVM stacks. |
+| G4 | **Efficiency.** The library is small and fast enough for mobile use. | Binary size and signing latency targets, *to be set at the start of phase 1* from measurements of current mobile and JVM stacks. |
 | G5 | **Honest results.** The library never claims more than it has checked. | Every unsupported feature encountered during verification yields an explicit "not supported" outcome; the conformance suite tests this for each excluded feature. |
 | G6 | **Clean provenance.** The code can be used under its stated licence without encumbrance. | Implementation derived from published specifications, each change citing its clauses; no code or test data under licences incompatible with Apache-2.0 OR MIT (see [CONTRIBUTING.md](../../CONTRIBUTING.md)). |
 | G7 | **Usability by integrators.** Adopting the library is straightforward. | Idiomatic Kotlin, Swift and JavaScript bindings; documented examples for remote signing through the Cloud Signature Consortium API and for platform keystores. |
