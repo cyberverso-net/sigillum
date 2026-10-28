@@ -159,11 +159,7 @@ fn pdf(name: &str, signature_field: bool) -> Vec<u8> {
 }
 
 fn hex(bytes: &[u8]) -> String {
-    let text: String = bytes.iter().map(|byte| format!("{byte:02X}")).collect();
-    if text.len() != bytes.len() * 2 {
-        return String::new();
-    }
-    text
+    bytes.iter().map(|byte| format!("{byte:02X}")).collect()
 }
 
 /// Reports whether an entry belongs to what `generate documents`
