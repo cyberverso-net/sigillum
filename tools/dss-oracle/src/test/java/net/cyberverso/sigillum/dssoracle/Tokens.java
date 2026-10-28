@@ -242,6 +242,52 @@ final class Tokens {
         return CMSSignedData.replaceCertificatesAndCRLs(cms, none, null, null).getEncoded("DER");
     }
 
+    /**
+     * Moves the certificates of a token to the unsigned attribute
+     * certificateValues of its signer (id-aa-ets-certValues, ETSI EN 319
+     * 122-1 V1.3.1, clause 5.5.2), with the given certificates in their
+     * place, and leaves SignedData without certificates. The attribute is
+     * unsigned, so the signature still verifies.
+     */
+    static byte[] withCertificateValues(byte[] token, byte[]... certificates) throws Exception {
+        SignedData signedData = signedData(token);
+        SignerInfo signer = SignerInfo.getInstance(signedData.getSignerInfos().getObjectAt(0));
+        ASN1EncodableVector values = new ASN1EncodableVector();
+        for (byte[] certificate : certificates) {
+            values.add(org.bouncycastle.asn1.x509.Certificate.getInstance(certificate));
+        }
+        Attribute attribute = new Attribute(PKCSObjectIdentifiers.id_aa_ets_certValues,
+                new DERSet(new org.bouncycastle.asn1.DERSequence(values)));
+        SignerInfo changed = new SignerInfo(signer.getSID(), signer.getDigestAlgorithm(),
+                signer.getAuthenticatedAttributes(), signer.getDigestEncryptionAlgorithm(),
+                signer.getEncryptedDigest(), new DERSet(attribute));
+        SignedData result = new SignedData(signedData.getDigestAlgorithms(), signedData.getEncapContentInfo(),
+                null, signedData.getCRLs(), new DERSet(changed));
+        return new ContentInfo(CMSObjectIdentifiers.signedData, result).getEncoded("DER");
+    }
+
+    /**
+     * Returns a token whose SignedData holds the given number of copies of
+     * each of its certificates, in a SET that is not sorted. The
+     * certificates are not signed, so the signature still verifies.
+     */
+    static byte[] withCopiesOfItsCertificates(byte[] token, int copies) {
+        SignedData signedData = signedData(token);
+        ASN1EncodableVector certificates = new ASN1EncodableVector();
+        for (ASN1Encodable certificate : signedData.getCertificates()) {
+            for (int i = 0; i < copies; i++) {
+                certificates.add(certificate);
+            }
+        }
+        SignedData result = new SignedData(signedData.getDigestAlgorithms(), signedData.getEncapContentInfo(),
+                new org.bouncycastle.asn1.DLSet(certificates), signedData.getCRLs(), signedData.getSignerInfos());
+        try {
+            return new ContentInfo(CMSObjectIdentifiers.signedData, result).getEncoded("DL");
+        } catch (IOException e) {
+            throw new java.io.UncheckedIOException(e);
+        }
+    }
+
     private static int indexOf(byte[] data, byte[] pattern, int from) {
         for (int i = Math.max(from, 0); i + pattern.length <= data.length; i++) {
             if (java.util.Arrays.equals(data, i, i + pattern.length, pattern, 0, pattern.length)) {

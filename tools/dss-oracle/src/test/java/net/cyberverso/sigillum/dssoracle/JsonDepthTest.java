@@ -1,5 +1,6 @@
 package net.cyberverso.sigillum.dssoracle;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -51,5 +52,51 @@ class JsonDepthTest {
         assertFalse(JsonDepth.isJws("%PDF-1.7\n".getBytes(StandardCharsets.US_ASCII)));
         assertFalse(JsonDepth.isJws(new byte[] {0x30, (byte) 0x82, 0x01, 0x00}));
         assertFalse(JsonDepth.isJws(new byte[0]));
+    }
+
+    /** A general JWS: a valid entry, then one whose protected header is nested too deep, with the given member. */
+    private static byte[] generalWithDeepEntry(String signatureMember) {
+        String ok = Documents.base64url("{\"alg\":\"ES256\"}");
+        String deep = Documents.base64url(Documents.nestedHeader(JsonDepth.MAX_DEPTH));
+        return ("{\"payload\":\"e30\",\"signatures\":[{\"protected\":\"" + ok + "\",\"signature\":\"AAAA\"},"
+                + "{\"protected\":\"" + deep + "\"" + signatureMember + "}]}").getBytes(StandardCharsets.US_ASCII);
+    }
+
+    /**
+     * Issue #72, comment case 13: DSS skips an entry of {@code signatures},
+     * or the flattened JWS, whose member {@code signature} is absent, null
+     * or a blank string, and never parses its headers. It reads the headers
+     * of an entry whose signature is any other value.
+     */
+    @Test
+    void theHeadersOfAnEntryThatDssSkipsAreNotChecked() {
+        for (String skipped : new String[] {"", ",\"signature\":null", ",\"signature\":\"\"",
+            ",\"signature\":\" \\t\""}) {
+            assertEquals(java.util.Optional.empty(), JsonDepth.check(generalWithDeepEntry(skipped)), skipped);
+        }
+        for (String read : new String[] {",\"signature\":\"AAAA\"", ",\"signature\":0",
+            ",\"signature\":{}", ",\"signature\":[]", ",\"signature\":false"}) {
+            assertTrue(JsonDepth.check(generalWithDeepEntry(read)).isPresent(), read);
+        }
+        String deep = Documents.base64url(Documents.nestedHeader(JsonDepth.MAX_DEPTH));
+        byte[] flattened = ("{\"payload\":\"e30\",\"protected\":\"" + deep + "\",\"signature\":\"\"}")
+                .getBytes(StandardCharsets.US_ASCII);
+        assertEquals(java.util.Optional.empty(), JsonDepth.check(flattened));
+    }
+
+    /**
+     * Issue #72, comment case 14: a document nested millions of levels deep
+     * is rejected without the walk keeping a record per level.
+     */
+    @Test
+    void aVeryDeepDocumentIsRejectedWithoutMemoryInProportionToItsDepth() {
+        int depth = 4_000_000;
+        byte[] document = ("{\"a\":" + "[".repeat(depth)).getBytes(StandardCharsets.US_ASCII);
+        com.sun.management.ThreadMXBean threads =
+                (com.sun.management.ThreadMXBean) java.lang.management.ManagementFactory.getThreadMXBean();
+        long before = threads.getCurrentThreadAllocatedBytes();
+        assertTrue(JsonDepth.check(document).isPresent());
+        long allocated = threads.getCurrentThreadAllocatedBytes() - before;
+        assertTrue(allocated < 16L * 1024 * 1024, "allocated " + allocated + " bytes");
     }
 }

@@ -547,6 +547,124 @@ class ValidateTimestampTest {
         assertEquals("--crl", summary.get("input"));
     }
 
+    /**
+     * Issue #72, case 1: the TBSCertList tag of crl/root-ca loses its
+     * constructed bit and its nextUpdate declares about 858 MB. DSS reads
+     * the TBSCertList whatever its tag, so the CRL must be rejected in a
+     * small heap, not end the run with an OutOfMemoryError.
+     */
+    @Test
+    void aCrlWithAPrimitiveTbsCertListDeclaringALengthBeyondTheHeapIsRejected() throws Exception {
+        byte[] crl = Files.readAllBytes(CORPUS.resolve("crl/root-ca.crl"));
+        crl[4] = 0x10;
+        crl[103] = (byte) 0x84;
+        Path file = Files.write(temp.resolve("primitive-tbs.crl"), crl);
+        Path result = temp.resolve("primitive-tbs");
+        List<String> command = new ArrayList<>(List.of(
+                Path.of(System.getProperty("java.home"), "bin", "java").toString(), "-Xmx64m",
+                "-cp", System.getProperty("java.class.path"), Main.class.getName()));
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"), "--out", result.toString());
+        args.set(args.indexOf(corpus("crl/root-ca.crl")), file.toString());
+        command.addAll(args);
+        Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
+        String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        assertEquals(ExitCodes.SUCCESS, process.waitFor(), output);
+        Map<String, Object> summary = summary(result);
+        assertEquals("rejected", summary.get("result"), summary.toString());
+        assertEquals("--crl", summary.get("input"));
+    }
+
+    /** Issue #72, case 2: DSS ignores the bytes after a CRL, even when they declare a large length. */
+    @Test
+    void aCrlFollowedByAnElementDeclaringALargeLengthIsUsedAsDssUsesIt() throws Exception {
+        byte[] original = Files.readAllBytes(CORPUS.resolve("crl/ca-ecdsa.crl"));
+        int n = 0;
+        for (byte[] trailing : new byte[][] {
+            {0x04, (byte) 0x84, 0x03, (byte) 0xff, (byte) 0xff, (byte) 0xff},
+            {0x04, (byte) 0x84, 0x7f, (byte) 0xff, (byte) 0xff, (byte) 0xff}}) {
+            byte[] crl = Arrays.copyOf(original, original.length + trailing.length);
+            System.arraycopy(trailing, 0, crl, original.length, trailing.length);
+            assertCrlUsed(crl, "trailing-length-" + n++);
+        }
+    }
+
+    /**
+     * Issue #72, case 3: the signatureValue BIT STRING of crl/root-ca, at
+     * offset 181, gets the constructed bit. DSS reads its contents as the
+     * signature value and makes a usable revocation token.
+     */
+    @Test
+    void aCrlWhoseSignatureValueHasTheConstructedBitIsUsedAsDssUsesIt() throws Exception {
+        for (int tag : new int[] {0x23, 0x63, 0xa3, 0xe3}) {
+            byte[] crl = Files.readAllBytes(CORPUS.resolve("crl/root-ca.crl"));
+            crl[181] = (byte) tag;
+            Path file = Files.write(temp.resolve("constructed-" + tag + ".crl"), crl);
+            Path result = temp.resolve("constructed-" + tag);
+            List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"),
+                    "--out", result.toString());
+            args.set(args.indexOf(corpus("crl/root-ca.crl")), file.toString());
+            assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+            assertValidated(result, "PASSED", null);
+        }
+    }
+
+    /**
+     * Issue #72, case 4: the certificate of pki/tsa, with invalid UTF-8 in
+     * its subject, is carried only in the unsigned certificateValues
+     * attribute. DSS takes it from there and fails on it while building its
+     * reports, so the token is rejected.
+     */
+    @Test
+    void aTokenWithAnUndecodableCertificateInItsCertificateValuesIsRejected() throws Exception {
+        byte[] certificate = Tokens.certificateWithInvalidUtf8Subject(
+                Files.readString(CORPUS.resolve("pki/tsa.pem")));
+        assertTokenRejected(Tokens.withCertificateValues(
+                Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst")), certificate), "cert-values-utf8");
+    }
+
+    /** The certificate of pki/tsa in the certificateValues attribute only is used as DSS uses it. */
+    @Test
+    void aTokenWithItsCertificateInItsCertificateValuesIsValidated() throws Exception {
+        byte[] certificate = Pem.decode(Files.readString(CORPUS.resolve("pki/tsa.pem")));
+        Path token = Files.write(temp.resolve("cert-values.tst"), Tokens.withCertificateValues(
+                Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst")), certificate));
+        Path result = temp.resolve("cert-values");
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"), "--out", result.toString());
+        args.set(args.indexOf("--timestamp") + 1, token.toString());
+        assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+        assertValidated(result, "PASSED", null);
+    }
+
+    /** Runs the valid token with the given number of copies of its certificates, and returns the time taken. */
+    private long copiesRun(int copies) throws Exception {
+        Path token = Files.write(temp.resolve("copies-" + copies + ".tst"), Tokens.withCopiesOfItsCertificates(
+                Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst")), copies));
+        Path result = temp.resolve("copies-" + copies);
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"), "--out", result.toString());
+        args.set(args.indexOf("--timestamp") + 1, token.toString());
+        long start = System.nanoTime();
+        assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+        long elapsed = System.nanoTime() - start;
+        assertValidated(result, "PASSED", null);
+        return elapsed;
+    }
+
+    /**
+     * Issue #72, case 5: a token holding thousands of copies of one
+     * certificate. DSS keeps one, so the checks of the tool must take time
+     * in proportion to the input, not to the square of the copies: four
+     * times the copies may not take more than eight times as long, with a
+     * second of margin. Before the fix, the ratio was about sixteen.
+     */
+    @Test
+    void copiesOfACertificateInATokenTakeTimeInProportionToTheirNumber() throws Exception {
+        copiesRun(100);
+        long thousand = copiesRun(1000);
+        long fourThousand = copiesRun(4000);
+        assertTrue(fourThousand < 8 * thousand + 1_000_000_000L,
+                "1000 copies: " + thousand / 1_000_000 + " ms; 4000 copies: " + fourThousand / 1_000_000 + " ms");
+    }
+
     /** Asserts that the tool rejects the token, and that DSS alone fails on it at the same stage. */
     private void assertTokenRejected(byte[] content, String name) throws Exception {
         Path token = Files.write(temp.resolve(name + ".tst"), content);

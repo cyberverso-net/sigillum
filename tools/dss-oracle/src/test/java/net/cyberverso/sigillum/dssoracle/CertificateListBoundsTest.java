@@ -91,10 +91,80 @@ class CertificateListBoundsTest {
     }
 
     @Test
-    void findsAnElementAfterOneThatOverstatesItsLength() {
-        // The first inner SEQUENCE says 3 bytes but holds 2; a reader that skips it lands on 0x84.
-        byte[] der = {0x30, (byte) 0x80, 0x30, 0x03, 0x02, 0x00, 0x04, (byte) 0x84, 0x7f, 0, 0, 0};
+    void findsAnElementWhereTheParserOfDssLandsAfterOneThatOverstatesItsLength() {
+        // The version INTEGER says 3 octets but holds 1; DSS reads the next two as part of it and lands on 0x30 0x84.
+        byte[] der = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x02, 0x03, 0x01, 0x30, 0x00, 0x30, (byte) 0x84, 0x7f,
+            0, 0, 0};
         assertRejected(der);
+    }
+
+    /**
+     * Issue #72, case 1: the TBSCertList tag 0x30 becomes 0x10, without the
+     * constructed bit. The parser of DSS reads the identifier and length
+     * octets of the TBSCertList whatever its tag, and then the nextUpdate,
+     * whose length octet becomes 0x84: a length of about 858 MB.
+     */
+    @Test
+    void readsTheTbsCertListWhateverItsTagAsDssDoes() throws Exception {
+        byte[] der = crl("root-ca");
+        der[4] = 0x10;
+        der[103] = (byte) 0x84;
+        assertRejected(der);
+    }
+
+    /** Issue #72, case 2: DSS stops reading after the signature value, so bytes after it are never read. */
+    @Test
+    void ignoresElementsAfterTheSignatureValueAsDssDoes() throws Exception {
+        byte[] original = crl("ca-ecdsa");
+        for (byte[] trailing : new byte[][] {
+            {0x04, (byte) 0x84, 0x03, (byte) 0xff, (byte) 0xff, (byte) 0xff},
+            {0x04, (byte) 0x84, 0x7f, (byte) 0xff, (byte) 0xff, (byte) 0xff}}) {
+            byte[] der = Arrays.copyOf(original, original.length + trailing.length);
+            System.arraycopy(trailing, 0, der, original.length, trailing.length);
+            assertAccepted(der);
+        }
+    }
+
+    /**
+     * Issue #72, case 3: the identifier octet of the signatureValue BIT
+     * STRING of crl/root-ca, at offset 181, gets the constructed bit. DSS
+     * reads the contents as the signature value, not as encodings.
+     */
+    @Test
+    void readsTheSignatureValueAsOctetsWhateverItsTagAsDssDoes() throws Exception {
+        for (int tag : new int[] {0x23, 0x63, 0xa3, 0xe3}) {
+            byte[] der = crl("root-ca");
+            der[181] = (byte) tag;
+            assertAccepted(der);
+        }
+    }
+
+    @Test
+    void leavesALengthThatDssSkipsWithoutReadingIt() {
+        // revokedCertificates declares 0x7f000000 octets; DSS skips it without allocating, then fails at the end.
+        byte[] der = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x30, 0x00, 0x30, 0x00, 0x17, 0x00,
+            0x30, (byte) 0x84, 0x7f, 0, 0, 0, 0x30, 0x00};
+        assertAccepted(der);
+    }
+
+    @Test
+    void checksTheRevokedCertificateEntriesAndTheirSerialNumbersAsDssReadsThem() {
+        // An entry of revokedCertificates declares 0x7f000000 octets, which DSS reads into an array.
+        byte[] entry = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x30, 0x00, 0x30, 0x00, 0x17, 0x00,
+            0x30, 0x08, 0x30, (byte) 0x84, 0x7f, 0, 0, 0, 0x02, 0x00};
+        assertRejected(entry);
+        // The serial number of an entry declares 0x7f000000 octets.
+        byte[] serial = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x30, 0x00, 0x30, 0x00, 0x17, 0x00,
+            0x30, 0x08, 0x30, 0x06, 0x02, (byte) (0x84), 0x7f, 0, 0, 0};
+        assertRejected(serial);
+        // DSS stops reading the entries at a serial number that Bouncy Castle refuses, here an empty INTEGER.
+        byte[] afterMalformed = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x30, 0x00, 0x30, 0x00, 0x17, 0x00,
+            0x30, 0x0a, 0x30, 0x02, 0x02, 0x00, 0x30, (byte) 0x84, 0x7f, 0, 0, 0};
+        assertAccepted(afterMalformed);
+        // An empty entry stops it too: DSS cannot read an identifier octet in it.
+        byte[] afterEmpty = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x30, 0x00, 0x30, 0x00, 0x17, 0x00,
+            0x30, 0x08, 0x30, 0x00, 0x30, (byte) 0x84, 0x7f, 0, 0, 0};
+        assertAccepted(afterEmpty);
     }
 
     @Test

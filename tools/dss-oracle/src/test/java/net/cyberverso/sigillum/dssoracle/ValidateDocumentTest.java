@@ -613,7 +613,9 @@ class ValidateDocumentTest {
             assertTrue(outcomes.stream().anyMatch(line -> line.startsWith(failing + ": rejected")), failing);
         }
         for (String passing : List.of("etsiu-lenient", "etsiu-mixed", "general-plus-top",
-                "general-plus-top-header", "csig-second-member-clear", "csig-second-member-b64")) {
+                "general-plus-top-header", "csig-second-member-clear", "csig-second-member-b64",
+                "skipped-entry-empty-signature", "skipped-entry-blank-signature", "skipped-entry-null-signature",
+                "skipped-entry-without-signature", "skipped-entry-etsiu", "skipped-flattened-empty-signature")) {
             assertTrue(outcomes.stream().anyMatch(line -> line.startsWith(passing + ": validated")), passing);
         }
         // The walk itself finds the counter signatures, before DSS parses them.
@@ -622,6 +624,33 @@ class ValidateDocumentTest {
             String message = (String) summary(temp.resolve("crafted-" + counterSignature)).get("message");
             assertTrue(message.contains("a counter signature"), counterSignature + ": " + message);
         }
+    }
+
+    /**
+     * Issue #72, comment case 13: a general JWS with the JAdES signature of
+     * the tests, followed by an entry whose protected header is nested
+     * deeper than DSS accepts and whose signature is empty. DSS skips that
+     * entry and validates the signature, and so must the tool.
+     */
+    @Test
+    void anEntryThatDssSkipsDoesNotRejectTheDocument() throws Exception {
+        String json = new String(Documents.jadesJson(), StandardCharsets.US_ASCII);
+        java.util.regex.Matcher payload = java.util.regex.Pattern.compile("\"payload\":\"([^\"]*)\"").matcher(json);
+        java.util.regex.Matcher header = java.util.regex.Pattern.compile("\"protected\":\"([^\"]*)\"").matcher(json);
+        java.util.regex.Matcher value = java.util.regex.Pattern.compile("\"signature\":\"([^\"]*)\"").matcher(json);
+        assertTrue(payload.find() && header.find() && value.find(), json);
+        String deep = Documents.base64url(Documents.nestedHeader(JsonDepth.MAX_DEPTH));
+        byte[] document = ("{\"payload\":\"" + payload.group(1) + "\",\"signatures\":[{\"protected\":\""
+                + header.group(1) + "\",\"signature\":\"" + value.group(1) + "\"},{\"protected\":\"" + deep
+                + "\",\"signature\":\"\"}]}").getBytes(StandardCharsets.US_ASCII);
+        DssAlone.Inputs inputs = DssAlone.Inputs.of(document, "skipped-entry.json");
+        assertNull(DssAlone.failure(inputs));
+        Path result = temp.resolve("skipped-entry");
+        assertEquals(ExitCodes.SUCCESS, run(arguments(write("skipped-entry.json", document),
+                "--out", result.toString())), stderr());
+        List<Map<String, Object>> signatures = assertAsDssAlone(result, inputs);
+        assertEquals(1, signatures.size());
+        assertEquals("TOTAL_PASSED", signatures.get(0).get("indication"));
     }
 
     /**
