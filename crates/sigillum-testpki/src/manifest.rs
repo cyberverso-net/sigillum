@@ -5,8 +5,9 @@
 //! empty text fields, duplicate identifiers, paths that are not portable
 //! relative paths or that name the corpus's own files, paths that conflict
 //! ignoring letter case, malformed digests, sub-indications that do not
-//! belong to the indication, and links to unknown artefacts, to the artefact
-//! itself, to artefacts of the wrong kind or repeated in a list.
+//! belong to the indication, links to unknown artefacts, to the artefact
+//! itself, to artefacts of the wrong kind or repeated in a list, and an
+//! attack class on an artefact that is not a PAdES signed document.
 //!
 //! [`Manifest::to_toml`] writes a manifest back in the same format, so that
 //! the generator can record the artefacts it writes.
@@ -21,7 +22,7 @@ use time::OffsetDateTime;
 use time::format_description::well_known::Rfc3339;
 
 /// The manifest format version this crate reads.
-pub const FORMAT_VERSION: u32 = 2;
+pub const FORMAT_VERSION: u32 = 3;
 
 /// The sub-indications that may accompany TOTAL-FAILED (ETSI EN 319 102-1
 /// V1.4.1, clause 5.1.3, Table 6). The project also uses them with FAILED,
@@ -106,6 +107,8 @@ pub struct Artefact {
     /// The result that DSS gives in place of `expected_dss`, with the entry
     /// of `docs/design/divergences.md` that records the difference.
     pub dss_divergence: Option<Divergence>,
+    /// For a malformed PAdES document, the class of attack that it carries.
+    pub attack_class: Option<AttackClass>,
 }
 
 /// A result of DSS that differs from the prediction of the manifest, and
@@ -205,6 +208,50 @@ impl OpensslResult {
             Self::Parsed => "parsed",
             Self::Rejected => "rejected",
             Self::NotApplicable => "not-applicable",
+        }
+    }
+}
+
+/// A class of attack on PDF signatures, carried by a malformed PAdES
+/// document of the corpus. Each class is a row of the threat model of the
+/// sigillum documentation.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum AttackClass {
+    /// Incremental saving: content appended after signing (threat D1).
+    IncrementalSaving,
+    /// Shadow attack of the hide class (threat D2).
+    ShadowHide,
+    /// Shadow attack of the replace class (threat D2).
+    ShadowReplace,
+    /// Shadow attack of the hide-and-replace class (threat D2).
+    ShadowHideAndReplace,
+    /// Signature wrapping (threat D3).
+    SignatureWrapping,
+    /// Universal signature forgery (threat D4).
+    UniversalSignatureForgery,
+}
+
+impl AttackClass {
+    /// Every class, in the order of the threat model.
+    pub const ALL: [Self; 6] = [
+        Self::IncrementalSaving,
+        Self::ShadowHide,
+        Self::ShadowReplace,
+        Self::ShadowHideAndReplace,
+        Self::SignatureWrapping,
+        Self::UniversalSignatureForgery,
+    ];
+
+    /// The class as written in the manifest.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::IncrementalSaving => "incremental-saving",
+            Self::ShadowHide => "shadow-hide",
+            Self::ShadowReplace => "shadow-replace",
+            Self::ShadowHideAndReplace => "shadow-hide-and-replace",
+            Self::SignatureWrapping => "signature-wrapping",
+            Self::UniversalSignatureForgery => "universal-signature-forgery",
         }
     }
 }
@@ -384,6 +431,9 @@ pub enum ManifestError {
         /// The artefact identifier.
         id: String,
     },
+    /// An attack class is given for an artefact that is not a PAdES
+    /// signed document.
+    AttackClassNotAllowed(String),
     /// The manifest file cannot be read.
     Io(String),
 }
@@ -456,6 +506,10 @@ impl fmt::Display for ManifestError {
             Self::DivergenceNotApplicable { id } => write!(
                 f,
                 "\"{id}\" has a dss-divergence, but its expected-dss is not-applicable"
+            ),
+            Self::AttackClassNotAllowed(id) => write!(
+                f,
+                "the attack-class of \"{id}\" is allowed only on a PAdES signed document: a signed-document whose path ends with .pdf"
             ),
             Self::Io(message) => write!(f, "the manifest cannot be read: {message}"),
         }
@@ -571,6 +625,9 @@ impl Artefact {
                 divergence.sub_indication.as_deref(),
             ));
             push_field(out, "dss-divergence", &inline_table(&fields));
+        }
+        if let Some(class) = self.attack_class {
+            push_field(out, "attack-class", &quoted(class.as_str()));
         }
         let links = &self.links;
         let list = |values: &[String]| {
@@ -822,6 +879,7 @@ struct RawArtefact {
     links: RawLinks,
     notes: Option<String>,
     dss_divergence: Option<RawDivergence>,
+    attack_class: Option<AttackClass>,
 }
 
 /// `dss-divergence`: the entry of `docs/design/divergences.md`, and the
@@ -858,6 +916,18 @@ impl RawDivergence {
         }
         Ok(divergence)
     }
+}
+
+/// Reports whether an artefact of `kind` at `path` is a PAdES signed
+/// document: a signed document whose path ends with `.pdf`, ignoring
+/// letter case. The manifest records no format, so the extension decides.
+fn is_pades_document(kind: Kind, path: &str) -> bool {
+    kind == Kind::SignedDocument
+        && path
+            .len()
+            .checked_sub(4)
+            .and_then(|start| path.get(start..))
+            .is_some_and(|extension| extension.eq_ignore_ascii_case(".pdf"))
 }
 
 /// Reports whether `entry` is of the form `DIV-<number>`, with a number
@@ -944,6 +1014,9 @@ impl RawArtefact {
                 }
             }
         };
+        if self.attack_class.is_some() && !is_pades_document(self.kind, &self.path) {
+            return Err(ManifestError::AttackClassNotAllowed(id));
+        }
         let dss_divergence = self
             .dss_divergence
             .map(|divergence| divergence.check(&id, &expected_dss))
@@ -965,6 +1038,7 @@ impl RawArtefact {
             },
             notes,
             dss_divergence,
+            attack_class: self.attack_class,
         })
     }
 }

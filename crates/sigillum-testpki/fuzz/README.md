@@ -6,7 +6,7 @@ The target `manifest` feeds arbitrary text to the manifest parser. A manifest th
 cargo +nightly fuzz run manifest corpus/manifest seeds/manifest -- -dict=manifest.dict -max_total_time=600
 ```
 
-`seeds/manifest` holds manifests of the current format to start from, one with a `dss-divergence`, and `manifest.dict` the field names and values of the format.
+`seeds/manifest` holds manifests of the current format to start from, one with a `dss-divergence` and an `attack-class`, and `manifest.dict` the field names and values of the format.
 
 The target `tsa_input` feeds arbitrary bytes to the input handling of the `tsa` subcommand: the module `timestamp::input` and `Tsa::from_pem`. The whole input goes to `check_der`, which checks that every DER length fits its parent and the input before any owned decoding. Valid UTF-8 also goes to the parsers of the digest algorithm, the digest and the time. The first byte then chooses what the remaining bytes stand for. When it is even, they are the key file, read with the committed certificate of `pki/tsa`. When it is odd, they are the certificate file, read with the committed test key of `pki/tsa`, so that certificate parsing and the check that the key matches the certificate are reached:
 
@@ -31,3 +31,11 @@ cargo +nightly fuzz run dss_output corpus/dss_output seeds/dss_output -- -dict=d
 ```
 
 `seeds/dss_output` holds the version line of the tool and summaries that it wrote for the corpus: a certificate validated with CRLs, a timestamp token whose imprint does not match its data, a JAdES signature, and an OCSP response that DSS rejects, with the paths of the files made relative to the repository. It also holds a summary of a run that exceeded the time limit, written by hand in the form that the README of the tool describes. `dss_output.dict` holds the members and values of `summary.json`.
+
+The target `mutations` feeds arbitrary bytes to the readers of `generate mutations`: `modify_signing_time` and `modify_encapsulated_content`, which look for the signing-time attribute and for the encapsulated content of a CMS signature, and `tamper_protected_header` and `duplicate_protected_header_parameter`, which read a JWS in the compact serialisation and the `iat` of its protected header. The JWS readers refuse an input over 1 MiB, a protected header over 64 KiB, a header with an escape sequence or with a name given twice, and read `iat` only among the members of the outer object. A mutation that succeeds must change one byte of a CMS signature, by its bit 0x20 for the content, or the protected header of a JWS only, and a header with `iat` given twice is refused:
+
+```
+cargo +nightly fuzz run mutations corpus/mutations seeds/mutations -- -dict=mutations.dict -max_total_time=600
+```
+
+`seeds/mutations` holds the two signatures of the corpus that the variants derive from, `signed/cades-enveloping-b-b-p256` and `signed/jades-compact-b-b-p256`, a signing-time attribute alone with a UTCTime and with a GeneralizedTime, an encapsulated content of three octets, and a short compact JWS. `mutations.dict` holds the encodings of the attribute and of the encapsulated content, and the syntax of a compact JWS.

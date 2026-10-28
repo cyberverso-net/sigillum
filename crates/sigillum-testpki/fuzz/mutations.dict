@@ -1,0 +1,17 @@
+# Dictionary for the mutations fuzz target: the signing-time attribute and
+# the compact JWS syntax.
+"\x06\x09\x2a\x86\x48\x86\xf7\x0d\x01\x09\x05"
+"\x31\x0f\x17\x0d"
+"\x31\x11\x18\x0f"
+"291216100000Z"
+"\x06\x09\x2a\x86\x48\x86\xf7\x0d\x01\x07\x01\xa0"
+"\x04"
+"\x81"
+"\x82"
+"20291216100000Z"
+"."
+"eyJ"
+"eyJpYXQiOj"
+"ImlhdCI6"
+"In0"
+"fQ"

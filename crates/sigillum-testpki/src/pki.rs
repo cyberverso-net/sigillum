@@ -155,6 +155,7 @@ fn certificate_file(spec: &CertSpec, certificate: &[u8]) -> Result<GeneratedFile
             content: None,
             timestamp_chain: Vec::new(),
         },
+        attack_class: None,
         dss_divergence: spec
             .dss_divergence
             .map(hierarchy::DssDivergence::to_manifest),
@@ -180,6 +181,7 @@ fn key_file(spec: &CertSpec, key: &KeyPair) -> Result<GeneratedFile, PkiError> {
         expected_openssl: OpensslResult::Parsed,
         expected_dss: DssResult::NotApplicable,
         links: Links::default(),
+        attack_class: None,
         dss_divergence: None,
         notes: None,
     };
@@ -209,6 +211,8 @@ pub enum GenerateError {
     Timestamp(crate::timestamp::TsaError),
     /// A signature of the signed corpus cannot be created.
     Signed(crate::signed::SignedError),
+    /// A malformed variant of the signed corpus cannot be derived.
+    Mutation(crate::mutations::MutationError),
     /// A file cannot be written.
     Io(String),
 }
@@ -220,6 +224,7 @@ impl fmt::Display for GenerateError {
             Self::Pki(error) => error.fmt(f),
             Self::Timestamp(error) => error.fmt(f),
             Self::Signed(error) => error.fmt(f),
+            Self::Mutation(error) => error.fmt(f),
             Self::Io(message) => write!(f, "a file cannot be written: {message}"),
         }
     }

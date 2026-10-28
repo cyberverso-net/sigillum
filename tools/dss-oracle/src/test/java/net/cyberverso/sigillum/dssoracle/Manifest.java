@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  * a reader of that layout suffices. It is not a TOML parser: it reads the
  * layout that {@code Manifest::to_toml} writes, with its order of fields and
  * spacing, and checks no value that the Rust parser checks. It reads format
- * version 2 only, and refuses any line whose key names {@code dss-divergence}
+ * version 3 only, and refuses any line whose key names {@code dss-divergence}
  * but that is not the inline table it reads, such as a dotted key or a
  * sub-table, so that a change of the format cannot drop a divergence
  * silently.
@@ -53,7 +53,7 @@ final class Manifest {
     }
 
     /** The format version of the manifest that this reader reads. */
-    static final String FORMAT_VERSION = "2";
+    static final String FORMAT_VERSION = "3";
 
     /** A basic string or a literal string (TOML 1.0.0) on one line; escapes are kept as written. */
     private static final Pattern STRING = Pattern.compile("^([a-z-]+) = (?:\"(.*)\"|'(.*)')$");

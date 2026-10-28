@@ -398,7 +398,7 @@ fn every_crl_has_a_manifest_entry() -> TestResult {
     let files = crls()?;
     assert_eq!(files.len(), CRLS.len());
     let mut manifest = Manifest::parse(
-        "[header]\nformat-version = 2\nvalidation-time = \"2030-01-15T10:00:00Z\"\nopenssl-version = \"3.5.9\"\ndss-version = \"6.5.1\"\n",
+        "[header]\nformat-version = 3\nvalidation-time = \"2030-01-15T10:00:00Z\"\nopenssl-version = \"3.5.9\"\ndss-version = \"6.5.1\"\n",
     )?;
     for file in super::super::tests::generated()? {
         manifest.upsert(file.artefact.clone());
@@ -490,7 +490,7 @@ fn every_crl_has_a_manifest_entry() -> TestResult {
 #[test]
 fn certificate_links_replace_only_the_crls_of_this_generator() -> TestResult {
     let mut manifest = Manifest::parse(
-        "[header]\nformat-version = 2\nvalidation-time = \"2030-01-15T10:00:00Z\"\nopenssl-version = \"3.5.9\"\ndss-version = \"6.5.1\"\n",
+        "[header]\nformat-version = 3\nvalidation-time = \"2030-01-15T10:00:00Z\"\nopenssl-version = \"3.5.9\"\ndss-version = \"6.5.1\"\n",
     )?;
     let mut entry = super::super::tests::generated()?
         .iter()
@@ -627,6 +627,7 @@ fn identifiers_have_the_manifest_form() {
         expected_dss: DssResult::NotApplicable,
         links: Links::default(),
         notes: None,
+        attack_class: None,
         dss_divergence: None,
     };
     assert!(generated_here(&entry(Kind::Crl, "crl/a")));

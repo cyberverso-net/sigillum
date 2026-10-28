@@ -14,6 +14,7 @@ use std::process::ExitCode;
 
 use clap::{Parser, Subcommand, ValueEnum};
 use sigillum_testpki::documents;
+use sigillum_testpki::mutations;
 use sigillum_testpki::pki::{self, GenerateError, Summary};
 use sigillum_testpki::signed::{self, JavaOracle};
 use sigillum_testpki::timestamp;
@@ -77,9 +78,11 @@ enum Target {
     /// The unsigned base documents of the signed corpus, under documents/.
     Documents,
     /// The signed corpus, under signed/, created by tools/dss-oracle with
-    /// this program as its timestamping authority, after every other
-    /// target.
+    /// this program as its timestamping authority, after the targets above.
     Signed,
+    /// The malformed variants of the signed corpus, under mutations/,
+    /// derived from the committed signed corpus, after every other target.
+    Mutations,
 }
 
 impl Target {
@@ -92,6 +95,7 @@ impl Target {
             Self::Ocsp => "ocsp",
             Self::Documents => "documents",
             Self::Signed => "signed",
+            Self::Mutations => "mutations",
         }
     }
 }
@@ -110,6 +114,7 @@ fn main() -> ExitCode {
                 Target::Timestamps => timestamp::write_into_corpus(&corpus.manifest),
                 Target::Ocsp => pki::ocsp::write_into_corpus(&corpus.manifest),
                 Target::Documents => documents::write_into_corpus(&corpus.manifest),
+                Target::Mutations => mutations::write_into_corpus(&corpus.manifest),
                 Target::Signed => {
                     let oracle = JavaOracle::new(java, dss_oracle);
                     match std::env::current_exe() {

@@ -453,7 +453,7 @@ fn owns_every_entry_under_its_directory() -> TestResult {
 #[test]
 fn the_corpus_must_list_what_the_fixtures_link_and_read() -> TestResult {
     let mut manifest = Manifest::parse(
-        "[header]\nformat-version = 2\nvalidation-time = \"2030-01-15T10:00:00Z\"\nopenssl-version = \"3.0.13\"\ndss-version = \"6.5.1\"\n",
+        "[header]\nformat-version = 3\nvalidation-time = \"2030-01-15T10:00:00Z\"\nopenssl-version = \"3.0.13\"\ndss-version = \"6.5.1\"\n",
     )?;
     assert_eq!(
         check_listed(&manifest),

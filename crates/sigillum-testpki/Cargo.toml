@@ -12,6 +12,7 @@ keywords.workspace = true
 publish = false
 
 [dependencies]
+base64ct = { version = "1.8.3", features = ["alloc"] }
 clap = { version = "4", features = ["derive"] }
 cms = { version = "0.2.3", features = ["builder"] }
 const-oid = { version = "0.9.6", features = ["db"] }

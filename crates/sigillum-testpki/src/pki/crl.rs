@@ -536,6 +536,7 @@ fn crl_file(spec: &CrlSpec, der: Vec<u8>) -> Result<GeneratedFile, PkiError> {
             content: None,
             timestamp_chain: Vec::new(),
         },
+        attack_class: None,
         dss_divergence: None,
         notes: Some(match spec.notes {
             Some(notes) => format!("{} {notes}", covered_note(spec)),

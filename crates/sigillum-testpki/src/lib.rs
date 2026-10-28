@@ -10,6 +10,7 @@
 pub mod documents;
 pub mod dss;
 pub mod manifest;
+pub mod mutations;
 pub mod openssl;
 pub mod pki;
 pub mod signed;

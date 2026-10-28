@@ -34,8 +34,9 @@ jobs:
         run: mvn -B -ntp package -DskipTests
       # The corpus is regenerated in a network namespace without network: DSS and the
       # timestamping authority must work offline. The documents come first, as the
-      # signatures read them.
-      - name: Regenerate the documents and the signed corpus without network
+      # signatures read them, and the malformed variants last, as they derive from
+      # the signatures.
+      - name: Regenerate the documents, the signed corpus and its variants without network
         run: |
           offline() {
             sudo unshare --net -- runuser -u "$(id -un)" -- env "PATH=$PATH" "JAVA_HOME=$JAVA_HOME" "$@"
@@ -43,6 +44,7 @@ jobs:
           offline ./target/debug/sigillum-testpki generate documents --manifest testdata/manifest.toml
           offline ./target/debug/sigillum-testpki generate signed --manifest testdata/manifest.toml \
             --java "$JAVA_HOME/bin/java" --dss-oracle tools/dss-oracle/target/dss-oracle.jar
+          offline ./target/debug/sigillum-testpki generate mutations --manifest testdata/manifest.toml
       - name: Check that nothing changed
         run: |
           git status --porcelain -- testdata

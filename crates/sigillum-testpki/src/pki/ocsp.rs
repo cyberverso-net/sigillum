@@ -727,6 +727,7 @@ fn response_file(spec: &OcspSpec, der: Vec<u8>) -> Result<GeneratedFile, PkiErro
         expected_openssl: spec.expected_openssl,
         expected_dss: spec.expected_dss.clone(),
         links,
+        attack_class: None,
         dss_divergence: spec.dss_divergence.clone(),
         notes: Some(
             [Some(covered.as_str()), spec.notes.as_deref(), freshness]
