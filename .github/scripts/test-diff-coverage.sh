@@ -1,0 +1,248 @@
+#!/usr/bin/env bash
+# Tests diff-coverage.sh on small Git repositories built for each case, with
+# lcov reports written by hand: the counts of the total and of the changed
+# lines, the lines that are not covered, and the inputs that it refuses.
+set -euo pipefail
+
+here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+script=$here/diff-coverage.sh
+scratch=$(mktemp -d)
+trap 'rm -rf "$scratch"' EXIT
+
+failures=0
+
+# Starts a new repository in $repo, with one commit that adds the files
+# given as <path>=<number of lines>, and records it as the base.
+repo=
+new_repo() {
+  local spec path lines
+  repo=$scratch/repo
+  rm -rf "$repo"
+  mkdir -p "$repo"
+  git -C "$repo" init -q -b main
+  git -C "$repo" config user.name Test
+  git -C "$repo" config user.email test@example.invalid
+  git -C "$repo" config commit.gpgsign false
+  for spec in "$@"; do
+    path=${spec%=*}
+    lines=${spec##*=}
+    mkdir -p "$repo/$(dirname "$path")"
+    seq 1 "$lines" | sed 's/^/line /' > "$repo/$path"
+  done
+  git -C "$repo" add -A
+  git -C "$repo" commit -q -m base
+  base=$(git -C "$repo" rev-parse HEAD)
+}
+
+commit() {
+  git -C "$repo" add -A
+  git -C "$repo" commit -q -m change
+}
+
+# Replaces line <n> of <path> with new text.
+change_line() {
+  sed -i.bak "$2s/.*/changed $2/" "$repo/$1" && rm "$repo/$1.bak"
+}
+
+# Writes the lcov report: one argument per record, <path>:<line>=<count>,...
+# A path that starts with / is written as it is; any other is placed under
+# the repository.
+lcov() {
+  local record path data entry
+  : > "$scratch/lcov.info"
+  for record in "$@"; do
+    path=${record%%:*}
+    data=${record#*:}
+    case "$path" in
+      /*) ;;
+      *) path=$(cd "$repo" && pwd -P)/$path ;;
+    esac
+    {
+      echo "TN:"
+      echo "SF:$path"
+      echo "FN:1,f"
+      IFS=',' read -ra entries <<< "$data"
+      for entry in "${entries[@]}"; do
+        echo "DA:${entry%=*},${entry#*=}"
+      done
+      echo "end_of_record"
+    } >> "$scratch/lcov.info"
+  done
+}
+
+# expect <exit code> <name> [<text the output must contain>...]
+# Text that starts with ! must not appear in the output.
+expect() {
+  local wanted=$1 name=$2 code=0 text
+  shift 2
+  (cd "$repo" && bash "$script" "$scratch/lcov.info" "${base_arg:-$base}") > "$scratch/output" 2>&1 || code=$?
+  if [ "$code" -ne "$wanted" ]; then
+    echo "FAIL: $name: exit code $code, expected $wanted" >&2
+    sed 's/^/  /' "$scratch/output" >&2
+    failures=$((failures + 1))
+    return
+  fi
+  for text in "$@"; do
+    if [ "${text:0:1}" = "!" ]; then
+      if grep -qF -- "${text:1}" "$scratch/output"; then
+        echo "FAIL: $name: the output contains: ${text:1}" >&2
+        sed 's/^/  /' "$scratch/output" >&2
+        failures=$((failures + 1))
+        return
+      fi
+    elif ! grep -qF -- "$text" "$scratch/output"; then
+      echo "FAIL: $name: the output does not contain: $text" >&2
+      sed 's/^/  /' "$scratch/output" >&2
+      failures=$((failures + 1))
+      return
+    fi
+  done
+  echo "ok: $name"
+}
+
+# Two changed lines out of three instrumented ones are covered; a changed
+# line without coverage data, such as a comment, does not count.
+new_repo src/a.rs=10
+change_line src/a.rs 2
+change_line src/a.rs 3
+change_line src/a.rs 4
+change_line src/a.rs 9
+commit
+lcov "src/a.rs:1=1,2=5,3=0,4=1,5=0"
+expect 0 "changed lines, covered and not" \
+  "| Total | 3 | 5 | 60.00% |" \
+  "| Changed lines | 2 | 3 | 66.66% |" \
+  "| \`src/a.rs\` | 2 | 3 | 66.66% | 3 |"
+
+# A file that appears in several records is covered where any record covers it.
+lcov "src/a.rs:1=1,2=0,3=0,4=1,5=0" "src/a.rs:2=1,3=0,5=0"
+expect 0 "records of the same file merged" \
+  "| Total | 3 | 5 | 60.00% |" \
+  "| Changed lines | 2 | 3 | 66.66% |"
+
+# A checksum after the count is allowed, and counts above the range of a
+# 32-bit integer are covered.
+printf 'SF:%s/src/a.rs\nDA:2,4294967296,abc\nDA:3,0,def\nDA:4,1\nend_of_record\n' "$(cd "$repo" && pwd -P)" > "$scratch/lcov.info"
+expect 0 "checksums and large counts" "| Changed lines | 2 | 3 | 66.66% |"
+
+# Consecutive lines that are not covered are shown as ranges.
+new_repo src/a.rs=20
+for n in 2 3 4 5 8 10 11; do change_line src/a.rs "$n"; done
+commit
+lcov "src/a.rs:2=0,3=0,4=0,5=1,8=0,10=0,11=0"
+expect 0 "ranges of lines not covered" "| \`src/a.rs\` | 1 | 7 | 14.28% | 2-4, 8, 10-11 |"
+
+# The percentage is truncated, never rounded up to a threshold.
+new_repo src/a.rs=1
+seq 1 20000 >> "$repo/src/a.rs"
+commit
+data=$(seq 2 20001 | awk '{ printf "%s%s=%d", sep, $1, ($1 == 20001 ? 0 : 1); sep = "," }')
+lcov "src/a.rs:$data"
+expect 0 "a percentage truncated" "| Changed lines | 19999 | 20000 | 99.99% |" "!100.00%"
+
+# Lines removed and files deleted are not changed lines; added and renamed
+# files count under their new path; a file outside the repository and a
+# file that did not change count only in the total.
+new_repo src/a.rs=5 src/b.rs=5 src/c.rs=5 src/old.rs=8
+sed -i.bak '2d' "$repo/src/a.rs" && rm "$repo/src/a.rs.bak"
+git -C "$repo" rm -q src/b.rs
+git -C "$repo" mv src/old.rs src/new.rs
+change_line src/new.rs 7
+seq 1 3 > "$repo/src/added.rs"
+commit
+lcov "src/a.rs:1=1,2=1" "src/c.rs:1=0" "src/new.rs:6=1,7=0" "src/added.rs:1=1,2=1,3=0" "/elsewhere/lib.rs:1=0"
+expect 0 "deletions, additions and renames" \
+  "| Total | 5 | 8 | 62.50% |" \
+  "| Changed lines | 2 | 4 | 50.00% |" \
+  "| \`src/added.rs\` | 2 | 3 | 66.66% | 3 |" \
+  "| \`src/new.rs\` | 0 | 1 | 0.00% | 7 |" \
+  "!src/a.rs\` |" "!src/b.rs" "!src/old.rs" "!elsewhere"
+
+# A changed Rust file that has no record in the report is listed; other
+# changed files are not.
+new_repo src/a.rs=3 src/gated.rs=3 README.md=3
+change_line src/a.rs 1
+change_line src/gated.rs 1
+change_line README.md 1
+commit
+lcov "src/a.rs:1=1"
+expect 0 "changed Rust files missing from the report" \
+  "Changed Rust files with no line in the report: \`src/gated.rs\`." "!README.md"
+
+# Without a changed instrumented line, the changed coverage is not a number.
+new_repo src/a.rs=3 README.md=3
+change_line README.md 1
+commit
+lcov "src/a.rs:1=1,2=0"
+expect 0 "no changed instrumented line" "| Changed lines | 0 | 0 | n/a |" "!Changed Rust files"
+
+# Changes made on the base branch after the merge base do not count.
+new_repo src/a.rs=5
+git -C "$repo" checkout -q -b topic
+change_line src/a.rs 2
+commit
+topic=$(git -C "$repo" rev-parse HEAD)
+git -C "$repo" checkout -q main
+change_line src/a.rs 4
+commit
+base_arg=$(git -C "$repo" rev-parse HEAD)
+git -C "$repo" checkout -q "$topic"
+lcov "src/a.rs:2=1,4=0"
+expect 0 "a base that moved on" "| Changed lines | 1 | 1 | 100.00% |"
+base_arg=
+
+# Added lines whose text looks like a file or hunk header are content.
+new_repo src/a.rs=5
+printf '%s\n' "++ b/src/z.rs" "@@ -1 +1,9 @@" "-- a/src/a.rs" >> "$repo/src/a.rs"
+commit
+lcov "src/a.rs:6=1,7=1,8=0"
+expect 0 "lines that look like headers" "| \`src/a.rs\` | 2 | 3 | 66.66% | 8 |" "!src/z.rs"
+
+# File names with spaces, and Git settings that change the diff output.
+new_repo "src/with space.rs=4"
+change_line "src/with space.rs" 2
+commit
+git -C "$repo" config diff.noprefix true
+git -C "$repo" config diff.mnemonicPrefix true
+git -C "$repo" config color.ui always
+git -C "$repo" config diff.context 5
+lcov "src/with space.rs:1=1,2=0"
+expect 0 "a name with a space and unusual Git settings" "| \`src/with space.rs\` | 0 | 1 | 0.00% | 2 |"
+
+# Refused inputs.
+new_repo src/a.rs=3
+change_line src/a.rs 1
+commit
+lcov "src/a.rs:1=1"
+base_arg=0000000000000000000000000000000000000000
+expect 2 "a base that is not a commit" "is not a commit"
+base_arg=
+: > "$scratch/lcov.info"
+expect 2 "a report without a record" "has no coverage record"
+rm "$scratch/lcov.info"
+expect 2 "a missing report" "cannot be read"
+printf 'SF:%s/src/a.rs\nDA:x,1\nend_of_record\n' "$(cd "$repo" && pwd -P)" > "$scratch/lcov.info"
+expect 2 "a malformed line record" "malformed"
+code=0
+(cd "$repo" && bash "$script" "$scratch/lcov.info") > "$scratch/output" 2>&1 || code=$?
+if [ "$code" -eq 2 ] && grep -qF "usage" "$scratch/output"; then
+  echo "ok: a missing argument"
+else
+  echo "FAIL: a missing argument: exit code $code" >&2
+  failures=$((failures + 1))
+fi
+
+# A file name that Git quotes cannot be matched with the report.
+if touch "$scratch/probe$(printf '\t')name" 2> /dev/null; then
+  new_repo src/a.rs=3
+  printf 'x\n' > "$repo/src/tab$(printf '\t')name.rs"
+  commit
+  lcov "src/a.rs:1=1"
+  expect 2 "a file name that Git quotes" "quoted"
+fi
+
+if [ "$failures" -ne 0 ]; then
+  echo "$failures case(s) failed" >&2
+  exit 1
+fi
+echo "every case passed"

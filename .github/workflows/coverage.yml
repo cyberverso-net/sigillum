@@ -1,0 +1,84 @@
+name: Coverage
+
+on:
+  push:
+    branches: [main, task/79-coverage-ci]
+  pull_request:
+  # The job does not fail on the coverage threshold yet. The trigger lets it
+  # become a required check without a change to the workflow; the merge
+  # queue does not merge a group until every required check is reported.
+  merge_group:
+    types: [checks_requested]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  coverage:
+    name: Line coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CARGO_TERM_COLOR: always
+      RUSTFLAGS: -D warnings
+    steps:
+      # The whole history, so that the merge base of the change is present.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Test the changed-line report
+        run: .github/scripts/test-diff-coverage.sh
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
+        with:
+          toolchain: stable
+          components: llvm-tools-preview
+      - uses: taiki-e/install-action@1e29709c0ec63babbe8f266397a465f29a825f91 # v2.87.31
+        with:
+          tool: cargo-llvm-cov@0.9.1
+          fallback: none
+      # The tests of the cross-platform test job, with default features: the
+      # dss feature of sigillum-oracle, and the tests that need OpenSSL or
+      # tools/dss-oracle, run in their own workflows. cargo llvm-cov leaves
+      # tests out of the report by default (tests, examples and benches
+      # directories, and tests.rs files).
+      - name: Measure line coverage
+        run: |
+          mkdir -p target/coverage
+          cargo llvm-cov --locked --workspace --lcov --output-path target/coverage/lcov.info
+      - name: Write the HTML report
+        run: cargo llvm-cov report --html --output-dir target/coverage
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage-${{ github.run_number }}-${{ github.run_attempt }}
+          path: |
+            target/coverage/lcov.info
+            target/coverage/html
+          if-no-files-found: error
+          retention-days: 30
+      # The changed lines are those of the pull request merged into its base,
+      # of the merge group over its base, or of the push.
+      - name: Report the coverage of the changed lines
+        env:
+          EVENT: ${{ github.event_name }}
+          GROUP_BASE: ${{ github.event.merge_group.base_sha }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          case "$EVENT" in
+            pull_request) base=$(git rev-parse HEAD^1) ;;
+            merge_group) base=$GROUP_BASE ;;
+            push) base=$BEFORE ;;
+            *) base= ;;
+          esac
+          if [ -z "$base" ] || ! git rev-parse --quiet --verify "$base^{commit}" > /dev/null; then
+            # A dispatched run, or a push whose previous commit is not known.
+            base=$(git rev-parse HEAD)
+            echo "::notice::No base to compare with: the changed lines are not reported."
+          fi
+          .github/scripts/diff-coverage.sh target/coverage/lcov.info "$base" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo
+            echo "The lcov and HTML reports are in the artefact coverage-$GITHUB_RUN_NUMBER-$GITHUB_RUN_ATTEMPT of this run."
+            echo "The threshold of docs/development/quality-gates.md, 90% of the changed lines, is checked by the reviewer; this job does not enforce it."
+          } >> "$GITHUB_STEP_SUMMARY"
