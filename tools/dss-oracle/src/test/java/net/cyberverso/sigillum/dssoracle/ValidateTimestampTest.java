@@ -649,16 +649,18 @@ class ValidateTimestampTest {
     }
 
     /**
-     * Issue #72, case 5: a token holding 3,000 copies of its certificate.
-     * DSS keeps one, and validates the token in about the time it takes for
-     * one copy; the checks of the tool must not make the run much slower
-     * than DSS alone: at most three times as long, with two seconds of
-     * margin. Before the fix, it took about twelve times as long.
+     * Issue #72, case 5: a token holding 10,000 copies of its certificate.
+     * DSS keeps one certificate token for them. The tool runs DSS once and
+     * its own checks, which must not make the run much slower than DSS
+     * alone: at most three times as long, with half a second of margin.
+     * Before the fix, the checks made revocation tokens and decoded the
+     * certificate once per copy, and the run took more than five times as
+     * long as DSS alone.
      */
     @Test
     void copiesOfACertificateInATokenDoNotMakeTheChecksSlowerThanDss() throws Exception {
         byte[] valid = Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst"));
-        byte[] copies = Tokens.withCopiesOfItsCertificates(valid, 3000);
+        byte[] copies = Tokens.withCopiesOfItsCertificates(valid, 10_000);
         // Warm up both paths once, so that neither pays for loading classes.
         copiesRun(Tokens.withCopiesOfItsCertificates(valid, 10), "copies-warm-up");
         MutationTest.rawDss(MutationTest.Setup.corpus(Tokens.withCopiesOfItsCertificates(valid, 10)));
@@ -668,9 +670,9 @@ class ValidateTimestampTest {
         assertNull(alone.failure());
         assertTrue(alone.indication().startsWith("PASSED"), alone.indication());
         long tool = copiesRun(copies, "copies");
-        String timings = "3000 copies: tool " + tool / 1_000_000 + " ms, DSS alone " + dss / 1_000_000 + " ms";
+        String timings = "10000 copies: tool " + tool / 1_000_000 + " ms, DSS alone " + dss / 1_000_000 + " ms";
         System.out.println(timings);
-        assertTrue(tool < 3 * dss + 2_000_000_000L, timings);
+        assertTrue(tool < 3 * dss + 500_000_000L, timings);
     }
 
     /** Asserts that the tool rejects the token, and that DSS alone fails on it at the same stage. */
