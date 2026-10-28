@@ -60,6 +60,11 @@ vet=$(sed -n 's/.*tool: cargo-vet@\([0-9.]*\).*/\1/p' "$workflows/cargo-vet.yml"
 [ "$(value CARGO_VET_VERSION)" = "$vet" ] \
     || differs "CARGO_VET_VERSION is $(value CARGO_VET_VERSION), cargo-vet.yml installs $vet"
 
+# cargo mutants: the version that mutants.yml installs.
+mutants=$(sed -n 's/.*tool: cargo-mutants@\([0-9.]*\).*/\1/p' "$workflows/mutants.yml")
+[ "$(value CARGO_MUTANTS_VERSION)" = "$mutants" ] \
+    || differs "CARGO_MUTANTS_VERSION is $(value CARGO_MUTANTS_VERSION), mutants.yml installs $mutants"
+
 # The minimum supported Rust version of the workspace.
 msrv=$(sed -n 's/^rust-version *= *"\([^"]*\)".*/\1/p' "$root/Cargo.toml" | head -n 1)
 [ "$(value RUST_MSRV)" = "$msrv" ] || differs "RUST_MSRV is $(value RUST_MSRV), Cargo.toml declares $msrv"

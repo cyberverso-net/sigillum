@@ -1,0 +1,77 @@
+name: Mutation testing
+
+on:
+  pull_request:
+  # Temporary, for the measurement of #80; removed before review.
+  push:
+    branches: [task/80-mutants-ci]
+
+permissions:
+  contents: read
+
+jobs:
+  mutants:
+    name: Mutation testing (${{ matrix.diff }}, ${{ matrix.jobs }} jobs)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        diff: [small, pr154]
+        jobs: [1, 3]
+    env:
+      CARGO_TERM_COLOR: always
+      # The threshold of docs/development/quality-gates.md, "Author gates".
+      MUTATION_THRESHOLD: 80
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Test the summary script
+        run: .github/scripts/test-mutants-summary.sh
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
+        with:
+          toolchain: stable
+      - uses: taiki-e/install-action@1e29709c0ec63babbe8f266397a465f29a825f91 # v2.87.31
+        with:
+          tool: cargo-mutants@27.1.0
+          fallback: none
+      - name: Write the diff
+        env:
+          DIFF: ${{ matrix.diff }}
+        run: |
+          case "$DIFF" in
+            small) git diff "$(git merge-base origin/main HEAD)" HEAD > "$RUNNER_TEMP/changes.diff" ;;
+            pr154) git diff 85d6b83^ 85d6b83 > "$RUNNER_TEMP/changes.diff" ;;
+          esac
+          git diff --stat "$(git merge-base origin/main HEAD)" HEAD
+          cargo mutants --list --in-diff "$RUNNER_TEMP/changes.diff" | tee "$RUNNER_TEMP/listed.txt"
+          echo "Mutants in the diff: $(wc -l < "$RUNNER_TEMP/listed.txt")"
+      - name: Test the mutants of the diff
+        id: mutants
+        env:
+          JOBS: ${{ matrix.jobs }}
+        run: |
+          start=$(date +%s)
+          status=0
+          cargo mutants --no-shuffle --jobs "$JOBS" --in-diff "$RUNNER_TEMP/changes.diff" || status=$?
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          echo "Run time: $(( $(date +%s) - start )) s"
+          echo "Run time: $(( $(date +%s) - start )) s" >> "$GITHUB_STEP_SUMMARY"
+      - name: Report the score and the missed mutants
+        if: always() && steps.mutants.outputs.status != ''
+        env:
+          STATUS: ${{ steps.mutants.outputs.status }}
+        run: |
+          code=0
+          .github/scripts/mutants-summary.sh "$STATUS" mutants.out "$MUTATION_THRESHOLD" > "$RUNNER_TEMP/summary.md" || code=$?
+          cat "$RUNNER_TEMP/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          cat "$RUNNER_TEMP/summary.md"
+          exit "$code"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: mutants-out-${{ matrix.diff }}-${{ matrix.jobs }}
+          path: mutants.out
+          if-no-files-found: ignore
