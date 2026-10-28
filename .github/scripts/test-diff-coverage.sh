@@ -169,6 +169,18 @@ lcov "src/a.rs:1=1"
 expect 0 "changed Rust files missing from the report" \
   "Changed Rust files with no line in the report: \`src/gated.rs\`." "!README.md"
 
+# Test files, which cargo llvm-cov leaves out of the report by default, are
+# not listed as missing.
+new_repo src/a.rs=3 src/m/tests.rs=3 src/m_tests.rs=3 tests/it.rs=3 benches/b.rs=3 examples/e.rs=3 fuzz/fuzz_targets/t.rs=3 src/contests.rs=3
+for f in src/a.rs src/m/tests.rs src/m_tests.rs tests/it.rs benches/b.rs examples/e.rs fuzz/fuzz_targets/t.rs src/contests.rs; do
+  change_line "$f" 1
+done
+commit
+lcov "src/a.rs:1=1"
+expect 0 "test files not listed as missing" \
+  "Changed Rust files with no line in the report: \`fuzz/fuzz_targets/t.rs\`, \`src/contests.rs\`." \
+  "!m/tests.rs" "!m_tests.rs" "!tests/it.rs" "!benches/" "!examples/"
+
 # Without a changed instrumented line, the changed coverage is not a number.
 new_repo src/a.rs=3 README.md=3
 change_line README.md 1

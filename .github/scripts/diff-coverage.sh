@@ -9,9 +9,10 @@
 # record gives it a count above zero. Changed lines without data, such as
 # comments, do not count. Records of files outside the repository are
 # ignored. Changed Rust files that have no record are listed, since their
-# lines are not measured: they are excluded from the report, as tests are,
-# or not built in the configuration that was measured. Percentages are
-# truncated to two decimals, never rounded up.
+# lines are not measured: they are not built in the configuration that was
+# measured, as fuzz targets are, or have no executable line. Test files,
+# which cargo llvm-cov leaves out of the report by default, are not
+# listed. Percentages are truncated to two decimals, never rounded up.
 #
 # Exits with 2 when an input is missing or cannot be read, and with 0
 # otherwise, whatever the coverage.
@@ -170,6 +171,8 @@ awk -F '\t' -v base="$base_name" '
     }
     unmeasured = ""
     for (f in changed_file) {
+      # The test files that cargo llvm-cov leaves out of the report by default.
+      if (f ~ /(^|\/)(tests|examples|benches)\// || f ~ /(^|\/)(tests\.rs|[0-9a-zA-Z_-]+[_-]tests\.rs)$/) continue
       if (f ~ /\.rs$/ && !(f in known)) list[++m] = f
     }
     for (i = 2; i <= m; i++) {
