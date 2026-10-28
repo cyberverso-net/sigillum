@@ -10,6 +10,7 @@ import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.model.DigestDocument;
 import eu.europa.esig.dss.model.x509.CertificateToken;
 import eu.europa.esig.dss.simplereport.SimpleReport;
+import eu.europa.esig.dss.spi.DSSASN1Utils;
 import eu.europa.esig.dss.spi.DSSSecurityProvider;
 import eu.europa.esig.dss.spi.DSSUtils;
 import eu.europa.esig.dss.spi.validation.CertificateVerifier;
@@ -25,6 +26,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -42,6 +44,7 @@ import org.bouncycastle.asn1.ess.ESSCertIDv2;
 import org.bouncycastle.asn1.ess.SigningCertificate;
 import org.bouncycastle.asn1.ess.SigningCertificateV2;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.operator.RuntimeOperatorException;
@@ -182,8 +185,10 @@ public final class ValidateTimestamp implements Main.ModeRunner {
      * <ul>
      * <li>it resolves the algorithm of the message imprint and, when data is
      * given, the digest implementation that DSS computes it with;</li>
-     * <li>it decodes ({@link CertificateChecks}) every certificate that DSS
-     * takes from the token ({@link #certificates}).</li>
+     * <li>it decodes ({@link CertificateChecks}) every certificate of the
+     * token ({@link #certificates}): those of SignedData that DSS can
+     * convert, then those that DSS takes from the unsigned attribute
+     * certificateValues of the signer.</li>
      * </ul>
      *
      * Only the exception types that DSS and Bouncy Castle throw for malformed
@@ -221,15 +226,29 @@ public final class ValidateTimestamp implements Main.ModeRunner {
                         "DSS cannot compute the digest algorithm of the message imprint, " + algorithm.getName(), e));
             }
         }
-        for (CertificateToken certificate : certificates(parsed)) {
-            try {
-                CertificateChecks.decode(certificate);
-            } catch (IllegalArgumentException e) {
-                throw token.rejected(new IllegalArgumentException(
-                        "a certificate in the token cannot be decoded", e));
+        // The certificates of the CMS structure first, as before the certificate source of DSS was read here: a
+        // token whose certificate has a public key that cannot be decoded made the run fail with a
+        // NullPointerException when the source was read before them.
+        Set<CertificateToken> signedData = signedDataCertificates(parsed);
+        for (CertificateToken certificate : signedData) {
+            decode(token, certificate);
+        }
+        for (CertificateToken certificate : parsed.getCertificates()) {
+            if (!signedData.contains(certificate)) {
+                decode(token, certificate);
             }
         }
         return parsed;
+    }
+
+    /** Decodes a certificate of the token, which a failure rejects. */
+    private static void decode(OfflineSources.Input token, CertificateToken certificate)
+            throws RejectedInputException {
+        try {
+            CertificateChecks.decode(certificate);
+        } catch (IllegalArgumentException e) {
+            throw token.rejected(new IllegalArgumentException("a certificate in the token cannot be decoded", e));
+        }
     }
 
     /**
@@ -355,13 +374,31 @@ public final class ValidateTimestamp implements Main.ModeRunner {
     }
 
     /**
-     * Returns the certificates that DSS takes from the token, as its
-     * certificate source holds them: those of SignedData that it can convert,
-     * up to the first that it cannot, and those of the unsigned attribute
-     * certificateValues (id-aa-ets-certValues) of the signer, each once.
+     * Returns the certificates of the token, each once: those of the CMS
+     * structure that DSS can convert, as it converts them, in their order,
+     * then the others that the certificate source of DSS holds, which are
+     * those of the unsigned attribute certificateValues
+     * (id-aa-ets-certValues) of the signer. DSS skips a certificate of the
+     * CMS structure that it cannot convert, and so does this list. Copies
+     * count once, as DSS keeps one certificate token for them.
      */
     private static List<CertificateToken> certificates(TimestampToken parsed) {
-        return parsed.getCertificates();
+        Set<CertificateToken> certificates = new LinkedHashSet<>(signedDataCertificates(parsed));
+        certificates.addAll(parsed.getCertificates());
+        return new ArrayList<>(certificates);
+    }
+
+    /** The certificates of the CMS structure of the token that DSS can convert, each once. */
+    private static Set<CertificateToken> signedDataCertificates(TimestampToken parsed) {
+        Set<CertificateToken> certificates = new LinkedHashSet<>();
+        for (X509CertificateHolder holder : parsed.getTimeStamp().getCertificates().getMatches(null)) {
+            try {
+                certificates.add(DSSASN1Utils.getCertificate(holder));
+            } catch (DSSException e) {
+                // DSS skips it as well.
+            }
+        }
+        return certificates;
     }
 
     /**
