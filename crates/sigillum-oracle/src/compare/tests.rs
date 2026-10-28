@@ -379,6 +379,7 @@ fn an_artefact_expects_the_result_of_its_divergence_or_its_prediction() -> TestR
         expected_dss: DssResult::Rejected,
         links: Links::default(),
         notes: None,
+        attack_class: None,
         dss_divergence: Some(Divergence {
             entry: "DIV-9".into(),
             indication: Indication::Passed,

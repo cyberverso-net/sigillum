@@ -613,7 +613,7 @@ fn multi_intermediate_corpus(
         format!("links = {{ issuer = \"{issuer}\", chain = [{chain}] }}\n")
     };
     let mut manifest = format!(
-        "[header]\nformat-version = 2\nvalidation-time = \"2030-01-15T10:00:00Z\"\nopenssl-version = \"{version}\"\ndss-version = \"6.5.1\"\n"
+        "[header]\nformat-version = 3\nvalidation-time = \"2030-01-15T10:00:00Z\"\nopenssl-version = \"{version}\"\ndss-version = \"6.5.1\"\n"
     );
     manifest.push_str(&entry(
         &dir,
@@ -858,7 +858,7 @@ fn self_signed_tsa_corpus(
         .header
         .openssl_version;
     let mut manifest = format!(
-        "[header]\nformat-version = 2\nvalidation-time = \"2030-01-15T10:00:00Z\"\nopenssl-version = \"{version}\"\ndss-version = \"6.5.1\"\n"
+        "[header]\nformat-version = 3\nvalidation-time = \"2030-01-15T10:00:00Z\"\nopenssl-version = \"{version}\"\ndss-version = \"6.5.1\"\n"
     );
     manifest.push_str(&entry(
         &dir,

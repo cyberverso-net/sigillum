@@ -407,6 +407,7 @@ impl Fixture {
                     ]
                 },
             },
+            attack_class: None,
             dss_divergence: None,
             notes: Some(self.notes()),
         }

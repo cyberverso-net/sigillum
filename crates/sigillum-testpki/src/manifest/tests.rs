@@ -6,7 +6,7 @@ use super::*;
 
 const HEADER: &str = r#"
 [header]
-format-version = 2
+format-version = 3
 validation-time = "2030-01-15T10:00:00Z"
 openssl-version = "3.5.9"
 dss-version = "6.5.1"
@@ -64,7 +64,7 @@ fn is_syntax(error: Option<ManifestError>) -> bool {
 #[test]
 fn parses_header_only() -> Result<(), ManifestError> {
     let manifest = Manifest::parse(HEADER)?;
-    assert_eq!(manifest.header.format_version, 2);
+    assert_eq!(manifest.header.format_version, 3);
     assert_eq!(
         manifest.header.validation_time,
         datetime!(2030-01-15 10:00:00 UTC)
@@ -93,6 +93,7 @@ fn parses_an_artefact() -> Result<(), ManifestError> {
             },
             links: Links::default(),
             notes: None,
+            attack_class: None,
             dss_divergence: None,
         }]
     );
@@ -334,14 +335,15 @@ fn rejects_missing_fields() {
     }
     assert!(is_syntax(parse_err(ROOT)));
     assert!(is_syntax(parse_err(
-        &HEADER.replace("format-version = 2\n", "")
+        &HEADER.replace("format-version = 3\n", "")
     )));
 }
 
 #[test]
 fn rejects_other_format_versions() {
-    for version in [1, 3] {
-        let text = HEADER.replace("format-version = 2", &format!("format-version = {version}"));
+    // Version 2 had no attack-class; version 3 added it.
+    for version in [0, 1, 2, 4] {
+        let text = HEADER.replace("format-version = 3", &format!("format-version = {version}"));
         assert_eq!(
             parse_err(&text),
             Some(ManifestError::UnsupportedFormatVersion(version))
@@ -714,8 +716,8 @@ fn errors_display_the_cause() {
             "the manifest is not valid: bad",
         ),
         (
-            ManifestError::UnsupportedFormatVersion(3),
-            "the manifest format version 3 is not supported; this program reads version 2",
+            ManifestError::UnsupportedFormatVersion(2),
+            "the manifest format version 2 is not supported; this program reads version 3",
         ),
         (
             ManifestError::ValidationTime("t".into()),
@@ -794,6 +796,10 @@ fn errors_display_the_cause() {
                 target: "y".into(),
             },
             "the link issuer = \"y\" of \"x\" does not name another artefact of the manifest",
+        ),
+        (
+            ManifestError::AttackClassNotAllowed("x".into()),
+            "the attack-class of \"x\" is allowed only on a PAdES signed document: a signed-document whose path ends with .pdf",
         ),
         (
             ManifestError::Io("gone".into()),
@@ -926,9 +932,26 @@ fn varied_manifest() -> Result<Manifest, ManifestError> {
             expected_dss: dss[index % dss.len()].clone(),
             links,
             notes: (index % 2 == 0).then(|| "Line one.\nLine 'two'.".to_owned()),
+            attack_class: None,
             dss_divergence: divergence(&dss[index % dss.len()], index),
         });
     }
+    manifest.upsert(Artefact {
+        id: "x/pades".into(),
+        path: PathBuf::from("x/pades.pdf"),
+        sha256: DIGEST.into(),
+        kind: Kind::SignedDocument,
+        purpose: "A PAdES variant.".into(),
+        expected_openssl: OpensslResult::NotApplicable,
+        expected_dss: DssResult::Indication {
+            indication: Indication::TotalFailed,
+            sub_indication: Some("FORMAT_FAILURE".into()),
+        },
+        links: Links::default(),
+        notes: None,
+        dss_divergence: None,
+        attack_class: Some(AttackClass::SignatureWrapping),
+    });
     Ok(manifest)
 }
 
@@ -938,7 +961,7 @@ fn writing_and_reading_a_manifest_gives_it_back() -> Result<(), ManifestError> {
     let text = manifest.to_toml();
     assert_eq!(Manifest::parse(&text)?, manifest);
     assert!(text.starts_with(
-        "# Manifest of the test corpus. The format is described in README.md.\n\n[header]\nformat-version = 2\nvalidation-time = \"2030-01-15T10:00:00Z\"\n"
+        "# Manifest of the test corpus. The format is described in README.md.\n\n[header]\nformat-version = 3\nvalidation-time = \"2030-01-15T10:00:00Z\"\n"
     ));
     assert!(
         manifest
@@ -1297,4 +1320,138 @@ proptest::proptest! {
             .map_err(|e| proptest::test_runner::TestCaseError::fail(e.to_string()))?;
         proptest::prop_assert_eq!(read, manifest);
     }
+}
+
+// The field attack-class, added in format version 3. The PAdES variants
+// that use it come with #112; these tests build their entries.
+
+/// A signed document `id` at `path`, with the given extra lines.
+fn signed_document(id: &str, path: &str, extra: &str) -> String {
+    format!(
+        r#"
+[[artefact]]
+id = "{id}"
+path = "{path}"
+sha256 = "{DIGEST}"
+kind = "signed-document"
+purpose = "A signed document"
+expected-openssl = "not-applicable"
+expected-dss = {{ indication = "TOTAL-PASSED" }}
+{extra}
+"#
+    )
+}
+
+#[test]
+fn parses_every_attack_class_of_a_pades_document() -> Result<(), ManifestError> {
+    let classes = [
+        (AttackClass::IncrementalSaving, "incremental-saving"),
+        (AttackClass::ShadowHide, "shadow-hide"),
+        (AttackClass::ShadowReplace, "shadow-replace"),
+        (AttackClass::ShadowHideAndReplace, "shadow-hide-and-replace"),
+        (AttackClass::SignatureWrapping, "signature-wrapping"),
+        (
+            AttackClass::UniversalSignatureForgery,
+            "universal-signature-forgery",
+        ),
+    ];
+    assert_eq!(AttackClass::ALL, classes.map(|(class, _)| class));
+    for (class, text) in classes {
+        assert_eq!(class.as_str(), text);
+        let line = format!("attack-class = \"{text}\"");
+        let manifest = Manifest::parse(&with_artefacts(&signed_document("m/a", "m/a.pdf", &line)))?;
+        assert_eq!(manifest.artefacts[0].attack_class, Some(class));
+    }
+    // The extension is compared ignoring letter case.
+    let upper = Manifest::parse(&with_artefacts(&signed_document(
+        "m/a",
+        "m/a.PDF",
+        "attack-class = \"shadow-hide\"",
+    )))?;
+    assert_eq!(
+        upper.artefacts[0].attack_class,
+        Some(AttackClass::ShadowHide)
+    );
+    // The field is optional, also on a PAdES document.
+    let none = Manifest::parse(&with_artefacts(&signed_document("m/a", "m/a.pdf", "")))?;
+    assert_eq!(none.artefacts[0].attack_class, None);
+    Ok(())
+}
+
+#[test]
+fn rejects_an_attack_class_outside_pades_signed_documents() {
+    let line = "attack-class = \"incremental-saving\"";
+    let not_allowed = Some(ManifestError::AttackClassNotAllowed("m/a".into()));
+    for path in [
+        "m/a.p7m",
+        "m/a.p7s",
+        "m/a.jws",
+        "m/a.json",
+        "m/pdf",
+        "m/a.pdf.p7s",
+        "m/a_pdf",
+    ] {
+        assert_eq!(
+            parse_err(&with_artefacts(&signed_document("m/a", path, line))),
+            not_allowed,
+            "{path}"
+        );
+    }
+    for kind in ["document", "certificate", "crl", "timestamp-token"] {
+        let text = with_artefacts(&signed_document("m/a", "m/a.pdf", line))
+            .replace("\"signed-document\"", &format!("\"{kind}\""))
+            .replace("{ indication = \"TOTAL-PASSED\" }", "\"not-applicable\"");
+        assert_eq!(parse_err(&text), not_allowed, "{kind}");
+    }
+}
+
+#[test]
+fn rejects_unknown_attack_classes() {
+    for value in [
+        "\"shadow\"",
+        "\"\"",
+        "\"Incremental-Saving\"",
+        "\"incremental_saving\"",
+        "1",
+    ] {
+        let line = format!("attack-class = {value}");
+        let text = with_artefacts(&signed_document("m/a", "m/a.pdf", &line));
+        assert!(is_syntax(parse_err(&text)), "{value}");
+    }
+}
+
+#[test]
+fn the_attack_class_is_written_after_the_dss_result() -> Result<(), ManifestError> {
+    let text = with_artefacts(&format!(
+        "{ROOT}{}",
+        signed_document(
+            "m/a",
+            "m/a.pdf",
+            "attack-class = \"signature-wrapping\"\nlinks = { issuer = \"pki/root\", chain = [\"pki/root\"] }",
+        )
+    ));
+    let manifest = Manifest::parse(&text)?;
+    let written = manifest.to_toml();
+    assert!(
+        written.contains(
+            "\nexpected-dss = { indication = \"TOTAL-PASSED\" }\nattack-class = \"signature-wrapping\"\nlinks = { issuer = \"pki/root\", chain = [\"pki/root\"] }\n"
+        ),
+        "{written}"
+    );
+    assert_eq!(written.matches("attack-class").count(), 1);
+    assert_eq!(Manifest::parse(&written)?, manifest);
+    // After a divergence, when both are present.
+    let both = with_artefacts(&signed_document(
+        "m/a",
+        "m/a.pdf",
+        "dss-divergence = { entry = \"DIV-9\", indication = \"TOTAL-FAILED\" }\nattack-class = \"shadow-hide\"",
+    ));
+    let written = Manifest::parse(&both)?.to_toml();
+    assert!(
+        written.contains(
+            "\ndss-divergence = { entry = \"DIV-9\", indication = \"TOTAL-FAILED\" }\nattack-class = \"shadow-hide\"\n"
+        ),
+        "{written}"
+    );
+    Ok(())
 }

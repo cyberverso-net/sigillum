@@ -41,6 +41,7 @@ fn every_subcommand_has_help() -> std::io::Result<()> {
         ("generate", "ocsp"),
         ("generate", "documents"),
         ("generate", "signed"),
+        ("generate", "mutations"),
         ("generate", "--dss-oracle"),
         ("generate", "--java"),
         ("tsa", "--tsa-cert"),
@@ -392,7 +393,7 @@ fn corpus(name: &str, artefacts: &str) -> std::io::Result<PathBuf> {
     std::fs::write(
         &path,
         format!(
-            "[header]\nformat-version = 2\nvalidation-time = \"2030-01-15T10:00:00Z\"\nopenssl-version = \"3.5.9\"\ndss-version = \"6.5.1\"\n{artefacts}"
+            "[header]\nformat-version = 3\nvalidation-time = \"2030-01-15T10:00:00Z\"\nopenssl-version = \"3.5.9\"\ndss-version = \"6.5.1\"\n{artefacts}"
         ),
     )?;
     Ok(path)
@@ -998,7 +999,7 @@ fn an_invalid_manifest_is_reported() -> std::io::Result<()> {
     let path = dir.join("manifest.toml");
     std::fs::write(
         &path,
-        "[header]\nformat-version = 2\nvalidation-time = \"soon\"\nopenssl-version = \"3\"\ndss-version = \"6\"\n",
+        "[header]\nformat-version = 3\nvalidation-time = \"soon\"\nopenssl-version = \"3\"\ndss-version = \"6\"\n",
     )?;
     let output = run(&["generate", "pki", "--manifest", &path.to_string_lossy()])?;
     let _ = std::fs::remove_dir_all(&dir);
@@ -1087,15 +1088,21 @@ fn generate_crls_writes_the_crls_and_links_the_certificates()
     assert!(text(&output.stderr).is_empty(), "{}", text(&output.stderr));
     let written = std::fs::read_to_string(&manifest)?;
     // The entries are those of the committed corpus, which also holds
-    // the timestamp tokens, the OCSP responses, the base documents and the
-    // signed corpus, and the links to them.
+    // the timestamp tokens, the OCSP responses, the base documents, the
+    // signed corpus and its malformed variants, and the links to them.
     let committed: Vec<_> = load(&committed_manifest())?
         .artefacts
         .into_iter()
         .filter(|a| {
-            ["timestamps/", "ocsp/", "documents/", "signed/"]
-                .iter()
-                .all(|prefix| !a.id.starts_with(prefix))
+            [
+                "timestamps/",
+                "ocsp/",
+                "documents/",
+                "signed/",
+                "mutations/",
+            ]
+            .iter()
+            .all(|prefix| !a.id.starts_with(prefix))
         })
         .map(|mut a| {
             a.links.revocation.retain(|r| !r.starts_with("ocsp/"));
@@ -1237,8 +1244,9 @@ fn generate_crls_keeps_the_revocation_links_of_its_entries()
 
 /// The generators that need no Java, run in the documented order on a
 /// manifest with only a header, reproduce the committed manifest byte for
-/// byte, apart from the signed corpus, which `generate signed` adds last
-/// with DSS. The signed-corpus workflow checks that step.
+/// byte, apart from the signed corpus, which `generate signed` adds with
+/// DSS, and its malformed variants, which `generate mutations` derives
+/// from it last. The signed-corpus workflow checks those two steps.
 #[test]
 fn the_generators_in_order_reproduce_the_committed_manifest()
 -> Result<(), Box<dyn std::error::Error>> {
@@ -1251,9 +1259,9 @@ fn the_generators_in_order_reproduce_the_committed_manifest()
         assert!(text(&output.stderr).is_empty(), "{}", text(&output.stderr));
     }
     let mut committed = load(&committed_manifest())?;
-    committed
-        .artefacts
-        .retain(|artefact| !artefact.id.starts_with("signed/"));
+    committed.artefacts.retain(|artefact| {
+        !artefact.id.starts_with("signed/") && !artefact.id.starts_with("mutations/")
+    });
     assert_eq!(std::fs::read_to_string(&manifest)?, committed.to_toml());
     let committed = committed_manifest();
     let testdata = committed.parent().ok_or("no parent")?;

@@ -41,6 +41,13 @@ test = false
 doc = false
 bench = false
 
+[[bin]]
+name = "mutations"
+path = "fuzz_targets/mutations.rs"
+test = false
+doc = false
+bench = false
+
 # The fuzz targets form their own workspace, built with the nightly toolchain.
 [workspace]
 members = ["."]

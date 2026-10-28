@@ -19,7 +19,7 @@ class ManifestTest {
 
     private static final Path CORPUS = Path.of("..", "..", "testdata");
 
-    private static final String HEADER = "# Manifest\n\n[header]\nformat-version = 2\n"
+    private static final String HEADER = "# Manifest\n\n[header]\nformat-version = 3\n"
             + "validation-time = \"2030-01-15T10:00:00Z\"\n";
 
     private static final String ENTRY = "\n[[artefact]]\nid = \"pki/a\"\npath = \"pki/a.pem\"\nkind = \"certificate\"\n"
@@ -99,9 +99,9 @@ class ManifestTest {
 
     @Test
     void anotherFormatVersionIsRefused() {
-        for (String version : new String[] {"1", "3"}) {
+        for (String version : new String[] {"1", "2", "4"}) {
             assertThrows(IllegalArgumentException.class,
-                    () -> read(HEADER.replace("format-version = 2", "format-version = " + version) + ENTRY),
+                    () -> read(HEADER.replace("format-version = 3", "format-version = " + version) + ENTRY),
                     version);
         }
     }

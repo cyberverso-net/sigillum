@@ -1335,6 +1335,7 @@ fn documents_are_not_applicable_and_run_nothing() -> TestResult {
         expected_dss: DssResult::NotApplicable,
         links: Links::default(),
         notes: None,
+        attack_class: None,
         dss_divergence: None,
     });
     let dir = scratch("documents")?;
@@ -1854,7 +1855,11 @@ fn the_peek_finds_signed_data_in_every_cades_fixture_and_nothing_else() -> TestR
         let bytes = std::fs::read(testdata().join(&artefact.path))?;
         assert_eq!(
             is_cms_signed_data(&bytes),
-            artefact.id.starts_with("signed/cades-"),
+            // The CAdES signatures and their malformed variants.
+            matches!(
+                artefact.path.extension().and_then(|e| e.to_str()),
+                Some("p7m" | "p7s")
+            ),
             "{}",
             artefact.id
         );

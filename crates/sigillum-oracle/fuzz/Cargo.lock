@@ -970,6 +970,7 @@ dependencies = [
 name = "sigillum-testpki"
 version = "0.0.0"
 dependencies = [
+ "base64ct",
  "clap",
  "cms",
  "const-oid",

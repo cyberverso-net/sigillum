@@ -83,6 +83,7 @@ fn file(id: &str, extension: &str, contents: Vec<u8>, purpose: &str) -> Generate
             expected_openssl: OpensslResult::NotApplicable,
             expected_dss: DssResult::NotApplicable,
             links: Links::default(),
+            attack_class: None,
             dss_divergence: None,
             notes: None,
         },
