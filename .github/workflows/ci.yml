@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
   pull_request:
+  # This workflow reports a required check. The merge queue does not merge
+  # a group until every required check is reported for it.
+  merge_group:
+    types: [checks_requested]
 
 permissions:
   contents: read
@@ -98,15 +102,32 @@ jobs:
           toolchain: stable
       - run: cargo doc --workspace --no-deps --all-features
 
+  # The sign-off and signature checks read the commits of a pull request.
+  # In the merge queue they pass without checking the commits of the merge
+  # group, for these reasons:
+  # - a pull request enters the queue only after its required checks,
+  #   including these two, have passed on the pull request (for a
+  #   Dependabot pull request the sign-off job is skipped, as below);
+  # - the merge group holds commits that the merge queue creates, one
+  #   squash commit per queued pull request, not the commits of the
+  #   contributor. A sign-off or a signature on them records nothing about
+  #   the contributor;
+  # - the ruleset on main still requires a verified signature on every
+  #   commit that reaches main.
+  # See docs/development/process.md, "Merging through the merge queue".
   sign-off:
     name: Developer Certificate of Origin
-    if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
+    if: >-
+      github.event_name == 'merge_group'
+      || (github.event_name == 'pull_request' && github.actor != 'dependabot[bot]')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: github.event_name == 'pull_request'
         with:
           fetch-depth: 0
       - name: Check every commit is signed off
+        if: github.event_name == 'pull_request'
         env:
           BASE: ${{ github.event.pull_request.base.sha }}
           HEAD: ${{ github.event.pull_request.head.sha }}
@@ -119,15 +140,20 @@ jobs:
             fi
           done
           exit $missing
+      - name: Rely on the check of the queued pull requests
+        if: github.event_name == 'merge_group'
+        run: |
+          echo "::notice::Merge group: the commits of each queued pull request were checked on the pull request before it entered the queue."
 
   signatures:
     name: Verified commit signatures
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read
     steps:
       - name: Check every commit has a verified signature
+        if: github.event_name == 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
@@ -144,3 +170,7 @@ jobs:
             echo "Commit $commit has no verified signature."
           done
           test -z "$unverified"
+      - name: Rely on the check of the queued pull requests
+        if: github.event_name == 'merge_group'
+        run: |
+          echo "::notice::Merge group: the commits of each queued pull request were checked on the pull request before it entered the queue."

@@ -14,18 +14,32 @@ Every change must pass the gates below before it is merged. Continuous integrati
 | Portability | `cargo check` for `wasm32-unknown-unknown`, `aarch64-apple-ios`, `aarch64-linux-android` | Builds |
 | Dependencies | `cargo deny check` | No licence, advisory or source violations |
 | Dependency audits | `cargo vet --locked` | Every third-party dependency is covered by an audit or a recorded exemption, as described below |
-| Sign-off | DCO check | Every commit signed off |
-| Commit signatures | Verified commit signatures check | Every commit in the pull request has a verified signature |
-| Dependabot lists | `.github/scripts/check-dependabot-lists.sh` | The RustCrypto group and the ignore rules in `dependabot.yml` name the same crates |
+| Sign-off | DCO check | Every commit of the pull request signed off. In the merge queue the check relies on the pull request, as described in [process.md](process.md#merging-through-the-merge-queue) |
+| Commit signatures | Verified commit signatures check | Every commit in the pull request has a verified signature. In the merge queue the check relies on the pull request, as for the sign-off |
+| Code scanning | CodeQL default setup and the code scanning rule of the ruleset on `main`, as described below | No CodeQL security alert of high or critical severity whose lines are all in the pull request diff |
+| Dependabot lists | `.github/scripts/check-dependabot-lists.sh`, with its tests in `.github/scripts/test-check-dependabot-lists.sh` | The RustCrypto group and the ignore rules in `dependabot.yml` name the same crates. The Maven entry lists every directory with a `pom.xml`, and its `maven-routine` group excludes the DSS artefacts of the `dss` group |
 | Fixture verification with OpenSSL | `sigillum-testpki verify --openssl` with the OpenSSL release named in the manifest, and with OpenSSL 4.0.3 through `--openssl-version`, each built from source and run without network, Linux | Every artefact matches the OpenSSL result in its manifest |
-| Fixture verification with DSS | `sigillum-testpki verify --dss` with `tools/dss-oracle`, built against the DSS release named in the manifest and run without network, Linux | Every artefact matches the DSS result in its manifest, or, for an artefact of a divergence recorded in `docs/design/divergences.md`, the result of DSS that the divergence records |
+| Fixture verification with DSS | `sigillum-testpki verify --dss` with `tools/dss-oracle`, built against the DSS release named in the manifest and run without network, Linux | Every artefact matches the DSS result in its manifest, or, for an artefact whose `dss-divergence` names a divergence recorded in `docs/design/divergences.md`, the result of DSS that the field records |
 | DSS oracle build | `mvn -B verify` in `tools/dss-oracle`, Java 21, Linux; the tool then runs without network | Builds, its tests pass, and it runs offline |
 | Signed corpus | `sigillum-testpki generate documents` and `generate signed` with `tools/dss-oracle`, run without network, Linux | The regenerated `testdata/` is identical, byte for byte, to the committed one |
 | Development image versions | `tools/dev-image/check-versions.sh`, with its tests in `tools/dev-image/test-check-versions.sh` | The versions in `tools/dev-image/versions.env` are those that the workflows, the manifest and `Cargo.toml` pin. A newer stable Rust or Temurin 21 release, or a new Ubuntu release behind `ubuntu-latest`, is reported as a warning |
 | Development image (when its inputs change, and weekly) | `tools/dev-image/run.sh tools/dev-image/smoke.sh` on `linux/amd64` and `linux/arm64`, then a build of `tools/dss-oracle` without network | The image builds, every download matches its recorded digest, each tool is the version of `versions.env`, and Maven needs no network |
-| Differential tests (planned with the harness, phase 0) | `cargo test -p sigillum-oracle --features dss` on Linux, with Java and Maven, running `tools/dss-oracle` without network | Pass |
+| Differential tests | `cargo test -p sigillum-oracle --features dss` in `differential.yml` on Linux, with Java and Maven, running `tools/dss-oracle` without network | Pass: every artefact of the corpus that DSS processes gives its expected result, or the result of its recorded divergence, and two runs of the whole corpus give the same `summary.json`, byte for byte |
 
 The `dss` feature of `sigillum-oracle` is excluded from the cross-platform test job, which tests `sigillum-oracle` with its default features only.
+
+Each required check runs on the pull request and again on the merge group in the merge queue, except where the table says otherwise. [process.md](process.md#merging-through-the-merge-queue) describes the queue.
+
+## Code scanning merge protection
+
+CodeQL runs through the default setup of code scanning. The ruleset on `main` holds a code scanning rule: a pull request cannot be merged while CodeQL reports a security alert of high or critical severity, while its analysis is in progress, or if CodeQL is not configured. The rule is not a status check, and it has two limits, both accepted:
+
+- **Merge groups.** The rule does not apply to merge groups in the merge queue. It is expected to be enforced on the pull request before the pull request can be queued, so that the queue combines only pull requests that passed it. GitHub's documentation does not state this; the first pull request merged through the queue confirms it, and this text is corrected if it does not hold.
+- **Lines in the diff.** The rule considers only an alert whose lines are all in the pull request diff, which means a new finding. An alert that already exists on `main` does not block a pull request. It goes through triage in the code scanning alerts of the repository instead.
+
+The rule also does not apply to Dependabot pull requests analysed by the default setup.
+
+GitHub documents these limits in [Code scanning merge protection](https://docs.github.com/en/code-security/concepts/code-scanning/merge-protection).
 
 ## Dependency audits
 

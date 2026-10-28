@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
   pull_request:
+  # This workflow reports a required check. The merge queue does not merge
+  # a group until every required check is reported for it.
+  merge_group:
+    types: [checks_requested]
 
 permissions:
   contents: read
@@ -16,21 +20,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Check that the group and the ignore rules match
+      - name: Test the check
+        run: .github/scripts/test-check-dependabot-lists.sh
+      - name: Check the group and ignore lists and the Maven entry
         run: .github/scripts/check-dependabot-lists.sh .github/dependabot.yml
-      - name: Check that a mismatched copy is rejected
-        run: |
-          copy="$RUNNER_TEMP/mismatched.yml"
-          sed '0,/dependency-name: der$/s//dependency-name: not-a-crate/' \
-            .github/dependabot.yml > "$copy"
-          if cmp -s .github/dependabot.yml "$copy"; then
-            echo "The self-test could not create a mismatched copy; update its sed expression."
-            exit 1
-          fi
-          if output=$(.github/scripts/check-dependabot-lists.sh "$copy"); then
-            echo "The check accepted a mismatched configuration."
-            exit 1
-          fi
-          echo "$output"
-          grep -q 'only in the group: der' <<< "$output"
-          grep -q 'only in the ignore rules: not-a-crate' <<< "$output"

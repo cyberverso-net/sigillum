@@ -15,7 +15,6 @@ use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
-use sigillum_testpki::dss::DIVERGENCES;
 use sigillum_testpki::manifest::{DssResult, Indication, Manifest};
 use sigillum_testpki::openssl::covered_certificate;
 
@@ -181,9 +180,10 @@ fn part_of_the_committed_corpus_matches_dss() -> TestResult {
         "{stdout}{}",
         text(&output.stderr)
     );
-    let divergent = DIVERGENCES
+    let divergent = part
+        .artefacts
         .iter()
-        .filter(|d| part.artefacts.iter().any(|a| a.id == d.id))
+        .filter(|a| a.dss_divergence.is_some())
         .count();
     assert!(divergent > 0);
     assert!(
@@ -239,9 +239,10 @@ fn a_wrong_expected_result_is_reported_for_each_mode() -> TestResult {
             "{id}: {stderr}"
         );
     }
-    let divergent = DIVERGENCES
+    let divergent = part
+        .artefacts
         .iter()
-        .filter(|d| part.artefacts.iter().any(|a| a.id == d.id))
+        .filter(|a| a.dss_divergence.is_some())
         .count();
     assert_eq!(
         text(&output.stdout),

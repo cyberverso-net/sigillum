@@ -54,6 +54,22 @@ Branches are named `<type>/<issue>-<short-slug>`, for example `story/42-cades-si
 
 `.github/CODEOWNERS` names the maintainer as owner of every file. While there is a single maintainer, the ruleset on `main` must not require code-owner review, because the only code owner cannot approve their own pull requests. The other rules on `main` are listed in [CONTRIBUTING.md](../../CONTRIBUTING.md).
 
+## Merging through the merge queue
+
+Every pull request into `main` is merged through the merge queue, by squash. The bypass of the ruleset described in [CONTRIBUTING.md](../../CONTRIBUTING.md) is the only exception. The queue tests each change as it will land on `main`, so a pull request branch need not be updated with `main` before it is merged.
+
+1. The pull request passes its required checks and the code scanning rule, both run on the pull request. The code scanning rule blocks a CodeQL security alert of high or critical severity whose lines are all in the pull request diff.
+2. The maintainer adds the pull request to the queue with *Merge when ready*, or with `gh pr merge`. If the checks have not finished, GitHub enables auto-merge and queues the pull request once they pass.
+3. The queue creates a merge group on a temporary branch. The merge group combines the latest `main`, the pull requests ahead in the queue and this pull request.
+4. The required checks run again on the merge group, through the `merge_group` event.
+5. If they pass, GitHub merges the group into `main`. If one fails or times out, the queue removes the pull request, and the pull request timeline gives the reason.
+
+A queued merge does not change the pull request branch. The independent review of that branch therefore stays valid and is not repeated when the pull request is queued, or queued again after removal. A change pushed to the branch is a new state of the pull request, and its review is repeated as for any other update.
+
+The checks "Developer Certificate of Origin" and "Verified commit signatures" read the commits of a pull request. In a merge group they pass without checking its commits, as `.github/workflows/ci.yml` states. The merge group holds commits that the queue creates, not the contributor's commits, and those were already checked on the pull request before it could be queued. The ruleset on `main` still requires a verified signature on every commit that reaches `main`.
+
+Every workflow that reports a required check has the `merge_group` trigger. A check that is not reported for a merge group blocks the queue until the status check timeout. A new required check therefore needs the trigger, and it must not depend on a `paths` filter, before it is added to the ruleset.
+
 ## Definition of Done
 
 A story is done when:
@@ -82,6 +98,20 @@ Issue type, milestone and status are not duplicated as labels.
 ## Releases
 
 Versions follow Semantic Versioning. Before 1.0, minor versions may contain breaking changes, which are listed in the changelog. A release is tagged `vX.Y.Z` from `main` once its milestone's exit criteria, or the subset planned for that release, are met. When a release is prepared, the changelog fragments in `changelog.d/` are compiled into [CHANGELOG.md](../../CHANGELOG.md).
+
+## Dependency updates
+
+Dependabot proposes version updates weekly, as configured in `.github/dependabot.yml`. Its pull requests pass the same checks as any other.
+
+| Entry | Groups | Review |
+| --- | --- | --- |
+| `cargo` | `rustcrypto-dalek`, which moves the RustCrypto and dalek crates together within the generation that [ADR-0011](../design/adr/0011-asn1-x509-cms-foundations.md) pins | The normal checks, with `cargo vet` as described in [quality-gates.md](quality-gates.md) |
+| `maven` | `dss` for the DSS artefacts, and `maven-routine` for the plugins and the other libraries | `dss`: an oracle change, as below. `maven-routine`: the normal checks, and the licence table in [tools/dss-oracle/README.md](../../tools/dss-oracle/README.md) |
+| `github-actions` | None | The normal checks |
+
+A DSS update is an oracle change, never a routine update ([ADR-0013](../design/adr/0013-dss-oracle-command-line-tool.md)). Its pull request reruns the whole corpus through the oracle, reviews every changed result against the predictions of `testdata/manifest.toml`, and updates `dss-version` in the header of the manifest. The steps are listed under "Dependency updates" in [tools/dss-oracle/README.md](../../tools/dss-oracle/README.md).
+
+The `maven` entry lists every directory of the repository that holds a `pom.xml`. Dependabot's current implementation makes one pull request per group across all the directories of an entry, so the `dss` group is expected to move every DSS pin in the same pull request. GitHub's documentation does not state this, so any other build that pins DSS must have a test that its pin equals that of `tools/dss-oracle`. The check `.github/scripts/check-dependabot-lists.sh` fails when a `pom.xml` is added without its directory, or when the `maven-routine` group could take a DSS artefact.
 
 ## Raising the minimum supported Rust version
 

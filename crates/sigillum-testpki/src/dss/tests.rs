@@ -10,7 +10,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
 use super::*;
-use crate::manifest::{Artefact, DssResult, Indication, Kind, Manifest};
+use crate::manifest::{Artefact, Divergence, DssResult, Indication, Kind, Manifest};
 use crate::openssl::{Output, RunError, Scratch};
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;
@@ -122,9 +122,9 @@ impl Fake {
     fn expected(manifest: &Manifest) -> Self {
         let mut answers = HashMap::new();
         for artefact in &manifest.artefacts {
-            let result = DIVERGENCES
-                .iter()
-                .find(|d| d.id == artefact.id)
+            let result = artefact
+                .dss_divergence
+                .as_ref()
                 .map_or_else(|| artefact.expected_dss.clone(), Divergence::result);
             answers.insert(
                 artefact.id.clone(),
@@ -352,6 +352,47 @@ fn the_committed_corpus_matches_an_oracle_that_gives_the_expected_results() -> T
         processed,
         "each run has its own output directory"
     );
+    Ok(())
+}
+
+/// The arguments that `validation_arguments` gives are those of the runs
+/// of `verify --dss`, without `--out`.
+#[test]
+fn the_validation_arguments_are_those_that_verify_runs() -> TestResult {
+    let manifest = committed()?;
+    let fake = Fake::expected(&manifest);
+    run(&manifest, &fake, 4)?;
+    let mut compared = 0;
+    for artefact in &manifest.artefacts {
+        let arguments = validation_arguments(&manifest, &testdata(), artefact)?;
+        let Some((mode, args)) = arguments else {
+            assert!(matches!(artefact.kind, Kind::PrivateKey | Kind::Document));
+            continue;
+        };
+        assert_eq!(mode.name(), mode_of(artefact.kind));
+        let args: Vec<String> = args
+            .iter()
+            .map(|a| a.to_string_lossy().into_owned())
+            .collect();
+        assert!(!args.contains(&"--out".to_owned()));
+        assert_eq!(args.first().map(String::as_str), Some(mode.name()));
+        assert_eq!(&args[args.len() - 2..], ["--timeout", VALIDATION_TIMEOUT]);
+        let ran = fake
+            .calls()
+            .into_iter()
+            .any(|call| call.len() == args.len() + 2 && call[..args.len()] == args[..]);
+        assert!(ran, "{}: {args:?}", artefact.id);
+        compared += 1;
+    }
+    assert!(compared > 100);
+    let mut broken = manifest.clone();
+    artefact_mut(&mut broken, "crl/ca-ecdsa")?.notes = None;
+    let crl = broken
+        .artefacts
+        .iter()
+        .find(|a| a.id == "crl/ca-ecdsa")
+        .ok_or("no crl/ca-ecdsa")?;
+    assert!(validation_arguments(&broken, &testdata(), crl).is_err());
     Ok(())
 }
 
@@ -628,89 +669,241 @@ fn a_crl_without_a_covered_certificate_cannot_be_checked() -> TestResult {
     Ok(())
 }
 
-// The divergences recorded in docs/design/divergences.md.
+// The divergences recorded in docs/design/divergences.md, which the
+// manifest names in the field dss-divergence.
 
 #[test]
-fn the_recorded_divergences_name_artefacts_whose_prediction_differs() -> TestResult {
+fn every_divergence_of_the_manifest_is_a_row_of_divergences_md_that_names_the_artefact()
+-> TestResult {
     let manifest = committed()?;
-    for divergence in &DIVERGENCES {
-        let artefact = manifest
-            .artefacts
-            .iter()
-            .find(|a| a.id == divergence.id)
-            .ok_or(format!("{} is not in the manifest", divergence.id))?;
-        assert_ne!(
-            artefact.expected_dss,
-            divergence.result(),
-            "{}",
-            divergence.id
-        );
-        assert!(divergence.entry.starts_with("DIV-"), "{}", divergence.id);
-    }
     let docs = std::fs::read_to_string(
         PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../docs/design/divergences.md"),
     )?;
-    for divergence in &DIVERGENCES {
-        let row = docs
-            .lines()
-            .find(|line| line.starts_with(&format!("| {} |", divergence.entry)))
-            .ok_or(format!("{} is not in divergences.md", divergence.entry))?;
-        assert!(
-            row.contains(&format!("`{}`", divergence.id)),
-            "{} does not name {}",
-            divergence.entry,
-            divergence.id
-        );
+    let mut checked = 0;
+    for artefact in &manifest.artefacts {
+        let Some(divergence) = &artefact.dss_divergence else {
+            continue;
+        };
+        check_row(&docs, &artefact.id, divergence)?;
+        checked += 1;
     }
+    assert!(checked > 0, "the manifest records no divergence");
+    Ok(())
+}
+
+/// Checks that the register of `docs` has exactly one row for the entry of
+/// `divergence`, that its cell "Test vector" names `id`, and that the row
+/// names the result of DSS that the manifest records: its indication, with
+/// hyphens or underscores, and its sub-indication, each as a whole word.
+fn check_row(docs: &str, id: &str, divergence: &Divergence) -> Result<(), String> {
+    let entry = divergence.entry.as_str();
+    let cells = |line: &str| -> Vec<String> {
+        line.trim()
+            .trim_start_matches('|')
+            .trim_end_matches('|')
+            .split(" | ")
+            .map(|cell| cell.trim().to_owned())
+            .collect()
+    };
+    let header = docs
+        .lines()
+        .find(|line| line.starts_with("| Id |"))
+        .map(cells)
+        .ok_or("divergences.md has no register")?;
+    let column = header
+        .iter()
+        .position(|cell| cell == "Test vector")
+        .ok_or("the register has no column Test vector")?;
+    let rows: Vec<&str> = docs
+        .lines()
+        .filter(|line| line.starts_with(&format!("| {entry} |")))
+        .collect();
+    let [row] = rows[..] else {
+        return Err(format!(
+            "{entry} is in {} rows of divergences.md, not one",
+            rows.len()
+        ));
+    };
+    let row_cells = cells(row);
+    if row_cells.len() != header.len() {
+        return Err(format!(
+            "the row of {entry} does not have the columns of the register"
+        ));
+    }
+    if !row_cells[column].contains(&format!("`{id}`")) {
+        return Err(format!("the test vectors of {entry} do not name {id}"));
+    }
+    let indication = divergence.indication.as_str();
+    let named = |word: &str| names_word(row, word);
+    if !named(indication) && !named(&indication.replace('-', "_")) {
+        return Err(format!(
+            "the row of {entry} does not name {indication}, the indication of DSS"
+        ));
+    }
+    if let Some(sub) = divergence.sub_indication.as_deref()
+        && !named(sub)
+    {
+        return Err(format!(
+            "the row of {entry} does not name {sub}, the sub-indication of DSS"
+        ));
+    }
+    Ok(())
+}
+
+/// Reports whether `text` holds `word` as a whole word: not preceded or
+/// followed by a letter, a digit, `_` or `-`, which the names of results
+/// are made of.
+fn names_word(text: &str, word: &str) -> bool {
+    let part =
+        |c: Option<char>| c.is_some_and(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-');
+    !word.is_empty()
+        && text.match_indices(word).any(|(start, _)| {
+            !part(text[..start].chars().next_back())
+                && !part(text[start + word.len()..].chars().next())
+        })
+}
+
+fn divergence(entry: &str, indication: Indication, sub: Option<&str>) -> Divergence {
+    Divergence {
+        entry: entry.to_owned(),
+        indication,
+        sub_indication: sub.map(str::to_owned),
+    }
+}
+
+#[test]
+fn a_row_must_name_the_artefact_as_a_test_vector_and_the_result_of_dss() {
+    use Indication::{Indeterminate, Passed, TotalPassed};
+    let docs = "| Id | Description | Test vector |\n| --- | --- | --- |\n\
+        | DIV-1 | DSS gives INDETERMINATE with NO_POE for `x/z` | `x/y` |\n\
+        | DIV-10 | DSS gives INDETERMINATE with TRY_LATER | `x/z` |\n\
+        | DIV-3 | DSS gives INDETERMINATE with NO_POE | `x/y` |\n| DIV-3 | again | `x/y` |\n\
+        | DIV-4 | DSS gives INDETERMINATE with NO_POE | `x/y` | extra |\n\
+        | DIV-5 | DSS gives INDETERMINATE with OUT_OF_BOUNDS_NO_POE | `x/y` |\n\
+        | DIV-6 | DSS gives TOTAL_PASSED, not PASSED-like | `x/y` |\n";
+    let no_poe = divergence("DIV-1", Indeterminate, Some("NO_POE"));
+    assert_eq!(check_row(docs, "x/y", &no_poe), Ok(()));
+    let try_later = divergence("DIV-10", Indeterminate, Some("TRY_LATER"));
+    assert_eq!(check_row(docs, "x/z", &try_later), Ok(()));
+    // Named in the description only, not as a test vector.
+    assert!(check_row(docs, "x/z", &no_poe).is_err());
+    // Another sub-indication or indication than the manifest records.
+    let other = divergence("DIV-1", Indeterminate, Some("TRY_LATER"));
+    assert!(check_row(docs, "x/y", &other).is_err());
+    let passed = divergence("DIV-1", Passed, Some("NO_POE"));
+    assert!(check_row(docs, "x/y", &passed).is_err());
+    // A sub-indication inside a longer one is not named.
+    let inside = divergence("DIV-5", Indeterminate, Some("NO_POE"));
+    assert!(check_row(docs, "x/y", &inside).is_err());
+    let whole = divergence("DIV-5", Indeterminate, Some("OUT_OF_BOUNDS_NO_POE"));
+    assert_eq!(check_row(docs, "x/y", &whole), Ok(()));
+    // An indication is named with hyphens or underscores, as a whole word.
+    let total = divergence("DIV-6", TotalPassed, None);
+    assert_eq!(check_row(docs, "x/y", &total), Ok(()));
+    let part = divergence("DIV-6", Passed, None);
+    assert!(check_row(docs, "x/y", &part).is_err());
+    // No row, two rows, or a row of other columns.
+    for entry in ["DIV-2", "DIV-3", "DIV-4"] {
+        let missing = divergence(entry, Indeterminate, Some("NO_POE"));
+        assert!(check_row(docs, "x/y", &missing).is_err(), "{entry}");
+    }
+    // No register, or no column of test vectors.
+    let bare = divergence("DIV-1", Indeterminate, None);
+    assert!(check_row("| DIV-1 | x INDETERMINATE |", "x", &bare).is_err());
+    assert!(
+        check_row(
+            "| Id | Description |\n| DIV-1 | `x` INDETERMINATE |",
+            "x",
+            &bare
+        )
+        .is_err()
+    );
+}
+
+/// The control of a divergence, an artefact for which DSS gives the result
+/// that the divergence records because it is the prediction, cannot name
+/// the divergence: the manifest refuses a `dss-divergence` that gives the
+/// result of `expected-dss`.
+#[test]
+fn the_control_of_a_divergence_cannot_name_it() -> TestResult {
+    let mut manifest = committed()?;
+    let divergence = manifest
+        .artefacts
+        .iter()
+        .find_map(|a| a.dss_divergence.clone())
+        .ok_or("the manifest records no divergence")?;
+    let control = manifest
+        .artefacts
+        .iter_mut()
+        .find(|a| a.dss_divergence.is_none() && a.expected_dss == divergence.result())
+        .ok_or("no artefact predicts the result of the divergence")?;
+    let id = control.id.clone();
+    control.dss_divergence = Some(divergence);
+    assert_eq!(
+        Manifest::parse(&manifest.to_toml()).err(),
+        Some(crate::manifest::ManifestError::StaleDivergence { id })
+    );
     Ok(())
 }
 
 #[test]
 fn a_divergent_artefact_must_give_the_result_recorded_for_dss() -> TestResult {
     let manifest = committed()?;
+    let recorded = manifest
+        .artefacts
+        .iter()
+        .filter(|a| a.dss_divergence.is_some())
+        .count();
+    let artefact = manifest
+        .artefacts
+        .iter()
+        .find(|a| a.dss_divergence.is_some())
+        .ok_or("the manifest records no divergence")?;
+    let divergence = artefact.dss_divergence.as_ref().ok_or("no divergence")?;
     let fake = Fake::expected(&manifest);
     let report = run(&manifest, &fake, 2)?;
     let finding = report
         .findings
         .iter()
-        .find(|f| f.id == "pki/signer-expired")
+        .find(|f| f.id == artefact.id)
         .ok_or("no finding")?;
     assert!(finding.matches());
-    assert_eq!(finding.divergence.map(|d| d.entry), Some("DIV-5"));
-    assert_eq!(report.divergent().count(), DIVERGENCES.len());
+    assert_eq!(finding.divergence.as_ref(), Some(divergence));
+    assert_eq!(
+        finding.expectation(),
+        format!(
+            "{}, the result of DSS that {} records; the manifest predicts {}",
+            divergence.result(),
+            divergence.entry,
+            artefact.expected_dss
+        )
+    );
+    assert_eq!(report.divergent().count(), recorded);
     // DSS giving the prediction is a mismatch: the divergence is stale.
     let mut fake = fake;
     fake.answer(
-        "pki/signer-expired",
-        Ok(validated(
-            "validate-certificate",
-            "INDETERMINATE",
-            Some("OUT_OF_BOUNDS_NO_POE"),
-        )),
+        &artefact.id,
+        Ok(summary_of(mode_of(artefact.kind), &artefact.expected_dss)),
     );
     let report = run(&manifest, &fake, 2)?;
     let ids: Vec<&str> = report.mismatches().map(|f| f.id.as_str()).collect();
-    assert_eq!(ids, ["pki/signer-expired"]);
+    assert_eq!(ids, [artefact.id.as_str()]);
     Ok(())
 }
 
 #[test]
-fn a_manifest_that_predicts_a_recorded_divergence_stops_the_checks() -> TestResult {
+fn a_manifest_that_predicts_the_result_of_its_divergence_is_refused() -> TestResult {
     let mut manifest = committed()?;
     artefact_mut(&mut manifest, "pki/ca-expired")?.expected_dss = DssResult::Indication {
         indication: Indication::Indeterminate,
         sub_indication: Some("OUT_OF_BOUNDS_NOT_REVOKED".to_owned()),
     };
-    let fake = Fake::expected(&manifest);
-    let error = run(&manifest, &fake, 1).err();
     assert_eq!(
-        error,
-        Some(DssError::StaleDivergence {
-            id: "pki/ca-expired".to_owned(),
-            entry: "DIV-5"
+        Manifest::parse(&manifest.to_toml()).err(),
+        Some(crate::manifest::ManifestError::StaleDivergence {
+            id: "pki/ca-expired".to_owned()
         })
     );
-    assert!(fake.calls().is_empty());
     Ok(())
 }
 
@@ -847,16 +1040,28 @@ fn a_run_that_exceeds_a_resource_limit_has_no_result() {
 #[test]
 fn a_finding_says_why_it_differs() -> TestResult {
     let manifest = committed()?;
+    let artefact = manifest
+        .artefacts
+        .iter()
+        .find(|a| a.dss_divergence.is_some())
+        .ok_or("the manifest records no divergence")?;
+    let divergence = artefact.dss_divergence.as_ref().ok_or("no divergence")?;
     let mut fake = Fake::expected(&manifest);
     fake.answer(
-        "pki/signer-expired",
-        Ok(validated("validate-certificate", "PASSED", None)),
+        &artefact.id,
+        Ok(validated(mode_of(artefact.kind), "TOTAL_PASSED", None)),
     );
     let report = run(&manifest, &fake, 1)?;
     let finding = report.mismatches().next().ok_or("no mismatch")?;
+    assert_eq!(finding.id, artefact.id);
     assert_eq!(
         finding.expectation(),
-        "INDETERMINATE with OUT_OF_BOUNDS_NOT_REVOKED, the result of DSS that DIV-5 records; the manifest predicts INDETERMINATE with OUT_OF_BOUNDS_NO_POE"
+        format!(
+            "{}, the result of DSS that {} records; the manifest predicts {}",
+            divergence.result(),
+            divergence.entry,
+            artefact.expected_dss
+        )
     );
     Ok(())
 }

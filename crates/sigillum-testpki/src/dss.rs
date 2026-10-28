@@ -20,7 +20,7 @@ use std::time::Duration;
 use serde_json::Value;
 use time::format_description::well_known::Rfc3339;
 
-use crate::manifest::{Artefact, DssResult, Indication, Kind, Manifest};
+use crate::manifest::{Artefact, Divergence, DssResult, Indication, Kind, Manifest};
 use crate::openssl::{Output, RunError, Runner, covered_certificate};
 use crate::signed::JavaOracle;
 
@@ -96,15 +96,6 @@ pub enum DssError {
         /// The version in the manifest header.
         expected: String,
     },
-    /// The manifest expects, for an artefact listed in [`DIVERGENCES`],
-    /// the result that the divergence records for DSS, so the entry no
-    /// longer describes a divergence.
-    StaleDivergence {
-        /// The identifier of the artefact.
-        id: String,
-        /// The entry of `docs/design/divergences.md`.
-        entry: &'static str,
-    },
 }
 
 impl fmt::Display for DssError {
@@ -119,10 +110,6 @@ impl fmt::Display for DssError {
             Self::VersionMismatch { found, expected } => write!(
                 f,
                 "the manifest records the results of DSS {expected}, but tools/dss-oracle is built against DSS {found}"
-            ),
-            Self::StaleDivergence { id, entry } => write!(
-                f,
-                "the manifest expects for {id} the result of DSS that {entry} records; remove {id} from the divergences of verify --dss"
             ),
         }
     }
@@ -209,63 +196,6 @@ impl Mode {
     }
 }
 
-/// A result of DSS that differs from the prediction of the manifest, and
-/// is recorded in `docs/design/divergences.md`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Divergence {
-    /// The identifier of the artefact.
-    pub id: &'static str,
-    /// The indication that DSS gives.
-    pub indication: Indication,
-    /// The sub-indication that DSS gives, as the manifest writes it.
-    pub sub_indication: Option<&'static str>,
-    /// The entry of `docs/design/divergences.md`, such as `DIV-5`.
-    pub entry: &'static str,
-}
-
-impl Divergence {
-    /// The result that DSS gives.
-    pub fn result(&self) -> DssResult {
-        DssResult::Indication {
-            indication: self.indication,
-            sub_indication: self.sub_indication.map(str::to_owned),
-        }
-    }
-}
-
-/// The artefacts of the corpus for which DSS 6.5.1, under the aligned
-/// policy of ADR-0023, gives another result than the manifest predicts.
-/// `verify --dss` expects the recorded result of DSS for them, and refuses
-/// to run when the manifest predicts that result, so the list stays
-/// current. The test `ValidateCertificateTest` of `tools/dss-oracle` holds
-/// the same list.
-pub const DIVERGENCES: [Divergence; 4] = [
-    Divergence {
-        id: "pki/signer-expired",
-        indication: Indication::Indeterminate,
-        sub_indication: Some("OUT_OF_BOUNDS_NOT_REVOKED"),
-        entry: "DIV-5",
-    },
-    Divergence {
-        id: "pki/ca-expired",
-        indication: Indication::Indeterminate,
-        sub_indication: Some("OUT_OF_BOUNDS_NOT_REVOKED"),
-        entry: "DIV-5",
-    },
-    Divergence {
-        id: "ocsp/signer-expired",
-        indication: Indication::Indeterminate,
-        sub_indication: Some("OUT_OF_BOUNDS_NOT_REVOKED"),
-        entry: "DIV-5",
-    },
-    Divergence {
-        id: "ocsp/signer-expired-before-expiry",
-        indication: Indication::Indeterminate,
-        sub_indication: Some("OUT_OF_BOUNDS_NOT_REVOKED"),
-        entry: "DIV-5",
-    },
-];
-
 /// The DSS check of one artefact.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Finding {
@@ -273,9 +203,10 @@ pub struct Finding {
     pub id: String,
     /// The result that the manifest expects.
     pub expected: DssResult,
-    /// The recorded divergence of the artefact, whose result DSS must give
-    /// in place of the expected one.
-    pub divergence: Option<&'static Divergence>,
+    /// The recorded divergence of the artefact, from its `dss-divergence`
+    /// in the manifest, whose result DSS must give in place of the expected
+    /// one.
+    pub divergence: Option<Divergence>,
     /// The result that DSS gave, or why the check could not run.
     pub actual: Result<DssResult, String>,
     /// The run that decided the result and its summary, empty when no run
@@ -287,7 +218,7 @@ impl Finding {
     /// Reports whether DSS gave the expected result, or the result of the
     /// recorded divergence.
     pub fn matches(&self) -> bool {
-        match self.divergence {
+        match &self.divergence {
             Some(divergence) => self.actual.as_ref() == Ok(&divergence.result()),
             None => self.actual.as_ref() == Ok(&self.expected),
         }
@@ -295,7 +226,7 @@ impl Finding {
 
     /// The result that DSS must give, in words.
     pub fn expectation(&self) -> String {
-        match self.divergence {
+        match &self.divergence {
             Some(divergence) => format!(
                 "{}, the result of DSS that {} records; the manifest predicts {}",
                 divergence.result(),
@@ -337,10 +268,8 @@ impl Report {
 ///
 /// # Errors
 ///
-/// Returns the errors of [`check_version`], and
-/// [`DssError::StaleDivergence`] when the manifest predicts the result of
-/// a recorded divergence. A failed check of an artefact is a [`Finding`],
-/// not an error.
+/// Returns the errors of [`check_version`]. A failed check of an artefact
+/// is a [`Finding`], not an error.
 pub fn verify(
     manifest: &Manifest,
     corpus: &Path,
@@ -348,29 +277,11 @@ pub fn verify(
     oracle: &dyn Oracle,
     jobs: NonZeroUsize,
 ) -> Result<Report, DssError> {
-    for divergence in &DIVERGENCES {
-        let stale = manifest
-            .artefacts
-            .iter()
-            .any(|a| a.id == divergence.id && a.expected_dss == divergence.result());
-        if stale {
-            return Err(DssError::StaleDivergence {
-                id: divergence.id.to_owned(),
-                entry: divergence.entry,
-            });
-        }
-    }
     let version = check_version(oracle, &manifest.header.dss_version)?;
     let checker = Checker {
-        manifest,
-        corpus: std::path::absolute(corpus).unwrap_or_else(|_| corpus.to_path_buf()),
+        inputs: Inputs::new(manifest, corpus),
         scratch: std::path::absolute(scratch).unwrap_or_else(|_| scratch.to_path_buf()),
         oracle,
-        time: manifest
-            .header
-            .validation_time
-            .format(&Rfc3339)
-            .unwrap_or_default(),
     };
     let artefacts = &manifest.artefacts;
     let findings = Mutex::new(vec![None; artefacts.len()]);
@@ -403,25 +314,42 @@ pub fn verify(
 
 /// The largest `summary.json` that a check reads, in bytes. A summary is a
 /// few kilobytes long.
-const MAX_SUMMARY_LEN: u64 = 1024 * 1024;
+pub const MAX_SUMMARY_LEN: u64 = 1024 * 1024;
 
 /// The most lines of a summary that a finding keeps.
 const EXCERPT_LINES: usize = 40;
 
-/// The checks of one manifest.
-struct Checker<'a> {
-    manifest: &'a Manifest,
-    corpus: PathBuf,
-    scratch: PathBuf,
-    oracle: &'a dyn Oracle,
-    time: String,
+/// The mode and the arguments of `tools/dss-oracle`, without `--out`, with
+/// which `verify --dss` validates `artefact` of `manifest`, whose files are
+/// under `corpus`: the inputs that `testdata/README.md` describes under
+/// "Verification with DSS", the validation time of the manifest and the
+/// time limit [`VALIDATION_TIMEOUT`]. Returns `None` for a kind that DSS
+/// does not process.
+///
+/// # Errors
+///
+/// Returns a message when the manifest lacks a link or a note that the
+/// validation needs.
+pub fn validation_arguments(
+    manifest: &Manifest,
+    corpus: &Path,
+    artefact: &Artefact,
+) -> Result<Option<(Mode, Vec<OsString>)>, String> {
+    Inputs::new(manifest, corpus).arguments(artefact)
 }
 
-impl<'a> Checker<'a> {
+/// The checks of one manifest.
+struct Checker<'a> {
+    inputs: Inputs<'a>,
+    scratch: PathBuf,
+    oracle: &'a dyn Oracle,
+}
+
+impl Checker<'_> {
     /// Checks one artefact against its expected result, with the output
     /// directory numbered `index`.
     fn check(&self, index: usize, artefact: &Artefact) -> Finding {
-        let (actual, detail) = match self.arguments(artefact) {
+        let (actual, detail) = match self.inputs.arguments(artefact) {
             Ok(None) => (Ok(DssResult::NotApplicable), String::new()),
             Ok(Some((mode, args))) => self.validate(index, mode, args),
             Err(reason) => (Err(reason), String::new()),
@@ -429,7 +357,7 @@ impl<'a> Checker<'a> {
         Finding {
             id: artefact.id.clone(),
             expected: artefact.expected_dss.clone(),
-            divergence: DIVERGENCES.iter().find(|d| d.id == artefact.id),
+            divergence: artefact.dss_divergence.clone(),
             actual,
             detail,
         }
@@ -469,8 +397,36 @@ impl<'a> Checker<'a> {
             detail.push('\n');
             detail.push_str(line);
         }
-        let result = read_summary(&text, mode, &self.time, &self.manifest.header.dss_version);
+        let inputs = &self.inputs;
+        let result = read_summary(
+            &text,
+            mode,
+            &inputs.time,
+            &inputs.manifest.header.dss_version,
+        );
         (result, detail)
+    }
+}
+
+/// The inputs of the validations of one manifest.
+struct Inputs<'a> {
+    manifest: &'a Manifest,
+    corpus: PathBuf,
+    time: String,
+}
+
+impl<'a> Inputs<'a> {
+    /// The inputs of `manifest`, whose files are under `corpus`.
+    fn new(manifest: &'a Manifest, corpus: &Path) -> Self {
+        Self {
+            manifest,
+            corpus: std::path::absolute(corpus).unwrap_or_else(|_| corpus.to_path_buf()),
+            time: manifest
+                .header
+                .validation_time
+                .format(&Rfc3339)
+                .unwrap_or_default(),
+        }
     }
 
     /// The mode and arguments, without `--out`, that validate `artefact`,
@@ -639,7 +595,12 @@ impl<'a> Checker<'a> {
 }
 
 /// Reads a file up to [`MAX_SUMMARY_LEN`] bytes, as UTF-8.
-fn read_limited(path: &Path) -> Result<String, String> {
+///
+/// # Errors
+///
+/// Returns a message that names the file when it cannot be read, is not
+/// UTF-8 or is larger than the limit.
+pub fn read_limited(path: &Path) -> Result<String, String> {
     let name = path.display();
     let file = File::open(path).map_err(|e| format!("{name}: {e}"))?;
     let mut text = String::new();

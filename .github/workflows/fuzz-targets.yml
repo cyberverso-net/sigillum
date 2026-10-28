@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
   pull_request:
+  # This workflow reports a required check. The merge queue does not merge
+  # a group until every required check is reported for it.
+  merge_group:
+    types: [checks_requested]
 
 permissions:
   contents: read
@@ -23,3 +27,5 @@ jobs:
           toolchain: stable
       - name: Check the fuzz targets of sigillum-testpki
         run: cargo check --locked --manifest-path crates/sigillum-testpki/fuzz/Cargo.toml
+      - name: Check the fuzz targets of sigillum-oracle
+        run: cargo check --locked --manifest-path crates/sigillum-oracle/fuzz/Cargo.toml

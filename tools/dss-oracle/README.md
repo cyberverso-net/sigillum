@@ -38,7 +38,7 @@ No mode may access the network, and three layers enforce it:
 
 1. **Proxy selector.** The tool replaces the JVM's default proxy selector, which `java.net.URLConnection`, plain sockets and `java.net.http.HttpClient` consult before connecting unless a proxy is given explicitly.
 2. **Name resolution.** A resolver registered as a `java.net.spi.InetAddressResolverProvider` service refuses every name lookup made through `java.net.InetAddress`, forward or reverse, during a run.
-3. **No network in CI.** Continuous integration builds the tool with network access, then runs it in a network namespace without any. This covers only the jobs that run the tool that way: the check of this tool and the fixture verification with DSS do, and the planned differential-test job must do the same. The Maven tests run with network access.
+3. **No network in CI.** Continuous integration builds the tool with network access, then runs it in a network namespace without any. This covers only the jobs that run the tool that way: the check of this tool, the fixture verification with DSS and the differential tests of `differential.yml` do. The Maven tests run with network access.
 
 The first two layers record every attempt, and a run with any attempt fails with exit code 4, even if the code that made the attempt ignored the error. In process, they do not see:
 
@@ -82,7 +82,7 @@ java -jar target/dss-oracle.jar validate-certificate \
     --validation-time 2030-01-15T10:00:00Z --out results/signer-p256
 ```
 
-The expected DSS result of a CRL or an OCSP response in `testdata/manifest.toml` is a prediction of the result of this mode for the certificate that it covers, given that CRL or response and the revocation data that the CA certificates of the chain link, as `testdata/README.md` describes. The test `ValidateCertificateTest` runs every certificate, CRL and OCSP response of the corpus so, under the aligned policy, and requires the predicted result. The only exceptions are the divergences recorded in [divergences.md](../../docs/design/divergences.md), whose results the test pins. `sigillum-testpki verify --dss` runs the same validations and holds the same divergences, as `testdata/README.md` describes under "Verification with DSS". It also runs `ocsp/responder-without-ocsp-signing` with the CRL of `pki/ca-ecdsa`, which covers the signer of the response: DSS then uses the response, the divergence DIV-3.
+The expected DSS result of a CRL or an OCSP response in `testdata/manifest.toml` is a prediction of the result of this mode for the certificate that it covers, given that CRL or response and the revocation data that the CA certificates of the chain link, as `testdata/README.md` describes. The test `ValidateCertificateTest` runs every certificate, CRL and OCSP response of the corpus so, under the aligned policy, and requires the predicted result. The only exceptions are the divergences recorded in [divergences.md](../../docs/design/divergences.md), whose results the manifest records in the field `dss-divergence` of each artefact concerned, and the test requires. `sigillum-testpki verify --dss` and the differential tests of `sigillum-oracle` run the same validations and read the same field, as `testdata/README.md` describes under "Verification with DSS". The test reads the manifest with the class `Manifest`, which is not a TOML parser. It reads the layout that `Manifest::to_toml` of `sigillum-testpki` writes, with its order of fields and spacing, and format version 2 only. It refuses any key that names `dss-divergence` in another form than that layout, so that a divergence is never dropped silently. It checks none of the values that the Rust parser checks, such as the sub-indications; `sigillum-testpki` parses and checks the same manifest in its own tests. It also runs `ocsp/responder-without-ocsp-signing` with the CRL of `pki/ca-ecdsa`, which covers the signer of the response: DSS then uses the response, the divergence DIV-3.
 
 ### Validation policy
 
@@ -198,7 +198,7 @@ Every validation mode runs DSS on a worker thread within three limits. A run tha
 | `stack` | 64 MiB, fixed, whatever the default of the host | The stack of the worker overflows: a `StackOverflowError` |
 | `time` | `--timeout`, 300 seconds by default | The worker is still running |
 
-The outcome of a run that comes near a limit depends on it, so the limits are part of a result, and `limits` records them with the names of the garbage collectors of the JVM. How close to the heap limit a run comes also depends on the collector, so the invocation pins it: continuous integration runs the JAR with `java -Xmx512m -XX:+UseSerialGC -jar target/dss-oracle.jar ... --timeout 120`, and so does the fixture verification with DSS, `sigillum-testpki verify --dss`; the planned differential-test job must give the limits and collector it uses. An outcome near a limit is then reproducible on the same JVM with the same heap, collector and time limit, not across hosts with others. A worker past its time limit is interrupted and left to end, since Java cannot stop a thread safely; nothing more is written to the output, and the tool exits. A caller that runs the tool in its own JVM, as the tests do, keeps such a worker running after the network guard is closed, so its network attempts are no longer recorded.
+The outcome of a run that comes near a limit depends on it, so the limits are part of a result, and `limits` records them with the names of the garbage collectors of the JVM. How close to the heap limit a run comes also depends on the collector, so the invocation pins it: continuous integration runs the JAR with `java -Xmx512m -XX:+UseSerialGC -jar target/dss-oracle.jar ... --timeout 120`, and so do the fixture verification with DSS, `sigillum-testpki verify --dss`, and the differential tests of `sigillum-oracle`, which run it as `verify --dss` does. An outcome near a limit is then reproducible on the same JVM with the same heap, collector and time limit, not across hosts with others. A worker past its time limit is interrupted and left to end, since Java cannot stop a thread safely; nothing more is written to the output, and the tool exits. A caller that runs the tool in its own JVM, as the tests do, keeps such a worker running after the network guard is closed, so its network attempts are no longer recorded.
 
 The memory of some inputs grows with sizes that they declare. DSS compares the pages of a PDF that has revisions after a signature by rendering up to 10 pages of each, at a size that the PDF declares; a page of 40,000 by 40,000 units ends with `resource-limit` in a heap of 256 MiB, as a test checks. The tool does not reject such a PDF: DSS can use it with a larger heap, so a bound on the declared size would reject documents that DSS can use. The limit `heap`, with its value recorded, makes the outcome reproducible instead.
 
@@ -533,3 +533,24 @@ mvn org.codehaus.mojo:license-maven-plugin:2.7.1:add-third-party -Dlicense.exclu
 ```
 
 The list is written to `target/generated-sources/license/THIRD-PARTY.txt`.
+
+## Dependency updates
+
+Dependabot watches `pom.xml` weekly, through the `maven` entry of `.github/dependabot.yml`, and opens grouped pull requests of two kinds.
+
+| Group | Artefacts | Review |
+| --- | --- | --- |
+| `dss` | Every artefact of `eu.europa.ec.joinup.sd-dss`, which all take their version from the property `dss.version` | An oracle change, as described below |
+| `maven-routine` | The Maven plugins and every other library declared in `pom.xml`, such as JUnit | The normal checks, and the licence table above |
+
+A DSS update is an oracle change, because the results of the tool are those of the DSS version it is built against, and those results decide the expected results of the corpus and the differential tests ([ADR-0013](../../docs/design/adr/0013-dss-oracle-command-line-tool.md)). Its pull request is never merged as a routine update. The maintainer completes it on the Dependabot branch:
+
+1. Rerun the whole corpus through the oracle with the new version. The workflows `dss-oracle.yml`, `fixtures-dss.yml`, `signed-corpus.yml` and `differential.yml` do so on the pull request, through the tests of `mvn -B verify`, `sigillum-testpki verify --dss`, `generate signed` and the differential tests of `sigillum-oracle`.
+2. Review every result that changes against the prediction of `testdata/manifest.toml`. A result that now meets the prediction closes the divergence that recorded it, in [divergences.md](../../docs/design/divergences.md) and in `dss-divergence`. A result that departs from the prediction is either a fault in the prediction, corrected in its generator with the reason, or a divergence recorded in `divergences.md` and named in `dss-divergence`. The prediction is never changed only to match DSS.
+3. Update `dss-version` in the header of `testdata/manifest.toml`. Until it names the new version, `sigillum-testpki verify --dss` stops on the Dependabot branch, so the pull request cannot pass unchanged.
+4. Regenerate the signed corpus with `generate signed` if `signed-corpus.yml` reports a difference, and review the difference.
+5. Update the licence table above, and the DSS version where this README, `testdata/README.md` and `divergences.md` state a result of that version.
+
+The pull request states the old and new DSS versions, each result that changed and how it was resolved. A security update of a DSS artefact is reviewed the same way. Groups apply to version updates only, so a security update may arrive as a separate pull request for one artefact; it still changes the shared property, and is completed on its branch like a version update.
+
+The PDF backend, Apache PDFBox, is not declared in `pom.xml`. It comes with DSS, at the version that DSS requires, so it changes with a DSS update. A library that `pom.xml` declares directly, other than DSS, belongs to `maven-routine`, even when DSS also depends on it.

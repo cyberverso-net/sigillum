@@ -21,7 +21,7 @@ use time::OffsetDateTime;
 use time::format_description::well_known::Rfc3339;
 
 /// The manifest format version this crate reads.
-pub const FORMAT_VERSION: u32 = 1;
+pub const FORMAT_VERSION: u32 = 2;
 
 /// The sub-indications that may accompany TOTAL-FAILED (ETSI EN 319 102-1
 /// V1.4.1, clause 5.1.3, Table 6). The project also uses them with FAILED,
@@ -103,6 +103,31 @@ pub struct Artefact {
     pub links: Links,
     /// Free-form remarks.
     pub notes: Option<String>,
+    /// The result that DSS gives in place of `expected_dss`, with the entry
+    /// of `docs/design/divergences.md` that records the difference.
+    pub dss_divergence: Option<Divergence>,
+}
+
+/// A result of DSS that differs from the prediction of the manifest, and
+/// that `docs/design/divergences.md` records as a divergence.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Divergence {
+    /// The identifier of the entry, such as `DIV-5`.
+    pub entry: String,
+    /// The indication that DSS gives.
+    pub indication: Indication,
+    /// The sub-indication that DSS gives, as the manifest writes it.
+    pub sub_indication: Option<String>,
+}
+
+impl Divergence {
+    /// The result that DSS gives.
+    pub fn result(&self) -> DssResult {
+        DssResult::Indication {
+            indication: self.indication,
+            sub_indication: self.sub_indication.clone(),
+        }
+    }
 }
 
 /// Other artefacts needed to check an artefact, by identifier.
@@ -341,6 +366,24 @@ pub enum ManifestError {
         /// The identifier the link names.
         target: String,
     },
+    /// The `entry` of a `dss-divergence` is not of the form `DIV-<number>`.
+    InvalidDivergenceEntry {
+        /// The artefact identifier.
+        id: String,
+        /// The entry as written in the manifest.
+        value: String,
+    },
+    /// A `dss-divergence` gives the result that `expected-dss` predicts.
+    StaleDivergence {
+        /// The artefact identifier.
+        id: String,
+    },
+    /// An artefact whose `expected-dss` is `not-applicable` has a
+    /// `dss-divergence`.
+    DivergenceNotApplicable {
+        /// The artefact identifier.
+        id: String,
+    },
     /// The manifest file cannot be read.
     Io(String),
 }
@@ -401,6 +444,18 @@ impl fmt::Display for ManifestError {
             Self::InvalidLink { id, link, target } => write!(
                 f,
                 "the link {link} = \"{target}\" of \"{id}\" does not name another artefact of the manifest"
+            ),
+            Self::InvalidDivergenceEntry { id, value } => write!(
+                f,
+                "the dss-divergence entry \"{value}\" of \"{id}\" is not of the form DIV-<number>"
+            ),
+            Self::StaleDivergence { id } => write!(
+                f,
+                "the dss-divergence of \"{id}\" gives the result that expected-dss predicts, so it records no divergence"
+            ),
+            Self::DivergenceNotApplicable { id } => write!(
+                f,
+                "\"{id}\" has a dss-divergence, but its expected-dss is not-applicable"
             ),
             Self::Io(message) => write!(f, "the manifest cannot be read: {message}"),
         }
@@ -506,15 +561,17 @@ impl Artefact {
             DssResult::Indication {
                 indication,
                 sub_indication,
-            } => {
-                let mut fields = vec![format!("indication = {}", quoted(indication.as_str()))];
-                if let Some(sub_indication) = sub_indication {
-                    fields.push(format!("sub-indication = {}", quoted(sub_indication)));
-                }
-                inline_table(&fields)
-            }
+            } => inline_table(&indication_fields(*indication, sub_indication.as_deref())),
         };
         push_field(out, "expected-dss", &dss);
+        if let Some(divergence) = &self.dss_divergence {
+            let mut fields = vec![format!("entry = {}", quoted(&divergence.entry))];
+            fields.extend(indication_fields(
+                divergence.indication,
+                divergence.sub_indication.as_deref(),
+            ));
+            push_field(out, "dss-divergence", &inline_table(&fields));
+        }
         let links = &self.links;
         let list = |values: &[String]| {
             let items: Vec<String> = values.iter().map(|v| quoted(v)).collect();
@@ -546,6 +603,16 @@ impl Artefact {
             push_field(out, "notes", &quoted(notes));
         }
     }
+}
+
+/// The fields `indication` and, when there is one, `sub-indication` of an
+/// inline table.
+fn indication_fields(indication: Indication, sub_indication: Option<&str>) -> Vec<String> {
+    let mut fields = vec![format!("indication = {}", quoted(indication.as_str()))];
+    if let Some(sub_indication) = sub_indication {
+        fields.push(format!("sub-indication = {}", quoted(sub_indication)));
+    }
+    fields
 }
 
 fn push_field(out: &mut String, key: &str, value: &str) {
@@ -754,6 +821,72 @@ struct RawArtefact {
     #[serde(default)]
     links: RawLinks,
     notes: Option<String>,
+    dss_divergence: Option<RawDivergence>,
+}
+
+/// `dss-divergence`: the entry of `docs/design/divergences.md`, and the
+/// result that DSS gives.
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
+struct RawDivergence {
+    entry: String,
+    indication: Indication,
+    sub_indication: Option<String>,
+}
+
+impl RawDivergence {
+    /// Checks the divergence of the artefact `id`, whose expected result
+    /// is `expected`.
+    fn check(self, id: &str, expected: &DssResult) -> Result<Divergence, ManifestError> {
+        if !is_divergence_entry(&self.entry) {
+            return Err(ManifestError::InvalidDivergenceEntry {
+                id: id.to_owned(),
+                value: self.entry,
+            });
+        }
+        check_sub_indication(id, self.indication, self.sub_indication.as_deref())?;
+        let divergence = Divergence {
+            entry: self.entry,
+            indication: self.indication,
+            sub_indication: self.sub_indication,
+        };
+        if *expected == DssResult::NotApplicable {
+            return Err(ManifestError::DivergenceNotApplicable { id: id.to_owned() });
+        }
+        if divergence.result() == *expected {
+            return Err(ManifestError::StaleDivergence { id: id.to_owned() });
+        }
+        Ok(divergence)
+    }
+}
+
+/// Reports whether `entry` is of the form `DIV-<number>`, with a number
+/// from 1 written without leading zeros, as the identifiers of
+/// `docs/design/divergences.md` are.
+fn is_divergence_entry(entry: &str) -> bool {
+    entry.strip_prefix("DIV-").is_some_and(|number| {
+        number.starts_with(|c: char| matches!(c, '1'..='9'))
+            && number.bytes().all(|b| b.is_ascii_digit())
+    })
+}
+
+/// Checks that `sub_indication`, when there is one, is defined for
+/// `indication`.
+fn check_sub_indication(
+    id: &str,
+    indication: Indication,
+    sub_indication: Option<&str>,
+) -> Result<(), ManifestError> {
+    match sub_indication {
+        Some(value) if !indication.sub_indications().contains(&value) => {
+            Err(ManifestError::InvalidSubIndication {
+                id: id.to_owned(),
+                indication: indication.as_str(),
+                value: value.to_owned(),
+            })
+        }
+        _ => Ok(()),
+    }
 }
 
 #[derive(Deserialize, Default)]
@@ -804,21 +937,17 @@ impl RawArtefact {
                 indication,
                 sub_indication,
             } => {
-                if let Some(value) = &sub_indication
-                    && !indication.sub_indications().contains(&value.as_str())
-                {
-                    return Err(ManifestError::InvalidSubIndication {
-                        id,
-                        indication: indication.as_str(),
-                        value: value.clone(),
-                    });
-                }
+                check_sub_indication(&id, indication, sub_indication.as_deref())?;
                 DssResult::Indication {
                     indication,
                     sub_indication,
                 }
             }
         };
+        let dss_divergence = self
+            .dss_divergence
+            .map(|divergence| divergence.check(&id, &expected_dss))
+            .transpose()?;
         Ok(Artefact {
             path: PathBuf::from(&self.path),
             id,
@@ -835,6 +964,7 @@ impl RawArtefact {
                 timestamp_chain: self.links.timestamp_chain,
             },
             notes,
+            dss_divergence,
         })
     }
 }
