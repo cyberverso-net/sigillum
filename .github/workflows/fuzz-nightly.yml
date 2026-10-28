@@ -11,6 +11,8 @@ name: Nightly fuzzing
 # has contents: write, and it runs no code of the repository. A push made
 # with GITHUB_TOKEN starts no other workflow.
 on:
+  push:
+    branches: [task/81-nightly-fuzzing]
   schedule:
     - cron: "41 2 * * *"
   workflow_dispatch:
@@ -33,8 +35,8 @@ env:
   # tools/dev-image/check-versions.sh compares with these values.
   RUST_NIGHTLY: nightly-2026-10-25
   CARGO_FUZZ_VERSION: 0.13.2
-  CORPUS_BRANCH: fuzz-corpus
-  FUZZ_SECONDS: 600
+  CORPUS_BRANCH: fuzz-corpus-test-81
+  FUZZ_SECONDS: 60
   # Gives git the token of the job, from the environment, when GitHub asks
   # for credentials, so that the token never appears in a command line.
   CREDENTIAL_HELPER: >-
@@ -174,7 +176,7 @@ jobs:
     name: Save the corpus
     needs: [targets, fuzz]
     # Only runs of the workflow of main write the branch.
-    if: ${{ !cancelled() && needs.targets.result == 'success' && github.ref == 'refs/heads/main' }}
+    if: ${{ !cancelled() && needs.targets.result == 'success' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/task/81-nightly-fuzzing') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
