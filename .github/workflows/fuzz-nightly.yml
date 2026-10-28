@@ -124,6 +124,8 @@ jobs:
       - name: Fetch the dependencies
         working-directory: ${{ matrix.directory }}
         run: cargo "+$RUST_NIGHTLY" fetch --locked
+      # --fuzz-dir names the fuzz project, which cargo fuzz otherwise looks
+      # for from the package that contains the working directory.
       - name: Fuzz
         id: fuzz
         working-directory: ${{ matrix.directory }}
@@ -132,7 +134,7 @@ jobs:
           if [ -d "seeds/$TARGET" ]; then corpora+=("seeds/$TARGET"); fi
           options=("-max_total_time=$FUZZ_SECONDS" -print_final_stats=1)
           if [ -f "$TARGET.dict" ]; then options+=("-dict=$TARGET.dict"); fi
-          cargo "+$RUST_NIGHTLY" fuzz run "$TARGET" "${corpora[@]}" -- "${options[@]}"
+          cargo "+$RUST_NIGHTLY" fuzz run --fuzz-dir . "$TARGET" "${corpora[@]}" -- "${options[@]}"
       - name: Upload the crash inputs
         if: failure() && steps.fuzz.outcome == 'failure'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -152,7 +154,7 @@ jobs:
             exit 0
           fi
           before=$(find "corpus/$TARGET" -type f | wc -l)
-          cargo "+$RUST_NIGHTLY" fuzz cmin "$TARGET" "corpus/$TARGET" 2>&1 | tee "$RUNNER_TEMP/cmin.log"
+          cargo "+$RUST_NIGHTLY" fuzz cmin --fuzz-dir . "$TARGET" "corpus/$TARGET" 2>&1 | tee "$RUNNER_TEMP/cmin.log"
           if grep -q 'Failed to minimize corpus' "$RUNNER_TEMP/cmin.log"; then exit 1; fi
           echo "The corpus went from $before to $(find "corpus/$TARGET" -type f | wc -l) inputs."
       # The corpus is passed on when fuzzing ran, with or without a crash,
