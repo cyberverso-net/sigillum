@@ -93,12 +93,23 @@ Trusting another publisher, with `cargo vet trust`, or adding another source of 
 | --- | --- | --- |
 | Line coverage of new and changed code | `cargo llvm-cov` | At least 90% |
 | Mutation score in critical modules (signing, verification, parsers) | `cargo mutants` | At least 80% of mutants caught |
-| Fuzzing of each new or changed parser | `cargo fuzz` | At least 10 minutes per target without a finding |
+| Fuzzing of each new or changed parser | `cargo fuzz` | At least 10 minutes per target without a finding. Long runs are not an author gate: their evidence is in the nightly fuzzing workflow, described below |
 | Differential tests against DSS | `sigillum-oracle` | No unexplained divergence |
 
 Thresholds apply to the change under review. A shortfall is acceptable only with a written justification in the pull request, for example code that is unreachable by construction.
 
 The fuzzing threshold applies to parsers in the library crates and in the Rust tools. The Java test tool `tools/dss-oracle` is covered instead by a deterministic JUnit mutation test of its inputs, run by `mvn verify`, because it is not distributed and reads only project fixtures and sigillum output. Its README describes the test.
+
+## Nightly fuzzing
+
+`.github/workflows/fuzz-nightly.yml` runs every `cargo fuzz` target of the repository each night, and when it is started by hand, for at least 10 minutes per target, one job per target. `.github/scripts/fuzz-targets.sh` lists the targets: every binary of every fuzz project under `crates/*/fuzz`, so a new target joins the run without a change to the workflow. Its tests, `.github/scripts/test-fuzz-targets.sh`, run in the fuzz targets build check of each pull request. The runs of this workflow, in the Actions tab of the repository, are where the evidence of long fuzzing runs lives.
+
+- **Toolchain.** The workflow pins the nightly toolchain and `cargo-fuzz` to the versions of `tools/dev-image/versions.env`, which the development image versions check compares.
+- **Findings.** A crash, leak, timeout or out-of-memory input fails the job of its target and is uploaded as the artefact `crash-<crate>-<target>` of the run. A finding is reproduced with `cargo +nightly fuzz run <target> <input>` in the fuzz project, and becomes an issue of type Bug.
+- **Corpus.** Each target starts from the corpus that earlier runs kept on the branch `fuzz-corpus`, under `<crate>/<target>/`, and from the seeds of its fuzz project. On Sundays, and when the run is started with *minimise*, the corpus of each target is reduced with `cargo fuzz cmin` after fuzzing.
+- **Writing the corpus branch.** Only the job *Save the corpus* writes `fuzz-corpus`, once per run after every fuzzing job has ended, so the jobs of the matrix never push concurrently and one run at a time is allowed. It has the workflow's only `contents: write` permission, uses the `GITHUB_TOKEN` of the run, runs no code of the repository and pushes only fast-forwards; the workflow's other jobs can only read. Only runs from `main` write the branch. A ruleset on `fuzz-corpus` allows pushes only by GitHub Actions. No personal access token or other long-lived credential is used. A push made with `GITHUB_TOKEN` starts no other workflow.
+
+The workflow is not a required check: it does not run on pull requests, and a finding is fixed in its own pull request.
 
 ## Local runs
 

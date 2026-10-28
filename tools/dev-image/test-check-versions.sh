@@ -65,6 +65,10 @@ cases=(
     ".github/workflows/dss-oracle.yml|s/distribution: temurin/distribution: zulu/|a workflow with another Java distribution"
     ".github/workflows/dss-oracle.yml|s/java-version: \"21\"/java-version: \"25\"/|a workflow with another Java release"
     ".github/workflows/cargo-vet.yml|s/cargo-vet@[0-9.]*/cargo-vet@0.10.4/|a workflow with another cargo vet"
+    "tools/dev-image/versions.env|s/^RUST_NIGHTLY=.*/RUST_NIGHTLY=nightly-2026-01-01/|another nightly"
+    "tools/dev-image/versions.env|s/^CARGO_FUZZ_VERSION=.*/CARGO_FUZZ_VERSION=0.13.1/|another cargo fuzz"
+    ".github/workflows/fuzz-nightly.yml|s/RUST_NIGHTLY: nightly-[0-9-]*/RUST_NIGHTLY: nightly-2026-01-01/|a fuzzing workflow with another nightly"
+    ".github/workflows/fuzz-nightly.yml|s/CARGO_FUZZ_VERSION: [0-9.]*/CARGO_FUZZ_VERSION: 0.13.1/|a fuzzing workflow with another cargo fuzz"
     "Cargo.toml|s/^rust-version = .*/rust-version = \"1.89\"/|a workspace with another minimum Rust version"
 )
 for case in "${cases[@]}"; do

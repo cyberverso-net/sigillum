@@ -60,6 +60,13 @@ vet=$(sed -n 's/.*tool: cargo-vet@\([0-9.]*\).*/\1/p' "$workflows/cargo-vet.yml"
 [ "$(value CARGO_VET_VERSION)" = "$vet" ] \
     || differs "CARGO_VET_VERSION is $(value CARGO_VET_VERSION), cargo-vet.yml installs $vet"
 
+# The nightly and the cargo fuzz that fuzz-nightly.yml installs.
+for name in RUST_NIGHTLY CARGO_FUZZ_VERSION; do
+    pinned=$(sed -n "s/^  $name: *\([^ #]*\).*/\1/p" "$workflows/fuzz-nightly.yml")
+    [ "$(value "$name")" = "$pinned" ] \
+        || differs "$name is $(value "$name"), fuzz-nightly.yml installs ${pinned:-nothing}"
+done
+
 # The minimum supported Rust version of the workspace.
 msrv=$(sed -n 's/^rust-version *= *"\([^"]*\)".*/\1/p' "$root/Cargo.toml" | head -n 1)
 [ "$(value RUST_MSRV)" = "$msrv" ] || differs "RUST_MSRV is $(value RUST_MSRV), Cargo.toml declares $msrv"
