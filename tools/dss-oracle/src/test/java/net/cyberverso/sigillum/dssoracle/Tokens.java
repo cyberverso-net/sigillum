@@ -2,9 +2,24 @@ package net.cyberverso.sigillum.dssoracle;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
+import java.security.Signature;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Arrays;
+import java.util.List;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DLSet;
@@ -20,9 +35,20 @@ import org.bouncycastle.asn1.ess.SigningCertificate;
 import org.bouncycastle.asn1.ess.SigningCertificateV2;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.Certificate;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.asn1.x509.IssuerSerial;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.util.CollectionStore;
+import org.bouncycastle.util.Store;
 
 /** Derives defective timestamp tokens from the corpus for the tests. */
 final class Tokens {
@@ -89,11 +115,11 @@ final class Tokens {
      * two-byte UTF-8 sequence that the next character does not continue.
      */
     static byte[] certificateWithInvalidUtf8Subject(String pem) throws Exception {
-        org.bouncycastle.cert.X509CertificateHolder holder = new org.bouncycastle.cert.X509CertificateHolder(Pem.decode(pem));
-        String commonName = holder.getSubject().getRDNs(org.bouncycastle.asn1.x500.style.BCStyle.CN)[0]
+        X509CertificateHolder holder = new X509CertificateHolder(Pem.decode(pem));
+        String commonName = holder.getSubject().getRDNs(BCStyle.CN)[0]
                 .getFirst().getValue().toString();
         byte[] der = holder.getEncoded();
-        byte[] value = commonName.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        byte[] value = commonName.getBytes(StandardCharsets.UTF_8);
         int at = lastIndexOf(der, value);
         der[at] = (byte) 0xd3;
         return der;
@@ -101,7 +127,7 @@ final class Tokens {
 
     private static int lastIndexOf(byte[] data, byte[] pattern) {
         for (int i = data.length - pattern.length; i >= 0; i--) {
-            if (java.util.Arrays.equals(data, i, i + pattern.length, pattern, 0, pattern.length)) {
+            if (Arrays.equals(data, i, i + pattern.length, pattern, 0, pattern.length)) {
                 return i;
             }
         }
@@ -169,16 +195,16 @@ final class Tokens {
             attributes.add(replacement);
         }
         DERSet signed = new DERSet(attributes);
-        java.security.PrivateKey key = java.security.KeyFactory.getInstance("EC").generatePrivate(
-                new java.security.spec.PKCS8EncodedKeySpec(Pem.decode(java.nio.file.Files.readString(
-                        java.nio.file.Path.of("..", "..", "testdata", "pki", "keys", "tsa.test-key.pem")))));
-        java.security.SecureRandom random = java.security.SecureRandom.getInstance("SHA1PRNG");
+        PrivateKey key = KeyFactory.getInstance("EC").generatePrivate(
+                new PKCS8EncodedKeySpec(Pem.decode(Files.readString(
+                        Path.of("..", "..", "testdata", "pki", "keys", "tsa.test-key.pem")))));
+        SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
         random.setSeed(36);
-        java.security.Signature signature = java.security.Signature.getInstance("SHA256withECDSA");
+        Signature signature = Signature.getInstance("SHA256withECDSA");
         signature.initSign(key, random);
         signature.update(signed.getEncoded("DER"));
         SignerInfo changed = new SignerInfo(signer.getSID(), signer.getDigestAlgorithm(), signed,
-                signer.getDigestEncryptionAlgorithm(), new org.bouncycastle.asn1.DEROctetString(signature.sign()),
+                signer.getDigestEncryptionAlgorithm(), new DEROctetString(signature.sign()),
                 signer.getUnauthenticatedAttributes());
         SignedData result = new SignedData(signedData.getDigestAlgorithms(), signedData.getEncapContentInfo(),
                 signedData.getCertificates(), signedData.getCRLs(), new DERSet(changed));
@@ -187,29 +213,29 @@ final class Tokens {
 
     /** Returns the ESSCertID (SHA-1) and ESSCertIDv2 (SHA-256) of pki/tsa, with its issuer and serial number. */
     static ESSCertID tsaCertId() throws Exception {
-        org.bouncycastle.cert.X509CertificateHolder tsa = tsa();
-        return new ESSCertID(java.security.MessageDigest.getInstance("SHA-1").digest(tsa.getEncoded()),
+        X509CertificateHolder tsa = tsa();
+        return new ESSCertID(MessageDigest.getInstance("SHA-1").digest(tsa.getEncoded()),
                 issuerSerial(tsa));
     }
 
     static ESSCertIDv2 tsaCertIdV2() throws Exception {
-        org.bouncycastle.cert.X509CertificateHolder tsa = tsa();
-        return new ESSCertIDv2(java.security.MessageDigest.getInstance("SHA-256").digest(tsa.getEncoded()),
+        X509CertificateHolder tsa = tsa();
+        return new ESSCertIDv2(MessageDigest.getInstance("SHA-256").digest(tsa.getEncoded()),
                 issuerSerial(tsa));
     }
 
-    static org.bouncycastle.asn1.x509.IssuerSerial tsaIssuerSerial() throws Exception {
+    static IssuerSerial tsaIssuerSerial() throws Exception {
         return issuerSerial(tsa());
     }
 
-    private static org.bouncycastle.cert.X509CertificateHolder tsa() throws Exception {
-        return new org.bouncycastle.cert.X509CertificateHolder(Pem.decode(java.nio.file.Files.readString(
-                java.nio.file.Path.of("..", "..", "testdata", "pki", "tsa.pem"))));
+    private static X509CertificateHolder tsa() throws Exception {
+        return new X509CertificateHolder(Pem.decode(Files.readString(
+                Path.of("..", "..", "testdata", "pki", "tsa.pem"))));
     }
 
-    private static org.bouncycastle.asn1.x509.IssuerSerial issuerSerial(org.bouncycastle.cert.X509CertificateHolder c) {
-        return new org.bouncycastle.asn1.x509.IssuerSerial(
-                new org.bouncycastle.asn1.x509.GeneralNames(new org.bouncycastle.asn1.x509.GeneralName(c.getIssuer())),
+    private static IssuerSerial issuerSerial(X509CertificateHolder c) {
+        return new IssuerSerial(
+                new GeneralNames(new GeneralName(c.getIssuer())),
                 c.getSerialNumber());
     }
 
@@ -241,8 +267,8 @@ final class Tokens {
     /** Removes the certificates of a token; the signer is then found among the supplied certificates. */
     static byte[] withoutCertificates(byte[] token) throws Exception {
         CMSSignedData cms = new CMSSignedData(token);
-        org.bouncycastle.util.Store<org.bouncycastle.cert.X509CertificateHolder> none =
-                new org.bouncycastle.util.CollectionStore<>(java.util.List.of());
+        Store<X509CertificateHolder> none =
+                new CollectionStore<>(List.of());
         return CMSSignedData.replaceCertificatesAndCRLs(cms, none, null, null).getEncoded("DER");
     }
 
@@ -319,17 +345,54 @@ final class Tokens {
      * refuses it, so DSS cannot convert it to a certificate token.
      */
     static byte[] caEcdsaWithMalformedBasicConstraints() throws Exception {
-        byte[] der = Pem.decode(java.nio.file.Files.readString(
-                java.nio.file.Path.of("..", "..", "testdata", "pki", "ca-ecdsa.pem")));
+        byte[] der = Pem.decode(Files.readString(
+                Path.of("..", "..", "testdata", "pki", "ca-ecdsa.pem")));
         int oid = indexOf(der, new byte[] {0x06, 0x03, 0x55, 0x1d, 0x13}, 0);
         int octetString = indexOf(der, new byte[] {0x04}, oid + 5);
         der[octetString + 2] = 0x31;
         return der;
     }
 
+    /**
+     * Returns pki/ca-ecdsa with the keyIdentifier tag of its
+     * authorityKeyIdentifier extension changed to an illegal one, 0x4A. The
+     * certificate factory accepts it, but DSS cannot decode its extensions.
+     */
+    static byte[] caEcdsaWithMalformedAuthorityKeyIdentifier() throws Exception {
+        byte[] der = Pem.decode(Files.readString(
+                Path.of("..", "..", "testdata", "pki", "ca-ecdsa.pem")));
+        int oid = indexOf(der, new byte[] {0x06, 0x03, 0x55, 0x1d, 0x23}, 0);
+        int octetString = indexOf(der, new byte[] {0x04}, oid + 5);
+        der[octetString + 4] = 0x4a;
+        return der;
+    }
+
+    /**
+     * Returns a certificate with the subject of pki/ca-ecdsa, issued under
+     * the name of pki/root-ca, with a key of its own and the malformed
+     * authorityKeyIdentifier of {@link #caEcdsaWithMalformedAuthorityKeyIdentifier}:
+     * a certificate of the same name that did not issue pki/tsa.
+     */
+    static byte[] otherKeyWithTheSubjectOfCaEcdsa() throws Exception {
+        X509CertificateHolder ca = new X509CertificateHolder(
+                caEcdsaWithMalformedAuthorityKeyIdentifier());
+        KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");
+        SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+        random.setSeed(72);
+        generator.initialize(256, random);
+        KeyPair pair = generator.generateKeyPair();
+        X509v3CertificateBuilder builder = new X509v3CertificateBuilder(
+                ca.getIssuer(), BigInteger.valueOf(0x7201), ca.getNotBefore(), ca.getNotAfter(),
+                ca.getSubject(), SubjectPublicKeyInfo.getInstance(
+                        pair.getPublic().getEncoded()));
+        builder.addExtension(ca.getExtension(Extension.authorityKeyIdentifier));
+        return builder.build(new JcaContentSignerBuilder("SHA256withECDSA")
+                .build(pair.getPrivate())).getEncoded();
+    }
+
     private static int indexOf(byte[] data, byte[] pattern, int from) {
         for (int i = Math.max(from, 0); i + pattern.length <= data.length; i++) {
-            if (java.util.Arrays.equals(data, i, i + pattern.length, pattern, 0, pattern.length)) {
+            if (Arrays.equals(data, i, i + pattern.length, pattern, 0, pattern.length)) {
                 return i;
             }
         }

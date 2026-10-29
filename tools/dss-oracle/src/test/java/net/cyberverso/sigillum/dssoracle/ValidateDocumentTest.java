@@ -299,7 +299,7 @@ class ValidateDocumentTest {
     /**
      * A CAdES signature without its certificates is validated with its
      * signing certificate supplied with {@code --certificate}, which DSS
-     * then takes as a candidate (Codex review of #37).
+     * then takes as a candidate (issue #37).
      */
     @Test
     void aSigningCertificateSuppliedOfflineIsACandidate() throws Exception {
@@ -315,7 +315,7 @@ class ValidateDocumentTest {
     /**
      * A certificate of a timestamp token that DSS does not use, here one
      * with a subject name that is not valid UTF-8, does not make the
-     * document rejected (Codex review of #37).
+     * document rejected (issue #37).
      */
     @Test
     void anUnusedMalformedCertificateOfATimestampIsIgnored() throws Exception {
@@ -565,7 +565,7 @@ class ValidateDocumentTest {
      * A member named {@code protected} that is not a JWS Protected Header,
      * here inside an extension of the unprotected header, is not decoded:
      * DSS does not parse it, and the document is validated however deep its
-     * decoded value is (Codex review of #37).
+     * decoded value is (issue #37).
      */
     @Test
     void aMemberNamedProtectedElsewhereIsNotTakenForAHeader() throws Exception {
@@ -657,7 +657,7 @@ class ValidateDocumentTest {
      * Member names that spell the places the walk looks at, such as a root
      * member named {@code signatures/#/protected} or a header parameter
      * named {@code etsiU/#/cSig}, are not those places: DSS validates the
-     * signature, and so must the tool (Codex review of #37).
+     * signature, and so must the tool (issue #37).
      */
     @Test
     void memberNamesThatSpellAPathAreNotThatPath() throws Exception {
@@ -684,7 +684,7 @@ class ValidateDocumentTest {
      * A standalone timestamp token given as the document, whose message
      * imprint uses SHAKE-128, which no provider computes: without detached
      * content DSS computes no imprint and validates it, with content it
-     * fails. The tool must do as DSS alone (Codex review of #37).
+     * fails. The tool must do as DSS alone (issue #37).
      */
     @Test
     void aTimestampWithAnImprintNoProviderComputesIsRejectedOnlyWithContent() throws Exception {

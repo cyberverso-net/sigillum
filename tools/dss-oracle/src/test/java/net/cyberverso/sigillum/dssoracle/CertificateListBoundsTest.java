@@ -172,7 +172,7 @@ class CertificateListBoundsTest {
      * number INTEGER that declares as many octets as the whole CRL and
      * starts with a valid octet: every length is within the slack, and the
      * check must take memory in proportion to the CRL, not to the declared
-     * lengths times the entries (Codex review of #72).
+     * lengths times the entries (issue #72).
      */
     @Test
     void manyEntriesDeclaringLongSerialNumbersTakeMemoryInProportionToTheCrl() {
@@ -206,6 +206,62 @@ class CertificateListBoundsTest {
         assertAccepted(der);
         long allocated = threads.getCurrentThreadAllocatedBytes() - before;
         assertTrue(allocated < 16L * 1024 * 1024, "allocated " + allocated + " bytes for a CRL of " + size);
+    }
+
+    /**
+     * With revokedCertificates of indefinite length, DSS does not reach the
+     * signatureAlgorithm and signatureValue of the CRL; the check of the
+     * fields stops there, and the entries are still checked (issue #72).
+     */
+    @Test
+    void stopsTheFieldsAtARevokedCertificatesOfIndefiniteLength() {
+        byte[] signatureAfter = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x30, 0x00, 0x30, 0x00, 0x17, 0x00,
+            0x30, (byte) 0x80, 0x30, 0x03, 0x02, 0x01, 0x01, 0x00, 0x00, 0x30, 0x00, 0x03, (byte) 0x84, 0x40, 0, 0, 0};
+        assertAccepted(signatureAfter);
+        byte[] longEntry = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x30, 0x00, 0x30, 0x00, 0x17, 0x00,
+            0x30, (byte) 0x80, 0x30, (byte) 0x84, 0x40, 0, 0, 0, 0x02, 0x01, 0x01, 0x00, 0x00};
+        assertRejected(longEntry);
+    }
+
+    /**
+     * DSS takes for crlExtensions an element of the context-specific or
+     * private class only; one of the application class with tag number 16
+     * is taken for the signatureAlgorithm, and its length is checked.
+     */
+    @Test
+    void takesAnApplicationClassElementForTheNextFieldOfItsTagNumber() {
+        byte[] application = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x30, 0x00, 0x30, 0x00, 0x17, 0x00,
+            0x70, (byte) 0x84, 0x40, 0, 0, 0, 0x02, 0x01, 0x00};
+        assertRejected(application);
+    }
+
+    /** A serial number that overruns its entry is read with zeros past the end of the entry. */
+    @Test
+    void readsZerosPastTheEndOfAnEntry() {
+        // The serial number declares two octets and holds 0x00: with a zero after it, it has a redundant
+        // leading octet, DSS stops reading the entries, and the long entry after it is not checked.
+        byte[] redundant = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x30, 0x00, 0x30, 0x00, 0x17, 0x00,
+            0x30, 0x0b, 0x30, 0x03, 0x02, 0x02, 0x00, 0x30, (byte) 0x84, 0x40, 0, 0, 0};
+        assertAccepted(redundant);
+        // Holding 0x05, it is valid with the zero, and DSS reads the next entry.
+        byte[] valid = redundant.clone();
+        valid[16] = 0x05;
+        assertRejected(valid);
+    }
+
+    /**
+     * Tag numbers are kept in 32 bits: a high tag number of 2^32 + 16 is
+     * taken for 16, a SEQUENCE, and its length is checked; one of 2^31 + 16
+     * is negative and matches no field.
+     */
+    @Test
+    void keepsTagNumbersInThirtyTwoBits() {
+        byte[] wrapped = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x1f, (byte) 0x90, (byte) 0x80, (byte) 0x80,
+            (byte) 0x80, 0x10, (byte) 0x84, 0x40, 0, 0, 0};
+        assertRejected(wrapped);
+        byte[] negative = wrapped.clone();
+        negative[5] = (byte) 0x88;
+        assertAccepted(negative);
     }
 
     @Test

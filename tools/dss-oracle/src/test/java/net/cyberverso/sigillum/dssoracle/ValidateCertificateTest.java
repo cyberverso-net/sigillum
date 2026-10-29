@@ -815,4 +815,23 @@ class ValidateCertificateTest {
                 "crl/ca-ecdsa-expired", "pki/signer-unknown-critical-extension",
                 "ocsp/signer-unknown-critical-extension", "pki/ocsp-responder")), policyDependent);
     }
+
+    /**
+     * A first revoked certificate entry whose serial number declares two
+     * octets but holds one: DSS reads a zero for the missing octet and goes
+     * on to the next entries, so pki/signer-p256-revoked is still found
+     * revoked (issue #72).
+     */
+    @Test
+    void aSerialNumberThatOverrunsItsEntryIsReadAsDssReadsIt() throws Exception {
+        Path crl = Files.write(temp.resolve("overrun.crl"),
+                Crls.caEcdsaWithAnEntryFirst(new byte[] {0x30, 0x03, 0x02, 0x02, 0x05}));
+        Path result = temp.resolve("overrun");
+        assertEquals(ExitCodes.SUCCESS, run(underCaEcdsa("signer-p256-revoked", "--crl", crl.toString(),
+                "--out", result.toString())), stderr());
+        Map<String, Object> summary = summary(result);
+        assertEquals("validated", summary.get("result"), summary.toString());
+        assertRevocation(member(summary, "details"), "REVOKED", "CRL", "--crl", crl.toString());
+    }
+
 }

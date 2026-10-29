@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.spi.DSSASN1Utils;
+import eu.europa.esig.dss.spi.DSSUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -668,7 +669,7 @@ class ValidateTimestampTest {
     /**
      * An unrelated certificate with invalid UTF-8 in its subject, next to
      * the certificate of pki/tsa in certificateValues: DSS does not process
-     * it, and validates the token (Codex review of #72).
+     * it, and validates the token (issue #72).
      */
     @Test
     void anUnrelatedUndecodableCertificateInTheCertificateValuesIsNotRejected() throws Exception {
@@ -679,6 +680,44 @@ class ValidateTimestampTest {
                 tsa, unrelated);
         assertNull(MutationTest.rawDss(MutationTest.Setup.corpus(token)).failure());
         assertAsDssAlone(token, "cert-values-unrelated");
+    }
+
+    /**
+     * The certificate of pki/tsa in certificateValues, with a copy of its
+     * issuer pki/ca-ecdsa whose extensions DSS cannot decode, or with a
+     * certificate of the same subject and another key, which did not issue
+     * it, and whose extensions DSS cannot decode either: the tool must give
+     * the outcome of DSS alone (issue #72).
+     */
+    @Test
+    void certificatesWithTheSubjectOfTheIssuerInTheCertificateValuesAreTreatedAsDssTreatsThem() throws Exception {
+        byte[] tsa = Pem.decode(Files.readString(CORPUS.resolve("pki/tsa.pem")));
+        byte[] valid = Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst"));
+        byte[] issuer = Tokens.caEcdsaWithMalformedAuthorityKeyIdentifier();
+        byte[] other = Tokens.otherKeyWithTheSubjectOfCaEcdsa();
+        for (byte[] certificate : List.of(issuer, other)) {
+            assertThrows(IllegalArgumentException.class,
+                    () -> CertificateChecks.decode(DSSUtils.loadCertificate(certificate)));
+        }
+        assertAsDssAlone(Tokens.withCertificateValues(valid, tsa, issuer), "cert-values-bad-issuer");
+        assertAsDssAlone(Tokens.withCertificateValues(valid, tsa, other), "cert-values-other-key");
+    }
+
+    /**
+     * A revokedCertificates of indefinite length, then a signatureValue
+     * declaring 1 GiB: the run must end with exit code 0 in a JVM with a
+     * heap of 128 MiB (issue #72).
+     */
+    @Test
+    void anIndefiniteRevokedCertificatesBeforeALongSignatureEndsWithinASmallHeap() throws Exception {
+        Path crl = Files.write(temp.resolve("indefinite-revoked.crl"),
+                Crls.caEcdsaWithIndefiniteRevokedCertificatesAndALongSignature());
+        List<String> command = new ArrayList<>(List.of(
+                Path.of(System.getProperty("java.home"), "bin", "java").toString(), "-Xmx128m",
+                "-cp", System.getProperty("java.class.path"), HeapProbe.class.getName(), crl.toString()));
+        Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
+        String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        assertEquals(0, process.waitFor(), output);
     }
 
     /**
