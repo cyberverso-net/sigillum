@@ -2,10 +2,10 @@
 #
 # examine_globs lists the critical modules of
 # docs/development/quality-gates.md, "Critical modules": the code that
-# signs, verifies or parses. The mutation-score threshold applies to them,
-# and mutants.yml tests the mutants of the diff of each pull request that
-# fall in them. A -f or --file option on the command line replaces this
-# list for that run.
+# signs, verifies or parses. The mutation-score threshold applies to them:
+# authors test the mutants of their diff that fall in them, and
+# .github/workflows/mutants.yml tests all of them every night. A -f or
+# --file option on the command line replaces this list for that run.
 examine_globs = [
     # Library crates: all of their code.
     "crates/sigillum-pki/src/**/*.rs",

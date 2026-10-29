@@ -92,13 +92,25 @@ Trusting another publisher, with `cargo vet trust`, or adding another source of 
 | Gate | Tool | Threshold |
 | --- | --- | --- |
 | Line coverage of new and changed code | `cargo llvm-cov` | At least 90% |
-| Mutation score in critical modules (signing, verification, parsers) | `cargo mutants` | At least 80% of mutants caught |
+| Mutation score in critical modules (signing, verification, parsers) | `cargo mutants --in-diff` on the change, as described below; the job `Mutation testing` of `mutants.yml` runs every night on all critical modules | At least 80% of mutants caught |
 | Fuzzing of each new or changed parser | `cargo fuzz` | At least 10 minutes per target without a finding |
 | Differential tests against DSS | `sigillum-oracle` | No unexplained divergence |
 
 Thresholds apply to the change under review. A shortfall is acceptable only with a written justification in the pull request, for example code that is unreachable by construction.
 
 The fuzzing threshold applies to parsers in the library crates and in the Rust tools. The Java test tool `tools/dss-oracle` is covered instead by a deterministic JUnit mutation test of its inputs, run by `mvn verify`, because it is not distributed and reads only project fixtures and sigillum output. Its README describes the test.
+
+## Mutation testing
+
+The critical modules are the code that signs, verifies or parses. `.cargo/mutants.toml` lists them as file globs, which `cargo mutants` reads:
+
+- **Library crates.** All the code of `sigillum-pki`, `sigillum-cms`, `sigillum-cades`, `sigillum-pades` and `sigillum-jades`. They hold no code yet. Their mutants are tested from the first pull request that adds code to them, with the tests of their own crate, and they add to the nightly run time. A new library crate that signs, verifies or parses, such as `sigillum-pdf` of [ADR-0015](../design/adr/0015-pdf-reader-and-incremental-writer.md), is added to the list in the pull request that creates it. `sigillum-ffi` holds bindings and is not listed.
+- **`sigillum-testpki`.** The issuance and signing of the test PKI and of timestamp tokens (`pki/keys.rs`, `pki/issue.rs`, `pki/crl.rs`, `pki/ocsp.rs`, `timestamp.rs`), the parsers of untrusted input (`manifest.rs`, `mutations.rs`, `timestamp/input.rs`), and the OpenSSL and DSS checks of the corpus (`openssl.rs`, `dss.rs`).
+- **`sigillum-oracle`.** The parser of `summary.json` (`summary.rs`), the comparison of results (`compare.rs`) and the validation runs (`validation.rs`). `dss.rs` is built only with the `dss` feature, which needs Java, so its mutants would not be built; it is not listed.
+
+The author runs `cargo mutants --in-diff` on the diff of the change against `main`, for example `git diff origin/main... > change.diff` and then `cargo mutants --in-diff change.diff`, and gives the score in the pull request. `.cargo/mutants.toml` restricts the run to the critical modules; a `--file` option replaces the list for one run. The development image has the version of `cargo mutants` that the workflow pins.
+
+The job `Mutation testing` of `.github/workflows/mutants.yml` runs every night on `main`, and on demand, on all critical modules. It runs in eight shards, each with three `cargo mutants` jobs. A run on the diff of each pull request was measured first: on the diff of #154, 191 mutants, it took 2 h 44 min, and 1 h 44 min with three jobs; on a diff that changes 11 lines in two files, 14 mutants, it took 6 minutes. A representative feature pull request therefore exceeds 30 minutes, and the run is nightly instead. The first run in shards tested the 1,076 mutants of the critical modules in 1 h 35 min, the time of its slowest shard. The number of shards is raised when the slowest shard approaches the time limit of the job, four hours, as the library crates grow. The job writes to its summary the counts of each outcome, the score and the missed and timed out mutants, and fails when the score is below the threshold. Each shard keeps its `mutants.out` directory in the artefact `mutants-out-shard-<n>`, with the log of every mutant. The score is the share of caught mutants among those the tests ran against: a timeout counts as not caught, and a mutant that does not build is left out. The check is not required: a nightly run tests `main`, not the pull request, and a shortfall can be justified, as stated above. A missed mutant reported by the nightly run is fixed, or justified, in a follow-up issue.
 
 ## Local runs
 

@@ -8,9 +8,6 @@ on:
   schedule:
     - cron: "23 1 * * *"
   workflow_dispatch:
-  # Temporary, for the measurement of #80; removed before review.
-  push:
-    branches: [task/80-mutants-ci]
 
 permissions:
   contents: read
