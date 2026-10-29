@@ -339,25 +339,25 @@ impl<'a> Walk<'a> {
     /// for it, and counts it otherwise. Nothing is allocated for a
     /// difference that is only counted.
     fn record(&mut self, expected: Option<&Value>, found: Option<&Value>) {
-        let list = &mut self.mismatch.differences;
-        if list.len() >= MAX_LISTED_DIFFERENCES {
+        let listed = &mut self.mismatch.differences;
+        if listed.len() >= MAX_LISTED_DIFFERENCES {
             self.mismatch.omitted += 1;
             return;
         }
         let path_length = self.path_length;
-        let needed = path_length
+        let size = path_length
             .saturating_add(json_length(expected))
             .saturating_add(json_length(found));
-        if needed > MAX_LISTED_BYTES.saturating_sub(self.bytes) {
+        if size > MAX_LISTED_BYTES.saturating_sub(self.bytes) {
             self.mismatch.omitted += 1;
             return;
         }
-        self.bytes += needed;
+        self.bytes += size;
         let mut path = String::with_capacity(path_length);
         for segment in &self.path {
             segment.write(&mut path);
         }
-        list.push(Difference {
+        listed.push(Difference {
             path,
             expected: expected.cloned(),
             found: found.cloned(),
