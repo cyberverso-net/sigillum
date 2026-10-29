@@ -1,6 +1,5 @@
 package net.cyberverso.sigillum.dssoracle;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -21,7 +20,8 @@ import java.util.function.Predicate;
  * CRL (RFC 5280, section 5.1) in a flat series of elements that starts in
  * the TBSCertList, except revokedCertificates, which DSS passes over; and the
  * revoked certificate entries with their serial numbers. Elements are
- * recognised by their tag number alone. Where DSS fails on the identifier
+ * recognised by their tag number alone, and the series is read with a
+ * cursor that keeps only its position. Where DSS fails on the identifier
  * and length octets, or on an indefinite length that it would read into
  * memory, the check stops without a rejection and leaves the CRL to DSS.
  * Where DSS fails later, when Bouncy Castle cannot decode a field that DSS
@@ -76,9 +76,8 @@ final class CertificateListBounds {
         if (problem.isPresent()) {
             return problem;
         }
-        List<Element> series = crl.series(tbs.contents());
-        problem = fields(crl, series);
-        return problem.isPresent() ? problem : entries(crl, series);
+        problem = fields(crl, tbs.contents());
+        return problem.isPresent() ? problem : entries(crl, tbs.contents());
     }
 
     /** The fields of the CRL, as DSS recognises them in the series. */
@@ -98,14 +97,14 @@ final class CertificateListBounds {
     }
 
     /** Checks the fields that DSS reads into memory. */
-    private static Optional<String> fields(Region crl, List<Element> series) {
-        int next = 0;
+    private static Optional<String> fields(Region crl, int start) {
+        Cursor series = new Cursor(crl, start);
+        Element element = series.next();
         for (Field field : fieldsOfACrl(crl)) {
-            if (next >= series.size()) {
+            if (element == null) {
                 // DSS cannot read the next identifier and length octets, and fails.
                 return Optional.empty();
             }
-            Element element = series.get(next);
             if (field.use() == Use.PASSED_OVER && element.tagNumber() == SEQUENCE && element.length() > 0
                     && !crl.firstReadable(element)) {
                 // DSS looks at the first element of a non-empty SEQUENCE here, and fails if it cannot read it.
@@ -113,12 +112,6 @@ final class CertificateListBounds {
             }
             if (!field.recognised().test(element)) {
                 continue;
-            }
-            next++;
-            if (field.use() == Use.PASSED_OVER && element.length() < 0) {
-                // A revokedCertificates of indefinite length: DSS does not pass over it, and the fields that
-                // follow are not where RFC 5280 puts them. Its entries are checked with the others.
-                return Optional.empty();
             }
             if (field.use() == Use.READ) {
                 if (element.length() < 0) {
@@ -130,24 +123,31 @@ final class CertificateListBounds {
                     return problem;
                 }
             }
+            // A revokedCertificates of indefinite length is passed over by no octet: the next field is taken from
+            // its contents, as DSS takes it.
+            element = series.next();
         }
         return Optional.empty();
     }
 
     /** Checks the revoked certificate entries and their serial numbers, which DSS reads into memory. */
-    private static Optional<String> entries(Region crl, List<Element> series) {
-        int index = 0;
-        while (index < series.size() && !time(series.get(index))) {
-            index++;
+    private static Optional<String> entries(Region crl, int start) {
+        Cursor series = new Cursor(crl, start);
+        Element element = series.next();
+        while (element != null && !time(element)) {
+            element = series.next();
         }
-        index++;
-        if (index < series.size() && time(series.get(index))) {
-            index++;
-        }
-        if (index >= series.size() || series.get(index).tagNumber() != SEQUENCE) {
+        if (element == null) {
             return Optional.empty();
         }
-        int position = series.get(index).contents();
+        element = series.next();
+        if (element != null && time(element)) {
+            element = series.next();
+        }
+        if (element == null || element.tagNumber() != SEQUENCE) {
+            return Optional.empty();
+        }
+        int position = element.contents();
         while (position < crl.end()) {
             Element entry = crl.element(position);
             if (entry == null || entry.tagNumber() != SEQUENCE || entry.length() < 0) {
@@ -199,6 +199,38 @@ final class CertificateListBounds {
         /** The offset after the contents, as far as the end. */
         int next(int end) {
             return (int) Math.min(end, contents + Math.max(0, length));
+        }
+    }
+
+    /**
+     * The series of elements from a position to the end of a region, each
+     * starting where the previous one ends by its declared length, up to the
+     * first whose identifier and length octets cannot be read. It keeps only
+     * its position, so a series of any length takes constant memory.
+     */
+    private static final class Cursor {
+        private final Region region;
+        private int position;
+        private boolean ended;
+
+        Cursor(Region region, int position) {
+            this.region = region;
+            this.position = position;
+        }
+
+        /** The next element, or {@code null} at the end of the series. */
+        Element next() {
+            if (ended || position >= region.end()) {
+                ended = true;
+                return null;
+            }
+            Element element = region.element(position);
+            if (element == null) {
+                ended = true;
+                return null;
+            }
+            position = element.next(region.end());
+            return element;
         }
     }
 
@@ -288,25 +320,6 @@ final class CertificateListBounds {
                 }
             }
             return ((long) at << 32) | (tagNumber & 0xffffffffL);
-        }
-
-        /**
-         * The series of elements from a position to the end, each starting
-         * where the previous one ends by its declared length, up to the
-         * first whose identifier and length octets cannot be read.
-         */
-        List<Element> series(int position) {
-            List<Element> series = new ArrayList<>();
-            int at = position;
-            while (at < end) {
-                Element element = element(at);
-                if (element == null) {
-                    break;
-                }
-                series.add(element);
-                at = element.next(end);
-            }
-            return series;
         }
 
         /** Whether the identifier octets of the first element in the contents can be read. */
