@@ -11,8 +11,6 @@ name: Nightly fuzzing
 # has contents: write, and it runs no code of the repository. A push made
 # with GITHUB_TOKEN starts no other workflow.
 on:
-  push:
-    branches: [task/81-nightly-fuzzing]
   schedule:
     - cron: "41 2 * * *"
   workflow_dispatch:
@@ -36,8 +34,8 @@ env:
   # tools/dev-image/check-versions.sh compares with these values.
   RUST_NIGHTLY: nightly-2026-10-25
   CARGO_FUZZ_VERSION: 0.13.2
-  CORPUS_BRANCH: fuzz-corpus-test-81b
-  FUZZ_SECONDS: 60
+  CORPUS_BRANCH: fuzz-corpus
+  FUZZ_SECONDS: 600
   # The time limit of one input, in seconds, instead of the 1200 s of
   # libFuzzer, so that an input that runs for a minute is a finding.
   FUZZ_TIMEOUT: 60
@@ -144,17 +142,9 @@ jobs:
       # Only after successful fuzzing: a target with a crash that persists
       # is not minimised until the crash is fixed. The script fails on an
       # input that fails during the merge, which libFuzzer skips.
-      - name: Trim the corpus of the test target to one input
-        if: matrix.target == 'cmin_killed_one'
-        working-directory: ${{ matrix.directory }}
-        run: |
-          find "corpus/$TARGET" -type f | sort | tail -n +2 | xargs -r rm -f
-          echo "The corpus holds $(find "corpus/$TARGET" -type f | wc -l) inputs."
       - name: Minimise the corpus
         id: minimise
         working-directory: ${{ matrix.directory }}
-        env:
-          CRASH_DURING_CMIN: "1"
         run: |
           "$GITHUB_WORKSPACE/.github/scripts/fuzz-minimise.sh" "$TARGET"
       # Failing inputs may expose a vulnerability: they are kept for a short
@@ -189,7 +179,7 @@ jobs:
     name: Save the corpus
     needs: [targets, fuzz]
     # Only runs of the workflow of main write the branch.
-    if: ${{ !cancelled() && needs.targets.result == 'success' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/task/81-nightly-fuzzing') }}
+    if: ${{ !cancelled() && needs.targets.result == 'success' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
