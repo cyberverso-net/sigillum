@@ -91,14 +91,15 @@ public final class ValidateTimestamp implements Main.ModeRunner {
                             + " differs from the algorithm of the message imprint of the token, "
                             + parsed.getMessageImprint().getAlgorithm().getName() + ".");
                 }
-                // The certificates that DSS processes decide the revocation tokens that the checks make.
-                List<CertificateToken> processed = checkCertificateValues(token, parsed,
-                        sources.certificateSources());
-                CertificateVerifier verifier = sources.certificateVerifier(processed);
+                CertificateVerifier supplied = sources.certificateSources();
                 List<CertificateToken> candidates = new ArrayList<>(certificates(parsed));
-                candidates.addAll(verifier.getTrustedCertSources().getCertificates());
-                candidates.addAll(verifier.getAdjunctCertSources().getCertificates());
+                candidates.addAll(supplied.getTrustedCertSources().getCertificates());
+                candidates.addAll(supplied.getAdjunctCertSources().getCertificates());
+                // Before DSS looks for the signer, which fails on some of the references that this rejects.
                 checkSigningCertificateReferences(token, parsed, candidates);
+                // The certificates that DSS processes decide the revocation tokens that the checks make.
+                List<CertificateToken> processed = checkCertificateValues(token, parsed, supplied);
+                CertificateVerifier verifier = sources.certificateVerifier(processed);
                 checkSignature(token, parsed, verifier);
 
                 DetachedTimestampValidator validator = new DetachedTimestampValidator(token.document(),

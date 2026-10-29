@@ -60,14 +60,16 @@ class OfflineSourcesTest {
     @Test
     void theIssuersOfANameAreSharedByItsCertificates() throws Exception {
         List<CertificateToken> certificates = new ArrayList<>();
-        for (byte[] der : Tokens.selfIssuedWithDistinctKeys(3000)) {
+        for (byte[] der : Tokens.selfIssuedWithDistinctKeys(6000)) {
             certificates.add(DSSUtils.loadCertificate(der));
         }
         ThreadMXBean threads = (ThreadMXBean) ManagementFactory.getThreadMXBean();
         long before = threads.getCurrentThreadAllocatedBytes();
         Map<CertificateToken, List<CertificateToken>> issuers = OfflineSources.issuers(certificates);
         long allocated = threads.getCurrentThreadAllocatedBytes() - before;
-        assertEquals(3000, issuers.get(certificates.get(0)).size());
-        assertTrue(allocated < 16L * 1024 * 1024, "allocated " + allocated + " bytes");
+        assertEquals(6000, issuers.get(certificates.get(0)).size());
+        // Each certificate costs some kilobytes, for its name among others; a list per certificate costs 6,000
+        // references each, about 300 MB in all.
+        assertTrue(allocated < 128L * 1024 * 1024, "allocated " + allocated + " bytes");
     }
 }
