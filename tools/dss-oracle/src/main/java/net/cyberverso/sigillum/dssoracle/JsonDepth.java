@@ -60,10 +60,13 @@ import java.util.Optional;
  *
  * <p>The walk of each JSON text reads each octet once and keeps a record of
  * the open containers down to {@link #NAMED_DEPTH} levels only, counting
- * those below, so its memory does not grow with the depth. Counter signatures are checked from a work list, not
- * by recursion, and each is smaller than the text that holds it, so the
- * work takes time and memory in proportion to the input and its decoded
- * parts. It is not a validating parser: malformed JSON is left to DSS. A
+ * those below, so its memory does not grow with the depth. Counter
+ * signatures are checked from a work list, not by recursion. Each is a copy
+ * of part of the text that holds it, or of its decoded form, and is walked
+ * again as a document of its own, so a counter signature nested k levels
+ * deep in others is read k + 1 times: the time and memory grow with the
+ * input and its decoded parts times the nesting of counter signatures. It
+ * is not a validating parser: malformed JSON is left to DSS. A
  * refusal of json-sKema that the walk does not foresee is attributed to the
  * document by {@link #isDepthLimitOfDss}.
  */

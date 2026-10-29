@@ -26,9 +26,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.HexFormat;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -95,6 +95,7 @@ public final class ValidateTimestamp implements Main.ModeRunner {
                 candidates.addAll(verifier.getTrustedCertSources().getCertificates());
                 candidates.addAll(verifier.getAdjunctCertSources().getCertificates());
                 checkSigningCertificateReferences(token, parsed, candidates);
+                checkCertificateValues(token, parsed, verifier);
                 checkSignature(token, parsed, verifier);
 
                 DetachedTimestampValidator validator = new DetachedTimestampValidator(token.document(),
@@ -185,10 +186,9 @@ public final class ValidateTimestamp implements Main.ModeRunner {
      * <ul>
      * <li>it resolves the algorithm of the message imprint and, when data is
      * given, the digest implementation that DSS computes it with;</li>
-     * <li>it decodes ({@link CertificateChecks}) every certificate of the
-     * token ({@link #certificates}): those of SignedData that DSS can
-     * convert, then those that DSS takes from the unsigned attribute
-     * certificateValues of the signer.</li>
+     * <li>it decodes ({@link CertificateChecks}) every certificate of
+     * SignedData that DSS can convert; those of the certificateValues
+     * attribute are decoded later, by {@link #checkCertificateValues}.</li>
      * </ul>
      *
      * Only the exception types that DSS and Bouncy Castle throw for malformed
@@ -226,17 +226,10 @@ public final class ValidateTimestamp implements Main.ModeRunner {
                         "DSS cannot compute the digest algorithm of the message imprint, " + algorithm.getName(), e));
             }
         }
-        // The certificates of the CMS structure first, as before the certificate source of DSS was read here: a
-        // token whose certificate has a public key that cannot be decoded made the run fail with a
-        // NullPointerException when the source was read before them.
-        Set<CertificateToken> signedData = signedDataCertificates(parsed);
-        for (CertificateToken certificate : signedData) {
+        // Before the certificate source of DSS is read: DSS drops from that source a certificate of SignedData
+        // whose public key cannot be decoded, but still uses it later, and fails on it.
+        for (CertificateToken certificate : signedDataCertificates(parsed)) {
             decode(token, certificate);
-        }
-        for (CertificateToken certificate : parsed.getCertificates()) {
-            if (!signedData.contains(certificate)) {
-                decode(token, certificate);
-            }
         }
         return parsed;
     }
@@ -375,12 +368,11 @@ public final class ValidateTimestamp implements Main.ModeRunner {
 
     /**
      * Returns the certificates of the token, each once: those of the CMS
-     * structure that DSS can convert, as it converts them, in their order,
-     * then the others that the certificate source of DSS holds, which are
-     * those of the unsigned attribute certificateValues
-     * (id-aa-ets-certValues) of the signer. DSS skips a certificate of the
-     * CMS structure that it cannot convert, and so does this list. Copies
-     * count once, as DSS keeps one certificate token for them.
+     * structure that DSS can convert ({@link #signedDataCertificates}), then
+     * the others that the certificate source of DSS holds, which are those
+     * of the unsigned attribute certificateValues (id-aa-ets-certValues) of
+     * the signer. Copies count once, as DSS keeps one certificate token for
+     * them.
      */
     private static List<CertificateToken> certificates(TimestampToken parsed) {
         Set<CertificateToken> certificates = new LinkedHashSet<>(signedDataCertificates(parsed));
@@ -388,14 +380,22 @@ public final class ValidateTimestamp implements Main.ModeRunner {
         return new ArrayList<>(certificates);
     }
 
-    /** The certificates of the CMS structure of the token that DSS can convert, each once. */
+    /**
+     * The certificates of the CMS structure of the token that DSS can
+     * convert, each once, including those after one that it cannot. The
+     * certificate source of DSS keeps them only up to the first that it
+     * cannot convert, but DSS uses the others later: a token holding a
+     * certificate that DSS cannot convert, then the certificate of its
+     * signer with a subject that cannot be decoded, makes DSS fail, as a
+     * test checks against DSS alone.
+     */
     private static Set<CertificateToken> signedDataCertificates(TimestampToken parsed) {
         Set<CertificateToken> certificates = new LinkedHashSet<>();
         for (X509CertificateHolder holder : parsed.getTimeStamp().getCertificates().getMatches(null)) {
             try {
                 certificates.add(DSSASN1Utils.getCertificate(holder));
             } catch (DSSException e) {
-                // DSS skips it as well.
+                // DSS cannot use it either.
             }
         }
         return certificates;
@@ -410,23 +410,55 @@ public final class ValidateTimestamp implements Main.ModeRunner {
      */
     static void checkSignature(OfflineSources.Input token, TimestampToken parsed,
             CertificateVerifier verifier) throws RejectedInputException {
-        CertificateValidity best = parsed.getCandidatesForSigningCertificate().getTheBestCandidate();
-        if (best == null) {
-            return;
+        for (CertificateToken candidate : signerCandidates(parsed, verifier)) {
+            try {
+                parsed.isSignedBy(candidate);
+            } catch (RuntimeOperatorException | IllegalArgumentException | DSSException e) {
+                throw token.rejected(new IllegalArgumentException(
+                        "the signature of the token cannot be decoded", e));
+            }
         }
+    }
+
+    /**
+     * The certificates that DSS tries as the signer of a token: the best
+     * candidate found in the token, or, when the token does not hold it, the
+     * supplied certificates that match the signer identifier.
+     */
+    private static Set<CertificateToken> signerCandidates(TimestampToken parsed, CertificateVerifier verifier) {
+        CertificateValidity best = parsed.getCandidatesForSigningCertificate().getTheBestCandidate();
         Set<CertificateToken> candidates = new HashSet<>();
+        if (best == null) {
+            return candidates;
+        }
         if (best.getCertificateToken() != null) {
             candidates.add(best.getCertificateToken());
         } else if (best.getSignerInfo() != null) {
             candidates.addAll(verifier.getTrustedCertSources().getBySignerIdentifier(best.getSignerInfo()));
             candidates.addAll(verifier.getAdjunctCertSources().getBySignerIdentifier(best.getSignerInfo()));
         }
-        for (CertificateToken candidate : candidates) {
-            try {
-                parsed.isSignedBy(candidate);
-            } catch (RuntimeOperatorException | IllegalArgumentException | DSSException e) {
-                throw token.rejected(new IllegalArgumentException(
-                        "the signature of the token cannot be decoded", e));
+        return candidates;
+    }
+
+    /**
+     * Decodes ({@link CertificateChecks}) the certificates of the
+     * certificateValues attribute that DSS processes: those among the
+     * signers that DSS tries and, transitively, the certificates of the
+     * token and the supplied ones whose subject is the issuer name of one of
+     * these. DSS does not process another certificate of that attribute, and
+     * does not fail on it. The certificates of SignedData are decoded when
+     * the token is parsed.
+     */
+    private static void checkCertificateValues(OfflineSources.Input token, TimestampToken parsed,
+            CertificateVerifier verifier) throws RejectedInputException {
+        Set<CertificateToken> signedData = signedDataCertificates(parsed);
+        List<CertificateToken> pool = new ArrayList<>(certificates(parsed));
+        pool.addAll(verifier.getTrustedCertSources().getCertificates());
+        pool.addAll(verifier.getAdjunctCertSources().getCertificates());
+        for (CertificateToken certificate
+                : SignedDocuments.withIssuers(new ArrayList<>(signerCandidates(parsed, verifier)), pool)) {
+            if (!signedData.contains(certificate)) {
+                decode(token, certificate);
             }
         }
     }

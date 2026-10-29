@@ -10,10 +10,17 @@ import eu.europa.esig.dss.spi.x509.CertificateRef;
 import eu.europa.esig.dss.spi.x509.CertificateValidity;
 import eu.europa.esig.dss.spi.x509.tsp.TimestampToken;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
+import javax.security.auth.x500.X500Principal;
 
 /**
  * Opens a signed document with DSS and makes, before the validation, the
@@ -171,16 +178,15 @@ final class SignedDocuments {
      * pool whose subject is the issuer name of one of them: the candidates
      * that DSS considers when it builds their chains.
      */
-    private static List<CertificateToken> withIssuers(List<CertificateToken> certificates,
+    static List<CertificateToken> withIssuers(List<CertificateToken> certificates,
             List<CertificateToken> pool) {
         // Copies count once, and issuers are found by their subject, so the work grows with the pairs.
-        java.util.Map<javax.security.auth.x500.X500Principal, List<CertificateToken>> bySubject =
-                new java.util.HashMap<>();
-        for (CertificateToken issuer : new java.util.LinkedHashSet<>(pool)) {
+        Map<X500Principal, List<CertificateToken>> bySubject = new HashMap<>();
+        for (CertificateToken issuer : new LinkedHashSet<>(pool)) {
             bySubject.computeIfAbsent(issuer.getSubject().getPrincipal(), subject -> new ArrayList<>()).add(issuer);
         }
-        java.util.Set<CertificateToken> result = new java.util.LinkedHashSet<>();
-        java.util.Deque<CertificateToken> pending = new java.util.ArrayDeque<>(certificates);
+        Set<CertificateToken> result = new LinkedHashSet<>();
+        Deque<CertificateToken> pending = new ArrayDeque<>(certificates);
         while (!pending.isEmpty()) {
             CertificateToken certificate = pending.pop();
             if (!result.add(certificate)) {

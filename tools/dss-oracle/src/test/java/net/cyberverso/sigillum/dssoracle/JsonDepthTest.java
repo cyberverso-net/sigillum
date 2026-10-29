@@ -4,8 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.sun.management.ThreadMXBean;
+import java.lang.management.ManagementFactory;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 /** Tests of the attribution of a refusal of the JSON schema validator of DSS to the document. */
@@ -72,7 +75,7 @@ class JsonDepthTest {
     void theHeadersOfAnEntryThatDssSkipsAreNotChecked() {
         for (String skipped : new String[] {"", ",\"signature\":null", ",\"signature\":\"\"",
             ",\"signature\":\" \\t\""}) {
-            assertEquals(java.util.Optional.empty(), JsonDepth.check(generalWithDeepEntry(skipped)), skipped);
+            assertEquals(Optional.empty(), JsonDepth.check(generalWithDeepEntry(skipped)), skipped);
         }
         for (String read : new String[] {",\"signature\":\"AAAA\"", ",\"signature\":0",
             ",\"signature\":{}", ",\"signature\":[]", ",\"signature\":false"}) {
@@ -81,7 +84,7 @@ class JsonDepthTest {
         String deep = Documents.base64url(Documents.nestedHeader(JsonDepth.MAX_DEPTH));
         byte[] flattened = ("{\"payload\":\"e30\",\"protected\":\"" + deep + "\",\"signature\":\"\"}")
                 .getBytes(StandardCharsets.US_ASCII);
-        assertEquals(java.util.Optional.empty(), JsonDepth.check(flattened));
+        assertEquals(Optional.empty(), JsonDepth.check(flattened));
     }
 
     /**
@@ -92,8 +95,7 @@ class JsonDepthTest {
     void aVeryDeepDocumentIsRejectedWithoutMemoryInProportionToItsDepth() {
         int depth = 4_000_000;
         byte[] document = ("{\"a\":" + "[".repeat(depth)).getBytes(StandardCharsets.US_ASCII);
-        com.sun.management.ThreadMXBean threads =
-                (com.sun.management.ThreadMXBean) java.lang.management.ManagementFactory.getThreadMXBean();
+        ThreadMXBean threads = (ThreadMXBean) ManagementFactory.getThreadMXBean();
         long before = threads.getCurrentThreadAllocatedBytes();
         assertTrue(JsonDepth.check(document).isPresent());
         long allocated = threads.getCurrentThreadAllocatedBytes() - before;
