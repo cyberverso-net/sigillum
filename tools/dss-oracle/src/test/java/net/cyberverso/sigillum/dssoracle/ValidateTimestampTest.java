@@ -961,6 +961,42 @@ class ValidateTimestampTest {
         assertEquals(alone.indication(), summary.get("indication") + " " + summary.get("sub-indication"));
     }
 
+    /**
+     * A token of pki/tsa without certificates in SignedData, the real
+     * certificate of pki/tsa and a certificate of the same signer
+     * identifier with another key supplied, and in certificateValues an
+     * issuer of the latter whose extensions DSS cannot decode. DSS discards
+     * the candidate whose key does not verify the token, and validates it;
+     * the tool must give the outcome of DSS alone (issue #72).
+     */
+    @Test
+    void aSuppliedSignerCandidateWhoseKeyDoesNotVerifyTheTokenIsNotFollowed() throws Exception {
+        List<byte[]> crafted = Tokens.wrongKeySignerWithMalformedIssuer();
+        byte[] wrongKey = crafted.get(0);
+        byte[] malformedIssuer = crafted.get(1);
+        assertThrows(IllegalArgumentException.class,
+                () -> CertificateChecks.decode(DSSUtils.loadCertificate(malformedIssuer)));
+        byte[] tsa = Pem.decode(Files.readString(CORPUS.resolve("pki/tsa.pem")));
+        byte[] ca = Pem.decode(Files.readString(CORPUS.resolve("pki/ca-ecdsa.pem")));
+        byte[] token = Tokens.withCertificateValues(Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst")),
+                malformedIssuer);
+        MutationTest.Setup corpusSetup = MutationTest.Setup.corpus(token);
+        MutationTest.RawResult alone = MutationTest.rawDss(new MutationTest.Setup(token, corpusSetup.anchors(),
+                List.of(ca, tsa, wrongKey), corpusSetup.crls(), corpusSetup.responses()));
+        assertNull(alone.failure(), String.valueOf(alone.failure()));
+        Path tokenFile = Files.write(temp.resolve("wrong-key-signer.tst"), token);
+        Path wrongKeyFile = Files.write(temp.resolve("wrong-key-signer.der"), wrongKey);
+        Path result = temp.resolve("wrong-key-signer");
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"),
+                "--certificate", corpus("pki/tsa.pem"), "--certificate", wrongKeyFile.toString(),
+                "--out", result.toString());
+        args.set(args.indexOf("--timestamp") + 1, tokenFile.toString());
+        assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+        Map<String, Object> summary = summary(result);
+        assertEquals("validated", summary.get("result"), summary + " (DSS alone: " + alone.indication() + ")");
+        assertEquals(alone.indication(), summary.get("indication") + " " + summary.get("sub-indication"));
+    }
+
     /** Asserts that the tool rejects the token, and that DSS alone fails on it at the same stage. */
     private void assertTokenRejected(byte[] content, String name) throws Exception {
         Path token = Files.write(temp.resolve(name + ".tst"), content);

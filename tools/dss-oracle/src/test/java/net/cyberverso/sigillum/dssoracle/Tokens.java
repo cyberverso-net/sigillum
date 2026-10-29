@@ -446,6 +446,38 @@ final class Tokens {
         return certificates;
     }
 
+    /**
+     * Returns two certificates: first one with the subject, issuer name and
+     * serial number of pki/tsa, so that it matches the signer identifier of
+     * a token of pki/tsa, but a key of its own, which does not verify the
+     * token; then its issuer, with the name of pki/ca-ecdsa, a key of its
+     * own and the malformed authorityKeyIdentifier of
+     * {@link #caEcdsaWithMalformedAuthorityKeyIdentifier}, whose key
+     * verifies the first.
+     */
+    static List<byte[]> wrongKeySignerWithMalformedIssuer() throws Exception {
+        X509CertificateHolder tsa = new X509CertificateHolder(
+                Pem.decode(Files.readString(Path.of("..", "..", "testdata", "pki", "tsa.pem"))));
+        X509CertificateHolder ca = new X509CertificateHolder(caEcdsaWithMalformedAuthorityKeyIdentifier());
+        KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");
+        SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+        random.setSeed(160);
+        generator.initialize(256, random);
+        KeyPair issuerKey = generator.generateKeyPair();
+        KeyPair signerKey = generator.generateKeyPair();
+        X509v3CertificateBuilder issuer = new X509v3CertificateBuilder(ca.getSubject(), BigInteger.valueOf(0x7401),
+                ca.getNotBefore(), ca.getNotAfter(), ca.getSubject(),
+                SubjectPublicKeyInfo.getInstance(issuerKey.getPublic().getEncoded()));
+        issuer.addExtension(ca.getExtension(Extension.authorityKeyIdentifier));
+        byte[] malformedIssuer = issuer.build(new JcaContentSignerBuilder("SHA256withECDSA")
+                .build(issuerKey.getPrivate())).getEncoded();
+        byte[] wrongKey = new X509v3CertificateBuilder(tsa.getIssuer(), tsa.getSerialNumber(), tsa.getNotBefore(),
+                tsa.getNotAfter(), tsa.getSubject(), SubjectPublicKeyInfo.getInstance(
+                        signerKey.getPublic().getEncoded()))
+                .build(new JcaContentSignerBuilder("SHA256withECDSA").build(issuerKey.getPrivate())).getEncoded();
+        return List.of(wrongKey, malformedIssuer);
+    }
+
     private static int indexOf(byte[] data, byte[] pattern, int from) {
         for (int i = Math.max(from, 0); i + pattern.length <= data.length; i++) {
             if (Arrays.equals(data, i, i + pattern.length, pattern, 0, pattern.length)) {
