@@ -2,9 +2,9 @@ name: Nightly fuzzing
 
 # Every cargo-fuzz target of the repository runs each night for at least
 # FUZZ_SECONDS, one job per target, starting from the corpus that earlier
-# runs kept on the branch CORPUS_BRANCH. A crash input is uploaded as an
-# artefact and fails the run. On Sundays, or when asked, the corpus of each
-# target is minimised with `cargo fuzz cmin` after fuzzing.
+# runs kept on the branch CORPUS_BRANCH. The corpus of each target is then
+# minimised with `cargo fuzz cmin`. An input that fails, while fuzzing or
+# while minimising, is uploaded as an artefact and fails the run.
 #
 # Only the job "Save the corpus" writes the branch, once per run after
 # every fuzzing job has ended, with the GITHUB_TOKEN of the run: it alone
@@ -14,19 +14,20 @@ on:
   schedule:
     - cron: "41 2 * * *"
   workflow_dispatch:
-    inputs:
-      minimise:
-        description: Minimise the corpus of every target after fuzzing
-        type: boolean
-        default: false
 
 permissions:
   contents: read
 
-# One run at a time, so that the corpus branch has one writer.
+# One run at a time for each branch, so that the corpus branch, written
+# only by runs of main, has one writer.
 concurrency:
-  group: fuzz-nightly
+  group: fuzz-nightly-${{ github.ref }}
   cancel-in-progress: false
+
+# bash with -o pipefail, so that a command that fails before a pipe fails the step.
+defaults:
+  run:
+    shell: bash
 
 env:
   # The nightly and the cargo-fuzz of tools/dev-image/versions.env, which
@@ -35,6 +36,9 @@ env:
   CARGO_FUZZ_VERSION: 0.13.2
   CORPUS_BRANCH: fuzz-corpus
   FUZZ_SECONDS: 600
+  # The time limit of one input, in seconds, instead of the 1200 s of
+  # libFuzzer, so that an input that runs for a minute is a finding.
+  FUZZ_TIMEOUT: 60
   # Gives git the token of the job, from the environment, when GitHub asks
   # for credentials, so that the token never appears in a command line.
   CREDENTIAL_HELPER: >-
@@ -52,8 +56,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Test the listing of the fuzz targets
-        run: .github/scripts/test-fuzz-targets.sh
+      - name: Test the listing of the fuzz targets and the minimisation
+        run: |
+          .github/scripts/test-fuzz-targets.sh
+          .github/scripts/test-fuzz-minimise.sh
       - name: List the fuzz targets
         id: list
         run: |
@@ -81,9 +87,9 @@ jobs:
     name: Fuzz ${{ matrix.crate }} ${{ matrix.target }}
     needs: targets
     runs-on: ubuntu-latest
-    # Building, FUZZ_SECONDS of fuzzing, the libFuzzer time limit of one
-    # input (1200 s) and the minimisation.
-    timeout-minutes: 60
+    # Building, FUZZ_SECONDS of fuzzing, FUZZ_TIMEOUT for the last input
+    # and the minimisation, with a wide margin.
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -130,31 +136,27 @@ jobs:
         run: |
           corpora=("corpus/$TARGET")
           if [ -d "seeds/$TARGET" ]; then corpora+=("seeds/$TARGET"); fi
-          options=("-max_total_time=$FUZZ_SECONDS" -print_final_stats=1)
+          options=("-max_total_time=$FUZZ_SECONDS" "-timeout=$FUZZ_TIMEOUT" -print_final_stats=1)
           if [ -f "$TARGET.dict" ]; then options+=("-dict=$TARGET.dict"); fi
           cargo "+$RUST_NIGHTLY" fuzz run --fuzz-dir . "$TARGET" "${corpora[@]}" -- "${options[@]}"
-      - name: Upload the crash inputs
-        if: failure() && steps.fuzz.outcome == 'failure'
+      # Only after successful fuzzing: a target with a crash that persists
+      # is not minimised until the crash is fixed. The script fails on an
+      # input that fails during the merge, which libFuzzer skips.
+      - name: Minimise the corpus
+        id: minimise
+        working-directory: ${{ matrix.directory }}
+        run: |
+          "$GITHUB_WORKSPACE/.github/scripts/fuzz-minimise.sh" "$TARGET"
+      # Failing inputs may expose a vulnerability: they are kept for a short
+      # time only, and handled as quality-gates.md describes.
+      - name: Upload the failing inputs
+        if: failure() && (steps.fuzz.outcome == 'failure' || steps.minimise.outcome == 'failure')
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: crash-${{ matrix.crate }}-${{ matrix.target }}
           path: ${{ matrix.directory }}/artifacts/${{ matrix.target }}/
           if-no-files-found: warn
-      # cargo fuzz cmin exits with 0 when libFuzzer fails, and then leaves
-      # the corpus as it was; the message it prints fails the step.
-      - name: Minimise the corpus
-        working-directory: ${{ matrix.directory }}
-        env:
-          MINIMISE: ${{ inputs.minimise }}
-        run: |
-          if [ "$MINIMISE" != true ] && [ "$(date -u +%u)" != 7 ]; then
-            echo "The corpus is minimised on Sundays, or when the run is started with minimise."
-            exit 0
-          fi
-          before=$(find "corpus/$TARGET" -type f | wc -l)
-          cargo "+$RUST_NIGHTLY" fuzz cmin --fuzz-dir . "$TARGET" "corpus/$TARGET" 2>&1 | tee "$RUNNER_TEMP/cmin.log"
-          if grep -q 'Failed to minimize corpus' "$RUNNER_TEMP/cmin.log"; then exit 1; fi
-          echo "The corpus went from $before to $(find "corpus/$TARGET" -type f | wc -l) inputs."
+          retention-days: 7
       # The corpus is passed on when fuzzing ran, with or without a crash,
       # so that a failure before it never replaces a kept corpus.
       - name: Prepare the corpus
@@ -180,7 +182,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
-      # To push the corpus branch.
+      # To push the corpus branch. The OpenSSF Scorecard check
+      # Token-Permissions reports this job-level write permission; it is
+      # accepted because the job runs no code of the repository and writes
+      # only the corpus branch.
       contents: write
     steps:
       - name: Download the corpus of each target
