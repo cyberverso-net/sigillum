@@ -209,12 +209,18 @@ class CertificateListBoundsTest {
     }
 
     /**
-     * With revokedCertificates of indefinite length, DSS does not reach the
-     * signatureAlgorithm and signatureValue of the CRL; the check of the
-     * fields stops there, and the entries are still checked (issue #72).
+     * With a revokedCertificates of indefinite length, DSS takes the next
+     * field from its contents: here an AlgorithmIdentifier, read as the
+     * signatureAlgorithm, then a BIT STRING declaring 1 GiB, read as the
+     * signatureValue, which is rejected (issue #72).
      */
     @Test
-    void stopsTheFieldsAtARevokedCertificatesOfIndefiniteLength() {
+    void takesTheFieldsAfterAnIndefiniteRevokedCertificatesFromItsContents() throws Exception {
+        byte[] inside = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x30, 0x00, 0x30, 0x00, 0x17, 0x00,
+            0x30, (byte) 0x80, 0x30, 0x03, 0x06, 0x01, 0x01, 0x03, (byte) 0x84, 0x40, 0, 0, 0};
+        assertRejected(inside);
+        assertRejected(Crls.caEcdsaWithAnAlgorithmAndALongBitStringInIndefiniteRevokedCertificates());
+        // An entry, then elements that are no fields: nothing after them is read.
         byte[] signatureAfter = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x30, 0x00, 0x30, 0x00, 0x17, 0x00,
             0x30, (byte) 0x80, 0x30, 0x03, 0x02, 0x01, 0x01, 0x00, 0x00, 0x30, 0x00, 0x03, (byte) 0x84, 0x40, 0, 0, 0};
         assertAccepted(signatureAfter);

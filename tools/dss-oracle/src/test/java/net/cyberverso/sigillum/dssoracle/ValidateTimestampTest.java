@@ -777,6 +777,58 @@ class ValidateTimestampTest {
         assertTrue(tool < 6 * dss + 1_000_000_000L, timings);
     }
 
+    /** Runs the tool in a new JVM with a heap, with the CRL in place of crl/ca-ecdsa, and returns the summary. */
+    private Map<String, Object> runWithHeap(String heap, byte[] crl, String name) throws Exception {
+        Path file = Files.write(temp.resolve(name + ".crl"), crl);
+        Path result = temp.resolve(name);
+        List<String> command = new ArrayList<>(List.of(
+                Path.of(System.getProperty("java.home"), "bin", "java").toString(), heap, "-XX:+UseSerialGC",
+                "-cp", System.getProperty("java.class.path"), Main.class.getName()));
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"), "--out", result.toString());
+        args.set(args.indexOf(corpus("crl/ca-ecdsa.crl")), file.toString());
+        command.addAll(args);
+        Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
+        String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        assertEquals(ExitCodes.SUCCESS, process.waitFor(), output);
+        return summary(result);
+    }
+
+    /**
+     * A revokedCertificates of indefinite length whose contents start with
+     * an AlgorithmIdentifier and a BIT STRING declaring 1 GiB: DSS alone, in
+     * a heap of 64 MiB, runs out of memory on it, so it reads that BIT
+     * STRING, and the tool must reject the CRL in the same heap (issue #72).
+     */
+    @Test
+    void aLongBitStringInAnIndefiniteRevokedCertificatesIsRejected() throws Exception {
+        byte[] crl = Crls.caEcdsaWithAnAlgorithmAndALongBitStringInIndefiniteRevokedCertificates();
+        Path file = Files.write(temp.resolve("algorithm-in-revoked-alone.crl"), crl);
+        Process alone = new ProcessBuilder(List.of(
+                Path.of(System.getProperty("java.home"), "bin", "java").toString(), "-Xmx64m", "-XX:+UseSerialGC",
+                "-cp", System.getProperty("java.class.path"), CrlAloneProbe.class.getName(), file.toString()))
+                .redirectErrorStream(true).start();
+        String output = new String(alone.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        assertEquals(0, alone.waitFor(), output);
+        assertTrue(output.contains("OutOfMemoryError"), output);
+        Map<String, Object> summary = runWithHeap("-Xmx64m", crl, "algorithm-in-revoked");
+        assertEquals("rejected", summary.get("result"), summary.toString());
+        assertEquals("--crl", summary.get("input"));
+    }
+
+    /**
+     * crl/ca-ecdsa followed by 16 MiB of zeros, which DSS ignores: the check
+     * must not keep a record per trailing element, and the token is
+     * validated in a heap of 256 MiB (issue #72).
+     */
+    @Test
+    void aCrlFollowedByManyZerosIsUsedWithinAModerateHeap() throws Exception {
+        byte[] original = Files.readAllBytes(CORPUS.resolve("crl/ca-ecdsa.crl"));
+        byte[] padded = Arrays.copyOf(original, original.length + 16 * 1024 * 1024);
+        Map<String, Object> summary = runWithHeap("-Xmx256m", padded, "zero-padded");
+        assertEquals("validated", summary.get("result"), summary.toString());
+        assertEquals("PASSED", summary.get("indication"), summary.toString());
+    }
+
     /** Asserts that the tool rejects the token, and that DSS alone fails on it at the same stage. */
     private void assertTokenRejected(byte[] content, String name) throws Exception {
         Path token = Files.write(temp.resolve(name + ".tst"), content);

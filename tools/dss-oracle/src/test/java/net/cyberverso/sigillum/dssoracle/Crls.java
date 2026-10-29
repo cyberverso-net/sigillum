@@ -76,6 +76,23 @@ final class Crls {
     }
 
     /**
+     * Returns crl/ca-ecdsa with a revokedCertificates of indefinite length
+     * whose contents start with the signatureAlgorithm of the CRL, then a
+     * BIT STRING that declares 1 GiB, signed again by the key of
+     * pki/ca-ecdsa.
+     */
+    static byte[] caEcdsaWithAnAlgorithmAndALongBitStringInIndefiniteRevokedCertificates() throws Exception {
+        CertificateList original = CertificateList.getInstance(
+                Files.readAllBytes(TESTDATA.resolve("crl/ca-ecdsa.crl")));
+        byte[] algorithm = original.getSignatureAlgorithm().getEncoded(ASN1Encoding.DER);
+        java.util.List<byte[]> components = tbsComponents();
+        int revoked = components.size() - 2;
+        components.set(revoked, concat(new byte[] {0x30, (byte) 0x80}, algorithm,
+                new byte[] {0x03, (byte) 0x84, 0x40, 0, 0, 0}));
+        return signed(tlv(0x30, concat(components.toArray(byte[][]::new))));
+    }
+
+    /**
      * Returns crl/ca-ecdsa with the length octets of the element at an offset
      * replaced by the long form of a length, the rest unchanged.
      */
