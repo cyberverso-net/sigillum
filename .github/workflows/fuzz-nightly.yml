@@ -196,8 +196,9 @@ jobs:
           path: ${{ runner.temp }}/corpus
           merge-multiple: true
       # Each target whose corpus was passed on replaces its directory; the
-      # others, including every target with a finding, keep theirs. A push that is not a fast-forward is refused,
-      # so that nothing written since the branch was read is lost.
+      # others, including every target with a finding, keep theirs. A push
+      # that is not a fast-forward is refused, so that nothing written since
+      # the branch was read is lost.
       - name: Commit and push the corpus
         env:
           GH_TOKEN: ${{ github.token }}

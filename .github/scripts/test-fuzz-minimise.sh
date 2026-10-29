@@ -6,9 +6,10 @@
 # to the artefacts of the target, reports a crash only in its output, or
 # loses an inner merge process without any report, as when it is killed.
 # A merge of a corpus that is not empty must also print that an inner
-# process succeeded. Every case but the first two must fail the script and leave the corpus as it
-# was before the minimisation, with the input that fails. The script is run as the
-# workflow runs it, so that it must be executable.
+# process succeeded. Every case but the first two must fail the script and
+# leave the corpus as it was before the minimisation, with the input that
+# fails, also when listing the inputs that failed itself fails. The script
+# is run as the workflow runs it, so that it must be executable.
 set -euo pipefail
 
 here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
@@ -16,6 +17,14 @@ scratch=$(mktemp -d)
 trap 'rm -rf "$scratch"' EXIT
 
 mkdir -p "$scratch/bin"
+# awk fails when FAKE_AWK_FAILS is set, as a broken listing would.
+real_awk=$(command -v awk)
+cat > "$scratch/bin/awk" <<EOF
+#!/usr/bin/env bash
+if [ -n "\${FAKE_AWK_FAILS:-}" ]; then exit 2; fi
+exec "$real_awk" "\$@"
+EOF
+chmod +x "$scratch/bin/awk"
 cat > "$scratch/bin/cargo" <<'EOF'
 #!/usr/bin/env bash
 echo "$*" > "$FAKE_ARGUMENTS"
@@ -44,6 +53,10 @@ case "$FAKE_CMIN" in
     echo "MERGE-OUTER: attempt 2"
     echo "MERGE-INNER: '$corpus/b' caused a failure at the previous merge step"
     echo "MERGE-OUTER: successful in 2 attempt(s)" ;;
+  listing-fails)
+    rm -f "$corpus/a"
+    printf '3\n0\n%s/a\n%s/b\n%s/c\nSTARTED 0 1\n' "$corpus" "$corpus" "$corpus" > "$control"
+    echo "MERGE-OUTER: attempt 1" ;;
   killed-single)
     # With one input there is one attempt: when its process is killed, the
     # outer merge prints no further attempt and still exits with 0.
@@ -85,7 +98,9 @@ expect() {
     printf '%s' "$file" > "$scratch/project/corpus/target_a/$file"
     restored+="./$file "
   done
-  (cd "$scratch/project" && env PATH="$scratch/bin:$PATH" FAKE_CMIN="$name" \
+  awk_fails=
+  if [ "$name" = listing-fails ]; then awk_fails=1; fi
+  (cd "$scratch/project" && env PATH="$scratch/bin:$PATH" FAKE_CMIN="$name" FAKE_AWK_FAILS="$awk_fails" \
     FAKE_ARGUMENTS="$scratch/arguments" RUST_NIGHTLY=nightly-2000-01-01 FUZZ_TIMEOUT=60 \
     RUNNER_TEMP="$scratch" "$here/fuzz-minimise.sh" target_a) > "$scratch/output" 2>&1 || code=$?
   if [ "$code" -ne "$wanted" ]; then
@@ -113,7 +128,7 @@ else
   failures=$((failures + 1))
 fi
 expect 1 exit-code "exited with 101"
-expect 1 failed-message "Failed to minimize corpus"
+expect 1 failed-message "cargo fuzz cmin reported: Failed to minimize corpus"
 expect 1 crash-artefact "artifacts/target_a/crash-0123456789abcdef"
 expect 1 timeout-artefact "artifacts/target_a/timeout-0123456789abcdef"
 expect 1 crash-in-output "reported a finding"
@@ -133,6 +148,8 @@ else
   echo "FAIL: artifacts/target_a/merge-failure-a does not hold the input" >&2
   failures=$((failures + 1))
 fi
+fixture="a b c"
+expect 1 listing-fails "did not complete"
 fixture=
 expect 0 empty
 

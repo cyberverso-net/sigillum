@@ -33,7 +33,18 @@ target=$1
 corpus=corpus/$target
 artifacts=artifacts/$target
 scratch=$(mktemp -d "${RUNNER_TEMP:-${TMPDIR:-/tmp}}/cmin.XXXXXX")
-trap 'rm -rf "$scratch"' EXIT
+# On every exit but a successful one, from any step, the corpus is put
+# back as it was before the minimisation.
+restore=0
+finish() {
+  if [ "$restore" -eq 1 ] && [ -d "$scratch/corpus" ]; then
+    rm -rf "$corpus"
+    mv "$scratch/corpus" "$corpus"
+    echo "The corpus is left as it was before the minimisation, with $before inputs."
+  fi
+  rm -rf "$scratch"
+}
+trap finish EXIT
 log=$scratch/log
 # Kept by libFuzzer when it is named, so that the inputs that an inner
 # process started and never finished can be read from it.
@@ -46,6 +57,7 @@ list_artifacts() {
 before=$(find "$corpus" -type f | wc -l | tr -d ' ')
 artifacts_before=$(list_artifacts)
 cp -R "$corpus" "$scratch/corpus"
+restore=1
 
 code=0
 cargo "+$RUST_NIGHTLY" fuzz cmin --fuzz-dir . "$target" "$corpus" -- \
@@ -107,6 +119,7 @@ failed_inputs() {
 }
 
 if [ "$failed" -ne 0 ]; then
+  # A failure of the listing must not hide the failure of the merge.
   failed_inputs | sort -u | while IFS= read -r input; do
     [ -n "$input" ] || continue
     echo "::error::An inner merge process did not finish $input"
@@ -115,10 +128,8 @@ if [ "$failed" -ne 0 ]; then
       mkdir -p "$artifacts"
       cp "$scratch/corpus/$name" "$artifacts/merge-failure-$name"
     fi
-  done
-  rm -rf "$corpus"
-  mv "$scratch/corpus" "$corpus"
-  echo "The corpus is left as it was before the minimisation, with $before inputs."
+  done || echo "::error::The inputs that the merge did not finish could not all be listed or kept"
   exit 1
 fi
+restore=0
 echo "The corpus went from $before to $(find "$corpus" -type f | wc -l | tr -d ' ') inputs."
