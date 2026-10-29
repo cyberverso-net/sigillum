@@ -11,7 +11,9 @@
 # A cfg attribute whose condition contains the word test, in any form,
 # must apply to exactly that declaration: the module named tests, with no
 # visibility and no other attribute, such as #[path], before or after the
-# condition. An inner #![cfg(...)] with test is refused.
+# condition. An inner #![cfg(...)] with test is refused, and so is a test
+# or a benchmark: #[test], an attribute whose path ends in ::test, such as
+# #[tokio::test], and #[bench].
 #
 # Run it in the repository. It checks the Rust files that Git tracks,
 # except those that cargo llvm-cov leaves out by default: files under
@@ -56,7 +58,18 @@ while IFS= read -r -d '' file; do
         else condition = line
       } else if (a !~ /^#!/) {
         others++
+        if (is_test_function(a)) report(line, "a test function in a measured file; move it to a tests.rs file")
       }
+    }
+    # Whether an attribute marks a test or a benchmark: #[test], a path
+    # that ends in ::test, such as #[tokio::test], or #[bench].
+    function is_test_function(a,    path) {
+      path = substr(a, 3)
+      sub(/^[ \t]+/, "", path)
+      sub(/^::/, "", path)
+      if (!match(path, /^[A-Za-z0-9_:]+/)) return 0
+      path = substr(path, 1, RLENGTH)
+      return path == "test" || path ~ /::test$/ || path == "bench"
     }
     # The item after the attributes, or the end of the file.
     function item(t) {

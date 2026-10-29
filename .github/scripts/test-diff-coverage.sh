@@ -369,6 +369,14 @@ expect_modules 1 "code for builds without tests" src/a.rs "#[cfg(not(test))]${nl
 expect_modules 1 "a whole file for tests" src/helpers.rs "#![cfg(test)]${nl}fn f() {}" "src/helpers.rs:1"
 expect_modules 1 "an inline test module with another attribute" src/a.rs "    #[cfg(test)]${nl}    #[allow(dead_code)]${nl}    mod tests {}" "src/a.rs:1"
 expect_modules 1 "a condition at the end of the file" src/a.rs "fn f() {}${nl}#[cfg(test)]" "src/a.rs:2"
+expect_modules 1 "a test function" src/lib.rs "fn f() {}${nl}${nl}#[test]${nl}fn t() {}" "src/lib.rs:3"
+expect_modules 1 "a test function on one line" src/lib.rs "#[test] fn t() {}" "src/lib.rs:1"
+expect_modules 1 "a test function with another attribute" src/lib.rs "#[should_panic]${nl}#[test]${nl}fn t() {}" "src/lib.rs:2"
+expect_modules 1 "a test function of a test framework" src/lib.rs "#[tokio::test]${nl}async fn t() {}" "src/lib.rs:1"
+expect_modules 1 "a test function with arguments to its attribute" src/lib.rs "#[ ::tokio::test(flavor = \"current_thread\")]${nl}async fn t() {}" "src/lib.rs:1"
+expect_modules 1 "a benchmark" src/lib.rs "#[bench]${nl}fn b(b: &mut Bencher) {}" "src/lib.rs:1"
+expect_modules 0 "attributes whose names only contain test" src/lib.rs "#[test_case]${nl}fn a() {}${nl}#[testing]${nl}fn b() {}${nl}#[my::tests]${nl}fn c() {}${nl}#[doc = \"#[test]\"]${nl}fn d() {}"
+expect_modules 0 "a test function in a tests.rs file" src/a/tests.rs "#[test]${nl}fn t() {}"
 
 # The repository as it is.
 code=0
