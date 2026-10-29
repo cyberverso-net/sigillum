@@ -446,17 +446,18 @@ public final class ValidateTimestamp implements Main.ModeRunner {
     /**
      * The signers whose chains DSS processes. When the token holds its best
      * candidate, that one. When the candidates are supplied certificates
-     * that match the signer identifier, those whose key verifies the
-     * signature of the token, as DSS discards the others; all of them when
-     * none does. A test checks against DSS alone a supplied candidate of the
-     * same signer identifier with another key, whose issuer DSS does not
+     * that match the signer identifier, only those whose key verifies the
+     * signature of the token, as DSS discards the others, and none when
+     * none does: DSS then finds no signing certificate. Tests check against
+     * DSS alone a supplied candidate of the same signer identifier with
+     * another key, next to the real one and alone, whose issuer DSS does not
      * process. The signature has been checked by {@link #checkSignature}
      * before, so the calls of DSS here cannot fail on its encoding.
      */
     private static Set<CertificateToken> processedSigners(TimestampToken parsed, CertificateVerifier verifier) {
         CertificateValidity best = parsed.getCandidatesForSigningCertificate().getTheBestCandidate();
         Set<CertificateToken> candidates = signerCandidates(parsed, verifier);
-        if (best == null || best.getCertificateToken() != null || candidates.size() < 2) {
+        if (best == null || best.getCertificateToken() != null) {
             return candidates;
         }
         Set<CertificateToken> verifying = new LinkedHashSet<>();
@@ -465,7 +466,7 @@ public final class ValidateTimestamp implements Main.ModeRunner {
                 verifying.add(candidate);
             }
         }
-        return verifying.isEmpty() ? candidates : verifying;
+        return verifying;
     }
 
     /**
