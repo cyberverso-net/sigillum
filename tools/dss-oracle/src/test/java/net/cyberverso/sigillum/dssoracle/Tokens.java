@@ -14,6 +14,7 @@ import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.bouncycastle.asn1.ASN1Encodable;
@@ -388,6 +389,39 @@ final class Tokens {
         builder.addExtension(ca.getExtension(Extension.authorityKeyIdentifier));
         return builder.build(new JcaContentSignerBuilder("SHA256withECDSA")
                 .build(pair.getPrivate())).getEncoded();
+    }
+
+    /**
+     * Returns pki/root-ca with the OCTET STRING tag inside its
+     * subjectKeyIdentifier extension changed to an illegal one, 0x4A: the
+     * same name and key, but extensions that DSS cannot decode.
+     */
+    static byte[] rootCaWithMalformedSubjectKeyIdentifier() throws Exception {
+        byte[] der = Pem.decode(Files.readString(Path.of("..", "..", "testdata", "pki", "root-ca.pem")));
+        int oid = indexOf(der, new byte[] {0x06, 0x03, 0x55, 0x1d, 0x0e}, 0);
+        int octetString = indexOf(der, new byte[] {0x04}, oid + 5);
+        der[octetString + 2] = 0x4a;
+        return der;
+    }
+
+    /**
+     * Returns certificates with the name of pki/ca-ecdsa as subject and
+     * issuer and its key, each signed with that key and with its own serial
+     * number: each verifies the others, and pki/tsa.
+     */
+    static List<byte[]> selfIssuedWithTheNameAndKeyOfCaEcdsa(int count) throws Exception {
+        X509CertificateHolder ca = new X509CertificateHolder(
+                Pem.decode(Files.readString(Path.of("..", "..", "testdata", "pki", "ca-ecdsa.pem"))));
+        PrivateKey key = KeyFactory.getInstance("EC").generatePrivate(new PKCS8EncodedKeySpec(Pem.decode(
+                Files.readString(Path.of("..", "..", "testdata", "pki", "keys", "ca-ecdsa.test-key.pem")))));
+        var signer = new JcaContentSignerBuilder("SHA256withECDSA").build(key);
+        List<byte[]> certificates = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            certificates.add(new X509v3CertificateBuilder(ca.getSubject(), BigInteger.valueOf(0x720000L + i),
+                    ca.getNotBefore(), ca.getNotAfter(), ca.getSubject(), ca.getSubjectPublicKeyInfo())
+                    .build(signer).getEncoded());
+        }
+        return certificates;
     }
 
     private static int indexOf(byte[] data, byte[] pattern, int from) {

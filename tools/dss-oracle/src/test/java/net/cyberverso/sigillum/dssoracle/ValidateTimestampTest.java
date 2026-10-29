@@ -829,6 +829,103 @@ class ValidateTimestampTest {
         assertEquals("PASSED", summary.get("indication"), summary.toString());
     }
 
+    /** Runs DSS alone in a new JVM with a heap of 64 MiB, with the CRL in place of crl/ca-ecdsa, and returns its output. */
+    private String dssAloneWithSmallHeap(byte[] crl, String name) throws Exception {
+        Path file = Files.write(temp.resolve(name + "-alone.crl"), crl);
+        Process alone = new ProcessBuilder(List.of(
+                Path.of(System.getProperty("java.home"), "bin", "java").toString(), "-Xmx64m", "-XX:+UseSerialGC",
+                "-cp", System.getProperty("java.class.path"), CrlAloneProbe.class.getName(), file.toString()))
+                .redirectErrorStream(true).start();
+        String output = new String(alone.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        assertEquals(0, alone.waitFor(), output);
+        return output;
+    }
+
+    /**
+     * Runs DSS alone and the tool, each in a heap of 64 MiB, with the CRL,
+     * and requires the tool to reject it exactly when DSS alone runs out of
+     * memory on it, and to validate it otherwise.
+     */
+    private void assertCrlAsDssAloneInASmallHeap(byte[] crl, String name) throws Exception {
+        String alone = dssAloneWithSmallHeap(crl, name);
+        boolean outOfMemory = alone.contains("OutOfMemoryError");
+        Map<String, Object> summary = runWithHeap("-Xmx64m", crl, name);
+        assertEquals(outOfMemory ? "rejected" : "validated", summary.get("result"),
+                name + ": " + summary + " (DSS alone: " + alone.strip() + ")");
+    }
+
+    /**
+     * A first revoked certificate entry of five octets whose serial number
+     * declares about 1 GiB: the tool rejects the CRL exactly when DSS alone
+     * runs out of memory on it in a small heap (issue #72).
+     */
+    @Test
+    void aSerialNumberDeclaringALargeLengthInAShortEntryIsTreatedAsDssTreatsIt() throws Exception {
+        assertCrlAsDssAloneInASmallHeap(Crls.caEcdsaWithAnEntryFirst(new byte[] {0x30, 0x07, 0x02, (byte) 0x84,
+            0x3f, (byte) 0xff, (byte) 0xff, (byte) 0xff, 0x05}), "long-serial");
+    }
+
+    /**
+     * A first entry of two octets holding the identifier and length octets
+     * of a serial number of two octets, then an entry declaring about
+     * 1 GiB: whether DSS reads that entry shows whether it reads the
+     * contents of the serial number past its entry, and the tool must
+     * agree (issue #72).
+     */
+    @Test
+    void aSerialNumberStartingAtTheEndOfItsEntryIsReadAsDssReadsIt() throws Exception {
+        byte[] entries = {0x30, 0x02, 0x02, 0x02, 0x30, (byte) 0x84, 0x3f, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+            0x02, 0x01, 0x05};
+        assertCrlAsDssAloneInASmallHeap(Crls.caEcdsaWithAnEntryFirst(entries), "serial-at-end");
+    }
+
+    /**
+     * pki/tsa in certificateValues with a copy of pki/root-ca, of the same
+     * name and key, whose extensions DSS cannot decode: the tool must give
+     * the outcome of DSS alone (issue #72).
+     */
+    @Test
+    void aCopyOfTheTrustAnchorInTheCertificateValuesIsTreatedAsDssTreatsIt() throws Exception {
+        byte[] root = Tokens.rootCaWithMalformedSubjectKeyIdentifier();
+        assertThrows(IllegalArgumentException.class, () -> CertificateChecks.decode(DSSUtils.loadCertificate(root)));
+        byte[] tsa = Pem.decode(Files.readString(CORPUS.resolve("pki/tsa.pem")));
+        assertAsDssAlone(Tokens.withCertificateValues(Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst")),
+                tsa, root), "cert-values-root-copy");
+    }
+
+    /**
+     * pki/tsa in certificateValues with 1,000 self-issued certificates of
+     * the name and key of pki/ca-ecdsa, each of which verifies the others:
+     * the checks of the tool must not make the run much slower than DSS
+     * alone, at most six times as long with a second of margin (issue #72).
+     */
+    @Test
+    void manySelfIssuedCertificatesOfOneNameAndKeyDoNotMakeTheChecksSlowerThanDss() throws Exception {
+        byte[] valid = Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst"));
+        byte[] tsa = Pem.decode(Files.readString(CORPUS.resolve("pki/tsa.pem")));
+        List<byte[]> values = new ArrayList<>(List.of(tsa));
+        values.addAll(Tokens.selfIssuedWithTheNameAndKeyOfCaEcdsa(1000));
+        byte[] token = Tokens.withCertificateValues(valid, values.toArray(byte[][]::new));
+        copiesRun(Tokens.withCertificateValues(valid, tsa), "self-issued-warm-up");
+        long start = System.nanoTime();
+        MutationTest.RawResult alone = MutationTest.rawDss(MutationTest.Setup.corpus(token));
+        long dss = System.nanoTime() - start;
+        assertNull(alone.failure());
+        Path file = Files.write(temp.resolve("self-issued.tst"), token);
+        Path result = temp.resolve("self-issued");
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"), "--out", result.toString());
+        args.set(args.indexOf("--timestamp") + 1, file.toString());
+        start = System.nanoTime();
+        assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+        long tool = System.nanoTime() - start;
+        String timings = "1000 self-issued: tool " + tool / 1_000_000 + " ms, DSS alone " + dss / 1_000_000 + " ms";
+        System.out.println(timings);
+        Map<String, Object> summary = summary(result);
+        assertEquals("validated", summary.get("result"), summary.toString());
+        assertEquals(alone.indication(), summary.get("indication") + " " + summary.get("sub-indication"));
+        assertTrue(tool < 6 * dss + 1_000_000_000L, timings);
+    }
+
     /** Asserts that the tool rejects the token, and that DSS alone fails on it at the same stage. */
     private void assertTokenRejected(byte[] content, String name) throws Exception {
         Path token = Files.write(temp.resolve(name + ".tst"), content);
