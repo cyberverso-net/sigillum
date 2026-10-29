@@ -321,6 +321,55 @@ expect_base 0 "another event: no base" "$head" EVENT=workflow_dispatch
 git -C "$repo" checkout -q "$topic"
 expect_base 2 "a pull request whose head is not a merge commit" "" EVENT=pull_request
 
+# Test-only code in measured files, from check-test-modules.sh. Each case
+# writes one file in a new repository and runs the check there.
+modules_script=$here/check-test-modules.sh
+# expect_modules <exit code> <name> <path> <contents> [<text the output must contain>]
+expect_modules() {
+  local wanted=$1 name=$2 path=$3 contents=$4 text=${5:-} code=0
+  new_repo README.md=1
+  mkdir -p "$repo/$(dirname "$path")"
+  printf '%s\n' "$contents" > "$repo/$path"
+  commit
+  (cd "$repo" && bash "$modules_script") > "$scratch/output" 2>&1 || code=$?
+  if [ "$code" -ne "$wanted" ]; then
+    echo "FAIL: $name: exit code $code, expected $wanted" >&2
+    sed 's/^/  /' "$scratch/output" >&2
+    failures=$((failures + 1))
+  elif [ -n "$text" ] && ! grep -qF -- "$text" "$scratch/output"; then
+    echo "FAIL: $name: the output does not contain: $text" >&2
+    sed 's/^/  /' "$scratch/output" >&2
+    failures=$((failures + 1))
+  else
+    echo "ok: $name"
+  fi
+}
+nl=$'\n'
+expect_modules 0 "a test module in its own file" src/a.rs "fn f() {}${nl}#[cfg(test)]${nl}mod tests;"
+expect_modules 0 "a test module on one line" src/a.rs "#[cfg(test)] mod tests;"
+expect_modules 0 "a test module with another attribute" src/a.rs "#[cfg(test)]${nl}#[path = \"t.rs\"]${nl}pub(crate) mod tests;"
+expect_modules 0 "code for builds without tests" src/a.rs "#[cfg(not(test))]${nl}fn f() {}"
+expect_modules 0 "a commented attribute" src/a.rs "// #[cfg(test)]${nl}fn f() {}"
+expect_modules 0 "an inline module in a tests.rs file" src/a/tests.rs "#[cfg(test)]${nl}mod more {}"
+expect_modules 0 "an inline module in a _tests.rs file" src/a_tests.rs "#[cfg(test)]${nl}mod more {}"
+expect_modules 0 "an inline module under a tests directory" tests/it.rs "#[cfg(test)]${nl}mod more {}"
+expect_modules 1 "an inline test module" src/a.rs "fn f() {}${nl}${nl}#[cfg(test)]${nl}mod tests {${nl}}" "src/a.rs:3"
+expect_modules 1 "an inline test module on one line" src/a.rs "#[cfg(test)] mod tests { }" "src/a.rs:1"
+expect_modules 1 "a test-only function" src/a.rs "#[cfg(test)]${nl}fn helper() {}" "src/a.rs:1"
+expect_modules 1 "an inline module for tests with a feature" src/a.rs "#[cfg(all(test, feature = \"x\"))]${nl}mod t {}" "src/a.rs:1"
+expect_modules 1 "an inline test module with another attribute" src/a.rs "    #[cfg(test)]${nl}    #[allow(dead_code)]${nl}    mod tests {}" "src/a.rs:1"
+
+# The repository as it is.
+code=0
+(cd "$here/../.." && bash "$modules_script") > "$scratch/output" 2>&1 || code=$?
+if [ "$code" -eq 0 ]; then
+  echo "ok: the repository as it is"
+else
+  echo "FAIL: the repository as it is: exit code $code" >&2
+  sed 's/^/  /' "$scratch/output" >&2
+  failures=$((failures + 1))
+fi
+
 if [ "$failures" -ne 0 ]; then
   echo "$failures case(s) failed" >&2
   exit 1
