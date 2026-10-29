@@ -10,17 +10,10 @@ import eu.europa.esig.dss.spi.x509.CertificateRef;
 import eu.europa.esig.dss.spi.x509.CertificateValidity;
 import eu.europa.esig.dss.spi.x509.tsp.TimestampToken;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.Set;
-import javax.security.auth.x500.X500Principal;
 
 /**
  * Opens a signed document with DSS and makes, before the validation, the
@@ -180,23 +173,8 @@ final class SignedDocuments {
      */
     private static List<CertificateToken> withIssuers(List<CertificateToken> certificates,
             List<CertificateToken> pool) {
-        // Copies count once, and issuers are found by their subject, so the work grows with the pairs.
-        Map<X500Principal, List<CertificateToken>> bySubject = new HashMap<>();
-        for (CertificateToken issuer : new LinkedHashSet<>(pool)) {
-            bySubject.computeIfAbsent(issuer.getSubject().getPrincipal(), subject -> new ArrayList<>()).add(issuer);
-        }
-        Set<CertificateToken> result = new LinkedHashSet<>();
-        Deque<CertificateToken> pending = new ArrayDeque<>(certificates);
-        while (!pending.isEmpty()) {
-            CertificateToken certificate = pending.pop();
-            if (!result.add(certificate)) {
-                continue;
-            }
-            for (CertificateToken issuer : bySubject.getOrDefault(certificate.getIssuer().getPrincipal(), List.of())) {
-                pending.push(issuer);
-            }
-        }
-        return new ArrayList<>(result);
+        return new ArrayList<>(IssuerClosure.of(certificates, pool, (certificate, issuer) -> true,
+                certificate -> false));
     }
 
     private static void addWithCounterSignatures(AdvancedSignature signature, List<AdvancedSignature> all) {

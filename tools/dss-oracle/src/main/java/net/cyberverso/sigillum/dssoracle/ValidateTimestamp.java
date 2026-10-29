@@ -24,11 +24,8 @@ import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Deque;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.HexFormat;
 import java.util.LinkedHashMap;
@@ -38,7 +35,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import javax.security.auth.x500.X500Principal;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -462,7 +458,10 @@ public final class ValidateTimestamp implements Main.ModeRunner {
         List<CertificateToken> pool = new ArrayList<>(certificates(parsed));
         pool.addAll(verifier.getTrustedCertSources().getCertificates());
         pool.addAll(verifier.getAdjunctCertSources().getCertificates());
-        for (CertificateToken certificate : withSigningIssuers(signerCandidates(parsed, verifier), pool)) {
+        // The chain does not end at a trust anchor: a copy of pki/root-ca with its name and key but extensions that
+        // DSS cannot decode, next to the anchor, makes DSS alone fail, as a test checks.
+        for (CertificateToken certificate : IssuerClosure.of(signerCandidates(parsed, verifier), pool,
+                ValidateTimestamp::signedBy, certificate -> false)) {
             if (!signedData.contains(certificate)) {
                 decode(token, certificate);
             }
@@ -470,37 +469,12 @@ public final class ValidateTimestamp implements Main.ModeRunner {
     }
 
     /**
-     * Returns the certificates with, transitively, every certificate of the
-     * pool whose subject is the issuer name of one of them and whose key
-     * verifies the signature of that one. Copies count once.
-     */
-    private static Set<CertificateToken> withSigningIssuers(Set<CertificateToken> certificates,
-            List<CertificateToken> pool) {
-        Map<X500Principal, List<CertificateToken>> bySubject = new HashMap<>();
-        for (CertificateToken issuer : new LinkedHashSet<>(pool)) {
-            bySubject.computeIfAbsent(issuer.getSubject().getPrincipal(), subject -> new ArrayList<>()).add(issuer);
-        }
-        Set<CertificateToken> result = new LinkedHashSet<>();
-        Deque<CertificateToken> pending = new ArrayDeque<>(certificates);
-        while (!pending.isEmpty()) {
-            CertificateToken certificate = pending.pop();
-            if (!result.add(certificate)) {
-                continue;
-            }
-            for (CertificateToken issuer : bySubject.getOrDefault(certificate.getIssuer().getPrincipal(), List.of())) {
-                if (signedBy(certificate, issuer)) {
-                    pending.push(issuer);
-                }
-            }
-        }
-        return result;
-    }
-
-    /**
      * Whether the key of the issuer verifies the signature of the
      * certificate. The check is made on the certificate as the JVM holds it,
      * not through the token, so that the state DSS keeps in the token is not
-     * changed before the validation.
+     * changed before the validation. It is the call that the token of DSS
+     * makes when it checks a signer, on the same certificate object, so the
+     * security providers are those that DSS uses, Bouncy Castle among them.
      */
     private static boolean signedBy(CertificateToken certificate, CertificateToken issuer) {
         try {
