@@ -3,7 +3,8 @@
 # arguments and acts as `cargo fuzz cmin` would in each case: it minimises
 # the corpus, fails, prints the message with which cargo fuzz reports a
 # failed minimisation while exiting with 0, writes a crash or timeout input
-# to the artefacts of the target, or reports a crash only in its output.
+# to the artefacts of the target, reports a crash only in its output, or
+# loses an inner merge process without any report, as when it is killed.
 # Every case but the first must fail the script and leave the corpus as it
 # was before the minimisation, with the input that fails. The script is run as the
 # workflow runs it, so that it must be executable.
@@ -21,7 +22,17 @@ corpus=corpus/target_a
 case "$FAKE_CMIN" in
   minimise)
     rm -f "$corpus/b" "$corpus/c"
+    echo "MERGE-OUTER: attempt 1"
+    echo "MERGE-OUTER: successful in 1 attempt(s)"
     echo "MERGE-OUTER: 1 new files with 3 new features added" ;;
+  killed-worker)
+    # An inner process killed by a signal writes no input and no report;
+    # the outer merge starts another one, which skips the input.
+    rm -f "$corpus/b"
+    echo "MERGE-OUTER: attempt 1"
+    echo "MERGE-OUTER: attempt 2"
+    echo "MERGE-INNER: '$corpus/b' caused a failure at the previous merge step"
+    echo "MERGE-OUTER: successful in 2 attempt(s)" ;;
   exit-code)
     echo "error: could not compile" >&2
     exit 101 ;;
@@ -85,6 +96,7 @@ expect 1 failed-message "Failed to minimize corpus"
 expect 1 crash-artefact "artifacts/target_a/crash-0123456789abcdef"
 expect 1 timeout-artefact "artifacts/target_a/timeout-0123456789abcdef"
 expect 1 crash-in-output "reported a finding"
+expect 1 killed-worker "an inner merge process failed"
 
 if [ "$failures" -ne 0 ]; then
   echo "$failures case(s) failed" >&2

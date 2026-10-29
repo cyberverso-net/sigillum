@@ -204,7 +204,7 @@ The attack classes below are documented in *1 Trillion Dollar Refund: How To Spo
 6. A compromised trust service whose keys remain valid (see *Outside the model*).
 7. Compromise of the single maintainer's account or signing key (threat S6).
 8. A replayed timestamp token over the same signature value, or a replayed OCSP response, accepted because the nonce recorded in an altered state was removed or replaced (threats G5 and G7). The other checks of the token or response still apply, including the `genTime` of a signature timestamp against the signing time and the `thisUpdate` and `nextUpdate` of an OCSP response ([ADR-0026](adr/0026-public-api-conventions.md), decision 6).
-9. Findings of the nightly fuzzing are public until they are removed: the log of a failing run, with its stack trace, and the failing input, kept for 7 days, can be read by anyone, because the repository is public. A finding is then handled through a private security advisory ([quality-gates.md](../development/quality-gates.md#nightly-fuzzing)).
+9. Findings of the nightly fuzzing are public until they are removed: the log of a failing run, with its stack trace, and the failing input, kept as an artefact for 7 days, can be read by anyone, because the repository is public. The corpus of a target with a finding is not saved that night, so neither the failing input nor inputs derived from it enter the history of the corpus branch. A finding is then handled through a private security advisory ([quality-gates.md](../development/quality-gates.md#nightly-fuzzing)).
 
 ## Decisions
 

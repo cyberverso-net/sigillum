@@ -157,16 +157,17 @@ jobs:
           path: ${{ matrix.directory }}/artifacts/${{ matrix.target }}/
           if-no-files-found: warn
           retention-days: 7
-      # The corpus is passed on when fuzzing ran, with or without a crash,
-      # so that a failure before it never replaces a kept corpus.
+      # The corpus is passed on only when fuzzing and minimising succeeded.
+      # After a finding, or any other failure, the corpus that the branch
+      # holds for the target stays as it is, so that a failing input, or
+      # inputs derived from it, are kept only in the artefact of the run
+      # and never in the history of the branch (issue #81).
       - name: Prepare the corpus
-        if: always() && (steps.fuzz.outcome == 'success' || steps.fuzz.outcome == 'failure')
         working-directory: ${{ matrix.directory }}
         run: |
           mkdir -p "$RUNNER_TEMP/corpus/$CRATE"
           cp -R "corpus/$TARGET" "$RUNNER_TEMP/corpus/$CRATE/$TARGET"
       - name: Upload the corpus
-        if: always() && (steps.fuzz.outcome == 'success' || steps.fuzz.outcome == 'failure')
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: corpus-${{ matrix.crate }}-${{ matrix.target }}
@@ -195,7 +196,7 @@ jobs:
           path: ${{ runner.temp }}/corpus
           merge-multiple: true
       # Each target whose corpus was passed on replaces its directory; the
-      # others keep theirs. A push that is not a fast-forward is refused,
+      # others, including every target with a finding, keep theirs. A push that is not a fast-forward is refused,
       # so that nothing written since the branch was read is lost.
       - name: Commit and push the corpus
         env:

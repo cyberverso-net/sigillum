@@ -9,10 +9,15 @@
 # corpus", with which cargo fuzz 0.13.2 reports a failed merge while still
 # exiting with 0; when a new crash, leak, timeout or out-of-memory input is
 # written to artifacts/<target>/, which happens when an input of the corpus
-# makes the merge crash, since libFuzzer then continues without it; and when
-# the output reports such a finding without an input being written. A
-# failed minimisation leaves the corpus as it was before, so that an input
-# that fails stays in the corpus and is found again in the next run.
+# makes the merge crash, since libFuzzer then continues without it; when
+# the output reports such a finding without an input being written; and
+# when an inner merge process failed without any report, as when the kernel
+# kills it for its memory. libFuzzer's outer merge then starts another
+# inner process, printing "MERGE-OUTER: attempt <n>" with n of 2 or more,
+# and that process prints "MERGE-INNER: '<file>' caused a failure at the
+# previous merge step" before it skips the file (FuzzerMerge.cpp of the
+# libFuzzer of libfuzzer-sys 0.4.13). A failed minimisation leaves the
+# corpus as it was before; fuzz-nightly.yml then does not save it.
 # Usage: fuzz-minimise.sh <target>.
 set -euo pipefail
 
@@ -59,6 +64,11 @@ if [ -n "$new" ]; then
 fi
 if grep -Eq 'ERROR: (libFuzzer|AddressSanitizer|LeakSanitizer|MemorySanitizer|UndefinedBehaviorSanitizer)' "$log"; then
   echo "::error::The output of the minimisation reported a finding"
+  failed=1
+fi
+if grep -Eq 'MERGE-OUTER: attempt ([2-9]|[1-9][0-9]+)$|caused a failure at the previous merge step' "$log"; then
+  grep -F 'caused a failure at the previous merge step' "$log" | sed 's/^/::error::/' || true
+  echo "::error::During the minimisation, an inner merge process failed"
   failed=1
 fi
 if [ "$failed" -ne 0 ]; then
