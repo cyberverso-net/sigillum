@@ -1,7 +1,13 @@
 name: Mutation testing
 
+# Runs every night on the critical modules of
+# docs/development/quality-gates.md, which .cargo/mutants.toml lists, on
+# main. A run on the diff of a pull request took more than 30 minutes on
+# a representative pull request (#80), so it runs nightly instead.
 on:
-  pull_request:
+  schedule:
+    - cron: "23 1 * * *"
+  workflow_dispatch:
   # Temporary, for the measurement of #80; removed before review.
   push:
     branches: [task/80-mutants-ci]
@@ -9,27 +15,24 @@ on:
 permissions:
   contents: read
 
+env:
+  CARGO_TERM_COLOR: always
+  # The number of shards; the matrix below lists 0 to SHARDS - 1.
+  SHARDS: 8
+
 jobs:
-  mutants:
-    name: Mutation testing (${{ matrix.diff }}, ${{ matrix.jobs }} jobs)
+  shard:
+    name: Mutation testing (shard ${{ matrix.shard }})
     runs-on: ubuntu-24.04
-    timeout-minutes: 350
+    timeout-minutes: 240
     strategy:
       fail-fast: false
       matrix:
-        diff: [small, pr154]
-        jobs: [1, 3]
-    env:
-      CARGO_TERM_COLOR: always
-      # The threshold of docs/development/quality-gates.md, "Author gates".
-      MUTATION_THRESHOLD: 80
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          fetch-depth: 0
-      - name: Test the summary script
-        run: .github/scripts/test-mutants-summary.sh
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
         with:
           toolchain: stable
@@ -37,41 +40,54 @@ jobs:
         with:
           tool: cargo-mutants@27.1.0
           fallback: none
-      - name: Write the diff
+      # Three jobs on the four processors of the runner: on the measured
+      # pull request they took 1 h 44 min where one job took 2 h 44 min.
+      # Round-robin sharding spreads the slow files over the shards. The
+      # exit code is kept for the report job, which judges it.
+      - name: Test the mutants of the shard
         env:
-          DIFF: ${{ matrix.diff }}
+          SHARD: ${{ matrix.shard }}
         run: |
-          case "$DIFF" in
-            small) git diff "$(git merge-base origin/main HEAD)" HEAD > "$RUNNER_TEMP/changes.diff" ;;
-            pr154) git diff 85d6b83^ 85d6b83 > "$RUNNER_TEMP/changes.diff" ;;
-          esac
-          git diff --stat "$(git merge-base origin/main HEAD)" HEAD
-          cargo mutants --list --in-diff "$RUNNER_TEMP/changes.diff" | tee "$RUNNER_TEMP/listed.txt"
-          echo "Mutants in the diff: $(wc -l < "$RUNNER_TEMP/listed.txt")"
-      - name: Test the mutants of the diff
-        id: mutants
-        env:
-          JOBS: ${{ matrix.jobs }}
-        run: |
-          start=$(date +%s)
           status=0
-          cargo mutants --no-shuffle --jobs "$JOBS" --in-diff "$RUNNER_TEMP/changes.diff" || status=$?
-          echo "status=$status" >> "$GITHUB_OUTPUT"
-          echo "Run time: $(( $(date +%s) - start )) s"
-          echo "Run time: $(( $(date +%s) - start )) s" >> "$GITHUB_STEP_SUMMARY"
-      - name: Report the score and the missed mutants
-        if: always() && steps.mutants.outputs.status != ''
-        env:
-          STATUS: ${{ steps.mutants.outputs.status }}
-        run: |
-          code=0
-          .github/scripts/mutants-summary.sh "$STATUS" mutants.out "$MUTATION_THRESHOLD" > "$RUNNER_TEMP/summary.md" || code=$?
-          cat "$RUNNER_TEMP/summary.md" >> "$GITHUB_STEP_SUMMARY"
-          cat "$RUNNER_TEMP/summary.md"
-          exit "$code"
+          cargo mutants --no-shuffle --jobs 3 --shard "$SHARD/$SHARDS" --sharding round-robin || status=$?
+          mkdir -p mutants.out
+          echo "$status" > mutants.out/exit-status
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
-          name: mutants-out-${{ matrix.diff }}-${{ matrix.jobs }}
+          name: mutants-out-shard-${{ matrix.shard }}
           path: mutants.out
           if-no-files-found: ignore
+
+  report:
+    name: Mutation testing
+    needs: shard
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      # The threshold of docs/development/quality-gates.md, "Author gates".
+      MUTATION_THRESHOLD: 80
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Test the summary script
+        run: .github/scripts/test-mutants-summary.sh
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: mutants-out-shard-*
+          path: ${{ runner.temp }}/shards
+      # A shard that left no artefact has no exit-status, which the script
+      # reports as a failure.
+      - name: Report the score and the missed mutants
+        run: |
+          shards=()
+          for ((k = 0; k < SHARDS; k++)); do
+            shards+=("$RUNNER_TEMP/shards/mutants-out-shard-$k")
+          done
+          code=0
+          .github/scripts/mutants-summary.sh "$MUTATION_THRESHOLD" "${shards[@]}" > "$RUNNER_TEMP/summary.md" || code=$?
+          cat "$RUNNER_TEMP/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          cat "$RUNNER_TEMP/summary.md"
+          exit "$code"
