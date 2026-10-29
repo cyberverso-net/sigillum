@@ -19,9 +19,11 @@ import eu.europa.esig.dss.spi.x509.CommonTrustedCertificateSource;
 import eu.europa.esig.dss.spi.x509.revocation.crl.ExternalResourcesCRLSource;
 import eu.europa.esig.dss.spi.x509.revocation.ocsp.ExternalResourcesOCSPSource;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -282,24 +284,37 @@ public final class OfflineSources {
     }
 
     /**
-     * Returns, for each distinct certificate, in their order, the distinct
-     * certificates whose subject is its issuer name.
+     * Returns, for each distinct certificate, in their order, the
+     * certificates whose subject is its issuer name, one per distinct pair
+     * of subject and public key. Revocation tokens depend on the issuer
+     * through its name and key only, so issuers of one name and key, such as
+     * re-encodings of one CA certificate, give the same tokens and count
+     * once. The pairs are then as many as the certificates times the
+     * distinct keys of their issuer name.
      *
      * @param certificates the certificates, possibly with copies
      * @return the issuers of each certificate
      */
     static Map<CertificateToken, List<CertificateToken>> issuers(List<CertificateToken> certificates) {
         Set<CertificateToken> distinct = new LinkedHashSet<>(certificates);
-        Map<X500Principal, List<CertificateToken>> bySubject = new HashMap<>();
+        Map<X500Principal, Map<Object, CertificateToken>> bySubject = new HashMap<>();
         for (CertificateToken certificate : distinct) {
-            bySubject.computeIfAbsent(certificate.getSubject().getPrincipal(), subject -> new ArrayList<>())
-                    .add(certificate);
+            bySubject.computeIfAbsent(certificate.getSubject().getPrincipal(), subject -> new LinkedHashMap<>())
+                    .putIfAbsent(keyOf(certificate), certificate);
         }
         Map<CertificateToken, List<CertificateToken>> issuers = new LinkedHashMap<>();
         for (CertificateToken certificate : distinct) {
-            issuers.put(certificate, bySubject.getOrDefault(certificate.getIssuer().getPrincipal(), List.of()));
+            Map<Object, CertificateToken> named = bySubject.get(certificate.getIssuer().getPrincipal());
+            issuers.put(certificate, named == null ? List.of() : List.copyOf(named.values()));
         }
         return issuers;
+    }
+
+    /** The public key of a certificate as a value, or the certificate itself when it has none that decodes. */
+    private static Object keyOf(CertificateToken certificate) {
+        PublicKey key = certificate.getPublicKey();
+        byte[] encoded = key == null ? null : key.getEncoded();
+        return encoded == null ? certificate : ByteBuffer.wrap(encoded);
     }
 
     /**
