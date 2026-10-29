@@ -930,28 +930,51 @@ class ValidateTimestampTest {
     }
 
     /**
-     * Two certificates with the name and key of pki/ca-ecdsa, the first
-     * without cRLSign in its key usage, and a CRL with an entry of
-     * indefinite length on which DSS fails with the other: the tool must
-     * reject the CRL, not fail (issue #72).
+     * Two certificates with the name and key of pki/ca-ecdsa, one without
+     * cRLSign in its key usage, supplied in either order, and a CRL with an
+     * entry of indefinite length: the tool must give the outcome of DSS
+     * alone, rejecting the CRL where DSS fails on it, never failing itself
+     * (issue #72).
      */
     @Test
-    void anIndefiniteEntryIsRejectedWhateverTheKeyUsageOfAnotherIssuerOfTheSameNameAndKey() throws Exception {
-        Path withoutCrlSign = Files.write(temp.resolve("ca-ecdsa-without-crl-sign.der"), Tokens.caEcdsaWithoutCrlSign());
-        Path crl = Files.write(temp.resolve("indefinite-entry-two-issuers.crl"), Crls.caEcdsaWithIndefiniteEntry());
-        Path result = temp.resolve("indefinite-entry-two-issuers");
-        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"), "--out", result.toString());
-        args.set(args.indexOf(corpus("crl/ca-ecdsa.crl")), crl.toString());
-        int at = args.indexOf(corpus("pki/ca-ecdsa.pem")) - 1;
-        args.add(at, withoutCrlSign.toString());
-        args.add(at, "--certificate");
-        assertRejected(args, result, "--crl", crl.toString());
+    void anIndefiniteEntryWithTwoIssuersOfOneNameAndKeyIsTreatedAsDssTreatsIt() throws Exception {
+        byte[] withoutCrlSign = Tokens.caEcdsaWithoutCrlSign();
+        byte[] ca = Pem.decode(Files.readString(CORPUS.resolve("pki/ca-ecdsa.pem")));
+        byte[] crl = Crls.caEcdsaWithIndefiniteEntry();
+        byte[] valid = Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst"));
+        Path withoutFile = Files.write(temp.resolve("ca-ecdsa-without-crl-sign.der"), withoutCrlSign);
+        Path crlFile = Files.write(temp.resolve("indefinite-entry-two-issuers.crl"), crl);
+        MutationTest.Setup corpusSetup = MutationTest.Setup.corpus(valid);
+        for (boolean withoutFirst : new boolean[] {true, false}) {
+            List<byte[]> certificates = withoutFirst ? List.of(withoutCrlSign, ca) : List.of(ca, withoutCrlSign);
+            MutationTest.RawResult alone = MutationTest.rawDss(new MutationTest.Setup(valid, corpusSetup.anchors(),
+                    certificates, List.of(crl, Files.readAllBytes(CORPUS.resolve("crl/root-ca.crl"))),
+                    corpusSetup.responses()));
+            Path result = temp.resolve("two-issuers-" + withoutFirst);
+            List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"),
+                    "--out", result.toString());
+            args.set(args.indexOf(corpus("crl/ca-ecdsa.crl")), crlFile.toString());
+            int at = args.indexOf(corpus("pki/ca-ecdsa.pem")) + (withoutFirst ? -1 : 1);
+            args.add(at, withoutFile.toString());
+            args.add(at, "--certificate");
+            err.reset();
+            String dss = alone.failure() != null ? "fails: " + alone.failure() : "validates: " + alone.indication();
+            assertEquals(ExitCodes.SUCCESS, run(args), withoutFirst + ": " + stderr() + " (DSS alone " + dss + ")");
+            Map<String, Object> summary = summary(result);
+            if (alone.failure() != null) {
+                assertEquals("rejected", summary.get("result"), summary + " (DSS alone " + dss + ")");
+                assertEquals("--crl", summary.get("input"));
+            } else {
+                assertEquals("validated", summary.get("result"), summary + " (DSS alone " + dss + ")");
+                assertEquals(alone.indication(), summary.get("indication") + " " + summary.get("sub-indication"));
+            }
+        }
     }
 
     /**
      * pki/tsa and pki/signer-p256 in certificateValues, and a CRL of
      * pki/ca-ecdsa, signed again, whose entry for pki/signer-p256 has a
-     * revocation date that cannot be read. DSS does not process
+     * INTEGER in place of its revocation date. DSS does not process
      * pki/signer-p256 and validates the token, so the tool must not make
      * revocation tokens for it (issue #72).
      */
@@ -961,13 +984,8 @@ class ValidateTimestampTest {
         byte[] signer = Pem.decode(Files.readString(CORPUS.resolve("pki/signer-p256.pem")));
         byte[] token = Tokens.withCertificateValues(Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst")),
                 tsa, signer);
-        byte[] date = "30AB15100000Z".getBytes(StandardCharsets.US_ASCII);
-        byte[] entry = new byte[2 + 4 + 2 + date.length];
-        entry[0] = 0x30;
-        entry[1] = (byte) (entry.length - 2);
-        System.arraycopy(new byte[] {0x02, 0x02, 0x12, 0x01, 0x17, (byte) date.length}, 0, entry, 2, 6);
-        System.arraycopy(date, 0, entry, 8, date.length);
-        byte[] crl = Crls.caEcdsaWithAnEntryFirst(entry);
+        // The serial number 0x1201 of pki/signer-p256, then an INTEGER where the revocation date belongs.
+        byte[] crl = Crls.caEcdsaWithAnEntryFirst(new byte[] {0x30, 0x07, 0x02, 0x02, 0x12, 0x01, 0x02, 0x01, 0x00});
         MutationTest.Setup corpusSetup = MutationTest.Setup.corpus(token);
         MutationTest.RawResult alone = MutationTest.rawDss(new MutationTest.Setup(token, corpusSetup.anchors(),
                 corpusSetup.certificates(), List.of(crl, Files.readAllBytes(CORPUS.resolve("crl/root-ca.crl"))),
