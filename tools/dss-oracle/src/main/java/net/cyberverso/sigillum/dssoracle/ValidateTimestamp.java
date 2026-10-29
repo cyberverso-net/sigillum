@@ -26,7 +26,6 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -97,10 +96,10 @@ public final class ValidateTimestamp implements Main.ModeRunner {
                 candidates.addAll(supplied.getAdjunctCertSources().getCertificates());
                 // Before DSS looks for the signer, which fails on some of the references that this rejects.
                 checkSigningCertificateReferences(token, parsed, candidates);
+                checkSignature(token, parsed, supplied);
                 // The certificates that DSS processes decide the revocation tokens that the checks make.
                 List<CertificateToken> processed = checkCertificateValues(token, parsed, supplied);
                 CertificateVerifier verifier = sources.certificateVerifier(processed);
-                checkSignature(token, parsed, verifier);
 
                 DetachedTimestampValidator validator = new DetachedTimestampValidator(token.document(),
                         TimestampType.CONTENT_TIMESTAMP);
@@ -431,7 +430,7 @@ public final class ValidateTimestamp implements Main.ModeRunner {
      */
     private static Set<CertificateToken> signerCandidates(TimestampToken parsed, CertificateVerifier verifier) {
         CertificateValidity best = parsed.getCandidatesForSigningCertificate().getTheBestCandidate();
-        Set<CertificateToken> candidates = new HashSet<>();
+        Set<CertificateToken> candidates = new LinkedHashSet<>();
         if (best == null) {
             return candidates;
         }
@@ -442,6 +441,31 @@ public final class ValidateTimestamp implements Main.ModeRunner {
             candidates.addAll(verifier.getAdjunctCertSources().getBySignerIdentifier(best.getSignerInfo()));
         }
         return candidates;
+    }
+
+    /**
+     * The signers whose chains DSS processes. When the token holds its best
+     * candidate, that one. When the candidates are supplied certificates
+     * that match the signer identifier, those whose key verifies the
+     * signature of the token, as DSS discards the others; all of them when
+     * none does. A test checks against DSS alone a supplied candidate of the
+     * same signer identifier with another key, whose issuer DSS does not
+     * process. The signature has been checked by {@link #checkSignature}
+     * before, so the calls of DSS here cannot fail on its encoding.
+     */
+    private static Set<CertificateToken> processedSigners(TimestampToken parsed, CertificateVerifier verifier) {
+        CertificateValidity best = parsed.getCandidatesForSigningCertificate().getTheBestCandidate();
+        Set<CertificateToken> candidates = signerCandidates(parsed, verifier);
+        if (best == null || best.getCertificateToken() != null || candidates.size() < 2) {
+            return candidates;
+        }
+        Set<CertificateToken> verifying = new LinkedHashSet<>();
+        for (CertificateToken candidate : candidates) {
+            if (parsed.isSignedBy(candidate)) {
+                verifying.add(candidate);
+            }
+        }
+        return verifying.isEmpty() ? candidates : verifying;
     }
 
     /**
@@ -471,7 +495,7 @@ public final class ValidateTimestamp implements Main.ModeRunner {
         // The chain does not end at a trust anchor: a copy of pki/root-ca with its name and key but extensions that
         // DSS cannot decode, next to the anchor, makes DSS alone fail, as a test checks.
         Set<CertificateToken> processed = new LinkedHashSet<>(signedData);
-        for (CertificateToken certificate : IssuerClosure.of(signerCandidates(parsed, verifier), pool,
+        for (CertificateToken certificate : IssuerClosure.of(processedSigners(parsed, verifier), pool,
                 ValidateTimestamp::signedBy)) {
             if (processed.add(certificate)) {
                 decode(token, certificate);
