@@ -10,7 +10,9 @@
 # exiting with 0; when a new crash, leak, timeout or out-of-memory input is
 # written to artifacts/<target>/, which happens when an input of the corpus
 # makes the merge crash, since libFuzzer then continues without it; and when
-# the output reports such a finding without an input being written.
+# the output reports such a finding without an input being written. A
+# failed minimisation leaves the corpus as it was before, so that an input
+# that fails stays in the corpus and is found again in the next run.
 # Usage: fuzz-minimise.sh <target>.
 set -euo pipefail
 
@@ -18,7 +20,9 @@ target=$1
 : "${RUST_NIGHTLY:?}" "${FUZZ_TIMEOUT:?}"
 corpus=corpus/$target
 artifacts=artifacts/$target
-log=$(mktemp "${RUNNER_TEMP:-${TMPDIR:-/tmp}}/cmin.XXXXXX")
+scratch=$(mktemp -d "${RUNNER_TEMP:-${TMPDIR:-/tmp}}/cmin.XXXXXX")
+trap 'rm -rf "$scratch"' EXIT
+log=$scratch/log
 
 list_artifacts() {
   if [ -d "$artifacts" ]; then find "$artifacts" -type f | sort; fi
@@ -26,6 +30,7 @@ list_artifacts() {
 
 before=$(find "$corpus" -type f | wc -l | tr -d ' ')
 artifacts_before=$(list_artifacts)
+cp -R "$corpus" "$scratch/corpus"
 
 code=0
 cargo "+$RUST_NIGHTLY" fuzz cmin --fuzz-dir . "$target" "$corpus" -- "-timeout=$FUZZ_TIMEOUT" 2>&1 \
@@ -56,8 +61,10 @@ if grep -Eq 'ERROR: (libFuzzer|AddressSanitizer|LeakSanitizer|MemorySanitizer|Un
   echo "::error::The output of the minimisation reported a finding"
   failed=1
 fi
-rm -f "$log"
 if [ "$failed" -ne 0 ]; then
+  rm -rf "$corpus"
+  mv "$scratch/corpus" "$corpus"
+  echo "The corpus is left as it was before the minimisation, with $before inputs."
   exit 1
 fi
 echo "The corpus went from $before to $(find "$corpus" -type f | wc -l | tr -d ' ') inputs."

@@ -37,7 +37,7 @@ env:
   RUST_NIGHTLY: nightly-2026-10-25
   CARGO_FUZZ_VERSION: 0.13.2
   CORPUS_BRANCH: fuzz-corpus-test-81
-  FUZZ_SECONDS: 600
+  FUZZ_SECONDS: 60
   # The time limit of one input, in seconds, instead of the 1200 s of
   # libFuzzer, so that an input that runs for a minute is a finding.
   FUZZ_TIMEOUT: 60

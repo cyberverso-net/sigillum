@@ -4,7 +4,9 @@
 # the corpus, fails, prints the message with which cargo fuzz reports a
 # failed minimisation while exiting with 0, writes a crash or timeout input
 # to the artefacts of the target, or reports a crash only in its output.
-# Every case but the first must fail the script.
+# Every case but the first must fail the script and leave the corpus as it
+# was before the minimisation, with the input that fails. The script is run as the
+# workflow runs it, so that it must be executable.
 set -euo pipefail
 
 here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
@@ -26,6 +28,8 @@ case "$FAKE_CMIN" in
   failed-message)
     echo "Failed to minimize corpus: exit status: 1" ;;
   crash-artefact)
+    # libFuzzer leaves out the input that fails, and cargo fuzz replaces the corpus.
+    rm -f "$corpus/b"
     mkdir -p artifacts/target_a
     printf 'x' > artifacts/target_a/crash-0123456789abcdef
     echo "MERGE-OUTER: attempt 2" ;;
@@ -51,7 +55,7 @@ expect() {
   printf c > "$scratch/project/corpus/target_a/c"
   (cd "$scratch/project" && env PATH="$scratch/bin:$PATH" FAKE_CMIN="$name" \
     FAKE_ARGUMENTS="$scratch/arguments" RUST_NIGHTLY=nightly-2000-01-01 FUZZ_TIMEOUT=60 \
-    RUNNER_TEMP="$scratch" bash "$here/fuzz-minimise.sh" target_a) > "$scratch/output" 2>&1 || code=$?
+    RUNNER_TEMP="$scratch" "$here/fuzz-minimise.sh" target_a) > "$scratch/output" 2>&1 || code=$?
   if [ "$code" -ne "$wanted" ]; then
     echo "FAIL: $name: exit code $code, expected $wanted" >&2
     sed 's/^/  /' "$scratch/output" >&2
@@ -59,6 +63,9 @@ expect() {
   elif [ -n "$text" ] && ! grep -qF -- "$text" "$scratch/output"; then
     echo "FAIL: $name: the output does not contain: $text" >&2
     sed 's/^/  /' "$scratch/output" >&2
+    failures=$((failures + 1))
+  elif [ "$wanted" -ne 0 ] && [ "$(cd "$scratch/project/corpus/target_a" && find . -type f | sort | tr '\n' ' ')" != "./a ./b ./c " ]; then
+    echo "FAIL: $name: the corpus was not restored" >&2
     failures=$((failures + 1))
   else
     echo "ok: $name"
