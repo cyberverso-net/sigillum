@@ -997,6 +997,36 @@ class ValidateTimestampTest {
         assertEquals(alone.indication(), summary.get("indication") + " " + summary.get("sub-indication"));
     }
 
+    /**
+     * The token of {@link #aSuppliedSignerCandidateWhoseKeyDoesNotVerifyTheTokenIsNotFollowed}
+     * with the wrong-key candidate as the only supplied certificate of its
+     * signer identifier: DSS finds no signing certificate and completes,
+     * and the tool must give that outcome, not follow the candidate's
+     * issuer (issue #72).
+     */
+    @Test
+    void aSingleSuppliedSignerCandidateWhoseKeyDoesNotVerifyTheTokenIsNotFollowed() throws Exception {
+        List<byte[]> crafted = Tokens.wrongKeySignerWithMalformedIssuer();
+        byte[] wrongKey = crafted.get(0);
+        byte[] ca = Pem.decode(Files.readString(CORPUS.resolve("pki/ca-ecdsa.pem")));
+        byte[] token = Tokens.withCertificateValues(Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst")),
+                crafted.get(1));
+        MutationTest.Setup corpusSetup = MutationTest.Setup.corpus(token);
+        MutationTest.RawResult alone = MutationTest.rawDss(new MutationTest.Setup(token, corpusSetup.anchors(),
+                List.of(ca, wrongKey), corpusSetup.crls(), corpusSetup.responses()));
+        assertNull(alone.failure(), String.valueOf(alone.failure()));
+        Path tokenFile = Files.write(temp.resolve("single-wrong-key-signer.tst"), token);
+        Path wrongKeyFile = Files.write(temp.resolve("single-wrong-key-signer.der"), wrongKey);
+        Path result = temp.resolve("single-wrong-key-signer");
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"),
+                "--certificate", wrongKeyFile.toString(), "--out", result.toString());
+        args.set(args.indexOf("--timestamp") + 1, tokenFile.toString());
+        assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+        Map<String, Object> summary = summary(result);
+        assertEquals("validated", summary.get("result"), summary + " (DSS alone: " + alone.indication() + ")");
+        assertEquals(alone.indication(), summary.get("indication") + " " + summary.get("sub-indication"));
+    }
+
     /** Asserts that the tool rejects the token, and that DSS alone fails on it at the same stage. */
     private void assertTokenRejected(byte[] content, String name) throws Exception {
         Path token = Files.write(temp.resolve(name + ".tst"), content);
