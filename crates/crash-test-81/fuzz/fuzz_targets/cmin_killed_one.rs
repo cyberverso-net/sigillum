@@ -1,5 +1,5 @@
-//! Temporary target with a corpus of about one input, whose process is
-//! killed, with no report, while the corpus is minimised.
+//! Temporary target whose process is killed, with no report, while its
+//! corpus, trimmed to one input, is minimised.
 #![no_main]
 use libfuzzer_sys::fuzz_target;
 fuzz_target!(|data: &[u8]| {
@@ -8,5 +8,7 @@ fuzz_target!(|data: &[u8]| {
             .args(["-9", &std::process::id().to_string()])
             .status();
     }
-    std::hint::black_box(data.is_empty());
+    if data.len() > 2 && data[0] == b'o' && data[1] == b'n' {
+        std::hint::black_box(data[2]);
+    }
 });

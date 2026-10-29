@@ -144,6 +144,12 @@ jobs:
       # Only after successful fuzzing: a target with a crash that persists
       # is not minimised until the crash is fixed. The script fails on an
       # input that fails during the merge, which libFuzzer skips.
+      - name: Trim the corpus of the test target to one input
+        if: matrix.target == 'cmin_killed_one'
+        working-directory: ${{ matrix.directory }}
+        run: |
+          find "corpus/$TARGET" -type f | sort | tail -n +2 | xargs -r rm -f
+          echo "The corpus holds $(find "corpus/$TARGET" -type f | wc -l) inputs."
       - name: Minimise the corpus
         id: minimise
         working-directory: ${{ matrix.directory }}
