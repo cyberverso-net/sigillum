@@ -115,6 +115,11 @@ final class CertificateListBounds {
                 continue;
             }
             next++;
+            if (field.use() == Use.PASSED_OVER && element.length() < 0) {
+                // A revokedCertificates of indefinite length: DSS does not pass over it, and the fields that
+                // follow are not where RFC 5280 puts them. Its entries are checked with the others.
+                return Optional.empty();
+            }
             if (field.use() == Use.READ) {
                 if (element.length() < 0) {
                     // DSS fails on an element of indefinite length that it reads into memory.
@@ -153,6 +158,7 @@ final class CertificateListBounds {
             if (problem.isPresent()) {
                 return problem;
             }
+            // The length is within the slack, so the end is below three times the largest input of the tool.
             Region contents = new Region(crl.der(), entry.contents(), (int) (entry.contents() + entry.length()));
             Element serial = contents.element(entry.contents());
             if (serial == null) {
@@ -252,7 +258,9 @@ final class CertificateListBounds {
          * the tag number in the low 32 bits and the offset after them in the
          * high ones, or -1 when they cannot be read. A high tag number is in
          * base 128, with bit 8 set on every subsequent octet but the last
-         * (clause 8.1.2.4.2), and kept in 32 bits.
+         * (clause 8.1.2.4.2), and kept modulo 2^32, as a 32-bit integer
+         * keeps it: refusing larger ones would stop the check where DSS may
+         * read on.
          */
         private long identifierAt(int position) {
             int at = position;

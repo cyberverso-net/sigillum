@@ -178,7 +178,7 @@ final class SignedDocuments {
      * pool whose subject is the issuer name of one of them: the candidates
      * that DSS considers when it builds their chains.
      */
-    static List<CertificateToken> withIssuers(List<CertificateToken> certificates,
+    private static List<CertificateToken> withIssuers(List<CertificateToken> certificates,
             List<CertificateToken> pool) {
         // Copies count once, and issuers are found by their subject, so the work grows with the pairs.
         Map<X500Principal, List<CertificateToken>> bySubject = new HashMap<>();
