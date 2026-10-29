@@ -5,7 +5,8 @@
 # failed minimisation while exiting with 0, writes a crash or timeout input
 # to the artefacts of the target, reports a crash only in its output, or
 # loses an inner merge process without any report, as when it is killed.
-# Every case but the first must fail the script and leave the corpus as it
+# A merge of a corpus that is not empty must also print that an inner
+# process succeeded. Every case but the first two must fail the script and leave the corpus as it
 # was before the minimisation, with the input that fails. The script is run as the
 # workflow runs it, so that it must be executable.
 set -euo pipefail
@@ -19,7 +20,14 @@ cat > "$scratch/bin/cargo" <<'EOF'
 #!/usr/bin/env bash
 echo "$*" > "$FAKE_ARGUMENTS"
 corpus=corpus/target_a
+control=/dev/null
+for argument in "$@"; do
+  case "$argument" in -merge_control_file=*) control=${argument#*=} ;; esac
+done
 case "$FAKE_CMIN" in
+  empty)
+    # libFuzzer returns at once from a merge of empty corpora.
+    ;;
   minimise)
     rm -f "$corpus/b" "$corpus/c"
     echo "MERGE-OUTER: attempt 1"
@@ -27,12 +35,22 @@ case "$FAKE_CMIN" in
     echo "MERGE-OUTER: 1 new files with 3 new features added" ;;
   killed-worker)
     # An inner process killed by a signal writes no input and no report;
-    # the outer merge starts another one, which skips the input.
+    # the outer merge starts another one, which skips the input. The
+    # control file records it as started, without features.
     rm -f "$corpus/b"
+    printf '3\n0\n%s/a\n%s/b\n%s/c\nSTARTED 0 1\nFT 0 1\nSTARTED 1 1\nSTARTED 2 1\nFT 2 2\n' \
+      "$corpus" "$corpus" "$corpus" > "$control"
     echo "MERGE-OUTER: attempt 1"
     echo "MERGE-OUTER: attempt 2"
     echo "MERGE-INNER: '$corpus/b' caused a failure at the previous merge step"
     echo "MERGE-OUTER: successful in 2 attempt(s)" ;;
+  killed-single)
+    # With one input there is one attempt: when its process is killed, the
+    # outer merge prints no further attempt and still exits with 0.
+    rm -f "$corpus/a"
+    printf '1\n0\n%s/a\nSTARTED 0 1\n' "$corpus" > "$control"
+    echo "MERGE-OUTER: attempt 1"
+    echo "MERGE-OUTER: 0 new files with 0 new features added; 0 new coverage edges" ;;
   exit-code)
     echo "error: could not compile" >&2
     exit 101 ;;
@@ -56,14 +74,17 @@ EOF
 chmod +x "$scratch/bin/cargo"
 
 failures=0
-# expect <exit code> <case> [<text the output must contain>]
+# expect <exit code> <case> [<text the output must contain>], with the
+# corpus named by $fixture: each file holds its own name.
+fixture="a b c"
 expect() {
-  local wanted=$1 name=$2 text=${3:-} code=0
+  local wanted=$1 name=$2 text=${3:-} code=0 file restored=
   rm -rf "$scratch/project"
   mkdir -p "$scratch/project/corpus/target_a"
-  printf a > "$scratch/project/corpus/target_a/a"
-  printf b > "$scratch/project/corpus/target_a/b"
-  printf c > "$scratch/project/corpus/target_a/c"
+  for file in $fixture; do
+    printf '%s' "$file" > "$scratch/project/corpus/target_a/$file"
+    restored+="./$file "
+  done
   (cd "$scratch/project" && env PATH="$scratch/bin:$PATH" FAKE_CMIN="$name" \
     FAKE_ARGUMENTS="$scratch/arguments" RUST_NIGHTLY=nightly-2000-01-01 FUZZ_TIMEOUT=60 \
     RUNNER_TEMP="$scratch" "$here/fuzz-minimise.sh" target_a) > "$scratch/output" 2>&1 || code=$?
@@ -75,7 +96,7 @@ expect() {
     echo "FAIL: $name: the output does not contain: $text" >&2
     sed 's/^/  /' "$scratch/output" >&2
     failures=$((failures + 1))
-  elif [ "$wanted" -ne 0 ] && [ "$(cd "$scratch/project/corpus/target_a" && find . -type f | sort | tr '\n' ' ')" != "./a ./b ./c " ]; then
+  elif [ "$wanted" -ne 0 ] && [ "$(cd "$scratch/project/corpus/target_a" && find . -type f | sort | tr '\n' ' ')" != "$restored" ]; then
     echo "FAIL: $name: the corpus was not restored" >&2
     failures=$((failures + 1))
   else
@@ -84,8 +105,8 @@ expect() {
 }
 
 expect 0 minimise "The corpus went from 3 to 1 inputs."
-wanted="+nightly-2000-01-01 fuzz cmin --fuzz-dir . target_a corpus/target_a -- -timeout=60"
-if [ "$(cat "$scratch/arguments")" = "$wanted" ]; then
+wanted="+nightly-2000-01-01 fuzz cmin --fuzz-dir . target_a corpus/target_a -- -timeout=60 -merge_control_file="
+if [[ "$(cat "$scratch/arguments")" == "$wanted"?* ]]; then
   echo "ok: the arguments of cargo fuzz cmin"
 else
   echo "FAIL: cargo was called with: $(cat "$scratch/arguments"), expected: $wanted" >&2
@@ -104,6 +125,16 @@ else
   echo "FAIL: artifacts/target_a/merge-failure-b does not hold the input" >&2
   failures=$((failures + 1))
 fi
+fixture=a
+expect 1 killed-single "did not complete"
+if [ "$(cat "$scratch/project/artifacts/target_a/merge-failure-a" 2> /dev/null)" = a ]; then
+  echo "ok: the input of the only, killed, inner process is kept"
+else
+  echo "FAIL: artifacts/target_a/merge-failure-a does not hold the input" >&2
+  failures=$((failures + 1))
+fi
+fixture=
+expect 0 empty
 
 if [ "$failures" -ne 0 ]; then
   echo "$failures case(s) failed" >&2
