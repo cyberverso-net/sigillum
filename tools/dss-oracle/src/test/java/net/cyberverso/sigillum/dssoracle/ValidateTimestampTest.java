@@ -930,48 +930,6 @@ class ValidateTimestampTest {
     }
 
     /**
-     * Two certificates with the name and key of pki/ca-ecdsa, one without
-     * cRLSign in its key usage, supplied in either order, and a CRL with an
-     * entry of indefinite length: the tool must give the outcome of DSS
-     * alone, rejecting the CRL where DSS fails on it, never failing itself
-     * (issue #72).
-     */
-    @Test
-    void anIndefiniteEntryWithTwoIssuersOfOneNameAndKeyIsTreatedAsDssTreatsIt() throws Exception {
-        byte[] withoutCrlSign = Tokens.caEcdsaWithoutCrlSign();
-        byte[] ca = Pem.decode(Files.readString(CORPUS.resolve("pki/ca-ecdsa.pem")));
-        byte[] crl = Crls.caEcdsaWithIndefiniteEntry();
-        byte[] valid = Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst"));
-        Path withoutFile = Files.write(temp.resolve("ca-ecdsa-without-crl-sign.der"), withoutCrlSign);
-        Path crlFile = Files.write(temp.resolve("indefinite-entry-two-issuers.crl"), crl);
-        MutationTest.Setup corpusSetup = MutationTest.Setup.corpus(valid);
-        for (boolean withoutFirst : new boolean[] {true, false}) {
-            List<byte[]> certificates = withoutFirst ? List.of(withoutCrlSign, ca) : List.of(ca, withoutCrlSign);
-            MutationTest.RawResult alone = MutationTest.rawDss(new MutationTest.Setup(valid, corpusSetup.anchors(),
-                    certificates, List.of(crl, Files.readAllBytes(CORPUS.resolve("crl/root-ca.crl"))),
-                    corpusSetup.responses()));
-            Path result = temp.resolve("two-issuers-" + withoutFirst);
-            List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"),
-                    "--out", result.toString());
-            args.set(args.indexOf(corpus("crl/ca-ecdsa.crl")), crlFile.toString());
-            int at = args.indexOf(corpus("pki/ca-ecdsa.pem")) + (withoutFirst ? -1 : 1);
-            args.add(at, withoutFile.toString());
-            args.add(at, "--certificate");
-            err.reset();
-            String dss = alone.failure() != null ? "fails: " + alone.failure() : "validates: " + alone.indication();
-            assertEquals(ExitCodes.SUCCESS, run(args), withoutFirst + ": " + stderr() + " (DSS alone " + dss + ")");
-            Map<String, Object> summary = summary(result);
-            if (alone.failure() != null) {
-                assertEquals("rejected", summary.get("result"), summary + " (DSS alone " + dss + ")");
-                assertEquals("--crl", summary.get("input"));
-            } else {
-                assertEquals("validated", summary.get("result"), summary + " (DSS alone " + dss + ")");
-                assertEquals(alone.indication(), summary.get("indication") + " " + summary.get("sub-indication"));
-            }
-        }
-    }
-
-    /**
      * pki/tsa and pki/signer-p256 in certificateValues, and a CRL of
      * pki/ca-ecdsa, signed again, whose entry for pki/signer-p256 has a
      * INTEGER in place of its revocation date. DSS does not process

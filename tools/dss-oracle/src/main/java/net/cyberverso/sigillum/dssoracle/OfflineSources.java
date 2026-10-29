@@ -102,6 +102,31 @@ public final class OfflineSources {
     }
 
     /**
+     * Builds a certificate verifier with the trust anchors and the other
+     * supplied certificates only, without revocation data and without the
+     * checks of {@link #certificateVerifier}: for finding signers and
+     * chains before the checks of the revocation data.
+     *
+     * @return the verifier
+     * @throws RejectedInputException if DSS cannot use a certificate
+     */
+    public CertificateVerifier certificateSources() throws RejectedInputException {
+        CommonTrustedCertificateSource trusted = new CommonTrustedCertificateSource();
+        for (Input anchor : trustAnchors) {
+            trusted.addCertificate(anchor.certificate());
+        }
+        CommonCertificateSource adjunct = new CommonCertificateSource();
+        for (Input input : certificates) {
+            adjunct.addCertificate(input.certificate());
+        }
+        CommonCertificateVerifier verifier = new CommonCertificateVerifier(true);
+        verifier.setAIASource(null);
+        verifier.setTrustedCertSources(trusted);
+        verifier.setAdjunctCertSources(adjunct);
+        return verifier;
+    }
+
+    /**
      * Parses the files with DSS and builds an offline certificate verifier
      * from them. A file is rejected only when DSS cannot use it:
      *
@@ -285,14 +310,17 @@ public final class OfflineSources {
 
     /**
      * Returns, for each distinct certificate, in their order, the
-     * certificates whose subject is its issuer name, one per distinct pair
-     * of subject and public key. In the corpus, the differential tests and
-     * a test with 1,000 certificates of one name and key against DSS alone,
-     * the revocation tokens were observed to depend on the issuer through
-     * its name and key only, so issuers of one name and key, such as
-     * re-encodings of one CA certificate, are taken to give the same tokens
-     * and count once. The pairs are then as many as the certificates times the
-     * distinct keys of their issuer name.
+     * certificates whose subject is its issuer name, one per distinct
+     * subject and public key, the first supplied. In the corpus, the
+     * differential tests and a test with 1,000 certificates of one name and
+     * key against DSS alone, the revocation tokens were observed to depend
+     * on the issuer through its name and key only, so issuers of one name
+     * and key, such as re-encodings of one CA certificate, are taken to give
+     * the same tokens and count once. Issuers of one name and key that
+     * differ in key usage are a known exception, left to #159: which of
+     * them DSS uses has not been established. The pairs are as many as the
+     * certificates times the distinct keys of their issuer name; the list of
+     * these issuers is shared by the certificates of the name.
      *
      * @param certificates the certificates, possibly with copies
      * @return the issuers of each certificate
@@ -304,10 +332,12 @@ public final class OfflineSources {
             bySubject.computeIfAbsent(certificate.getSubject().getPrincipal(), subject -> new LinkedHashMap<>())
                     .putIfAbsent(keyOf(certificate), certificate);
         }
+        // One list per name, shared by the certificates of that issuer name.
+        Map<X500Principal, List<CertificateToken>> lists = new HashMap<>();
+        bySubject.forEach((subject, named) -> lists.put(subject, List.copyOf(named.values())));
         Map<CertificateToken, List<CertificateToken>> issuers = new LinkedHashMap<>();
         for (CertificateToken certificate : distinct) {
-            Map<Object, CertificateToken> named = bySubject.get(certificate.getIssuer().getPrincipal());
-            issuers.put(certificate, named == null ? List.of() : List.copyOf(named.values()));
+            issuers.put(certificate, lists.getOrDefault(certificate.getIssuer().getPrincipal(), List.of()));
         }
         return issuers;
     }

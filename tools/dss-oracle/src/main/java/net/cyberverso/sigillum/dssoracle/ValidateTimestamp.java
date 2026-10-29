@@ -91,12 +91,14 @@ public final class ValidateTimestamp implements Main.ModeRunner {
                             + " differs from the algorithm of the message imprint of the token, "
                             + parsed.getMessageImprint().getAlgorithm().getName() + ".");
                 }
-                CertificateVerifier verifier = sources.certificateVerifier(certificates(parsed));
+                // The certificates that DSS processes decide the revocation tokens that the checks make.
+                List<CertificateToken> processed = checkCertificateValues(token, parsed,
+                        sources.certificateSources());
+                CertificateVerifier verifier = sources.certificateVerifier(processed);
                 List<CertificateToken> candidates = new ArrayList<>(certificates(parsed));
                 candidates.addAll(verifier.getTrustedCertSources().getCertificates());
                 candidates.addAll(verifier.getAdjunctCertSources().getCertificates());
                 checkSigningCertificateReferences(token, parsed, candidates);
-                checkCertificateValues(token, parsed, verifier);
                 checkSignature(token, parsed, verifier);
 
                 DetachedTimestampValidator validator = new DetachedTimestampValidator(token.document(),
@@ -451,21 +453,30 @@ public final class ValidateTimestamp implements Main.ModeRunner {
      * with another key, and does not fail on it, as tests check against DSS
      * alone. The certificates of SignedData are decoded when
      * the token is parsed.
+     *
+     * @param verifier a verifier with the supplied certificates
+     * @return the certificates of the token that DSS processes: those of
+     *         SignedData and those of certificateValues decoded here. The
+     *         checks of the revocation data make tokens for these only: DSS
+     *         does not make revocation tokens for another certificate of
+     *         certificateValues, as a test checks against DSS alone
      */
-    private static void checkCertificateValues(OfflineSources.Input token, TimestampToken parsed,
-            CertificateVerifier verifier) throws RejectedInputException {
+    private static List<CertificateToken> checkCertificateValues(OfflineSources.Input token,
+            TimestampToken parsed, CertificateVerifier verifier) throws RejectedInputException {
         Set<CertificateToken> signedData = signedDataCertificates(parsed);
         List<CertificateToken> pool = new ArrayList<>(certificates(parsed));
         pool.addAll(verifier.getTrustedCertSources().getCertificates());
         pool.addAll(verifier.getAdjunctCertSources().getCertificates());
         // The chain does not end at a trust anchor: a copy of pki/root-ca with its name and key but extensions that
         // DSS cannot decode, next to the anchor, makes DSS alone fail, as a test checks.
+        Set<CertificateToken> processed = new LinkedHashSet<>(signedData);
         for (CertificateToken certificate : IssuerClosure.of(signerCandidates(parsed, verifier), pool,
                 ValidateTimestamp::signedBy)) {
-            if (!signedData.contains(certificate)) {
+            if (processed.add(certificate)) {
                 decode(token, certificate);
             }
         }
+        return new ArrayList<>(processed);
     }
 
     /**
