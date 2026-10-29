@@ -97,6 +97,13 @@ expect 1 crash-artefact "artifacts/target_a/crash-0123456789abcdef"
 expect 1 timeout-artefact "artifacts/target_a/timeout-0123456789abcdef"
 expect 1 crash-in-output "reported a finding"
 expect 1 killed-worker "an inner merge process failed"
+# The input that the inner process failed on is kept with the artefacts.
+if [ "$(cat "$scratch/project/artifacts/target_a/merge-failure-b" 2> /dev/null)" = b ]; then
+  echo "ok: the input of the failed inner process is kept"
+else
+  echo "FAIL: artifacts/target_a/merge-failure-b does not hold the input" >&2
+  failures=$((failures + 1))
+fi
 
 if [ "$failures" -ne 0 ]; then
   echo "$failures case(s) failed" >&2

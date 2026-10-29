@@ -16,7 +16,8 @@
 # inner process, printing "MERGE-OUTER: attempt <n>" with n of 2 or more,
 # and that process prints "MERGE-INNER: '<file>' caused a failure at the
 # previous merge step" before it skips the file (FuzzerMerge.cpp of the
-# libFuzzer of libfuzzer-sys 0.4.13). A failed minimisation leaves the
+# libFuzzer of libfuzzer-sys 0.4.13); that file is then copied to
+# artifacts/<target>/merge-failure-<file>. A failed minimisation leaves the
 # corpus as it was before; fuzz-nightly.yml then does not save it.
 # Usage: fuzz-minimise.sh <target>.
 set -euo pipefail
@@ -67,8 +68,18 @@ if grep -Eq 'ERROR: (libFuzzer|AddressSanitizer|LeakSanitizer|MemorySanitizer|Un
   failed=1
 fi
 if grep -Eq 'MERGE-OUTER: attempt ([2-9]|[1-9][0-9]+)$|caused a failure at the previous merge step' "$log"; then
-  grep -F 'caused a failure at the previous merge step' "$log" | sed 's/^/::error::/' || true
   echo "::error::During the minimisation, an inner merge process failed"
+  # The input that it failed on is kept with the artefacts, from the copy
+  # of the corpus, since a process that is killed writes none.
+  sed -n "s/^MERGE-INNER: '\(.*\)' caused a failure at the previous merge step$/\1/p" "$log" |
+    while IFS= read -r input; do
+      echo "::error::An inner merge process failed on $input"
+      name=$(basename "$input")
+      if [ -f "$scratch/corpus/$name" ]; then
+        mkdir -p "$artifacts"
+        cp "$scratch/corpus/$name" "$artifacts/merge-failure-$name"
+      fi
+    done
   failed=1
 fi
 if [ "$failed" -ne 0 ]; then
