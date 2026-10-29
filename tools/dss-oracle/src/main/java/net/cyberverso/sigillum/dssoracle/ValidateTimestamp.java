@@ -461,7 +461,7 @@ public final class ValidateTimestamp implements Main.ModeRunner {
         // The chain does not end at a trust anchor: a copy of pki/root-ca with its name and key but extensions that
         // DSS cannot decode, next to the anchor, makes DSS alone fail, as a test checks.
         for (CertificateToken certificate : IssuerClosure.of(signerCandidates(parsed, verifier), pool,
-                ValidateTimestamp::signedBy, certificate -> false)) {
+                ValidateTimestamp::signedBy)) {
             if (!signedData.contains(certificate)) {
                 decode(token, certificate);
             }

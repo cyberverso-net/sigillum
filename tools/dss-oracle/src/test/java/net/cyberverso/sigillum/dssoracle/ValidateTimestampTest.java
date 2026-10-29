@@ -846,16 +846,17 @@ class ValidateTimestampTest {
      * and requires the tool to reject it exactly when DSS alone runs out of
      * memory on it, and to validate it otherwise.
      */
-    private void assertCrlAsDssAloneInASmallHeap(byte[] crl, String name) throws Exception {
+    private String assertCrlAsDssAloneInASmallHeap(byte[] crl, String name) throws Exception {
         String alone = dssAloneWithSmallHeap(crl, name);
         boolean outOfMemory = alone.contains("OutOfMemoryError");
         Map<String, Object> summary = runWithHeap("-Xmx64m", crl, name);
         assertEquals(outOfMemory ? "rejected" : "validated", summary.get("result"),
                 name + ": " + summary + " (DSS alone: " + alone.strip() + ")");
+        return alone;
     }
 
     /**
-     * A first revoked certificate entry of five octets whose serial number
+     * A first revoked certificate entry of 7 contents octets whose serial number
      * declares about 1 GiB: the tool rejects the CRL exactly when DSS alone
      * runs out of memory on it in a small heap (issue #72).
      */
@@ -866,8 +867,8 @@ class ValidateTimestampTest {
     }
 
     /**
-     * A first entry of two octets holding the identifier and length octets
-     * of a serial number of two octets, then an entry declaring about
+     * A first entry of 2 contents octets, the identifier and length octets
+     * of a serial number of 2 contents octets, then an entry declaring about
      * 1 GiB: whether DSS reads that entry shows whether it reads the
      * contents of the serial number past its entry, and the tool must
      * agree (issue #72).
@@ -876,7 +877,9 @@ class ValidateTimestampTest {
     void aSerialNumberStartingAtTheEndOfItsEntryIsReadAsDssReadsIt() throws Exception {
         byte[] entries = {0x30, 0x02, 0x02, 0x02, 0x30, (byte) 0x84, 0x3f, (byte) 0xff, (byte) 0xff, (byte) 0xff,
             0x02, 0x01, 0x05};
-        assertCrlAsDssAloneInASmallHeap(Crls.caEcdsaWithAnEntryFirst(entries), "serial-at-end");
+        String alone = assertCrlAsDssAloneInASmallHeap(Crls.caEcdsaWithAnEntryFirst(entries), "serial-at-end");
+        // DSS alone read the CRL and reported an indication, not only that it did not run out of memory.
+        assertTrue(alone.startsWith("indication "), alone);
     }
 
     /**

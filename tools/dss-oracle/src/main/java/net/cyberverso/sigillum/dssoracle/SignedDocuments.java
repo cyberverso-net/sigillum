@@ -173,8 +173,7 @@ final class SignedDocuments {
      */
     private static List<CertificateToken> withIssuers(List<CertificateToken> certificates,
             List<CertificateToken> pool) {
-        return new ArrayList<>(IssuerClosure.of(certificates, pool, (certificate, issuer) -> true,
-                certificate -> false));
+        return new ArrayList<>(IssuerClosure.of(certificates, pool, (certificate, issuer) -> true));
     }
 
     private static void addWithCounterSignatures(AdvancedSignature signature, List<AdvancedSignature> all) {

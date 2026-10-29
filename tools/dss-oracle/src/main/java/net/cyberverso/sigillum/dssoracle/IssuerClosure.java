@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiPredicate;
-import java.util.function.Predicate;
 import javax.security.auth.x500.X500Principal;
 
 /**
@@ -39,12 +38,10 @@ final class IssuerClosure {
      * @param certificates the certificates whose chains are built
      * @param pool the candidates for their issuers
      * @param issues whether a candidate is taken as the issuer of a certificate
-     * @param end whether the chain of a certificate ends with it, so that
-     *        no issuer of it is looked for
      * @return the certificates and the issuers taken, each once
      */
     static Set<CertificateToken> of(Collection<CertificateToken> certificates, Collection<CertificateToken> pool,
-            BiPredicate<CertificateToken, CertificateToken> issues, Predicate<CertificateToken> end) {
+            BiPredicate<CertificateToken, CertificateToken> issues) {
         Set<CertificateToken> taken = new LinkedHashSet<>(certificates);
         Map<X500Principal, List<CertificateToken>> candidates = new HashMap<>();
         for (CertificateToken candidate : new LinkedHashSet<>(pool)) {
@@ -58,9 +55,6 @@ final class IssuerClosure {
         while (!pending.isEmpty()) {
             CertificateToken certificate = pending.removeFirst();
             result.add(certificate);
-            if (end.test(certificate)) {
-                continue;
-            }
             List<CertificateToken> named = candidates.get(certificate.getIssuer().getPrincipal());
             if (named == null) {
                 continue;

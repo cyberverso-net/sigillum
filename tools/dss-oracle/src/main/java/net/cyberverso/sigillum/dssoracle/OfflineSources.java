@@ -286,10 +286,12 @@ public final class OfflineSources {
     /**
      * Returns, for each distinct certificate, in their order, the
      * certificates whose subject is its issuer name, one per distinct pair
-     * of subject and public key. Revocation tokens depend on the issuer
-     * through its name and key only, so issuers of one name and key, such as
-     * re-encodings of one CA certificate, give the same tokens and count
-     * once. The pairs are then as many as the certificates times the
+     * of subject and public key. In the corpus, the differential tests and
+     * a test with 1,000 certificates of one name and key against DSS alone,
+     * the revocation tokens were observed to depend on the issuer through
+     * its name and key only, so issuers of one name and key, such as
+     * re-encodings of one CA certificate, are taken to give the same tokens
+     * and count once. The pairs are then as many as the certificates times the
      * distinct keys of their issuer name.
      *
      * @param certificates the certificates, possibly with copies

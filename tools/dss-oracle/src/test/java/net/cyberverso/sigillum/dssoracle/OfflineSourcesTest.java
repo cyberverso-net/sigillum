@@ -37,4 +37,15 @@ class OfflineSourcesTest {
         assertEquals(List.of(root), issuers.get(ca));
         assertEquals(List.of(root), issuers.get(root));
     }
+
+    /** Issuers of one name count once per distinct key (issue #72). */
+    @Test
+    void issuersOfOneNameCountOncePerKey() throws Exception {
+        CertificateToken tsa = load("tsa");
+        CertificateToken ca = load("ca-ecdsa");
+        CertificateToken sameKey = DSSUtils.loadCertificate(Tokens.caEcdsaWithMalformedAuthorityKeyIdentifier());
+        CertificateToken otherKey = DSSUtils.loadCertificate(Tokens.otherKeyWithTheSubjectOfCaEcdsa());
+        assertEquals(List.of(ca), OfflineSources.issuers(List.of(tsa, ca, sameKey)).get(tsa));
+        assertEquals(List.of(ca, otherKey), OfflineSources.issuers(List.of(tsa, ca, otherKey)).get(tsa));
+    }
 }

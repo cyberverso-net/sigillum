@@ -36,7 +36,7 @@ class IssuerClosureTest {
         Set<CertificateToken> closure = IssuerClosure.of(List.of(tsa()), pool, (certificate, issuer) -> {
             calls.incrementAndGet();
             return true;
-        }, certificate -> false);
+        });
         assertEquals(COUNT + 1, closure.size());
         assertEquals(COUNT, calls.get());
     }
@@ -48,20 +48,8 @@ class IssuerClosureTest {
         Set<CertificateToken> closure = IssuerClosure.of(List.of(tsa()), pool, (certificate, issuer) -> {
             calls.incrementAndGet();
             return false;
-        }, certificate -> false);
+        });
         assertEquals(1, closure.size());
         assertEquals(COUNT, calls.get());
-    }
-
-    @Test
-    void theChainEndsWhereAsked() throws Exception {
-        CertificateToken tsa = tsa();
-        AtomicInteger calls = new AtomicInteger();
-        Set<CertificateToken> closure = IssuerClosure.of(List.of(tsa), selfIssued(), (certificate, issuer) -> {
-            calls.incrementAndGet();
-            return true;
-        }, tsa::equals);
-        assertEquals(Set.of(tsa), closure);
-        assertEquals(0, calls.get());
     }
 }

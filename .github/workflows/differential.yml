@@ -2,7 +2,7 @@ name: Differential tests
 
 on:
   push:
-    branches: [main]
+    branches: [main, task/72-dss-oracle-input-checks]
   pull_request:
   # This workflow reports a required check. The merge queue does not merge
   # a group until every required check is reported for it.
