@@ -43,6 +43,7 @@ import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.IssuerSerial;
+import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
@@ -420,6 +421,51 @@ final class Tokens {
             certificates.add(new X509v3CertificateBuilder(ca.getSubject(), BigInteger.valueOf(0x720000L + i),
                     ca.getNotBefore(), ca.getNotAfter(), ca.getSubject(), ca.getSubjectPublicKeyInfo())
                     .build(signer).getEncoded());
+        }
+        return certificates;
+    }
+
+    /**
+     * Returns a certificate with the name, key and other extensions of
+     * pki/ca-ecdsa, issued again by pki/root-ca with its key, but whose key
+     * usage is keyCertSign only, without cRLSign.
+     */
+    static byte[] caEcdsaWithoutCrlSign() throws Exception {
+        X509CertificateHolder ca = new X509CertificateHolder(
+                Pem.decode(Files.readString(Path.of("..", "..", "testdata", "pki", "ca-ecdsa.pem"))));
+        PrivateKey root = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(Pem.decode(
+                Files.readString(Path.of("..", "..", "testdata", "pki", "keys", "root-ca.test-key.pem")))));
+        X509v3CertificateBuilder builder = new X509v3CertificateBuilder(ca.getIssuer(),
+                BigInteger.valueOf(0x7202), ca.getNotBefore(), ca.getNotAfter(), ca.getSubject(),
+                ca.getSubjectPublicKeyInfo());
+        for (Object oid : ca.getExtensionOIDs()) {
+            if (!Extension.keyUsage.equals(oid)) {
+                builder.addExtension(ca.getExtension((ASN1ObjectIdentifier) oid));
+            }
+        }
+        builder.addExtension(Extension.keyUsage, true,
+                new KeyUsage(KeyUsage.keyCertSign));
+        return builder.build(new JcaContentSignerBuilder("SHA256withRSA").build(root)).getEncoded();
+    }
+
+    /**
+     * Returns self-issued certificates of one name, each with a key of its
+     * own and signed with it.
+     */
+    static List<byte[]> selfIssuedWithDistinctKeys(int count) throws Exception {
+        X509CertificateHolder ca = new X509CertificateHolder(
+                Pem.decode(Files.readString(Path.of("..", "..", "testdata", "pki", "ca-ecdsa.pem"))));
+        KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");
+        SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+        random.setSeed(159);
+        generator.initialize(256, random);
+        List<byte[]> certificates = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            KeyPair pair = generator.generateKeyPair();
+            certificates.add(new X509v3CertificateBuilder(ca.getSubject(), BigInteger.valueOf(0x730000L + i),
+                    ca.getNotBefore(), ca.getNotAfter(), ca.getSubject(),
+                    SubjectPublicKeyInfo.getInstance(pair.getPublic().getEncoded()))
+                    .build(new JcaContentSignerBuilder("SHA256withECDSA").build(pair.getPrivate())).getEncoded());
         }
         return certificates;
     }

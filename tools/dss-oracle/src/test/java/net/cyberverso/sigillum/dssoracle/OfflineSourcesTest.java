@@ -1,9 +1,12 @@
 package net.cyberverso.sigillum.dssoracle;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.sun.management.ThreadMXBean;
 import eu.europa.esig.dss.model.x509.CertificateToken;
 import eu.europa.esig.dss.spi.DSSUtils;
+import java.lang.management.ManagementFactory;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -47,5 +50,33 @@ class OfflineSourcesTest {
         CertificateToken otherKey = DSSUtils.loadCertificate(Tokens.otherKeyWithTheSubjectOfCaEcdsa());
         assertEquals(List.of(ca), OfflineSources.issuers(List.of(tsa, ca, sameKey)).get(tsa));
         assertEquals(List.of(ca, otherKey), OfflineSources.issuers(List.of(tsa, ca, otherKey)).get(tsa));
+    }
+
+    /** Issuers of one name and key with distinct key usages count separately (issue #72). */
+    @Test
+    void issuersOfOneNameAndKeyCountOncePerKeyUsage() throws Exception {
+        CertificateToken tsa = load("tsa");
+        CertificateToken ca = load("ca-ecdsa");
+        CertificateToken withoutCrlSign = DSSUtils.loadCertificate(Tokens.caEcdsaWithoutCrlSign());
+        assertEquals(List.of(withoutCrlSign, ca), OfflineSources.issuers(List.of(tsa, withoutCrlSign, ca)).get(tsa));
+    }
+
+    /**
+     * Thousands of self-issued certificates of one name with distinct keys:
+     * the list of the issuers of the name is shared, not copied for each
+     * certificate (issue #72).
+     */
+    @Test
+    void theIssuersOfANameAreSharedByItsCertificates() throws Exception {
+        List<CertificateToken> certificates = new ArrayList<>();
+        for (byte[] der : Tokens.selfIssuedWithDistinctKeys(3000)) {
+            certificates.add(DSSUtils.loadCertificate(der));
+        }
+        ThreadMXBean threads = (ThreadMXBean) ManagementFactory.getThreadMXBean();
+        long before = threads.getCurrentThreadAllocatedBytes();
+        Map<CertificateToken, List<CertificateToken>> issuers = OfflineSources.issuers(certificates);
+        long allocated = threads.getCurrentThreadAllocatedBytes() - before;
+        assertEquals(3000, issuers.get(certificates.get(0)).size());
+        assertTrue(allocated < 16L * 1024 * 1024, "allocated " + allocated + " bytes");
     }
 }

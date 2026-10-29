@@ -879,7 +879,7 @@ class ValidateTimestampTest {
             0x02, 0x01, 0x05};
         String alone = assertCrlAsDssAloneInASmallHeap(Crls.caEcdsaWithAnEntryFirst(entries), "serial-at-end");
         // DSS alone read the CRL and reported an indication, not only that it did not run out of memory.
-        assertTrue(alone.startsWith("indication "), alone);
+        assertTrue(alone.lines().anyMatch(line -> line.startsWith("indication ")), alone);
     }
 
     /**
@@ -927,6 +927,62 @@ class ValidateTimestampTest {
         assertEquals("validated", summary.get("result"), summary.toString());
         assertEquals(alone.indication(), summary.get("indication") + " " + summary.get("sub-indication"));
         assertTrue(tool < 6 * dss + 1_000_000_000L, timings);
+    }
+
+    /**
+     * Two certificates with the name and key of pki/ca-ecdsa, the first
+     * without cRLSign in its key usage, and a CRL with an entry of
+     * indefinite length on which DSS fails with the other: the tool must
+     * reject the CRL, not fail (issue #72).
+     */
+    @Test
+    void anIndefiniteEntryIsRejectedWhateverTheKeyUsageOfAnotherIssuerOfTheSameNameAndKey() throws Exception {
+        Path withoutCrlSign = Files.write(temp.resolve("ca-ecdsa-without-crl-sign.der"), Tokens.caEcdsaWithoutCrlSign());
+        Path crl = Files.write(temp.resolve("indefinite-entry-two-issuers.crl"), Crls.caEcdsaWithIndefiniteEntry());
+        Path result = temp.resolve("indefinite-entry-two-issuers");
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"), "--out", result.toString());
+        args.set(args.indexOf(corpus("crl/ca-ecdsa.crl")), crl.toString());
+        int at = args.indexOf(corpus("pki/ca-ecdsa.pem")) - 1;
+        args.add(at, withoutCrlSign.toString());
+        args.add(at, "--certificate");
+        assertRejected(args, result, "--crl", crl.toString());
+    }
+
+    /**
+     * pki/tsa and pki/signer-p256 in certificateValues, and a CRL of
+     * pki/ca-ecdsa, signed again, whose entry for pki/signer-p256 has a
+     * revocation date that cannot be read. DSS does not process
+     * pki/signer-p256 and validates the token, so the tool must not make
+     * revocation tokens for it (issue #72).
+     */
+    @Test
+    void aCertificateThatDssDoesNotProcessIsNotCheckedForRevocation() throws Exception {
+        byte[] tsa = Pem.decode(Files.readString(CORPUS.resolve("pki/tsa.pem")));
+        byte[] signer = Pem.decode(Files.readString(CORPUS.resolve("pki/signer-p256.pem")));
+        byte[] token = Tokens.withCertificateValues(Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst")),
+                tsa, signer);
+        byte[] date = "30AB15100000Z".getBytes(StandardCharsets.US_ASCII);
+        byte[] entry = new byte[2 + 4 + 2 + date.length];
+        entry[0] = 0x30;
+        entry[1] = (byte) (entry.length - 2);
+        System.arraycopy(new byte[] {0x02, 0x02, 0x12, 0x01, 0x17, (byte) date.length}, 0, entry, 2, 6);
+        System.arraycopy(date, 0, entry, 8, date.length);
+        byte[] crl = Crls.caEcdsaWithAnEntryFirst(entry);
+        MutationTest.Setup corpusSetup = MutationTest.Setup.corpus(token);
+        MutationTest.RawResult alone = MutationTest.rawDss(new MutationTest.Setup(token, corpusSetup.anchors(),
+                corpusSetup.certificates(), List.of(crl, Files.readAllBytes(CORPUS.resolve("crl/root-ca.crl"))),
+                corpusSetup.responses()));
+        assertNull(alone.failure(), String.valueOf(alone.failure()));
+        Path tokenFile = Files.write(temp.resolve("ignored-signer.tst"), token);
+        Path crlFile = Files.write(temp.resolve("ignored-signer.crl"), crl);
+        Path result = temp.resolve("ignored-signer");
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"), "--out", result.toString());
+        args.set(args.indexOf("--timestamp") + 1, tokenFile.toString());
+        args.set(args.indexOf(corpus("crl/ca-ecdsa.crl")), crlFile.toString());
+        assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+        Map<String, Object> summary = summary(result);
+        assertEquals("validated", summary.get("result"), summary + " (DSS alone: " + alone.indication() + ")");
+        assertEquals(alone.indication(), summary.get("indication") + " " + summary.get("sub-indication"));
     }
 
     /** Asserts that the tool rejects the token, and that DSS alone fails on it at the same stage. */
