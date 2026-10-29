@@ -1,10 +1,13 @@
 package net.cyberverso.sigillum.dssoracle;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DLSet;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
@@ -18,6 +21,7 @@ import org.bouncycastle.asn1.ess.SigningCertificateV2;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.Certificate;
 import org.bouncycastle.cms.CMSSignedData;
 
 /** Derives defective timestamp tokens from the corpus for the tests. */
@@ -245,7 +249,7 @@ final class Tokens {
     /**
      * Moves the certificates of a token to the unsigned attribute
      * certificateValues of its signer (id-aa-ets-certValues, ETSI EN 319
-     * 122-1 V1.3.1, clause 5.5.2), with the given certificates in their
+     * 122-1 V1.3.1, clause A.1.1.2), with the given certificates in their
      * place, and leaves SignedData without certificates. The attribute is
      * unsigned, so the signature still verifies.
      */
@@ -254,10 +258,10 @@ final class Tokens {
         SignerInfo signer = SignerInfo.getInstance(signedData.getSignerInfos().getObjectAt(0));
         ASN1EncodableVector values = new ASN1EncodableVector();
         for (byte[] certificate : certificates) {
-            values.add(org.bouncycastle.asn1.x509.Certificate.getInstance(certificate));
+            values.add(Certificate.getInstance(certificate));
         }
         Attribute attribute = new Attribute(PKCSObjectIdentifiers.id_aa_ets_certValues,
-                new DERSet(new org.bouncycastle.asn1.DERSequence(values)));
+                new DERSet(new DERSequence(values)));
         SignerInfo changed = new SignerInfo(signer.getSID(), signer.getDigestAlgorithm(),
                 signer.getAuthenticatedAttributes(), signer.getDigestEncryptionAlgorithm(),
                 signer.getEncryptedDigest(), new DERSet(attribute));
@@ -280,12 +284,47 @@ final class Tokens {
             }
         }
         SignedData result = new SignedData(signedData.getDigestAlgorithms(), signedData.getEncapContentInfo(),
-                new org.bouncycastle.asn1.DLSet(certificates), signedData.getCRLs(), signedData.getSignerInfos());
+                new DLSet(certificates), signedData.getCRLs(), signedData.getSignerInfos());
         try {
             return new ContentInfo(CMSObjectIdentifiers.signedData, result).getEncoded("DL");
         } catch (IOException e) {
-            throw new java.io.UncheckedIOException(e);
+            throw new UncheckedIOException(e);
         }
+    }
+
+    /**
+     * Returns a token whose SignedData holds the given certificates, in
+     * their order, in a SET that is not sorted. The certificates are not
+     * signed, so the signature still verifies.
+     */
+    static byte[] withCertificates(byte[] token, byte[]... certificates) {
+        SignedData signedData = signedData(token);
+        ASN1EncodableVector vector = new ASN1EncodableVector();
+        for (byte[] certificate : certificates) {
+            vector.add(Certificate.getInstance(certificate));
+        }
+        SignedData result = new SignedData(signedData.getDigestAlgorithms(), signedData.getEncapContentInfo(),
+                new DLSet(vector), signedData.getCRLs(), signedData.getSignerInfos());
+        try {
+            return new ContentInfo(CMSObjectIdentifiers.signedData, result).getEncoded("DL");
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     * Returns pki/ca-ecdsa with the value of its basicConstraints extension
+     * changed from a SEQUENCE to a SET. Bouncy Castle reads the certificate
+     * structure, but the certificate factory, which decodes basicConstraints,
+     * refuses it, so DSS cannot convert it to a certificate token.
+     */
+    static byte[] caEcdsaWithMalformedBasicConstraints() throws Exception {
+        byte[] der = Pem.decode(java.nio.file.Files.readString(
+                java.nio.file.Path.of("..", "..", "testdata", "pki", "ca-ecdsa.pem")));
+        int oid = indexOf(der, new byte[] {0x06, 0x03, 0x55, 0x1d, 0x13}, 0);
+        int octetString = indexOf(der, new byte[] {0x04}, oid + 5);
+        der[octetString + 2] = 0x31;
+        return der;
     }
 
     private static int indexOf(byte[] data, byte[] pattern, int from) {

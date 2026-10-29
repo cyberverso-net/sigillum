@@ -167,6 +167,47 @@ class CertificateListBoundsTest {
         assertAccepted(afterEmpty);
     }
 
+    /**
+     * Thousands of short revoked certificate entries, each with a serial
+     * number INTEGER that declares as many octets as the whole CRL and
+     * starts with a valid octet: every length is within the slack, and the
+     * check must take memory in proportion to the CRL, not to the declared
+     * lengths times the entries (Codex review of #72).
+     */
+    @Test
+    void manyEntriesDeclaringLongSerialNumbersTakeMemoryInProportionToTheCrl() {
+        int entries = 8000;
+        int entrySize = 9;
+        byte[] head = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x30, 0x00, 0x30, 0x00, 0x17, 0x00};
+        int revokedHeader = 6;
+        int size = head.length + revokedHeader + entries * entrySize;
+        byte[] der = new byte[size];
+        System.arraycopy(head, 0, der, 0, head.length);
+        int at = head.length;
+        der[at++] = 0x30;
+        der[at++] = (byte) 0x84;
+        int revokedLength = entries * entrySize;
+        for (int shift = 24; shift >= 0; shift -= 8) {
+            der[at++] = (byte) (revokedLength >>> shift);
+        }
+        for (int i = 0; i < entries; i++) {
+            der[at++] = 0x30;
+            der[at++] = 0x07;
+            der[at++] = 0x02;
+            der[at++] = (byte) 0x84;
+            for (int shift = 24; shift >= 0; shift -= 8) {
+                der[at++] = (byte) (size >>> shift);
+            }
+            der[at++] = 0x01;
+        }
+        com.sun.management.ThreadMXBean threads =
+                (com.sun.management.ThreadMXBean) java.lang.management.ManagementFactory.getThreadMXBean();
+        long before = threads.getCurrentThreadAllocatedBytes();
+        assertAccepted(der);
+        long allocated = threads.getCurrentThreadAllocatedBytes() - before;
+        assertTrue(allocated < 16L * 1024 * 1024, "allocated " + allocated + " bytes for a CRL of " + size);
+    }
+
     @Test
     void allocatesNothingInProportionToDeclaredLengths() throws Exception {
         byte[] der = crl("root-ca");

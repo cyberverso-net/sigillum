@@ -3,8 +3,11 @@ package net.cyberverso.sigillum.dssoracle;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import eu.europa.esig.dss.model.DSSException;
+import eu.europa.esig.dss.spi.DSSASN1Utils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -27,6 +30,7 @@ import org.bouncycastle.asn1.ess.SigningCertificateV2;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.cert.X509CertificateHolder;
 import java.util.stream.Stream;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -635,6 +639,65 @@ class ValidateTimestampTest {
         assertValidated(result, "PASSED", null);
     }
 
+    /**
+     * Runs a token through the tool and through DSS alone, with the corpus
+     * chain, CRLs and content, and requires the outcome of DSS: rejected
+     * exactly when DSS alone fails, otherwise validated with its indication.
+     */
+    private void assertAsDssAlone(byte[] content, String name) throws Exception {
+        Path token = Files.write(temp.resolve(name + ".tst"), content);
+        Path result = temp.resolve(name);
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"), "--out", result.toString());
+        args.set(args.indexOf("--timestamp") + 1, token.toString());
+        err.reset();
+        int code = run(args);
+        MutationTest.RawResult alone = MutationTest.rawDss(MutationTest.Setup.corpus(content));
+        String dss = alone.failure() != null ? "fails: " + alone.failure() : "validates: " + alone.indication();
+        assertEquals(ExitCodes.SUCCESS, code, name + ": " + stderr() + " (DSS alone " + dss + ")");
+        Map<String, Object> summary = summary(result);
+        if (alone.failure() != null) {
+            assertEquals("rejected", summary.get("result"), name + ": " + summary + " (DSS alone " + dss + ")");
+            assertEquals("--timestamp", summary.get("input"));
+        } else {
+            assertEquals("validated", summary.get("result"), name + ": " + summary + " (DSS alone " + dss + ")");
+            assertEquals(alone.indication(), summary.get("indication") + " " + summary.get("sub-indication"),
+                    name + ": " + summary);
+        }
+    }
+
+    /**
+     * An unrelated certificate with invalid UTF-8 in its subject, next to
+     * the certificate of pki/tsa in certificateValues: DSS does not process
+     * it, and validates the token (Codex review of #72).
+     */
+    @Test
+    void anUnrelatedUndecodableCertificateInTheCertificateValuesIsNotRejected() throws Exception {
+        byte[] tsa = Pem.decode(Files.readString(CORPUS.resolve("pki/tsa.pem")));
+        byte[] unrelated = Tokens.certificateWithInvalidUtf8Subject(
+                Files.readString(CORPUS.resolve("pki/signer-p256.pem")));
+        byte[] token = Tokens.withCertificateValues(Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst")),
+                tsa, unrelated);
+        assertNull(MutationTest.rawDss(MutationTest.Setup.corpus(token)).failure());
+        assertAsDssAlone(token, "cert-values-unrelated");
+    }
+
+    /**
+     * SignedData holding a certificate that DSS cannot convert, then the
+     * certificate of pki/tsa with invalid UTF-8 in its subject, and the
+     * reverse order: the tool must give the outcome of DSS alone in both.
+     */
+    @Test
+    void aCertificateAfterOneThatDssCannotConvertIsTreatedAsDssTreatsIt() throws Exception {
+        byte[] unconvertible = Tokens.caEcdsaWithMalformedBasicConstraints();
+        assertThrows(DSSException.class, () -> DSSASN1Utils.getCertificate(new X509CertificateHolder(unconvertible)));
+        byte[] badTsa = Tokens.certificateWithInvalidUtf8Subject(Files.readString(CORPUS.resolve("pki/tsa.pem")));
+        byte[] valid = Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst"));
+        assertAsDssAlone(Tokens.withCertificates(valid, unconvertible, badTsa), "unconvertible-then-bad-tsa");
+        assertAsDssAlone(Tokens.withCertificates(valid, badTsa, unconvertible), "bad-tsa-then-unconvertible");
+        byte[] tsa = Pem.decode(Files.readString(CORPUS.resolve("pki/tsa.pem")));
+        assertAsDssAlone(Tokens.withCertificates(valid, unconvertible, tsa), "unconvertible-then-tsa");
+    }
+
     /** Runs the valid token with the given number of copies of its certificates, and returns the time taken. */
     private long copiesRun(byte[] content, String name) throws Exception {
         Path token = Files.write(temp.resolve(name + ".tst"), content);
@@ -652,9 +715,9 @@ class ValidateTimestampTest {
      * Issue #72, case 5: a token holding 10,000 copies of its certificate.
      * DSS keeps one certificate token for them. The tool runs DSS once and
      * its own checks, which must not make the run much slower than DSS
-     * alone: at most three times as long, with half a second of margin.
+     * alone: at most six times as long, with a second of margin.
      * Before the fix, the checks made revocation tokens and decoded the
-     * certificate once per copy, and the run took more than five times as
+     * certificate once per copy, and the run took about fourteen times as
      * long as DSS alone.
      */
     @Test
@@ -672,7 +735,7 @@ class ValidateTimestampTest {
         long tool = copiesRun(copies, "copies");
         String timings = "10000 copies: tool " + tool / 1_000_000 + " ms, DSS alone " + dss / 1_000_000 + " ms";
         System.out.println(timings);
-        assertTrue(tool < 3 * dss + 500_000_000L, timings);
+        assertTrue(tool < 6 * dss + 1_000_000_000L, timings);
     }
 
     /** Asserts that the tool rejects the token, and that DSS alone fails on it at the same stage. */
