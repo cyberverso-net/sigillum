@@ -10,9 +10,6 @@ on:
   schedule:
     - cron: "23 1 * * *"
   workflow_dispatch:
-  # Temporary, for the measurement of issue #80; removed before review.
-  push:
-    branches: [task/80-mutants-ci]
 
 permissions:
   contents: read
@@ -41,7 +38,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          fetch-depth: ${{ github.event_name == 'push' && '0' || '2' }}
+          fetch-depth: 2
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
         with:
           toolchain: stable
@@ -52,10 +49,6 @@ jobs:
       - name: Write the diff of the pull request
         if: github.event_name == 'pull_request'
         run: git diff HEAD^1 HEAD > "$RUNNER_TEMP/changes.diff"
-      # Temporary, for the measurement of issue #80: the diff of #154.
-      - name: Write the diff of the measurement
-        if: github.event_name == 'push'
-        run: git diff 85d6b83^ 85d6b83 > "$RUNNER_TEMP/changes.diff"
       # Three jobs on the four processors of the runner, and round-robin
       # sharding, which spreads the slow files over the shards. The exit
       # code is kept for the report job, which judges it.

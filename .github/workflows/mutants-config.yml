@@ -9,9 +9,6 @@ on:
       - .github/scripts/*mutants*
       - .github/workflows/mutants*.yml
       - crates/**
-  # Temporary, for the checks of issue #80; removed before review.
-  push:
-    branches: [task/80-mutants-ci]
 
 permissions:
   contents: read
