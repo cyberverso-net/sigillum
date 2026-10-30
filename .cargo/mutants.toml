@@ -9,6 +9,20 @@
 # A -f or --file option on the command line adds to this list; it does not
 # replace it. To test other files alone, add --no-config, which ignores
 # this file.
+#
+# The other source files of the tool crates are not critical, for the
+# reasons that quality-gates.md gives for each. Test modules, tests.rs,
+# are test code. .github/scripts/check-mutants-globs.sh fails when a
+# source file of these crates is neither selected below nor named here.
+# not critical: crates/sigillum-testpki/src/lib.rs
+# not critical: crates/sigillum-testpki/src/main.rs
+# not critical: crates/sigillum-testpki/src/tsa_cli.rs
+# not critical: crates/sigillum-testpki/src/verify_cli.rs
+# not critical: crates/sigillum-testpki/src/documents.rs
+# not critical: crates/sigillum-testpki/src/pki.rs
+# not critical: crates/sigillum-testpki/src/pki/rng.rs
+# not critical: crates/sigillum-oracle/src/lib.rs
+# not critical: crates/sigillum-oracle/src/dss.rs
 examine_globs = [
     # Library crates: all of their code.
     "crates/sigillum-pki/src/**/*.rs",

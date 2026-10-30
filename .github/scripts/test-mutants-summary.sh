@@ -160,6 +160,18 @@ expect 1 "an exit status that is not a number" 80 "exit status"
 shard 1 3 0 5 0 0 0
 expect 0 "the three shards again" 80 "| Caught | 14 |" "!did not complete"
 
+# A mutant with another outcome, success or failure, fails the run.
+reset
+shard 0 1 0 5 0 0 0
+jq '.success = 1 | .total_mutants += 1' "$shards/mutants-out-shard-0/outcomes.json" > "$scratch/o.json"
+mv "$scratch/o.json" "$shards/mutants-out-shard-0/outcomes.json"
+expect 1 "a mutant with another outcome" 80 "| Caught | 5 |" \
+  "Shard 0 of 1: 1 mutants had an outcome other than caught, missed, timeout or unviable" "!did not complete"
+reset
+shard 0 3 0 5 0 0 0
+shard 1 3 0 5 0 0 0
+shard 2 3 0 4 0 0 0
+
 # The shards must agree on their count and have one directory each.
 shard 1 2 0 5 0 0 0
 expect 1 "shards that disagree on their count" 80 "do not agree"

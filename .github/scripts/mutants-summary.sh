@@ -2,7 +2,7 @@
 # Reports a run of cargo mutants in shards as Markdown on standard output,
 # for the job summary: the counts of each outcome, the mutation score, the
 # result against the threshold, the missed and timed out mutants, and the
-# shards that did not complete.
+# problems: shards that did not complete, and mutants of another outcome.
 #
 # Usage: mutants-summary.sh <threshold> <directory of shards>
 #
@@ -20,7 +20,8 @@
 #
 # Exits with 0 when every shard completed and the score meets the
 # threshold, or no mutant was tested; 1 when the score is below the
-# threshold or a shard is missing, failed, or ran on a failing baseline;
+# threshold, a shard is missing, failed or ran on a failing baseline, or
+# a mutant had another outcome than the four counted;
 # 2 on a usage error. Requires jq.
 set -euo pipefail
 
@@ -113,6 +114,13 @@ for dir in ${dirs[@]+"${dirs[@]}"}; do
     problem "$label: the tests fail without any mutation, so its mutants were not tested. The log of the baseline is in \`log/\` of its artefact."
     continue
   fi
+  # A mutant whose outcome is neither of the four counted ones, success
+  # or failure in cargo-mutants 27.1.0 (src/outcome.rs), is not in the
+  # score: it is reported, and the shard is still counted.
+  other=$(jq -r '.total_mutants - (.caught + .missed + .timeout + .unviable)' "$dir/outcomes.json")
+  if [ "$other" != 0 ]; then
+    problem "$label: $other mutants had an outcome other than caught, missed, timeout or unviable; see outcomes.json in its artefact."
+  fi
   completed=$((completed + 1))
   with_outcomes+=("$dir")
 done
@@ -135,9 +143,9 @@ report_problems() {
   local p
   [ "${#problems[@]}" -gt 0 ] || return 0
   echo
-  echo "### Shards that did not complete"
+  echo "### Problems"
   echo
-  echo "The run is incomplete: the counts above cover only the shards that completed, and the run fails."
+  echo "The run fails for the reasons below. The counts above cover only the shards that completed."
   echo
   for p in "${problems[@]}"; do
     echo "- $p"
@@ -199,9 +207,9 @@ else
   echo "The score is below the threshold of $threshold%."
   result=1
 fi
-if [ "${#problems[@]}" -gt 0 ]; then
+if [ "$completed" -lt "$count" ]; then
   echo
-  echo "$((count - completed)) of $count shards did not complete; see below."
+  echo "$((count - completed)) of $count shards did not complete; see the problems below."
 fi
 
 # list <title> <file name>: the mutants of one list over the shards, in a code block.

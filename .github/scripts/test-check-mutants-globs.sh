@@ -1,16 +1,20 @@
 #!/usr/bin/env bash
-# Tests check-mutants-globs.sh: it reads every glob of examine_globs and
-# fails when one of them matches no source file. cargo mutants is replaced
-# by a stub that lists, for a glob, the files that a list of the test
-# gives for it.
+# Tests check-mutants-globs.sh: it fails when a glob of examine_globs
+# matches no source file, and when a source file of the tool crates is
+# neither selected by the globs nor named on the list of files that are
+# not critical. Each case runs in a small tree written here, and cargo
+# mutants is replaced by a stub.
 set -euo pipefail
 
 here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 scratch=$(mktemp -d)
 trap 'rm -rf "$scratch"' EXIT
+tree=$scratch/tree
 
-# The stub: `cargo mutants --no-config --file <glob> --list-files` prints
-# the lines of $scratch/files whose first field is <glob>.
+# The stub. `cargo mutants --no-config --file <glob> --list-files` prints
+# the lines of $STUB_FILES whose first field is <glob>; `cargo mutants
+# --list-files` prints the lines of $STUB_LISTED, the files that the
+# configuration selects.
 mkdir -p "$scratch/bin"
 cat > "$scratch/bin/cargo" << 'STUB'
 #!/usr/bin/env bash
@@ -27,19 +31,58 @@ while [ "$#" -gt 0 ]; do
   esac
   shift
 done
-[ "$no_config" = 1 ] && [ "$list" = 1 ] && [ -n "$glob" ] || exit 64
+[ "$list" = 1 ] || exit 64
 [ ! -f "$STUB_FAIL" ] || exit 1
-awk -v g="$glob" '$1 == g { print $2 }' "$STUB_FILES"
+if [ -n "$glob" ]; then
+  [ "$no_config" = 1 ] || exit 64
+  awk -v g="$glob" '$1 == g { print $2 }' "$STUB_FILES"
+else
+  [ "$no_config" = 0 ] || exit 64
+  cat "$STUB_LISTED"
+fi
 STUB
 chmod +x "$scratch/bin/cargo"
+
+# The tree: two tool crates with a few source files each.
+reset() {
+  rm -rf "$tree"
+  mkdir -p "$tree/.cargo" "$tree/crates/sigillum-testpki/src/pki" "$tree/crates/sigillum-oracle/src/compare"
+  for f in lib.rs main.rs signed.rs pki/keys.rs pki/tests.rs; do
+    : > "$tree/crates/sigillum-testpki/src/$f"
+  done
+  for f in lib.rs compare.rs compare/tests.rs; do
+    : > "$tree/crates/sigillum-oracle/src/$f"
+  done
+  cat > "$tree/.cargo/mutants.toml" << 'TOML'
+# A comment with "crates/commented/*.rs" in it.
+#
+# Not critical, for the reasons in quality-gates.md:
+# not critical: crates/sigillum-testpki/src/lib.rs
+# not critical: crates/sigillum-testpki/src/main.rs
+# not critical: crates/sigillum-oracle/src/lib.rs
+examine_globs = [
+    # The first crate.
+    "crates/sigillum-testpki/src/**/*.rs",
+    "crates/sigillum-oracle/src/compare.rs", # a trailing comment
+]
+exclude_globs = ["crates/excluded/*.rs"]
+TOML
+  printf '%s\n' \
+    "crates/sigillum-testpki/src/**/*.rs crates/sigillum-testpki/src/signed.rs" \
+    "crates/sigillum-testpki/src/**/*.rs crates/sigillum-testpki/src/pki/keys.rs" \
+    "crates/sigillum-oracle/src/compare.rs crates/sigillum-oracle/src/compare.rs" > "$scratch/files"
+  printf '%s\n' crates/sigillum-testpki/src/signed.rs crates/sigillum-testpki/src/pki/keys.rs \
+    crates/sigillum-oracle/src/compare.rs > "$scratch/listed"
+  rm -f "$scratch/fail"
+}
 
 failures=0
 # expect <wanted exit code> <name> [<text the output must contain>...]
 expect() {
   local wanted=$1 name=$2 code=0 text
   shift 2
-  env PATH="$scratch/bin:$PATH" STUB_FILES="$scratch/files" STUB_FAIL="$scratch/fail" \
-    bash "$here/check-mutants-globs.sh" "$scratch/mutants.toml" > "$scratch/output" 2>&1 || code=$?
+  (cd "$tree" && env PATH="$scratch/bin:$PATH" STUB_FILES="$scratch/files" STUB_LISTED="$scratch/listed" \
+    STUB_FAIL="$scratch/fail" bash "$here/check-mutants-globs.sh") > "$scratch/output" 2>&1 || code=$?
   if [ "$code" -ne "$wanted" ]; then
     echo "FAIL: $name: exit code $code, expected $wanted" >&2
     sed 's/^/  /' "$scratch/output" >&2
@@ -57,33 +100,48 @@ expect() {
   echo "ok: $name"
 }
 
-cat > "$scratch/mutants.toml" << 'TOML'
-# A comment with "crates/commented/*.rs" in it.
-examine_globs = [
-    # The first crate.
-    "crates/a/src/**/*.rs",
-    "crates/b/src/lib.rs", # a trailing comment
-]
-exclude_globs = ["crates/excluded/*.rs"]
-TOML
-printf 'crates/a/src/**/*.rs crates/a/src/lib.rs\ncrates/a/src/**/*.rs crates/a/src/x.rs\ncrates/b/src/lib.rs crates/b/src/lib.rs\n' > "$scratch/files"
-expect 0 "every glob matches" "2 globs"
+reset
+expect 0 "every glob matches and every file is accounted for" "2 globs" "3 files that are not critical"
 
-printf 'crates/a/src/**/*.rs crates/a/src/lib.rs\n' > "$scratch/files"
-expect 1 "a glob that matches nothing" "crates/b/src/lib.rs matches no source file"
+reset
+sed -i.bak '/oracle\/src\/compare.rs crates/d' "$scratch/files" && rm "$scratch/files.bak"
+expect 1 "a glob that matches nothing" "crates/sigillum-oracle/src/compare.rs matches no source file"
 
-printf 'crates/b/src/lib.rs crates/b/src/lib.rs\n' > "$scratch/files"
-expect 1 "the first glob matches nothing" "crates/a/src/**/*.rs matches no source file"
+reset
+sed -i.bak '/testpki\/src\/\*\*/d' "$scratch/files" && rm "$scratch/files.bak"
+expect 1 "the first glob matches nothing" "crates/sigillum-testpki/src/**/*.rs matches no source file"
 
+reset
 : > "$scratch/fail"
-printf 'crates/a/src/**/*.rs crates/a/src/lib.rs\ncrates/b/src/lib.rs crates/b/src/lib.rs\n' > "$scratch/files"
 expect 1 "cargo mutants fails" "cargo mutants failed"
-rm "$scratch/fail"
 
-printf 'examine_globs = []\n' > "$scratch/mutants.toml"
+reset
+printf 'examine_globs = []\n' > "$tree/.cargo/mutants.toml"
 expect 1 "an empty list" "no glob"
-printf 'exclude_globs = ["x.rs"]\n' > "$scratch/mutants.toml"
+printf 'exclude_globs = ["x.rs"]\n' > "$tree/.cargo/mutants.toml"
 expect 1 "no list" "no glob"
+
+# A new file of a tool crate must be selected or named as not critical.
+reset
+: > "$tree/crates/sigillum-oracle/src/report.rs"
+expect 1 "a new file left out" "crates/sigillum-oracle/src/report.rs is neither selected by examine_globs nor named as not critical"
+mkdir -p "$tree/crates/sigillum-oracle/src/report"
+: > "$tree/crates/sigillum-oracle/src/report/tests.rs"
+printf '# not critical: crates/sigillum-oracle/src/report.rs\n' >> "$tree/.cargo/mutants.toml"
+expect 0 "a new file named as not critical, and its test module" "4 files that are not critical"
+
+reset
+sed -i.bak '/not critical: crates\/sigillum-testpki\/src\/main.rs/d' "$tree/.cargo/mutants.toml"
+rm "$tree/.cargo/mutants.toml.bak"
+expect 1 "a file no longer named" "crates/sigillum-testpki/src/main.rs is neither selected"
+
+# The list must not name files that are gone or that are selected.
+reset
+printf '# not critical: crates/sigillum-testpki/src/gone.rs\n' >> "$tree/.cargo/mutants.toml"
+expect 1 "a file named that does not exist" "crates/sigillum-testpki/src/gone.rs is named as not critical but does not exist"
+reset
+printf '# not critical: crates/sigillum-testpki/src/signed.rs\n' >> "$tree/.cargo/mutants.toml"
+expect 1 "a file named and selected" "crates/sigillum-testpki/src/signed.rs is named as not critical but examine_globs selects it"
 
 if [ "$failures" -ne 0 ]; then
   echo "$failures case(s) failed" >&2

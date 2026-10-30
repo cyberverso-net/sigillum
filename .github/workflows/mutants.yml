@@ -14,8 +14,10 @@ on:
 permissions:
   contents: read
 
-# One run per branch or pull request at a time: a manual run waits for the
-# nightly one, and a new push to a pull request replaces its older run.
+# One run per ref at a time. A manual run dispatched on main waits for a
+# nightly run in progress (on another ref it runs alongside it), and a
+# newer pending run replaces an older pending one. On a pull request, a
+# new push also cancels the run in progress.
 concurrency:
   group: mutants-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -24,7 +26,9 @@ jobs:
   shard:
     name: Mutation testing (shard ${{ matrix.shard }})
     runs-on: ubuntu-24.04
-    timeout-minutes: 240
+    # 45 minutes on a pull request, so that a run over its budget fails
+    # visibly instead of holding the runners; 240 for all critical modules.
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 45 || 240 }}
     strategy:
       fail-fast: false
       matrix:
