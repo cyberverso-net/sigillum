@@ -29,7 +29,10 @@ import java.util.Optional;
  * of {@code signatures} in the general syntax (section 7.2.1), or, when the
  * document has no {@code signatures}, the member {@code protected} of the
  * document in the flattened syntax (section 7.2.2). DSS ignores the
- * members of the flattened syntax when {@code signatures} is present;</li>
+ * members of the flattened syntax when {@code signatures} is present, and
+ * skips an element of {@code signatures}, or the flattened document, whose
+ * member {@code signature} is absent, null or a blank string, with all its
+ * headers;</li>
  * <li>the components of the header parameter {@code etsiU} of ETSI TS
  * 119 182-1 V1.2.1, clause 5.3.1, in the JWS Unprotected Header,
  * {@code header}, at the same places, when every component of the array is
@@ -55,11 +58,15 @@ import java.util.Optional;
  * as a {@code protected} member of a header parameter, is not decoded: DSS
  * does not parse it as a header.
  *
- * <p>The walk of each JSON text reads each octet once and keeps no more than
- * the open containers. Counter signatures are checked from a work list, not
- * by recursion, and each is smaller than the text that holds it, so the
- * work takes time and memory in proportion to the input and its decoded
- * parts. It is not a validating parser: malformed JSON is left to DSS. A
+ * <p>The walk of each JSON text reads each octet once and keeps a record of
+ * the open containers down to {@link #NAMED_DEPTH} levels only, counting
+ * those below, so its memory does not grow with the depth. Counter
+ * signatures are checked from a work list, not by recursion. Each is a copy
+ * of part of the text that holds it, or of its decoded form, and is walked
+ * again as a document of its own, so a counter signature nested k levels
+ * deep in others is read k + 1 times: the time and memory grow with the
+ * input and its decoded parts times the nesting of counter signatures. It
+ * is not a validating parser: malformed JSON is left to DSS. A
  * refusal of json-sKema that the walk does not foresee is attributed to the
  * document by {@link #isDepthLimitOfDss}.
  */
@@ -70,8 +77,12 @@ final class JsonDepth {
 
     /** The levels that DSS adds around an etsiU component: the object and the array {@code {"etsiU":[...]}}. */
     private static final int ETSI_U_LEVELS = 2;
-    /** The deepest place that the walk names, in containers. */
-    private static final int NAMED_DEPTH = 6;
+    /**
+     * The deepest place that the walk names, in containers: the object of a
+     * counter signature in a clear etsiU component of an element of
+     * {@code signatures}.
+     */
+    private static final int NAMED_DEPTH = 7;
 
     /**
      * A step into an array element in a path. Paths are lists of member
@@ -87,6 +98,7 @@ final class JsonDepth {
     private static final List<Object> SIGNATURE_CSIG =
             List.of("signatures", ELEMENT, "header", "etsiU", ELEMENT, "cSig");
     private static final List<Object> COMPONENT_CSIG = List.of("cSig");
+    private static final List<Object> SIGNATURE_ENTRY = List.of("signatures", ELEMENT);
 
     private JsonDepth() {
     }
@@ -125,7 +137,7 @@ final class JsonDepth {
                 return Optional.of(problem(of, walk.depth));
             }
             for (Encoded header : walk.protectedHeaders) {
-                if (header.topLevel() && walk.hasSignatures) {
+                if (header.topLevel() && walk.hasSignatures || !header.entry().read) {
                     continue;
                 }
                 Walk decoded = decoded(header.value());
@@ -134,7 +146,7 @@ final class JsonDepth {
                 }
             }
             for (EtsiU array : walk.etsiU) {
-                if (array.topLevel && walk.hasSignatures) {
+                if (array.topLevel && walk.hasSignatures || !array.entry.read) {
                     continue;
                 }
                 for (String component : array.strings) {
@@ -256,19 +268,35 @@ final class JsonDepth {
         return b == ' ' || b == '\t' || b == '\n' || b == '\r';
     }
 
-    /** A protected header found in a document, and whether it is at the top level, of the flattened syntax. */
-    private record Encoded(String value, boolean topLevel) {
+    /**
+     * A protected header found in a document, whether it is at the top level,
+     * of the flattened syntax, and the signature entry that holds it.
+     */
+    private record Encoded(String value, boolean topLevel, Entry entry) {
+    }
+
+    /**
+     * A signature of the document: the document in the flattened syntax, or
+     * an element of {@code signatures} in the general syntax. DSS skips one
+     * whose member {@code signature} is absent, null or a blank string, and
+     * does not parse its headers (JWSJsonSerializationParser of dss-jades).
+     */
+    private static final class Entry {
+        /** Whether DSS reads the entry: its signature is another value. */
+        boolean read;
     }
 
     /** An etsiU array found in a document. */
     private static final class EtsiU {
         final boolean topLevel;
+        final Entry entry;
         final List<String> strings = new ArrayList<>();
         boolean allStrict = true;
         final List<byte[]> counterSignatures = new ArrayList<>();
 
-        EtsiU(boolean topLevel) {
+        EtsiU(boolean topLevel, Entry entry) {
             this.topLevel = topLevel;
+            this.entry = entry;
         }
     }
 
@@ -297,6 +325,10 @@ final class JsonDepth {
         /** For a counter signature given as an object, the offset of its opening brace, and where it goes. */
         int captureStart = -1;
         List<byte[]> captureInto;
+        /** For a signature entry, its record. */
+        Entry entry;
+        /** In an object, whether the value of the current member has started. */
+        boolean valueStarted;
 
         Frame(boolean object) {
             this.object = object;
@@ -311,20 +343,48 @@ final class JsonDepth {
     private static Walk walk(byte[] json, boolean component) {
         Walk walk = new Walk();
         Deque<Frame> frames = new ArrayDeque<>();
+        // The containers open below the deepest frame kept: nothing in them is at a place that the walk names, so
+        // they are counted, not recorded, and the walk keeps no more than NAMED_DEPTH frames however deep the JSON.
+        int deep = 0;
         int i = 0;
         while (i < json.length) {
             byte b = json[i];
+            if (deep > 0) {
+                switch (b) {
+                    case '{', '[' -> {
+                        deep++;
+                        walk.depth = Math.max(walk.depth, NAMED_DEPTH + deep);
+                    }
+                    case '}', ']' -> deep--;
+                    case '"' -> i = endOfString(json, i);
+                    default -> {
+                        // Nothing below the frames kept is at a place that the walk names.
+                    }
+                }
+                i++;
+                continue;
+            }
             switch (b) {
                 case '{', '[' -> {
                     elementOfEtsiU(frames, false);
-                    List<Object> path = frames.size() < NAMED_DEPTH ? path(frames) : null;
+                    valueStarts(frames, false);
+                    if (frames.size() >= NAMED_DEPTH) {
+                        deep++;
+                        walk.depth = Math.max(walk.depth, NAMED_DEPTH + deep);
+                        i++;
+                        continue;
+                    }
+                    List<Object> path = path(frames);
                     Frame frame = new Frame(b == '{');
-                    if (path != null && !component && b == '['
+                    if (!component && b == '{' && (frames.isEmpty() || path.equals(SIGNATURE_ENTRY))) {
+                        frame.entry = new Entry();
+                    }
+                    if (!component && b == '['
                             && (path.equals(ETSI_U) || path.equals(SIGNATURE_ETSI_U))) {
-                        frame.etsiU = new EtsiU(path.equals(ETSI_U));
+                        frame.etsiU = new EtsiU(path.equals(ETSI_U), entryOf(frames));
                         walk.etsiU.add(frame.etsiU);
                     }
-                    if (path != null && b == '{') {
+                    if (b == '{') {
                         List<byte[]> target = counterSignatureTarget(walk, frames, path, component);
                         if (target != null) {
                             frame.captureStart = i;
@@ -356,22 +416,23 @@ final class JsonDepth {
                     i++;
                 }
                 case '"' -> {
-                    int end = i + 1;
-                    while (end < json.length && json[end] != '"') {
-                        end += json[end] == '\\' ? 2 : 1;
-                    }
+                    int end = endOfString(json, i);
                     int stop = Math.min(end, json.length);
                     Frame frame = frames.peek();
                     boolean named = frames.size() <= NAMED_DEPTH;
                     if (frame != null && frame.object && frame.expectingKey) {
                         frame.key = named ? unescape(json, i + 1, stop) : null;
                         frame.expectingKey = false;
+                        frame.valueStarted = false;
                         frame.members++;
                         if (!component && frames.size() == 1 && "signatures".equals(frame.key)) {
                             walk.hasSignatures = true;
                         }
                     } else if (frame != null && named) {
-                        value(walk, frames, unescape(json, i + 1, stop), component);
+                        String value = unescape(json, i + 1, stop);
+                        // DSS skips an entry whose signature is a blank string (Utils.isStringBlank).
+                        valueStarts(frames, value.isBlank());
+                        value(walk, frames, value, component);
                     }
                     i = end + 1;
                 }
@@ -379,12 +440,51 @@ final class JsonDepth {
                     if (!whitespace(b) && b != ':') {
                         // A number, true, false or null: an element of an etsiU array that is not a string.
                         elementOfEtsiU(frames, false);
+                        // DSS skips an entry whose signature is null.
+                        valueStarts(frames, b == 'n');
                     }
                     i++;
                 }
             }
         }
         return walk;
+    }
+
+    /** The offset of the quotation mark that ends the string starting at an offset, or the length of the text. */
+    private static int endOfString(byte[] json, int start) {
+        int end = start + 1;
+        while (end < json.length && json[end] != '"') {
+            end += json[end] == '\\' ? 2 : 1;
+        }
+        return end;
+    }
+
+    /**
+     * Records the start of a value in the innermost container. When that
+     * container is a signature entry and the value is that of its member
+     * {@code signature}, DSS reads the entry unless the value is null or a
+     * blank string. Of duplicate members, on which DSS fails, any value
+     * that DSS would read counts.
+     */
+    private static void valueStarts(Deque<Frame> frames, boolean skipped) {
+        Frame frame = frames.peek();
+        if (frame == null || !frame.object || frame.expectingKey || frame.valueStarted) {
+            return;
+        }
+        frame.valueStarted = true;
+        if (frame.entry != null && "signature".equals(frame.key) && !skipped) {
+            frame.entry.read = true;
+        }
+    }
+
+    /** The signature entry that holds the innermost container: the nearest frame with one. */
+    private static Entry entryOf(Deque<Frame> frames) {
+        for (Frame frame : frames) {
+            if (frame.entry != null) {
+                return frame.entry;
+            }
+        }
+        return null;
     }
 
     /** Records an element of an etsiU array that is not a string, which stops DSS decoding the array. */
@@ -400,9 +500,9 @@ final class JsonDepth {
         Frame frame = frames.peek();
         List<Object> path = path(frames);
         if (!component && path.equals(PROTECTED)) {
-            walk.protectedHeaders.add(new Encoded(value, true));
+            walk.protectedHeaders.add(new Encoded(value, true, frame.entry));
         } else if (!component && path.equals(SIGNATURE_PROTECTED)) {
-            walk.protectedHeaders.add(new Encoded(value, false));
+            walk.protectedHeaders.add(new Encoded(value, false, frame.entry));
         } else if (frame.etsiU != null) {
             frame.etsiU.strings.add(value);
             frame.etsiU.allStrict &= strict(value);

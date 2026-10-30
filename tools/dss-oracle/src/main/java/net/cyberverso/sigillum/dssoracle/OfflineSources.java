@@ -19,15 +19,21 @@ import eu.europa.esig.dss.spi.x509.CommonTrustedCertificateSource;
 import eu.europa.esig.dss.spi.x509.revocation.crl.ExternalResourcesCRLSource;
 import eu.europa.esig.dss.spi.x509.revocation.ocsp.ExternalResourcesOCSPSource;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiFunction;
+import javax.security.auth.x500.X500Principal;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.ocsp.BasicOCSPResp;
@@ -93,6 +99,31 @@ public final class OfflineSources {
                 Input.readAll("--certificate", arguments.certificates()),
                 Input.readAll("--crl", arguments.crls()),
                 Input.readAll("--ocsp", arguments.ocspResponses()));
+    }
+
+    /**
+     * Builds a certificate verifier with the trust anchors and the other
+     * supplied certificates only, without revocation data and without the
+     * checks of {@link #certificateVerifier}: for finding signers and
+     * chains before the checks of the revocation data.
+     *
+     * @return the verifier
+     * @throws RejectedInputException if DSS cannot use a certificate
+     */
+    public CertificateVerifier certificateSources() throws RejectedInputException {
+        CommonTrustedCertificateSource trusted = new CommonTrustedCertificateSource();
+        for (Input anchor : trustAnchors) {
+            trusted.addCertificate(anchor.certificate());
+        }
+        CommonCertificateSource adjunct = new CommonCertificateSource();
+        for (Input input : certificates) {
+            adjunct.addCertificate(input.certificate());
+        }
+        CommonCertificateVerifier verifier = new CommonCertificateVerifier(true);
+        verifier.setAIASource(null);
+        verifier.setTrustedCertSources(trusted);
+        verifier.setAdjunctCertSources(adjunct);
+        return verifier;
     }
 
     /**
@@ -256,16 +287,18 @@ public final class OfflineSources {
         return inputs;
     }
 
-    /** Makes the revocation tokens of a source for every pair of a certificate and its issuer. */
+    /**
+     * Makes the revocation tokens of a source for every pair of a certificate
+     * and its issuer. Copies of a certificate count once, as DSS keeps one
+     * certificate token for them, and issuers are found by their subject, so
+     * the work grows with the pairs, not with the square of the certificates.
+     */
     private static void makeRevocationTokens(Input input, List<CertificateToken> certificates,
             BiFunction<CertificateToken, CertificateToken, ?> tokens) throws RejectedInputException {
-        for (CertificateToken certificate : certificates) {
-            for (CertificateToken issuer : certificates) {
-                if (!issuer.getSubject().getPrincipal().equals(certificate.getIssuer().getPrincipal())) {
-                    continue;
-                }
+        for (Map.Entry<CertificateToken, List<CertificateToken>> pair : issuers(certificates).entrySet()) {
+            for (CertificateToken issuer : pair.getValue()) {
                 try {
-                    tokens.apply(certificate, issuer);
+                    tokens.apply(pair.getKey(), issuer);
                 } catch (DSSException | IllegalArgumentException | IllegalStateException
                         | NegativeArraySizeException e) {
                     // NegativeArraySizeException: DSS fails so on a CRL entry of indefinite length.
@@ -273,6 +306,47 @@ public final class OfflineSources {
                 }
             }
         }
+    }
+
+    /**
+     * Returns, for each distinct certificate, in their order, the
+     * certificates whose subject is its issuer name, one per distinct
+     * subject and public key, the first supplied. In the corpus, the
+     * differential tests and a test with 1,000 certificates of one name and
+     * key against DSS alone, the revocation tokens were observed to depend
+     * on the issuer through its name and key only, so issuers of one name
+     * and key, such as re-encodings of one CA certificate, are taken to give
+     * the same tokens and count once. Issuers of one name and key that
+     * differ in key usage are a known exception, left to #159: which of
+     * them DSS uses has not been established. The pairs are as many as the
+     * certificates times the distinct keys of their issuer name; the list of
+     * these issuers is shared by the certificates of the name.
+     *
+     * @param certificates the certificates, possibly with copies
+     * @return the issuers of each certificate
+     */
+    static Map<CertificateToken, List<CertificateToken>> issuers(List<CertificateToken> certificates) {
+        Set<CertificateToken> distinct = new LinkedHashSet<>(certificates);
+        Map<X500Principal, Map<Object, CertificateToken>> bySubject = new HashMap<>();
+        for (CertificateToken certificate : distinct) {
+            bySubject.computeIfAbsent(certificate.getSubject().getPrincipal(), subject -> new LinkedHashMap<>())
+                    .putIfAbsent(keyOf(certificate), certificate);
+        }
+        // One list per name, shared by the certificates of that issuer name.
+        Map<X500Principal, List<CertificateToken>> lists = new HashMap<>();
+        bySubject.forEach((subject, named) -> lists.put(subject, List.copyOf(named.values())));
+        Map<CertificateToken, List<CertificateToken>> issuers = new LinkedHashMap<>();
+        for (CertificateToken certificate : distinct) {
+            issuers.put(certificate, lists.getOrDefault(certificate.getIssuer().getPrincipal(), List.of()));
+        }
+        return issuers;
+    }
+
+    /** The public key of a certificate as a value, or the certificate itself when it has none that decodes. */
+    private static Object keyOf(CertificateToken certificate) {
+        PublicKey key = certificate.getPublicKey();
+        byte[] encoded = key == null ? null : key.getEncoded();
+        return encoded == null ? certificate : ByteBuffer.wrap(encoded);
     }
 
     /**
