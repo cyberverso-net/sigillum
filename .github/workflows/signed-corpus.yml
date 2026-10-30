@@ -2,7 +2,7 @@ name: Signed corpus
 
 on:
   push:
-    branches: [main]
+    branches: [main, story/112-pades-attack-variants]
   pull_request:
 
 permissions:
@@ -45,6 +45,38 @@ jobs:
           offline ./target/debug/sigillum-testpki generate signed --manifest testdata/manifest.toml \
             --java "$JAVA_HOME/bin/java" --dss-oracle tools/dss-oracle/target/dss-oracle.jar
           offline ./target/debug/sigillum-testpki generate mutations --manifest testdata/manifest.toml
+      - name: Validate the PAdES variants with DSS (temporary)
+        if: always()
+        run: |
+          offline() {
+            sudo unshare --net -- runuser -u "$(id -un)" -- env "PATH=$PATH" "JAVA_HOME=$JAVA_HOME" "$@"
+          }
+          time=$(sed -n 's/^validation-time *= *"\([^"]*\)".*/\1/p' testdata/manifest.toml | head -n 1)
+          mkdir -p "$RUNNER_TEMP/reports"
+          for file in testdata/signed/pades-shadow-*.pdf testdata/mutations/pades-*.pdf; do
+            [ -f "$file" ] || continue
+            name=$(basename "$file" .pdf)
+            out="$RUNNER_TEMP/reports/$(basename "$(dirname "$file")")-$name"
+            mkdir -p "$out"
+            offline "$JAVA_HOME/bin/java" -Xmx512m -XX:+UseSerialGC -jar tools/dss-oracle/target/dss-oracle.jar \
+              validate-document --document "$PWD/$file" \
+              --certificate "$PWD/testdata/pki/signer-p256.pem" --certificate "$PWD/testdata/pki/ca-ecdsa.pem" \
+              --trust-anchor "$PWD/testdata/pki/root-ca.pem" \
+              --ocsp "$PWD/testdata/ocsp/signer-p256.der" --crl "$PWD/testdata/crl/root-ca.crl" \
+              --validation-time "$time" --timeout 120 --out "$out" || echo "exit code $?"
+            echo "=== $file"
+            cat "$out/summary.json" || true
+            echo
+          done
+          git status --porcelain -- testdata
+      - name: Upload the generated corpus (temporary)
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: corpus-112
+          path: |
+            testdata
+            ${{ runner.temp }}/reports
       - name: Check that nothing changed
         run: |
           git status --porcelain -- testdata

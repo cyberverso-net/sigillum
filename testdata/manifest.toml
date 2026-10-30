@@ -1197,6 +1197,33 @@ expected-openssl = "not-applicable"
 expected-dss = "not-applicable"
 
 [[artefact]]
+id = "documents/shadow-hide"
+path = "documents/shadow-hide.pdf"
+sha256 = "9e1afec97d0e9f7abcda3323eedc631de6a723f14f1e253370d2ee59fca4443f"
+kind = "document"
+purpose = "A small PDF of one page prepared for a shadow attack of the hide class: a second line of text under a white rectangle drawn by a content stream of its own, which mutations/pades-shadow-hide empties after signing."
+expected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "documents/shadow-replace"
+path = "documents/shadow-replace.pdf"
+sha256 = "b3bd6472aeceea49fca3bc9565348fa8b0397cbad19c6466e6989eaac27751c5"
+kind = "document"
+purpose = "A small PDF of one page prepared for a shadow attack of the replace class: a text field named Amount with the value 100 EUR and its appearance, which mutations/pades-shadow-replace replaces after signing."
+expected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "documents/shadow-hide-and-replace"
+path = "documents/shadow-hide-and-replace.pdf"
+sha256 = "0e51c68aa72215691973b3e9d5dac705da39cc1a7e8236bb3c4da427bd0efa3c"
+kind = "document"
+purpose = "A small PDF of one page prepared for a shadow attack of the hide-and-replace class: a second page tree with a page of other text, which no object in use refers to and which mutations/pades-shadow-hide-and-replace makes the page tree of the catalog after signing."
+expected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
 id = "signed/cades-enveloping-b-b-rsa"
 path = "signed/cades-enveloping-b-b-rsa.p7m"
 sha256 = "4847a2d8e4a14d053435b4aabb269a45fa1f73deb51025d56627adaa12c775d1"

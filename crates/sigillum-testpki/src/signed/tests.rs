@@ -31,14 +31,21 @@ fn strings(arguments: &[OsString]) -> Vec<String> {
 fn the_plan_covers_every_combination_of_the_story() {
     let fixtures = plan();
     // CAdES enveloping and detached, PAdES, JAdES flattened and general at three
-    // levels, and JAdES compact at B-B only, for four signers.
-    assert_eq!(fixtures.len(), (5 * 3 + 1) * 4);
+    // levels, and JAdES compact at B-B only, for four signers; then the three
+    // documents prepared for shadow attacks, at B-B by one signer (issue #112).
+    assert_eq!(fixtures.len(), (5 * 3 + 1) * 4 + 3);
     let mut ids: Vec<String> = fixtures.iter().map(Fixture::id).collect();
     ids.sort();
     ids.dedup();
     assert_eq!(ids.len(), fixtures.len());
     for fixture in &fixtures {
-        if fixture.variant == Variant::JadesCompact {
+        if matches!(
+            fixture.variant,
+            Variant::JadesCompact
+                | Variant::PadesShadowHide
+                | Variant::PadesShadowReplace
+                | Variant::PadesShadowHideAndReplace
+        ) {
             assert_eq!(fixture.level, Level::B, "{}", fixture.id());
         }
         assert!(fixture.id().starts_with("signed/"), "{}", fixture.id());
@@ -716,5 +723,97 @@ fn jades_notes_describe_x5c_at_each_level() -> TestResult {
             );
         }
     }
+    Ok(())
+}
+
+/// Issue #112: the documents prepared for the three classes of shadow
+/// attack are signed at B-B by pki/signer-p256 only, after the rest of the
+/// plan, as PAdES signatures of their own base documents.
+#[test]
+fn the_shadow_documents_are_signed_at_b_b_by_one_signer() -> TestResult {
+    let shadows: Vec<Fixture> = plan()
+        .into_iter()
+        .filter(|fixture| fixture.id().starts_with("signed/pades-shadow-"))
+        .collect();
+    let ids: Vec<String> = shadows.iter().map(Fixture::id).collect();
+    assert_eq!(
+        ids,
+        [
+            "signed/pades-shadow-hide-b-b-p256",
+            "signed/pades-shadow-replace-b-b-p256",
+            "signed/pades-shadow-hide-and-replace-b-b-p256",
+        ]
+    );
+    assert_eq!(
+        plan()[plan().len() - 3..]
+            .iter()
+            .map(Fixture::id)
+            .collect::<Vec<_>>(),
+        ids
+    );
+    let root = Path::new("corpus");
+    for (fixture, document) in shadows.iter().zip([
+        "documents/shadow-hide",
+        "documents/shadow-replace",
+        "documents/shadow-hide-and-replace",
+    ]) {
+        assert_eq!(
+            fixture.path(),
+            PathBuf::from(format!("{}.pdf", fixture.id()))
+        );
+        let arguments =
+            strings(&fixture.arguments(root, Path::new("t"), VALIDATION_TIME, Path::new("o"))?);
+        let at = arguments
+            .iter()
+            .position(|a| a == "--document")
+            .ok_or("no --document")?;
+        assert_eq!(
+            arguments[at + 1],
+            root.join(format!("{document}.pdf")).to_string_lossy()
+        );
+        let format = arguments
+            .iter()
+            .position(|a| a == "--format")
+            .ok_or("no --format")?;
+        assert_eq!(arguments[format + 1], "pades");
+        assert!(!arguments.contains(&"--tsa-program".to_owned()));
+        let artefact = fixture.artefact(b"x");
+        assert_eq!(artefact.expected_openssl, OpensslResult::NotApplicable);
+        assert_eq!(
+            artefact.expected_dss,
+            DssResult::Indication {
+                indication: Indication::TotalPassed,
+                sub_indication: None
+            }
+        );
+        assert_eq!(artefact.attack_class, None);
+        assert_eq!(artefact.links.issuer.as_deref(), Some("pki/signer-p256"));
+        assert!(
+            artefact.purpose.contains(&format!("over {document},")),
+            "{}",
+            artefact.purpose
+        );
+        let notes = artefact.notes.ok_or("no notes")?;
+        assert!(notes.contains("mutations/pades-shadow-"), "{notes}");
+    }
+    let required = required_ids();
+    for document in [
+        "documents/shadow-hide",
+        "documents/shadow-replace",
+        "documents/shadow-hide-and-replace",
+    ] {
+        assert!(required.contains(&document.to_owned()), "{document}");
+    }
+    Ok(())
+}
+
+#[test]
+fn shadow_purposes_name_the_class() -> TestResult {
+    assert_eq!(
+        fixture("signed/pades-shadow-hide-and-replace-b-b-p256")?
+            .artefact(b"x")
+            .purpose,
+        "PAdES baseline signature, invisible, of a document prepared for a shadow attack of the hide-and-replace class, at B-B, over documents/shadow-hide-and-replace, by pki/signer-p256 with ECDSA on P-256 and SHA-256, created by DSS."
+    );
     Ok(())
 }
