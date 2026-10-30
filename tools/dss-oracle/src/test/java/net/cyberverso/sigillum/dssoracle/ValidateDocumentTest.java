@@ -299,7 +299,7 @@ class ValidateDocumentTest {
     /**
      * A CAdES signature without its certificates is validated with its
      * signing certificate supplied with {@code --certificate}, which DSS
-     * then takes as a candidate (Codex review of #37).
+     * then takes as a candidate (issue #37).
      */
     @Test
     void aSigningCertificateSuppliedOfflineIsACandidate() throws Exception {
@@ -315,7 +315,7 @@ class ValidateDocumentTest {
     /**
      * A certificate of a timestamp token that DSS does not use, here one
      * with a subject name that is not valid UTF-8, does not make the
-     * document rejected (Codex review of #37).
+     * document rejected (issue #37).
      */
     @Test
     void anUnusedMalformedCertificateOfATimestampIsIgnored() throws Exception {
@@ -565,7 +565,7 @@ class ValidateDocumentTest {
      * A member named {@code protected} that is not a JWS Protected Header,
      * here inside an extension of the unprotected header, is not decoded:
      * DSS does not parse it, and the document is validated however deep its
-     * decoded value is (Codex review of #37).
+     * decoded value is (issue #37).
      */
     @Test
     void aMemberNamedProtectedElsewhereIsNotTakenForAHeader() throws Exception {
@@ -609,26 +609,55 @@ class ValidateDocumentTest {
                 + "\nAll:\n" + String.join("\n", outcomes));
         // The probes of counter signatures make DSS alone fail; those of ignored members do not.
         for (String failing : List.of("csig-compact-b64", "csig-clear-obj", "csig-clear-compact", "csig-nested",
-                "csig-string-json")) {
+                "csig-string-json", "csig-general-clear-obj")) {
             assertTrue(outcomes.stream().anyMatch(line -> line.startsWith(failing + ": rejected")), failing);
         }
         for (String passing : List.of("etsiu-lenient", "etsiu-mixed", "general-plus-top",
-                "general-plus-top-header", "csig-second-member-clear", "csig-second-member-b64")) {
+                "general-plus-top-header", "csig-second-member-clear", "csig-second-member-b64",
+                "skipped-entry-empty-signature", "skipped-entry-blank-signature", "skipped-entry-null-signature",
+                "skipped-entry-without-signature", "skipped-entry-etsiu", "skipped-flattened-empty-signature")) {
             assertTrue(outcomes.stream().anyMatch(line -> line.startsWith(passing + ": validated")), passing);
         }
         // The walk itself finds the counter signatures, before DSS parses them.
         for (String counterSignature : List.of("csig-compact-b64", "csig-clear-obj", "csig-clear-compact",
-                "csig-nested", "csig-string-json")) {
+                "csig-nested", "csig-string-json", "csig-general-clear-obj")) {
             String message = (String) summary(temp.resolve("crafted-" + counterSignature)).get("message");
             assertTrue(message.contains("a counter signature"), counterSignature + ": " + message);
         }
     }
 
     /**
+     * Issue #72, comment case 13: a general JWS with the JAdES signature of
+     * the tests, followed by an entry whose protected header is nested
+     * deeper than DSS accepts and whose signature is empty. DSS skips that
+     * entry and validates the signature, and so must the tool.
+     */
+    @Test
+    void anEntryThatDssSkipsDoesNotRejectTheDocument() throws Exception {
+        String json = new String(Documents.jadesJson(), StandardCharsets.US_ASCII);
+        java.util.regex.Matcher payload = java.util.regex.Pattern.compile("\"payload\":\"([^\"]*)\"").matcher(json);
+        java.util.regex.Matcher header = java.util.regex.Pattern.compile("\"protected\":\"([^\"]*)\"").matcher(json);
+        java.util.regex.Matcher value = java.util.regex.Pattern.compile("\"signature\":\"([^\"]*)\"").matcher(json);
+        assertTrue(payload.find() && header.find() && value.find(), json);
+        String deep = Documents.base64url(Documents.nestedHeader(JsonDepth.MAX_DEPTH));
+        byte[] document = ("{\"payload\":\"" + payload.group(1) + "\",\"signatures\":[{\"protected\":\""
+                + header.group(1) + "\",\"signature\":\"" + value.group(1) + "\"},{\"protected\":\"" + deep
+                + "\",\"signature\":\"\"}]}").getBytes(StandardCharsets.US_ASCII);
+        DssAlone.Inputs inputs = DssAlone.Inputs.of(document, "skipped-entry.json");
+        assertNull(DssAlone.failure(inputs));
+        Path result = temp.resolve("skipped-entry");
+        assertEquals(ExitCodes.SUCCESS, run(arguments(write("skipped-entry.json", document),
+                "--out", result.toString())), stderr());
+        List<Map<String, Object>> signatures = assertAsDssAlone(result, inputs);
+        assertEquals(1, signatures.size());
+        assertEquals("TOTAL_PASSED", signatures.get(0).get("indication"));
+    }
+
+    /**
      * Member names that spell the places the walk looks at, such as a root
      * member named {@code signatures/#/protected} or a header parameter
      * named {@code etsiU/#/cSig}, are not those places: DSS validates the
-     * signature, and so must the tool (Codex review of #37).
+     * signature, and so must the tool (issue #37).
      */
     @Test
     void memberNamesThatSpellAPathAreNotThatPath() throws Exception {
@@ -655,7 +684,7 @@ class ValidateDocumentTest {
      * A standalone timestamp token given as the document, whose message
      * imprint uses SHAKE-128, which no provider computes: without detached
      * content DSS computes no imprint and validates it, with content it
-     * fails. The tool must do as DSS alone (Codex review of #37).
+     * fails. The tool must do as DSS alone (issue #37).
      */
     @Test
     void aTimestampWithAnImprintNoProviderComputesIsRejectedOnlyWithContent() throws Exception {

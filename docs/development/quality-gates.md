@@ -91,7 +91,7 @@ Trusting another publisher, with `cargo vet trust`, or adding another source of 
 
 | Gate | Tool | Threshold |
 | --- | --- | --- |
-| Line coverage of new and changed code | `cargo llvm-cov` | At least 90% |
+| Line coverage of new and changed code | `cargo llvm-cov`, measured by the *Line coverage* job of `coverage.yml`, as described below | At least 90% |
 | Mutation score in critical modules (signing, verification, parsers) | `cargo mutants` | At least 80% of mutants caught |
 | Fuzzing of each new or changed parser | `cargo fuzz` | At least 10 minutes per target without a finding. Long runs are not an author gate: their evidence is in the nightly fuzzing workflow, described below |
 | Differential tests against DSS | `sigillum-oracle` | No unexplained divergence |
@@ -99,6 +99,16 @@ Trusting another publisher, with `cargo vet trust`, or adding another source of 
 Thresholds apply to the change under review. A shortfall is acceptable only with a written justification in the pull request, for example code that is unreachable by construction.
 
 The fuzzing threshold applies to parsers in the library crates and in the Rust tools. The Java test tool `tools/dss-oracle` is covered instead by a deterministic JUnit mutation test of its inputs, run by `mvn verify`, because it is not distributed and reads only project fixtures and sigillum output. Its README describes the test.
+
+## Coverage evidence
+
+The *Line coverage* job of `.github/workflows/coverage.yml` runs on every pull request, on the merge group and on every push to `main`, on Linux. It is where the evidence for the coverage gate lives. The reviewer checks the threshold against its report; the job fails only when the tests or the report fail, never on the threshold.
+
+- **What runs.** `cargo llvm-cov --workspace`, with the version pinned in the workflow, runs the tests of the workspace with default features, as the cross-platform test job does. The `dss` feature of `sigillum-oracle`, and the tests that need OpenSSL or `tools/dss-oracle`, are not run: they need Java, Maven and OpenSSL built from source, and run in their own workflows. Their tests only say that they did not run.
+- **What is measured.** `cargo llvm-cov` leaves out of the report, by default, the files under `tests`, `examples` and `benches` directories and the files named `tests.rs` or ending in `_tests.rs` or `-tests.rs`, so test code does not count. Unit tests therefore live in their own file, `src/<module>/tests.rs`, declared with `#[cfg(test)] mod tests;`. In any other Rust file, `.github/scripts/check-test-modules.sh` allows a `cfg` attribute whose condition contains the word `test`, in any form, only on exactly `mod tests;`, with no visibility and no other attribute such as `#[path]`, and refuses an inner `#![cfg(...)]` with `test`, and any test or benchmark: `#[test]`, an attribute whose path ends in `::test`, such as `#[tokio::test]`, and `#[bench]`. Anything else would put test code in the report as covered code. Code built only with the `dss` feature is not in the report. A test process stopped at a deadline can leave a profile that cannot be read. The job skips such a profile, which can only lower the coverage, and says so in a warning and in the job summary.
+- **Changed lines.** `.github/scripts/diff-coverage.sh` compares the lcov report with the lines added or changed since the merge base: for a pull request, the base side of its merge commit; for a merge group, its base; for a push to `main`, the tip of `main` before the push. `.github/scripts/coverage-base.sh` chooses the base. A changed line counts when the report measures it, and is covered when a test runs it. The percentage is truncated, never rounded up. The scripts are tested in `.github/scripts/test-diff-coverage.sh`.
+- **Where to read it.** The job summary gives the total line coverage, the coverage of the changed lines, and for each changed file the lines not covered. It lists the changed Rust files, other than test files, that have no line in the report, such as fuzz targets. The lcov and HTML reports are in the artefact `coverage-<run number>-<attempt>` of the run, kept for 30 days.
+- **Code the job does not measure.** For changed code reached only by the tests that need DSS or OpenSSL, the author measures the coverage locally with those tests on, for example in the development image, and gives the result in the pull request.
 
 ## Nightly fuzzing
 

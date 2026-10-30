@@ -351,6 +351,23 @@ final class Documents {
         String second = "{\"unrecognized\":0,\"cSig\":\"" + compact + "\"}";
         documents.put("csig-second-member-clear", flat(ok, "[" + second + "]"));
         documents.put("csig-second-member-b64", flat(ok, "[\"" + base64url(second) + "\"]"));
+        // DSS skips an entry, or a flattened JWS, whose signature is absent, null or blank, and never parses its
+        // headers; it reads those of an entry whose signature is another value (issue #72).
+        String general = "{\"payload\":\"e30\",\"signatures\":[{\"protected\":\"" + ok
+                + "\",\"signature\":\"AAAA\"},{\"protected\":\"" + deepHeader + "\"";
+        documents.put("skipped-entry-empty-signature", general + ",\"signature\":\"\"}]}");
+        documents.put("skipped-entry-blank-signature", general + ",\"signature\":\" \"}]}");
+        documents.put("skipped-entry-null-signature", general + ",\"signature\":null}]}");
+        documents.put("skipped-entry-without-signature", general + "}]}");
+        documents.put("skipped-entry-etsiu", "{\"payload\":\"e30\",\"signatures\":[{\"protected\":\"" + ok
+                + "\",\"signature\":\"AAAA\"},{\"protected\":\"" + ok + "\",\"header\":{\"etsiU\":[\""
+                + component + "\"]},\"signature\":\"\"}]}");
+        documents.put("skipped-flattened-empty-signature", "{\"payload\":\"e30\",\"protected\":\"" + deepHeader
+                + "\",\"signature\":\"\"}");
+        documents.put("read-entry-numeric-signature", general + ",\"signature\":0}]}");
+        // A counter signature as an object in a clear etsiU component of the general syntax, six levels down.
+        documents.put("csig-general-clear-obj", "{\"payload\":\"e30\",\"signatures\":[{\"protected\":\"" + ok
+                + "\",\"header\":{\"etsiU\":[{\"cSig\":" + flatDeep + "}]},\"signature\":\"AAAA\"}]}");
         java.util.Map<String, byte[]> bytes = new java.util.LinkedHashMap<>();
         documents.forEach((name, text) -> bytes.put(name, text.getBytes(StandardCharsets.UTF_8)));
         return bytes;

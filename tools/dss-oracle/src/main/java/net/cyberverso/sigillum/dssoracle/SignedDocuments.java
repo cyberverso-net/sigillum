@@ -173,21 +173,7 @@ final class SignedDocuments {
      */
     private static List<CertificateToken> withIssuers(List<CertificateToken> certificates,
             List<CertificateToken> pool) {
-        List<CertificateToken> result = new ArrayList<>();
-        java.util.Deque<CertificateToken> pending = new java.util.ArrayDeque<>(certificates);
-        while (!pending.isEmpty()) {
-            CertificateToken certificate = pending.pop();
-            if (result.contains(certificate)) {
-                continue;
-            }
-            result.add(certificate);
-            for (CertificateToken issuer : pool) {
-                if (issuer.getSubject().getPrincipal().equals(certificate.getIssuer().getPrincipal())) {
-                    pending.push(issuer);
-                }
-            }
-        }
-        return result;
+        return new ArrayList<>(IssuerClosure.of(certificates, pool, (certificate, issuer) -> true));
     }
 
     private static void addWithCounterSignatures(AdvancedSignature signature, List<AdvancedSignature> all) {
