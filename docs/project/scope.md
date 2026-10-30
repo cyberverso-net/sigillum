@@ -21,8 +21,13 @@ The target versions of the standards are those listed in Annex I of [Commission 
 
 ### Cryptographic algorithms (creation)
 
+The algorithms follow [ETSI TS 119 312 V2.1.1](https://www.etsi.org/deliver/etsi_ts/119300_119399/119312/02.01.01_60/ts_119312v020101p.pdf), Cryptographic Suites.
+
 - Digests: SHA-256, SHA-384, SHA-512; SHA3-256, SHA3-384, SHA3-512.
-- Signatures: RSA PKCS#1 v1.5 and RSASSA-PSS (2048 bits and above); ECDSA on P-256, P-384 and P-521; Ed25519.
+- Signatures: RSASSA-PSS and RSA PKCS#1 v1.5; ECDSA on P-256, P-384 and P-521; Ed25519. TS 119 312 V2.1.1 recommends RSA keys of 3000 bits and above (Table 6).
+- RSA PKCS#1 v1.5 is a legacy mechanism in TS 119 312 V2.1.1 (clause 3.4, Table 2), while RSASSA-PSS is recommended. PKCS#1 v1.5 is kept for interoperability, which clause 4 allows for legacy mechanisms.
+- RSA keys of 2048 to 2999 bits are accepted for creation as legacy. TS 119 312 V2.1.1 (Table 6 and clause 8.4) stops the issuing of certificates with such keys after 2026-12-31 and ends their validity no later than 2028-12-31. Creation refuses such a key with "not supported" when the signing time is after 2028-12-31, whatever the validity period of the certificate, because a certificate may state a validity period that ends later.
+- Expiry dates of algorithms and key sizes come from TS 119 312 V2.1.1. Where its normative tables and its informative Annex D differ, the normative tables prevail. The dates themselves are set in phase 2, with the cryptographic policy of verification (threat K6 of the [threat model](../design/threat-model.md)).
 
 ### Supporting functions
 
@@ -54,6 +59,8 @@ These are expected to be added later, in the order of the [roadmap](roadmap.md) 
 | Counter-signatures | Demand |
 | Configurable validation policy | Demand from a validation-service user |
 | C ABI | Demand |
+| DSA on verification | Demand. Until then a DSA signature is reported as not supported ([ADR-0007](../design/adr/0007-asymmetric-scope.md)) |
+| On verification: Ed448, ML-DSA, SLH-DSA, LMS, XMSS, the Brainpool and FRP256v1 curves, SHA-224 | Demand, or the publication of the post-quantum migration document that TS 119 312 V2.1.1, clause 8.5, announces. Until then they are reported as not supported |
 
 ## Excluded
 
@@ -63,7 +70,8 @@ These are not planned. Proposals to include them need to explain why the reasons
 | --- | --- |
 | Creation of legacy forms (-C, -X, -XL, -A, PAdES-LTV) | Obsolete for new signatures |
 | XAdES namespaces 1.1.1 and 1.2.2 | Predate the current XAdES standard |
-| Creation with MD2, MD5, SHA-1, RIPEMD-160, Whirlpool, DSA | Insecure or obsolete; on verification these are recognised and rejected under the cryptographic policy, without being implemented. SHA-1 is the one exception, implemented for one purpose only: a lookup identifier where a standard specifies or permits SHA-1 for that identifier. It is never accepted for integrity or signatures. The only cases are the hash algorithm of an OCSP `CertID` ([RFC 6960](https://www.rfc-editor.org/rfc/rfc6960), section 4.1.1) and the `byKey` responder identifier (RFC 6960, sections 4.2.1 and 4.2.2.3). Key identifiers computed with method 1 of [RFC 5280](https://www.rfc-editor.org/rfc/rfc5280), section 4.2.1.2, are the third case. Threat K10 of the [threat model](../design/threat-model.md) gives the reason |
+| Creation with DSA | No target user, and rare in European signing certificates. Verification is deferred (see above) |
+| Creation with MD2, MD5, SHA-1, RIPEMD-160, Whirlpool | Insecure or obsolete; on verification these are recognised and rejected under the cryptographic policy, without being implemented. SHA-1 is the one exception, implemented for one purpose only: a lookup identifier where a standard specifies or permits SHA-1 for that identifier. It is never accepted for integrity or signatures. The only cases are the hash algorithm of an OCSP `CertID` ([RFC 6960](https://www.rfc-editor.org/rfc/rfc6960), section 4.1.1) and the `byKey` responder identifier (RFC 6960, sections 4.2.1 and 4.2.2.3). Key identifiers computed with method 1 of [RFC 5280](https://www.rfc-editor.org/rfc/rfc5280), section 4.2.1.2, are the third case. Threat K10 of the [threat model](../design/threat-model.md) gives the reason |
 | Explicit signature policies (EPES policy documents and policy stores) | Rarely used; verification checks presence and digest only |
 | OpenDocument signatures | Niche format |
 | PDF/A conformance checking | Outside the signature domain |
