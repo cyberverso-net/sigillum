@@ -1,0 +1,108 @@
+name: Mutation testing
+
+# Tests the mutants of the critical modules of
+# docs/development/quality-gates.md, which .cargo/mutants.toml lists: on a
+# pull request, those in its diff (--in-diff); every night and on demand,
+# all of them, on main. Not a required check: a shortfall can be justified
+# in the pull request, as quality-gates.md states.
+on:
+  pull_request:
+  schedule:
+    - cron: "23 1 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One run per ref at a time. A manual run dispatched on main waits for a
+# nightly run in progress (on another ref it runs alongside it), and a
+# newer pending run replaces an older pending one. On a pull request, a
+# new push also cancels the run in progress.
+concurrency:
+  group: mutants-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  shard:
+    name: Mutation testing (shard ${{ matrix.shard }})
+    runs-on: ubuntu-24.04
+    # 45 minutes on a pull request, so that a run over its budget fails
+    # visibly instead of holding the runners; 240 for all critical modules.
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 45 || 240 }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # The only place that sets the number of shards: each job reads
+        # its index and the count from strategy.job-index and job-total.
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      # On a pull request, the merge commit and its first parent, the base.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
+        with:
+          toolchain: stable
+      - uses: taiki-e/install-action@1e29709c0ec63babbe8f266397a465f29a825f91 # v2.87.31
+        with:
+          tool: cargo-mutants@27.1.0
+          fallback: none
+      - name: Write the diff of the pull request
+        if: github.event_name == 'pull_request'
+        run: git diff HEAD^1 HEAD > "$RUNNER_TEMP/changes.diff"
+      # Three jobs on the four processors of the runner, and round-robin
+      # sharding, which spreads the slow files over the shards. The exit
+      # code is kept for the report job, which judges it.
+      - name: Test the mutants of the shard
+        env:
+          SHARD: ${{ strategy.job-index }}
+          SHARDS: ${{ strategy.job-total }}
+        run: |
+          args=(--no-shuffle --jobs 3 --shard "$SHARD/$SHARDS" --sharding round-robin --cargo-arg=--locked)
+          if [ -f "$RUNNER_TEMP/changes.diff" ]; then
+            args+=(--in-diff "$RUNNER_TEMP/changes.diff")
+          fi
+          start=$(date +%s)
+          status=0
+          cargo mutants "${args[@]}" || status=$?
+          echo "Shard $SHARD of $SHARDS: $(( $(date +%s) - start )) s, exit code $status" | tee -a "$GITHUB_STEP_SUMMARY"
+          mkdir -p mutants.out
+          echo "$SHARD/$SHARDS" > mutants.out/shard
+          echo "$status" > mutants.out/exit-status
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ !cancelled() }}
+        with:
+          name: mutants-out-shard-${{ matrix.shard }}
+          path: mutants.out
+          if-no-files-found: ignore
+
+  report:
+    name: Mutation testing
+    needs: shard
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      # The threshold of docs/development/quality-gates.md, "Author gates".
+      MUTATION_THRESHOLD: 80
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: mutants-out-shard-*
+          path: ${{ runner.temp }}/shards
+      # The shards record their index and count, so a shard that left no
+      # artefact is reported as missing and fails the run, while the
+      # others are still counted.
+      - name: Report the score and the missed mutants
+        run: |
+          code=0
+          .github/scripts/mutants-summary.sh "$MUTATION_THRESHOLD" "$RUNNER_TEMP/shards" > "$RUNNER_TEMP/summary.md" || code=$?
+          cat "$RUNNER_TEMP/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          cat "$RUNNER_TEMP/summary.md"
+          exit "$code"

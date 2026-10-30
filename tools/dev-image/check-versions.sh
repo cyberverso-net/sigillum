@@ -71,6 +71,13 @@ for name in RUST_NIGHTLY CARGO_FUZZ_VERSION; do
         || differs "$name is $(value "$name"), fuzz-nightly.yml installs ${pinned:-nothing}"
 done
 
+# cargo mutants: the version that the mutation workflows install.
+for file in mutants.yml mutants-config.yml; do
+    mutants=$(sed -n 's/.*tool: cargo-mutants@\([0-9.]*\).*/\1/p' "$workflows/$file")
+    [ "$(value CARGO_MUTANTS_VERSION)" = "$mutants" ] \
+        || differs "CARGO_MUTANTS_VERSION is $(value CARGO_MUTANTS_VERSION), $file installs $mutants"
+done
+
 # The minimum supported Rust version of the workspace.
 msrv=$(sed -n 's/^rust-version *= *"\([^"]*\)".*/\1/p' "$root/Cargo.toml" | head -n 1)
 [ "$(value RUST_MSRV)" = "$msrv" ] || differs "RUST_MSRV is $(value RUST_MSRV), Cargo.toml declares $msrv"

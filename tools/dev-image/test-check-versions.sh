@@ -60,6 +60,7 @@ cases=(
     "tools/dev-image/versions.env|s/^TEMURIN_VERSION=.*/TEMURIN_VERSION=17.0.16+8/|another Java release"
     "tools/dev-image/versions.env|s/^CARGO_VET_VERSION=.*/CARGO_VET_VERSION=0.10.2/|another cargo vet"
     "tools/dev-image/versions.env|s/^CARGO_LLVM_COV_VERSION=.*/CARGO_LLVM_COV_VERSION=0.9.0/|another cargo llvm-cov"
+    "tools/dev-image/versions.env|s/^CARGO_MUTANTS_VERSION=.*/CARGO_MUTANTS_VERSION=27.0.0/|another cargo mutants"
     "tools/dev-image/versions.env|s/^RUST_MSRV=.*/RUST_MSRV=1.87/|another minimum Rust version"
     "tools/dev-image/versions.env|s/^UBUNTU_IMAGE=ubuntu:24.04/UBUNTU_IMAGE=ubuntu:22.04/|another Ubuntu release"
     ".github/workflows/fixtures-openssl.yml|s/runs-on: ubuntu-24.04/runs-on: ubuntu-22.04/|a workflow on another Ubuntu release"
@@ -71,6 +72,8 @@ cases=(
     "tools/dev-image/versions.env|s/^CARGO_FUZZ_VERSION=.*/CARGO_FUZZ_VERSION=0.13.1/|another cargo fuzz"
     ".github/workflows/fuzz-nightly.yml|s/RUST_NIGHTLY: nightly-[0-9-]*/RUST_NIGHTLY: nightly-2026-01-01/|a fuzzing workflow with another nightly"
     ".github/workflows/fuzz-nightly.yml|s/CARGO_FUZZ_VERSION: [0-9.]*/CARGO_FUZZ_VERSION: 0.13.1/|a fuzzing workflow with another cargo fuzz"
+    ".github/workflows/mutants.yml|s/cargo-mutants@[0-9.]*/cargo-mutants@27.0.0/|a workflow with another cargo mutants"
+    ".github/workflows/mutants-config.yml|s/cargo-mutants@[0-9.]*/cargo-mutants@27.0.0/|a second workflow with another cargo mutants"
     "Cargo.toml|s/^rust-version = .*/rust-version = \"1.89\"/|a workspace with another minimum Rust version"
 )
 for case in "${cases[@]}"; do
