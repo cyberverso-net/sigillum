@@ -3,8 +3,12 @@ package net.cyberverso.sigillum.dssoracle;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import eu.europa.esig.dss.model.DSSException;
+import eu.europa.esig.dss.spi.DSSASN1Utils;
+import eu.europa.esig.dss.spi.DSSUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -27,6 +31,7 @@ import org.bouncycastle.asn1.ess.SigningCertificateV2;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.cert.X509CertificateHolder;
 import java.util.stream.Stream;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -545,6 +550,481 @@ class ValidateTimestampTest {
         Map<String, Object> summary = summary(result);
         assertEquals("rejected", summary.get("result"), summary.toString());
         assertEquals("--crl", summary.get("input"));
+    }
+
+    /**
+     * Issue #72, case 1: the TBSCertList tag of crl/root-ca loses its
+     * constructed bit and its nextUpdate declares about 858 MB. DSS reads
+     * the TBSCertList whatever its tag, so the CRL must be rejected in a
+     * small heap, not end the run with an OutOfMemoryError.
+     */
+    @Test
+    void aCrlWithAPrimitiveTbsCertListDeclaringALengthBeyondTheHeapIsRejected() throws Exception {
+        byte[] crl = Files.readAllBytes(CORPUS.resolve("crl/root-ca.crl"));
+        crl[4] = 0x10;
+        crl[103] = (byte) 0x84;
+        Path file = Files.write(temp.resolve("primitive-tbs.crl"), crl);
+        Path result = temp.resolve("primitive-tbs");
+        List<String> command = new ArrayList<>(List.of(
+                Path.of(System.getProperty("java.home"), "bin", "java").toString(), "-Xmx64m",
+                "-cp", System.getProperty("java.class.path"), Main.class.getName()));
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"), "--out", result.toString());
+        args.set(args.indexOf(corpus("crl/root-ca.crl")), file.toString());
+        command.addAll(args);
+        Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
+        String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        assertEquals(ExitCodes.SUCCESS, process.waitFor(), output);
+        Map<String, Object> summary = summary(result);
+        assertEquals("rejected", summary.get("result"), summary.toString());
+        assertEquals("--crl", summary.get("input"));
+    }
+
+    /** Issue #72, case 2: DSS ignores the bytes after a CRL, even when they declare a large length. */
+    @Test
+    void aCrlFollowedByAnElementDeclaringALargeLengthIsUsedAsDssUsesIt() throws Exception {
+        byte[] original = Files.readAllBytes(CORPUS.resolve("crl/ca-ecdsa.crl"));
+        int n = 0;
+        for (byte[] trailing : new byte[][] {
+            {0x04, (byte) 0x84, 0x03, (byte) 0xff, (byte) 0xff, (byte) 0xff},
+            {0x04, (byte) 0x84, 0x7f, (byte) 0xff, (byte) 0xff, (byte) 0xff}}) {
+            byte[] crl = Arrays.copyOf(original, original.length + trailing.length);
+            System.arraycopy(trailing, 0, crl, original.length, trailing.length);
+            assertCrlUsed(crl, "trailing-length-" + n++);
+        }
+    }
+
+    /**
+     * Issue #72, case 3: the signatureValue BIT STRING of crl/root-ca, at
+     * offset 181, gets the constructed bit. DSS reads its contents as the
+     * signature value and makes a usable revocation token.
+     */
+    @Test
+    void aCrlWhoseSignatureValueHasTheConstructedBitIsUsedAsDssUsesIt() throws Exception {
+        for (int tag : new int[] {0x23, 0x63, 0xa3, 0xe3}) {
+            byte[] crl = Files.readAllBytes(CORPUS.resolve("crl/root-ca.crl"));
+            crl[181] = (byte) tag;
+            Path file = Files.write(temp.resolve("constructed-" + tag + ".crl"), crl);
+            Path result = temp.resolve("constructed-" + tag);
+            List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"),
+                    "--out", result.toString());
+            args.set(args.indexOf(corpus("crl/root-ca.crl")), file.toString());
+            assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+            assertValidated(result, "PASSED", null);
+        }
+    }
+
+    /**
+     * Issue #72, case 4: the certificate of pki/tsa, with invalid UTF-8 in
+     * its subject, is carried only in the unsigned certificateValues
+     * attribute. DSS takes it from there and fails on it while building its
+     * reports, so the token is rejected.
+     */
+    @Test
+    void aTokenWithAnUndecodableCertificateInItsCertificateValuesIsRejected() throws Exception {
+        byte[] certificate = Tokens.certificateWithInvalidUtf8Subject(
+                Files.readString(CORPUS.resolve("pki/tsa.pem")));
+        assertTokenRejected(Tokens.withCertificateValues(
+                Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst")), certificate), "cert-values-utf8");
+    }
+
+    /** The certificate of pki/tsa in the certificateValues attribute only is used as DSS uses it. */
+    @Test
+    void aTokenWithItsCertificateInItsCertificateValuesIsValidated() throws Exception {
+        byte[] certificate = Pem.decode(Files.readString(CORPUS.resolve("pki/tsa.pem")));
+        Path token = Files.write(temp.resolve("cert-values.tst"), Tokens.withCertificateValues(
+                Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst")), certificate));
+        Path result = temp.resolve("cert-values");
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"), "--out", result.toString());
+        args.set(args.indexOf("--timestamp") + 1, token.toString());
+        assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+        assertValidated(result, "PASSED", null);
+    }
+
+    /**
+     * Runs a token through the tool and through DSS alone, with the corpus
+     * chain, CRLs and content, and requires the outcome of DSS: rejected
+     * exactly when DSS alone fails, otherwise validated with its indication.
+     */
+    private void assertAsDssAlone(byte[] content, String name) throws Exception {
+        Path token = Files.write(temp.resolve(name + ".tst"), content);
+        Path result = temp.resolve(name);
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"), "--out", result.toString());
+        args.set(args.indexOf("--timestamp") + 1, token.toString());
+        err.reset();
+        int code = run(args);
+        MutationTest.RawResult alone = MutationTest.rawDss(MutationTest.Setup.corpus(content));
+        String dss = alone.failure() != null ? "fails: " + alone.failure() : "validates: " + alone.indication();
+        assertEquals(ExitCodes.SUCCESS, code, name + ": " + stderr() + " (DSS alone " + dss + ")");
+        Map<String, Object> summary = summary(result);
+        if (alone.failure() != null) {
+            assertEquals("rejected", summary.get("result"), name + ": " + summary + " (DSS alone " + dss + ")");
+            assertEquals("--timestamp", summary.get("input"));
+        } else {
+            assertEquals("validated", summary.get("result"), name + ": " + summary + " (DSS alone " + dss + ")");
+            assertEquals(alone.indication(), summary.get("indication") + " " + summary.get("sub-indication"),
+                    name + ": " + summary);
+        }
+    }
+
+    /**
+     * An unrelated certificate with invalid UTF-8 in its subject, next to
+     * the certificate of pki/tsa in certificateValues: DSS does not process
+     * it, and validates the token (issue #72).
+     */
+    @Test
+    void anUnrelatedUndecodableCertificateInTheCertificateValuesIsNotRejected() throws Exception {
+        byte[] tsa = Pem.decode(Files.readString(CORPUS.resolve("pki/tsa.pem")));
+        byte[] unrelated = Tokens.certificateWithInvalidUtf8Subject(
+                Files.readString(CORPUS.resolve("pki/signer-p256.pem")));
+        byte[] token = Tokens.withCertificateValues(Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst")),
+                tsa, unrelated);
+        assertNull(MutationTest.rawDss(MutationTest.Setup.corpus(token)).failure());
+        assertAsDssAlone(token, "cert-values-unrelated");
+    }
+
+    /**
+     * The certificate of pki/tsa in certificateValues, with a copy of its
+     * issuer pki/ca-ecdsa whose extensions DSS cannot decode, or with a
+     * certificate of the same subject and another key, which did not issue
+     * it, and whose extensions DSS cannot decode either: the tool must give
+     * the outcome of DSS alone (issue #72).
+     */
+    @Test
+    void certificatesWithTheSubjectOfTheIssuerInTheCertificateValuesAreTreatedAsDssTreatsThem() throws Exception {
+        byte[] tsa = Pem.decode(Files.readString(CORPUS.resolve("pki/tsa.pem")));
+        byte[] valid = Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst"));
+        byte[] issuer = Tokens.caEcdsaWithMalformedAuthorityKeyIdentifier();
+        byte[] other = Tokens.otherKeyWithTheSubjectOfCaEcdsa();
+        for (byte[] certificate : List.of(issuer, other)) {
+            assertThrows(IllegalArgumentException.class,
+                    () -> CertificateChecks.decode(DSSUtils.loadCertificate(certificate)));
+        }
+        assertAsDssAlone(Tokens.withCertificateValues(valid, tsa, issuer), "cert-values-bad-issuer");
+        assertAsDssAlone(Tokens.withCertificateValues(valid, tsa, other), "cert-values-other-key");
+    }
+
+    /**
+     * A revokedCertificates of indefinite length, then a signatureValue
+     * declaring 1 GiB: the run must end with exit code 0 in a JVM with a
+     * heap of 128 MiB (issue #72).
+     */
+    @Test
+    void anIndefiniteRevokedCertificatesBeforeALongSignatureEndsWithinASmallHeap() throws Exception {
+        Path crl = Files.write(temp.resolve("indefinite-revoked.crl"),
+                Crls.caEcdsaWithIndefiniteRevokedCertificatesAndALongSignature());
+        List<String> command = new ArrayList<>(List.of(
+                Path.of(System.getProperty("java.home"), "bin", "java").toString(), "-Xmx128m",
+                "-cp", System.getProperty("java.class.path"), HeapProbe.class.getName(), crl.toString()));
+        Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
+        String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        assertEquals(0, process.waitFor(), output);
+    }
+
+    /**
+     * SignedData holding a certificate that DSS cannot convert, then the
+     * certificate of pki/tsa with invalid UTF-8 in its subject, and the
+     * reverse order: the tool must give the outcome of DSS alone in both.
+     */
+    @Test
+    void aCertificateAfterOneThatDssCannotConvertIsTreatedAsDssTreatsIt() throws Exception {
+        byte[] unconvertible = Tokens.caEcdsaWithMalformedBasicConstraints();
+        assertThrows(DSSException.class, () -> DSSASN1Utils.getCertificate(new X509CertificateHolder(unconvertible)));
+        byte[] badTsa = Tokens.certificateWithInvalidUtf8Subject(Files.readString(CORPUS.resolve("pki/tsa.pem")));
+        byte[] valid = Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst"));
+        assertAsDssAlone(Tokens.withCertificates(valid, unconvertible, badTsa), "unconvertible-then-bad-tsa");
+        assertAsDssAlone(Tokens.withCertificates(valid, badTsa, unconvertible), "bad-tsa-then-unconvertible");
+        byte[] tsa = Pem.decode(Files.readString(CORPUS.resolve("pki/tsa.pem")));
+        assertAsDssAlone(Tokens.withCertificates(valid, unconvertible, tsa), "unconvertible-then-tsa");
+    }
+
+    /** Runs the valid token with the given number of copies of its certificates, and returns the time taken. */
+    private long copiesRun(byte[] content, String name) throws Exception {
+        Path token = Files.write(temp.resolve(name + ".tst"), content);
+        Path result = temp.resolve(name);
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"), "--out", result.toString());
+        args.set(args.indexOf("--timestamp") + 1, token.toString());
+        long start = System.nanoTime();
+        assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+        long elapsed = System.nanoTime() - start;
+        assertValidated(result, "PASSED", null);
+        return elapsed;
+    }
+
+    /**
+     * Issue #72, case 5: a token holding 10,000 copies of its certificate.
+     * DSS keeps one certificate token for them. The tool runs DSS once and
+     * its own checks, which must not make the run much slower than DSS
+     * alone: at most six times as long, with a second of margin.
+     * Before the fix, the checks made revocation tokens and decoded the
+     * certificate once per copy, and the run took about fourteen times as
+     * long as DSS alone.
+     */
+    @Test
+    void copiesOfACertificateInATokenDoNotMakeTheChecksSlowerThanDss() throws Exception {
+        byte[] valid = Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst"));
+        byte[] copies = Tokens.withCopiesOfItsCertificates(valid, 10_000);
+        // Warm up both paths once, so that neither pays for loading classes.
+        copiesRun(Tokens.withCopiesOfItsCertificates(valid, 10), "copies-warm-up");
+        MutationTest.rawDss(MutationTest.Setup.corpus(Tokens.withCopiesOfItsCertificates(valid, 10)));
+        long start = System.nanoTime();
+        MutationTest.RawResult alone = MutationTest.rawDss(MutationTest.Setup.corpus(copies));
+        long dss = System.nanoTime() - start;
+        assertNull(alone.failure());
+        assertTrue(alone.indication().startsWith("PASSED"), alone.indication());
+        long tool = copiesRun(copies, "copies");
+        String timings = "10000 copies: tool " + tool / 1_000_000 + " ms, DSS alone " + dss / 1_000_000 + " ms";
+        System.out.println(timings);
+        assertTrue(tool < 6 * dss + 1_000_000_000L, timings);
+    }
+
+    /** Runs the tool in a new JVM with a heap, with the CRL in place of crl/ca-ecdsa, and returns the summary. */
+    private Map<String, Object> runWithHeap(String heap, byte[] crl, String name) throws Exception {
+        Path file = Files.write(temp.resolve(name + ".crl"), crl);
+        Path result = temp.resolve(name);
+        List<String> command = new ArrayList<>(List.of(
+                Path.of(System.getProperty("java.home"), "bin", "java").toString(), heap, "-XX:+UseSerialGC",
+                "-cp", System.getProperty("java.class.path"), Main.class.getName()));
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"), "--out", result.toString());
+        args.set(args.indexOf(corpus("crl/ca-ecdsa.crl")), file.toString());
+        command.addAll(args);
+        Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
+        String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        assertEquals(ExitCodes.SUCCESS, process.waitFor(), output);
+        return summary(result);
+    }
+
+    /**
+     * A revokedCertificates of indefinite length whose contents start with
+     * an AlgorithmIdentifier and a BIT STRING declaring 1 GiB: DSS alone, in
+     * a heap of 64 MiB, runs out of memory on it, so it reads that BIT
+     * STRING, and the tool must reject the CRL in the same heap (issue #72).
+     */
+    @Test
+    void aLongBitStringInAnIndefiniteRevokedCertificatesIsRejected() throws Exception {
+        byte[] crl = Crls.caEcdsaWithAnAlgorithmAndALongBitStringInIndefiniteRevokedCertificates();
+        Path file = Files.write(temp.resolve("algorithm-in-revoked-alone.crl"), crl);
+        Process alone = new ProcessBuilder(List.of(
+                Path.of(System.getProperty("java.home"), "bin", "java").toString(), "-Xmx64m", "-XX:+UseSerialGC",
+                "-cp", System.getProperty("java.class.path"), CrlAloneProbe.class.getName(), file.toString()))
+                .redirectErrorStream(true).start();
+        String output = new String(alone.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        assertEquals(0, alone.waitFor(), output);
+        assertTrue(output.contains("OutOfMemoryError"), output);
+        Map<String, Object> summary = runWithHeap("-Xmx64m", crl, "algorithm-in-revoked");
+        assertEquals("rejected", summary.get("result"), summary.toString());
+        assertEquals("--crl", summary.get("input"));
+    }
+
+    /**
+     * crl/ca-ecdsa followed by 16 MiB of zeros, which DSS ignores: the check
+     * must not keep a record per trailing element, and the token is
+     * validated in a heap of 256 MiB (issue #72).
+     */
+    @Test
+    void aCrlFollowedByManyZerosIsUsedWithinAModerateHeap() throws Exception {
+        byte[] original = Files.readAllBytes(CORPUS.resolve("crl/ca-ecdsa.crl"));
+        byte[] padded = Arrays.copyOf(original, original.length + 16 * 1024 * 1024);
+        Map<String, Object> summary = runWithHeap("-Xmx256m", padded, "zero-padded");
+        assertEquals("validated", summary.get("result"), summary.toString());
+        assertEquals("PASSED", summary.get("indication"), summary.toString());
+    }
+
+    /** Runs DSS alone in a new JVM with a heap of 64 MiB, with the CRL in place of crl/ca-ecdsa, and returns its output. */
+    private String dssAloneWithSmallHeap(byte[] crl, String name) throws Exception {
+        Path file = Files.write(temp.resolve(name + "-alone.crl"), crl);
+        Process alone = new ProcessBuilder(List.of(
+                Path.of(System.getProperty("java.home"), "bin", "java").toString(), "-Xmx64m", "-XX:+UseSerialGC",
+                "-cp", System.getProperty("java.class.path"), CrlAloneProbe.class.getName(), file.toString()))
+                .redirectErrorStream(true).start();
+        String output = new String(alone.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        assertEquals(0, alone.waitFor(), output);
+        return output;
+    }
+
+    /**
+     * Runs DSS alone and the tool, each in a heap of 64 MiB, with the CRL,
+     * and requires the tool to reject it exactly when DSS alone runs out of
+     * memory on it, and to validate it otherwise.
+     */
+    private String assertCrlAsDssAloneInASmallHeap(byte[] crl, String name) throws Exception {
+        String alone = dssAloneWithSmallHeap(crl, name);
+        boolean outOfMemory = alone.contains("OutOfMemoryError");
+        Map<String, Object> summary = runWithHeap("-Xmx64m", crl, name);
+        assertEquals(outOfMemory ? "rejected" : "validated", summary.get("result"),
+                name + ": " + summary + " (DSS alone: " + alone.strip() + ")");
+        return alone;
+    }
+
+    /**
+     * A first revoked certificate entry of 7 contents octets whose serial number
+     * declares about 1 GiB: the tool rejects the CRL exactly when DSS alone
+     * runs out of memory on it in a small heap (issue #72).
+     */
+    @Test
+    void aSerialNumberDeclaringALargeLengthInAShortEntryIsTreatedAsDssTreatsIt() throws Exception {
+        assertCrlAsDssAloneInASmallHeap(Crls.caEcdsaWithAnEntryFirst(new byte[] {0x30, 0x07, 0x02, (byte) 0x84,
+            0x3f, (byte) 0xff, (byte) 0xff, (byte) 0xff, 0x05}), "long-serial");
+    }
+
+    /**
+     * A first entry of 2 contents octets, the identifier and length octets
+     * of a serial number of 2 contents octets, then an entry declaring about
+     * 1 GiB: whether DSS reads that entry shows whether it reads the
+     * contents of the serial number past its entry, and the tool must
+     * agree (issue #72).
+     */
+    @Test
+    void aSerialNumberStartingAtTheEndOfItsEntryIsReadAsDssReadsIt() throws Exception {
+        byte[] entries = {0x30, 0x02, 0x02, 0x02, 0x30, (byte) 0x84, 0x3f, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+            0x02, 0x01, 0x05};
+        String alone = assertCrlAsDssAloneInASmallHeap(Crls.caEcdsaWithAnEntryFirst(entries), "serial-at-end");
+        // DSS alone read the CRL and reported an indication, not only that it did not run out of memory.
+        assertTrue(alone.lines().anyMatch(line -> line.startsWith("indication ")), alone);
+    }
+
+    /**
+     * pki/tsa in certificateValues with a copy of pki/root-ca, of the same
+     * name and key, whose extensions DSS cannot decode: the tool must give
+     * the outcome of DSS alone (issue #72).
+     */
+    @Test
+    void aCopyOfTheTrustAnchorInTheCertificateValuesIsTreatedAsDssTreatsIt() throws Exception {
+        byte[] root = Tokens.rootCaWithMalformedSubjectKeyIdentifier();
+        assertThrows(IllegalArgumentException.class, () -> CertificateChecks.decode(DSSUtils.loadCertificate(root)));
+        byte[] tsa = Pem.decode(Files.readString(CORPUS.resolve("pki/tsa.pem")));
+        assertAsDssAlone(Tokens.withCertificateValues(Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst")),
+                tsa, root), "cert-values-root-copy");
+    }
+
+    /**
+     * pki/tsa in certificateValues with 1,000 self-issued certificates of
+     * the name and key of pki/ca-ecdsa, each of which verifies the others:
+     * the checks of the tool must not make the run much slower than DSS
+     * alone, at most six times as long with a second of margin (issue #72).
+     */
+    @Test
+    void manySelfIssuedCertificatesOfOneNameAndKeyDoNotMakeTheChecksSlowerThanDss() throws Exception {
+        byte[] valid = Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst"));
+        byte[] tsa = Pem.decode(Files.readString(CORPUS.resolve("pki/tsa.pem")));
+        List<byte[]> values = new ArrayList<>(List.of(tsa));
+        values.addAll(Tokens.selfIssuedWithTheNameAndKeyOfCaEcdsa(1000));
+        byte[] token = Tokens.withCertificateValues(valid, values.toArray(byte[][]::new));
+        copiesRun(Tokens.withCertificateValues(valid, tsa), "self-issued-warm-up");
+        long start = System.nanoTime();
+        MutationTest.RawResult alone = MutationTest.rawDss(MutationTest.Setup.corpus(token));
+        long dss = System.nanoTime() - start;
+        assertNull(alone.failure());
+        Path file = Files.write(temp.resolve("self-issued.tst"), token);
+        Path result = temp.resolve("self-issued");
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"), "--out", result.toString());
+        args.set(args.indexOf("--timestamp") + 1, file.toString());
+        start = System.nanoTime();
+        assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+        long tool = System.nanoTime() - start;
+        String timings = "1000 self-issued: tool " + tool / 1_000_000 + " ms, DSS alone " + dss / 1_000_000 + " ms";
+        System.out.println(timings);
+        Map<String, Object> summary = summary(result);
+        assertEquals("validated", summary.get("result"), summary.toString());
+        assertEquals(alone.indication(), summary.get("indication") + " " + summary.get("sub-indication"));
+        assertTrue(tool < 6 * dss + 1_000_000_000L, timings);
+    }
+
+    /**
+     * pki/tsa and pki/signer-p256 in certificateValues, and a CRL of
+     * pki/ca-ecdsa, signed again, whose entry for pki/signer-p256 has a
+     * INTEGER in place of its revocation date. DSS does not process
+     * pki/signer-p256 and validates the token, so the tool must not make
+     * revocation tokens for it (issue #72).
+     */
+    @Test
+    void aCertificateThatDssDoesNotProcessIsNotCheckedForRevocation() throws Exception {
+        byte[] tsa = Pem.decode(Files.readString(CORPUS.resolve("pki/tsa.pem")));
+        byte[] signer = Pem.decode(Files.readString(CORPUS.resolve("pki/signer-p256.pem")));
+        byte[] token = Tokens.withCertificateValues(Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst")),
+                tsa, signer);
+        // The serial number 0x1201 of pki/signer-p256, then an INTEGER where the revocation date belongs.
+        byte[] crl = Crls.caEcdsaWithAnEntryFirst(new byte[] {0x30, 0x07, 0x02, 0x02, 0x12, 0x01, 0x02, 0x01, 0x00});
+        MutationTest.Setup corpusSetup = MutationTest.Setup.corpus(token);
+        MutationTest.RawResult alone = MutationTest.rawDss(new MutationTest.Setup(token, corpusSetup.anchors(),
+                corpusSetup.certificates(), List.of(crl, Files.readAllBytes(CORPUS.resolve("crl/root-ca.crl"))),
+                corpusSetup.responses()));
+        assertNull(alone.failure(), String.valueOf(alone.failure()));
+        Path tokenFile = Files.write(temp.resolve("ignored-signer.tst"), token);
+        Path crlFile = Files.write(temp.resolve("ignored-signer.crl"), crl);
+        Path result = temp.resolve("ignored-signer");
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"), "--out", result.toString());
+        args.set(args.indexOf("--timestamp") + 1, tokenFile.toString());
+        args.set(args.indexOf(corpus("crl/ca-ecdsa.crl")), crlFile.toString());
+        assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+        Map<String, Object> summary = summary(result);
+        assertEquals("validated", summary.get("result"), summary + " (DSS alone: " + alone.indication() + ")");
+        assertEquals(alone.indication(), summary.get("indication") + " " + summary.get("sub-indication"));
+    }
+
+    /**
+     * A token of pki/tsa without certificates in SignedData, the real
+     * certificate of pki/tsa and a certificate of the same signer
+     * identifier with another key supplied, and in certificateValues an
+     * issuer of the latter whose extensions DSS cannot decode. DSS discards
+     * the candidate whose key does not verify the token, and validates it;
+     * the tool must give the outcome of DSS alone (issue #72).
+     */
+    @Test
+    void aSuppliedSignerCandidateWhoseKeyDoesNotVerifyTheTokenIsNotFollowed() throws Exception {
+        List<byte[]> crafted = Tokens.wrongKeySignerWithMalformedIssuer();
+        byte[] wrongKey = crafted.get(0);
+        byte[] malformedIssuer = crafted.get(1);
+        assertThrows(IllegalArgumentException.class,
+                () -> CertificateChecks.decode(DSSUtils.loadCertificate(malformedIssuer)));
+        byte[] tsa = Pem.decode(Files.readString(CORPUS.resolve("pki/tsa.pem")));
+        byte[] ca = Pem.decode(Files.readString(CORPUS.resolve("pki/ca-ecdsa.pem")));
+        byte[] token = Tokens.withCertificateValues(Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst")),
+                malformedIssuer);
+        MutationTest.Setup corpusSetup = MutationTest.Setup.corpus(token);
+        MutationTest.RawResult alone = MutationTest.rawDss(new MutationTest.Setup(token, corpusSetup.anchors(),
+                List.of(ca, tsa, wrongKey), corpusSetup.crls(), corpusSetup.responses()));
+        assertNull(alone.failure(), String.valueOf(alone.failure()));
+        Path tokenFile = Files.write(temp.resolve("wrong-key-signer.tst"), token);
+        Path wrongKeyFile = Files.write(temp.resolve("wrong-key-signer.der"), wrongKey);
+        Path result = temp.resolve("wrong-key-signer");
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"),
+                "--certificate", corpus("pki/tsa.pem"), "--certificate", wrongKeyFile.toString(),
+                "--out", result.toString());
+        args.set(args.indexOf("--timestamp") + 1, tokenFile.toString());
+        assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+        Map<String, Object> summary = summary(result);
+        assertEquals("validated", summary.get("result"), summary + " (DSS alone: " + alone.indication() + ")");
+        assertEquals(alone.indication(), summary.get("indication") + " " + summary.get("sub-indication"));
+    }
+
+    /**
+     * The token of {@link #aSuppliedSignerCandidateWhoseKeyDoesNotVerifyTheTokenIsNotFollowed}
+     * with the wrong-key candidate as the only supplied certificate of its
+     * signer identifier: DSS finds no signing certificate and completes,
+     * and the tool must give that outcome, not follow the candidate's
+     * issuer (issue #72).
+     */
+    @Test
+    void aSingleSuppliedSignerCandidateWhoseKeyDoesNotVerifyTheTokenIsNotFollowed() throws Exception {
+        List<byte[]> crafted = Tokens.wrongKeySignerWithMalformedIssuer();
+        byte[] wrongKey = crafted.get(0);
+        byte[] ca = Pem.decode(Files.readString(CORPUS.resolve("pki/ca-ecdsa.pem")));
+        byte[] token = Tokens.withCertificateValues(Files.readAllBytes(CORPUS.resolve("timestamps/valid.tst")),
+                crafted.get(1));
+        MutationTest.Setup corpusSetup = MutationTest.Setup.corpus(token);
+        MutationTest.RawResult alone = MutationTest.rawDss(new MutationTest.Setup(token, corpusSetup.anchors(),
+                List.of(ca, wrongKey), corpusSetup.crls(), corpusSetup.responses()));
+        assertNull(alone.failure(), String.valueOf(alone.failure()));
+        Path tokenFile = Files.write(temp.resolve("single-wrong-key-signer.tst"), token);
+        Path wrongKeyFile = Files.write(temp.resolve("single-wrong-key-signer.der"), wrongKey);
+        Path result = temp.resolve("single-wrong-key-signer");
+        List<String> args = arguments("valid", "--data", corpus("timestamps/content.txt"),
+                "--certificate", wrongKeyFile.toString(), "--out", result.toString());
+        args.set(args.indexOf("--timestamp") + 1, tokenFile.toString());
+        assertEquals(ExitCodes.SUCCESS, run(args), stderr());
+        Map<String, Object> summary = summary(result);
+        assertEquals("validated", summary.get("result"), summary + " (DSS alone: " + alone.indication() + ")");
+        assertEquals(alone.indication(), summary.get("indication") + " " + summary.get("sub-indication"));
     }
 
     /** Asserts that the tool rejects the token, and that DSS alone fails on it at the same stage. */

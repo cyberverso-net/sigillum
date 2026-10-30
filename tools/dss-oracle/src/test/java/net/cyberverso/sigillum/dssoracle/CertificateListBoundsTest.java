@@ -91,10 +91,183 @@ class CertificateListBoundsTest {
     }
 
     @Test
-    void findsAnElementAfterOneThatOverstatesItsLength() {
-        // The first inner SEQUENCE says 3 bytes but holds 2; a reader that skips it lands on 0x84.
-        byte[] der = {0x30, (byte) 0x80, 0x30, 0x03, 0x02, 0x00, 0x04, (byte) 0x84, 0x7f, 0, 0, 0};
+    void findsAnElementWhereTheParserOfDssLandsAfterOneThatOverstatesItsLength() {
+        // The version INTEGER says 3 octets but holds 1; DSS reads the next two as part of it and lands on 0x30 0x84.
+        byte[] der = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x02, 0x03, 0x01, 0x30, 0x00, 0x30, (byte) 0x84, 0x7f,
+            0, 0, 0};
         assertRejected(der);
+    }
+
+    /**
+     * Issue #72, case 1: the TBSCertList tag 0x30 becomes 0x10, without the
+     * constructed bit. The parser of DSS reads the identifier and length
+     * octets of the TBSCertList whatever its tag, and then the nextUpdate,
+     * whose length octet becomes 0x84: a length of about 858 MB.
+     */
+    @Test
+    void readsTheTbsCertListWhateverItsTagAsDssDoes() throws Exception {
+        byte[] der = crl("root-ca");
+        der[4] = 0x10;
+        der[103] = (byte) 0x84;
+        assertRejected(der);
+    }
+
+    /** Issue #72, case 2: DSS stops reading after the signature value, so bytes after it are never read. */
+    @Test
+    void ignoresElementsAfterTheSignatureValueAsDssDoes() throws Exception {
+        byte[] original = crl("ca-ecdsa");
+        for (byte[] trailing : new byte[][] {
+            {0x04, (byte) 0x84, 0x03, (byte) 0xff, (byte) 0xff, (byte) 0xff},
+            {0x04, (byte) 0x84, 0x7f, (byte) 0xff, (byte) 0xff, (byte) 0xff}}) {
+            byte[] der = Arrays.copyOf(original, original.length + trailing.length);
+            System.arraycopy(trailing, 0, der, original.length, trailing.length);
+            assertAccepted(der);
+        }
+    }
+
+    /**
+     * Issue #72, case 3: the identifier octet of the signatureValue BIT
+     * STRING of crl/root-ca, at offset 181, gets the constructed bit. DSS
+     * reads the contents as the signature value, not as encodings.
+     */
+    @Test
+    void readsTheSignatureValueAsOctetsWhateverItsTagAsDssDoes() throws Exception {
+        for (int tag : new int[] {0x23, 0x63, 0xa3, 0xe3}) {
+            byte[] der = crl("root-ca");
+            der[181] = (byte) tag;
+            assertAccepted(der);
+        }
+    }
+
+    @Test
+    void leavesALengthThatDssSkipsWithoutReadingIt() {
+        // revokedCertificates declares 0x7f000000 octets; DSS skips it without allocating, then fails at the end.
+        byte[] der = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x30, 0x00, 0x30, 0x00, 0x17, 0x00,
+            0x30, (byte) 0x84, 0x7f, 0, 0, 0, 0x30, 0x00};
+        assertAccepted(der);
+    }
+
+    @Test
+    void checksTheRevokedCertificateEntriesAndTheirSerialNumbersAsDssReadsThem() {
+        // An entry of revokedCertificates declares 0x7f000000 octets, which DSS reads into an array.
+        byte[] entry = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x30, 0x00, 0x30, 0x00, 0x17, 0x00,
+            0x30, 0x08, 0x30, (byte) 0x84, 0x7f, 0, 0, 0, 0x02, 0x00};
+        assertRejected(entry);
+        // The serial number of an entry declares 0x7f000000 octets.
+        byte[] serial = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x30, 0x00, 0x30, 0x00, 0x17, 0x00,
+            0x30, 0x08, 0x30, 0x06, 0x02, (byte) (0x84), 0x7f, 0, 0, 0};
+        assertRejected(serial);
+        // DSS stops reading the entries at a serial number that Bouncy Castle refuses, here an empty INTEGER.
+        byte[] afterMalformed = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x30, 0x00, 0x30, 0x00, 0x17, 0x00,
+            0x30, 0x0a, 0x30, 0x02, 0x02, 0x00, 0x30, (byte) 0x84, 0x7f, 0, 0, 0};
+        assertAccepted(afterMalformed);
+        // An empty entry stops it too: DSS cannot read an identifier octet in it.
+        byte[] afterEmpty = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x30, 0x00, 0x30, 0x00, 0x17, 0x00,
+            0x30, 0x08, 0x30, 0x00, 0x30, (byte) 0x84, 0x7f, 0, 0, 0};
+        assertAccepted(afterEmpty);
+    }
+
+    /**
+     * Thousands of short revoked certificate entries, each with a serial
+     * number INTEGER that declares as many octets as the whole CRL and
+     * starts with a valid octet: every length is within the slack, and the
+     * check must take memory in proportion to the CRL, not to the declared
+     * lengths times the entries (issue #72).
+     */
+    @Test
+    void manyEntriesDeclaringLongSerialNumbersTakeMemoryInProportionToTheCrl() {
+        int entries = 8000;
+        int entrySize = 9;
+        byte[] head = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x30, 0x00, 0x30, 0x00, 0x17, 0x00};
+        int revokedHeader = 6;
+        int size = head.length + revokedHeader + entries * entrySize;
+        byte[] der = new byte[size];
+        System.arraycopy(head, 0, der, 0, head.length);
+        int at = head.length;
+        der[at++] = 0x30;
+        der[at++] = (byte) 0x84;
+        int revokedLength = entries * entrySize;
+        for (int shift = 24; shift >= 0; shift -= 8) {
+            der[at++] = (byte) (revokedLength >>> shift);
+        }
+        for (int i = 0; i < entries; i++) {
+            der[at++] = 0x30;
+            der[at++] = 0x07;
+            der[at++] = 0x02;
+            der[at++] = (byte) 0x84;
+            for (int shift = 24; shift >= 0; shift -= 8) {
+                der[at++] = (byte) (size >>> shift);
+            }
+            der[at++] = 0x01;
+        }
+        com.sun.management.ThreadMXBean threads =
+                (com.sun.management.ThreadMXBean) java.lang.management.ManagementFactory.getThreadMXBean();
+        long before = threads.getCurrentThreadAllocatedBytes();
+        assertAccepted(der);
+        long allocated = threads.getCurrentThreadAllocatedBytes() - before;
+        assertTrue(allocated < 16L * 1024 * 1024, "allocated " + allocated + " bytes for a CRL of " + size);
+    }
+
+    /**
+     * With a revokedCertificates of indefinite length, DSS takes the next
+     * field from its contents: here an AlgorithmIdentifier, read as the
+     * signatureAlgorithm, then a BIT STRING declaring 1 GiB, read as the
+     * signatureValue, which is rejected (issue #72).
+     */
+    @Test
+    void takesTheFieldsAfterAnIndefiniteRevokedCertificatesFromItsContents() throws Exception {
+        byte[] inside = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x30, 0x00, 0x30, 0x00, 0x17, 0x00,
+            0x30, (byte) 0x80, 0x30, 0x03, 0x06, 0x01, 0x01, 0x03, (byte) 0x84, 0x40, 0, 0, 0};
+        assertRejected(inside);
+        assertRejected(Crls.caEcdsaWithAnAlgorithmAndALongBitStringInIndefiniteRevokedCertificates());
+        // An entry, then elements that are no fields: nothing after them is read.
+        byte[] signatureAfter = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x30, 0x00, 0x30, 0x00, 0x17, 0x00,
+            0x30, (byte) 0x80, 0x30, 0x03, 0x02, 0x01, 0x01, 0x00, 0x00, 0x30, 0x00, 0x03, (byte) 0x84, 0x40, 0, 0, 0};
+        assertAccepted(signatureAfter);
+        byte[] longEntry = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x30, 0x00, 0x30, 0x00, 0x17, 0x00,
+            0x30, (byte) 0x80, 0x30, (byte) 0x84, 0x40, 0, 0, 0, 0x02, 0x01, 0x01, 0x00, 0x00};
+        assertRejected(longEntry);
+    }
+
+    /**
+     * DSS takes for crlExtensions an element of the context-specific or
+     * private class only; one of the application class with tag number 16
+     * is taken for the signatureAlgorithm, and its length is checked.
+     */
+    @Test
+    void takesAnApplicationClassElementForTheNextFieldOfItsTagNumber() {
+        byte[] application = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x30, 0x00, 0x30, 0x00, 0x17, 0x00,
+            0x70, (byte) 0x84, 0x40, 0, 0, 0, 0x02, 0x01, 0x00};
+        assertRejected(application);
+    }
+
+    /** A serial number that overruns its entry is read with zeros past the end of the entry. */
+    @Test
+    void readsZerosPastTheEndOfAnEntry() {
+        // The serial number declares two octets and holds 0x00: with a zero after it, it has a redundant
+        // leading octet, DSS stops reading the entries, and the long entry after it is not checked.
+        byte[] redundant = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x30, 0x00, 0x30, 0x00, 0x17, 0x00,
+            0x30, 0x0b, 0x30, 0x03, 0x02, 0x02, 0x00, 0x30, (byte) 0x84, 0x40, 0, 0, 0};
+        assertAccepted(redundant);
+        // Holding 0x05, it is valid with the zero, and DSS reads the next entry.
+        byte[] valid = redundant.clone();
+        valid[16] = 0x05;
+        assertRejected(valid);
+    }
+
+    /**
+     * Tag numbers are kept in 32 bits: a high tag number of 2^32 + 16 is
+     * taken for 16, a SEQUENCE, and its length is checked; one of 2^31 + 16
+     * is negative and matches no field.
+     */
+    @Test
+    void keepsTagNumbersInThirtyTwoBits() {
+        byte[] wrapped = {0x30, (byte) 0x80, 0x30, (byte) 0x80, 0x1f, (byte) 0x90, (byte) 0x80, (byte) 0x80,
+            (byte) 0x80, 0x10, (byte) 0x84, 0x40, 0, 0, 0};
+        assertRejected(wrapped);
+        byte[] negative = wrapped.clone();
+        negative[5] = (byte) 0x88;
+        assertAccepted(negative);
     }
 
     @Test

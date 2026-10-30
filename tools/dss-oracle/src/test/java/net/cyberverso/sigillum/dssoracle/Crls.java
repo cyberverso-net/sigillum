@@ -49,6 +49,50 @@ final class Crls {
     }
 
     /**
+     * Returns crl/ca-ecdsa with an entry put before its revoked certificate
+     * entries, signed again by the key of pki/ca-ecdsa.
+     */
+    static byte[] caEcdsaWithAnEntryFirst(byte[] entry) throws Exception {
+        java.util.List<byte[]> components = tbsComponents();
+        int revoked = components.size() - 2;
+        components.set(revoked, tlv(0x30, concat(entry, contents(components.get(revoked)))));
+        return signed(tlv(0x30, concat(components.toArray(byte[][]::new))));
+    }
+
+    /**
+     * Returns crl/ca-ecdsa with its revokedCertificates in the indefinite
+     * length form, ended by two zero octets, signed again by the key of
+     * pki/ca-ecdsa, and with a signatureValue that declares 1 GiB. The
+     * outermost SEQUENCE has the indefinite length form.
+     */
+    static byte[] caEcdsaWithIndefiniteRevokedCertificatesAndALongSignature() throws Exception {
+        java.util.List<byte[]> components = tbsComponents();
+        int revoked = components.size() - 2;
+        components.set(revoked, concat(new byte[] {0x30, (byte) 0x80}, contents(components.get(revoked)),
+                new byte[] {0, 0}));
+        java.util.List<byte[]> parts = elements(contents(signed(tlv(0x30, concat(components.toArray(byte[][]::new))))));
+        byte[] value = concat(new byte[] {0x03, (byte) 0x84, 0x40, 0, 0, 0}, contents(parts.get(2)));
+        return concat(new byte[] {0x30, (byte) 0x80}, parts.get(0), parts.get(1), value);
+    }
+
+    /**
+     * Returns crl/ca-ecdsa with a revokedCertificates of indefinite length
+     * whose contents start with the signatureAlgorithm of the CRL, then a
+     * BIT STRING that declares 1 GiB, signed again by the key of
+     * pki/ca-ecdsa.
+     */
+    static byte[] caEcdsaWithAnAlgorithmAndALongBitStringInIndefiniteRevokedCertificates() throws Exception {
+        CertificateList original = CertificateList.getInstance(
+                Files.readAllBytes(TESTDATA.resolve("crl/ca-ecdsa.crl")));
+        byte[] algorithm = original.getSignatureAlgorithm().getEncoded(ASN1Encoding.DER);
+        java.util.List<byte[]> components = tbsComponents();
+        int revoked = components.size() - 2;
+        components.set(revoked, concat(new byte[] {0x30, (byte) 0x80}, algorithm,
+                new byte[] {0x03, (byte) 0x84, 0x40, 0, 0, 0}));
+        return signed(tlv(0x30, concat(components.toArray(byte[][]::new))));
+    }
+
+    /**
      * Returns crl/ca-ecdsa with the length octets of the element at an offset
      * replaced by the long form of a length, the rest unchanged.
      */

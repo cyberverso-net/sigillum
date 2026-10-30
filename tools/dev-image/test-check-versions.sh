@@ -59,6 +59,7 @@ cases=(
     "tools/dev-image/versions.env|s/^\(OPENSSL_OTHER_SHA256=.*\).$/\10/|another digest of the second release"
     "tools/dev-image/versions.env|s/^TEMURIN_VERSION=.*/TEMURIN_VERSION=17.0.16+8/|another Java release"
     "tools/dev-image/versions.env|s/^CARGO_VET_VERSION=.*/CARGO_VET_VERSION=0.10.2/|another cargo vet"
+    "tools/dev-image/versions.env|s/^CARGO_LLVM_COV_VERSION=.*/CARGO_LLVM_COV_VERSION=0.9.0/|another cargo llvm-cov"
     "tools/dev-image/versions.env|s/^CARGO_MUTANTS_VERSION=.*/CARGO_MUTANTS_VERSION=27.0.0/|another cargo mutants"
     "tools/dev-image/versions.env|s/^RUST_MSRV=.*/RUST_MSRV=1.87/|another minimum Rust version"
     "tools/dev-image/versions.env|s/^UBUNTU_IMAGE=ubuntu:24.04/UBUNTU_IMAGE=ubuntu:22.04/|another Ubuntu release"
@@ -66,6 +67,7 @@ cases=(
     ".github/workflows/dss-oracle.yml|s/distribution: temurin/distribution: zulu/|a workflow with another Java distribution"
     ".github/workflows/dss-oracle.yml|s/java-version: \"21\"/java-version: \"25\"/|a workflow with another Java release"
     ".github/workflows/cargo-vet.yml|s/cargo-vet@[0-9.]*/cargo-vet@0.10.4/|a workflow with another cargo vet"
+    ".github/workflows/coverage.yml|s/cargo-llvm-cov@[0-9.]*/cargo-llvm-cov@0.9.2/|a workflow with another cargo llvm-cov"
     ".github/workflows/mutants.yml|s/cargo-mutants@[0-9.]*/cargo-mutants@27.0.0/|a workflow with another cargo mutants"
     "Cargo.toml|s/^rust-version = .*/rust-version = \"1.89\"/|a workspace with another minimum Rust version"
 )
