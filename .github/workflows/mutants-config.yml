@@ -9,9 +9,6 @@ on:
       - .github/scripts/*mutants*
       - .github/workflows/mutants*.yml
       - crates/**
-  # Temporary, for the checks of issue #80; removed before review.
-  push:
-    branches: [task/80-mutants-ci]
 
 permissions:
   contents: read
@@ -36,5 +33,5 @@ jobs:
         with:
           tool: cargo-mutants@27.1.0
           fallback: none
-      - name: Check that every critical-module glob matches a source file
+      - name: Check the list of critical modules
         run: .github/scripts/check-mutants-globs.sh
