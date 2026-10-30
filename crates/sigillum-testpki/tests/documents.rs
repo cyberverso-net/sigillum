@@ -30,6 +30,6 @@ fn the_committed_documents_are_reproduced_byte_for_byte() -> TestResult {
         assert_eq!(entry, &file.artefact);
     }
     let listed = std::fs::read_dir(testdata().join(documents::DIRECTORY))?.count();
-    assert_eq!(listed, 4);
+    assert_eq!(listed, 7);
     Ok(())
 }

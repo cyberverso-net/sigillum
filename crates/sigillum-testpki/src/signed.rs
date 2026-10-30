@@ -287,7 +287,7 @@ pub struct Fixture {
 /// The signatures of the corpus: every variant at every level, except the
 /// compact serialisation of JAdES, which is created at B-B only, for every
 /// signer; then the documents prepared for shadow attacks, at B-B by
-/// [`SHADOW_SIGNER`].
+/// `pki/signer-p256`.
 pub fn plan() -> Vec<Fixture> {
     let mut fixtures = Vec::new();
     for variant in VARIANTS {

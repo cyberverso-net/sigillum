@@ -369,8 +369,11 @@ fn inputs_are_read_up_to_the_limit() {
     }
 }
 
+/// A mutation of this module.
+type Mutate = fn(&[u8]) -> Result<Vec<u8>, Unsupported>;
+
 /// The five mutations of this module.
-const MUTATIONS: [fn(&[u8]) -> Result<Vec<u8>, Unsupported>; 5] = [
+const MUTATIONS: [Mutate; 5] = [
     add_page_content,
     remove_overlay,
     replace_field_value,
