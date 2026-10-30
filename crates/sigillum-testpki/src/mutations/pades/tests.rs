@@ -377,3 +377,27 @@ const MUTATIONS: [fn(&[u8]) -> Result<Vec<u8>, Unsupported>; 5] = [
     switch_page_tree,
     wrap_byte_range,
 ];
+
+#[test]
+fn prepared_objects_compare_with_white_space_collapsed() -> TestResult {
+    assert_eq!(
+        collapsed("<<\n/FT /Tx\n/V (100 EUR)\r\n>>\n"),
+        "<< /FT /Tx /V (100 EUR) >>"
+    );
+    assert_eq!(collapsed("  a\t\x0c b  "), "a b");
+    assert_eq!(collapsed(""), "");
+    // The field as DSS writes it again, one entry per line, is the field
+    // as signed; another value is not.
+    let source = document(documents::SHADOW_REPLACE_PDF_ID)?;
+    let pdf = Pdf::parse(&source)?;
+    let field = documents::amount_field(documents::AMOUNT_SIGNED, 7);
+    let one_per_line = field
+        .replace(" /", "\n/")
+        .replace("<< ", "<<\n")
+        .replace(" >>", "\n>>");
+    let rewritten = pdf.update(&[(6, one_per_line)]);
+    assert!(replace_field_value(&rewritten).is_ok());
+    let other = pdf.update(&[(6, documents::amount_field("100 EUX", 7))]);
+    assert!(replace_field_value(&other).is_err());
+    Ok(())
+}

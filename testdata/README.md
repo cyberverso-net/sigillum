@@ -298,8 +298,13 @@ These are predictions from the text of the standard. DSS 6.5.1 gives them under 
 | `documents/signature-field` | The same page with an interactive form holding one empty signature field, `Signature1`, merged with an invisible widget annotation. It is an unsigned input reserved for signing into an existing field, by sigillum's PAdES creation, the epic #120 |
 | `documents/text` | A line of text, the signed content of the CAdES signatures |
 | `documents/payload` | A JSON object on one line (RFC 8259), the payload of the JAdES signatures |
+| `documents/shadow-hide` | The page of `documents/simple` with a second line of text, `shadow content, covered when signed`, under a white rectangle drawn by a second content stream, object 6: the base document of the shadow attack of the hide class |
+| `documents/shadow-replace` | The page of `documents/simple` with an interactive form holding one text field, `Amount`, object 6, with the value `100 EUR` and a normal appearance that shows it, object 7: the base document of the shadow attack of the replace class |
+| `documents/shadow-hide-and-replace` | The page of `documents/simple`, and a second page tree, object 6, with a page of other text, which no object in use refers to: the base document of the shadow attack of the hide-and-replace class |
 
 The PDF files are written byte by byte from ISO 32000-1:2008, without a PDF library: the header and a binary comment (clause 7.5.2), the objects (clauses 7.7.2, 7.7.3 and 7.3.8), a cross-reference table of one subsection whose entries are 20 bytes long (clause 7.5.4), and a trailer whose two file identifiers (clause 14.4) are derived from the name of the document. The signature field follows clauses 12.7.2 and 12.7.4.5. A test checks the structure, including every offset of the cross-reference table. No signature of the corpus uses `documents/signature-field`.
+
+The three `shadow-` documents prepare, before signing, the content that a shadow attack shows after signing, as threat D2 of the [threat model](../docs/design/threat-model.md) describes. DSS signs them like `documents/simple`, and `generate mutations` appends the later change (see "Malformed variants"). The rectangle is filled in white (clauses 8.6.8 and 8.5.3.1), and the page draws it after the text, in the order of its `Contents` array (clause 7.7.3.3). The text field follows clause 12.7.4.3, with its appearance as a form XObject (clause 8.10) and the default resources of the interactive form (clause 12.7.2).
 
 ## Signed corpus
 
@@ -312,8 +317,9 @@ The PDF files are written byte by byte from ISO 32000-1:2008, without a PDF libr
 | `signed/pades-<level>-<signer>` | An invisible PAdES signature of `documents/simple`, `.pdf` |
 | `signed/jades-compact-b-b-<signer>` | JAdES over `documents/payload` in the JWS compact serialisation, `.jws`, at B-B only: the compact serialisation has no unprotected header for unsigned properties (RFC 7515, section 7.1) |
 | `signed/jades-flattened-<level>-<signer>`, `signed/jades-general-<level>-<signer>` | JAdES over `documents/payload` in the flattened and general JWS JSON serialisations, `.json` |
+| `signed/pades-shadow-hide-b-b-p256`, `signed/pades-shadow-replace-b-b-p256`, `signed/pades-shadow-hide-and-replace-b-b-p256` | An invisible PAdES signature at B-B by `pki/signer-p256` of `documents/shadow-hide`, `documents/shadow-replace` and `documents/shadow-hide-and-replace`, the sources of the shadow-attack variants, `.pdf` |
 
-The level is `b-b`, `b-t` or `b-lt`. The signers are `rsa` (`pki/signer-rsa-2048`, RSA PKCS#1 v1.5 with SHA-256), `rsa-pss` (`pki/signer-rsa-pss-sha256`, RSASSA-PSS with SHA-256), `p256` (`pki/signer-p256`, ECDSA with SHA-256) and `ed25519` (`pki/signer-ed25519`). That is 64 signatures. DSS 6.5.1 creates every combination of the story, Ed25519 included, so none is left out for want of support.
+The level is `b-b`, `b-t` or `b-lt`. The signers are `rsa` (`pki/signer-rsa-2048`, RSA PKCS#1 v1.5 with SHA-256), `rsa-pss` (`pki/signer-rsa-pss-sha256`, RSASSA-PSS with SHA-256), `p256` (`pki/signer-p256`, ECDSA with SHA-256) and `ed25519` (`pki/signer-ed25519`). That is 64 signatures, and the three signatures of the documents prepared for shadow attacks, 67 in all. DSS 6.5.1 creates every combination of the story, Ed25519 included, so none is left out for want of support.
 
 Every signature is made as follows:
 
@@ -327,7 +333,7 @@ The links of each entry name the signing certificate as `issuer`, the chain from
 
 The expected OpenSSL result of a CAdES signature is that of `openssl cms -verify`, as `verify --openssl` runs it (see below): `verified` for every signature, with OpenSSL 3.5.9 and with OpenSSL 4.0.3. OpenSSL does not process PAdES or JAdES, whose entries are `not-applicable`.
 
-The expected DSS result is TOTAL-PASSED for every signature: a prediction from ETSI EN 319 102-1 V1.4.1. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to `pki/root-ca` (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). With the linked files, the signature timestamp passes the time-stamp validation building block (clause 5.4). DSS 6.5.1 gives this result for all 64 signatures in the `validate-document` mode of `tools/dss-oracle`, under the aligned policy of [ADR-0023](../docs/design/adr/0023-validation-policy-of-the-dss-oracle.md), with the linked files only and the root CA as trust anchor. Under its default validation policy, DSS 6.5.1 reports the 16 Ed25519 signatures INDETERMINATE with CRYPTO_CONSTRAINTS_FAILURE_NO_POE instead, because that policy does not authorise EdDSA; the notes of those entries say so.
+The expected DSS result is TOTAL-PASSED for every signature, those of the documents prepared for shadow attacks included: a prediction from ETSI EN 319 102-1 V1.4.1. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to `pki/root-ca` (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). With the linked files, the signature timestamp passes the time-stamp validation building block (clause 5.4). DSS 6.5.1 gives this result for all 67 signatures in the `validate-document` mode of `tools/dss-oracle`, under the aligned policy of [ADR-0023](../docs/design/adr/0023-validation-policy-of-the-dss-oracle.md), with the linked files only and the root CA as trust anchor. Under its default validation policy, DSS 6.5.1 reports the 16 Ed25519 signatures INDETERMINATE with CRYPTO_CONSTRAINTS_FAILURE_NO_POE instead, because that policy does not authorise EdDSA; the notes of those entries say so.
 
 ## Malformed variants
 

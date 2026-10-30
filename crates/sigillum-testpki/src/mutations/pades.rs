@@ -378,6 +378,33 @@ impl<'a> Pdf<'a> {
     }
 }
 
+/// `text` with every run of white space (clause 7.2.2, Table 1) written as
+/// one space, so that an object that DSS writes again with one entry per
+/// line compares equal to the object as [`crate::documents`] writes it.
+/// The objects compared hold no literal string with two spaces in a row.
+fn collapsed(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    let mut white = false;
+    for byte in text.bytes() {
+        if is_white(byte) {
+            white = true;
+        } else {
+            if white && !out.is_empty() {
+                out.push(' ');
+            }
+            white = false;
+            out.push(char::from(byte));
+        }
+    }
+    out
+}
+
+/// Reports whether the most recent copy of the object `number` is
+/// `expected`, white space aside.
+fn object_is(file: &Pdf<'_>, number: u32, expected: &str) -> Result<bool, Unsupported> {
+    Ok(collapsed(file.object_text(number)?) == collapsed(expected))
+}
+
 /// Replaces the one occurrence of `from` in `object`, which must not be
 /// followed by a digit, with `to`.
 fn replace_once(object: &str, from: &str, to: &str) -> Result<String, Unsupported> {
@@ -433,7 +460,7 @@ pub fn add_page_content(pdf: &[u8]) -> Result<Vec<u8>, Unsupported> {
 /// read here, or its object 6 is not the overlay drawn by the page.
 pub fn remove_overlay(pdf: &[u8]) -> Result<Vec<u8>, Unsupported> {
     let file = Pdf::parse(pdf)?;
-    if file.object_text(6)? != documents::overlay_object() {
+    if !object_is(&file, 6, &documents::overlay_object())? {
         return Err(Unsupported("object 6 is not the overlay"));
     }
     replace_once(file.object_text(3)?, "/Contents [5 0 R 6 0 R]", "")?;
@@ -448,10 +475,15 @@ pub fn remove_overlay(pdf: &[u8]) -> Result<Vec<u8>, Unsupported> {
 /// # Errors
 ///
 /// Returns [`Unsupported`] when the input is not a PDF of the structure
-/// read here, or its object 6 is not the field as signed.
+/// read here, or its object 6 is not the field as signed, white space
+/// aside: DSS writes it again when it adds the signature field.
 pub fn replace_field_value(pdf: &[u8]) -> Result<Vec<u8>, Unsupported> {
     let file = Pdf::parse(pdf)?;
-    if file.object_text(6)? != documents::amount_field(documents::AMOUNT_SIGNED, 7) {
+    if !object_is(
+        &file,
+        6,
+        &documents::amount_field(documents::AMOUNT_SIGNED, 7),
+    )? {
         return Err(Unsupported("object 6 is not the text field as signed"));
     }
     let appearance = file.size;
@@ -473,7 +505,7 @@ pub fn replace_field_value(pdf: &[u8]) -> Result<Vec<u8>, Unsupported> {
 /// have `/Pages 2 0 R` exactly once.
 pub fn switch_page_tree(pdf: &[u8]) -> Result<Vec<u8>, Unsupported> {
     let file = Pdf::parse(pdf)?;
-    if file.object_text(6)? != documents::HIDDEN_PAGES {
+    if !object_is(&file, 6, documents::HIDDEN_PAGES)? {
         return Err(Unsupported("object 6 is not the second page tree"));
     }
     let catalog = replace_once(file.object_text(1)?, "/Pages 2 0 R", "/Pages 6 0 R")?;
