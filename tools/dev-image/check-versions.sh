@@ -64,6 +64,12 @@ vet=$(sed -n 's/.*tool: cargo-vet@\([0-9.]*\).*/\1/p' "$workflows/cargo-vet.yml"
 llvm_cov=$(sed -n 's/.*tool: cargo-llvm-cov@\([0-9.]*\).*/\1/p' "$workflows/coverage.yml")
 [ "$(value CARGO_LLVM_COV_VERSION)" = "$llvm_cov" ] \
     || differs "CARGO_LLVM_COV_VERSION is $(value CARGO_LLVM_COV_VERSION), coverage.yml installs $llvm_cov"
+# The nightly and the cargo fuzz that fuzz-nightly.yml installs.
+for name in RUST_NIGHTLY CARGO_FUZZ_VERSION; do
+    pinned=$(sed -n "s/^  $name: *\([^ #]*\).*/\1/p" "$workflows/fuzz-nightly.yml")
+    [ "$(value "$name")" = "$pinned" ] \
+        || differs "$name is $(value "$name"), fuzz-nightly.yml installs ${pinned:-nothing}"
+done
 
 # cargo mutants: the version that the mutation workflows install.
 for file in mutants.yml mutants-config.yml; do

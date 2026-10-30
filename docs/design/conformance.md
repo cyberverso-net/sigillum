@@ -37,6 +37,8 @@ Real signed documents containing personal data are never added to the corpus.
 
 Every parser (ASN.1 structures, CMS, PDF objects and cross-reference sections, OCSP, CRL, timestamp tokens) has a `cargo-fuzz` target. Fuzz targets check for crashes and, where a reference result exists, for divergence from DSS on inputs that DSS accepts.
 
+Every target also runs each night from a corpus kept between runs, as [quality-gates.md](../development/quality-gates.md#nightly-fuzzing) describes.
+
 ## Recording divergences
 
 sigillum may behave differently from DSS on purpose. Each such case is recorded in [divergences.md](divergences.md), with its class, a test vector, and the basis of the class. An unrecorded divergence is a defect. The three classes are defined in [ADR-0019](adr/0019-divergence-classes-and-intentional-restrictions.md):
