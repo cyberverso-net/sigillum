@@ -404,3 +404,232 @@ fn prepared_objects_compare_with_white_space_collapsed() -> TestResult {
     assert!(replace_field_value(&other).is_err());
     Ok(())
 }
+
+#[test]
+fn trailer_entries_are_read_as_written() -> TestResult {
+    assert_eq!(
+        trailer_entries("<< /Size 6 /Root 1 0 R /ID [<AB> <CD>] >>\n")?,
+        [("Size", "6"), ("Root", "1 0 R"), ("ID", "[<AB> <CD>]")]
+    );
+    assert_eq!(
+        trailer_entries("<<\n/Size 10\n/Root 1 0 R\n/ID [<AB> <CD>]\n/Prev 420\n>>\n")?,
+        [
+            ("Size", "10"),
+            ("Root", "1 0 R"),
+            ("ID", "[<AB> <CD>]"),
+            ("Prev", "420")
+        ]
+    );
+    // Names end at a delimiter, and values may be hexadecimal strings.
+    assert_eq!(
+        trailer_entries("<</Size 6/ID[<AB> <CD>]/X <0F>/Info 12 3 R>>")?,
+        [
+            ("Size", "6"),
+            ("ID", "[<AB> <CD>]"),
+            ("X", "<0F>"),
+            ("Info", "12 3 R")
+        ]
+    );
+    assert_eq!(trailer_entries("<<>>")?, []);
+    for refused in [
+        "/Size 6",
+        "<< Size 6 >>",
+        "<< / 6 >>",
+        "<< /X (text) >>",
+        "<< /X true >>",
+        "<< /X << /A 1 >> >>",
+        "<< /X [(a)] >>",
+        "<< /X [[1]] >>",
+        "<< /X [<< /A 1 >>] >>",
+        "<< /X [1 2 >>",
+        "<< /X <AB >>",
+    ] {
+        assert!(trailer_entries(refused).is_err(), "{refused}");
+    }
+    Ok(())
+}
+
+#[test]
+fn integers_are_decimal_digits_only() {
+    assert_eq!(integer("0000020214"), Ok(20_214));
+    assert_eq!(integer("0"), Ok(0));
+    for refused in ["", "12345678901", "1a", "+1", "-1", " 1"] {
+        assert!(integer(refused).is_err(), "{refused:?}");
+    }
+}
+
+#[test]
+fn a_keyword_line_ends_with_any_end_of_line_marker() {
+    assert_eq!(line_after(b"xref\r\n0", 0, b"xref"), Ok(6));
+    assert_eq!(line_after(b"xref\n0", 0, b"xref"), Ok(5));
+    assert_eq!(line_after(b"xref\r0", 0, b"xref"), Ok(5));
+    assert_eq!(line_after(b"..xref\n", 2, b"xref"), Ok(7));
+    assert!(line_after(b"xref 0", 0, b"xref").is_err());
+    assert!(line_after(b"xref", 0, b"xref").is_err());
+    assert!(line_after(b"xref\n", 9, b"xref").is_err());
+}
+
+#[test]
+fn a_file_of_the_limit_is_read_and_a_hybrid_file_is_refused() -> TestResult {
+    let mut at_limit = vec![b' '; MAX_PDF_LEN - 6];
+    at_limit.extend_from_slice(b"%%EOF\n");
+    assert_eq!(at_limit.len(), MAX_PDF_LEN);
+    assert_eq!(Pdf::parse(&at_limit).err(), Some(NOT_READ));
+    // A trailer with /XRefStm, of a hybrid-reference file, is not read. The
+    // trailer follows the section, which keeps its offset.
+    let source = document(documents::SIMPLE_PDF_ID)?;
+    let at = find(&source, b"/Root 1 0 R").ok_or("no /Root")?;
+    let hybrid = [&source[..at], b"/XRefStm 9 ", &source[at..]].concat();
+    assert_eq!(Pdf::parse(&hybrid).err(), Some(NOT_READ));
+    Ok(())
+}
+
+#[test]
+fn a_missing_object_is_reported_as_such() -> TestResult {
+    let source = signed()?;
+    let at = rfind(&source, b"/Prev 420").ok_or("no /Prev")?;
+    for prev in [&b"/Prev 20373"[..], b"/Prev 20374"] {
+        let looped = [&source[..at], prev, &source[at + 9..]].concat();
+        assert_eq!(
+            Pdf::parse(&looped)?.object(4).err(),
+            Some(Unsupported("the object is not in the file"))
+        );
+    }
+    Ok(())
+}
+
+#[test]
+fn an_update_has_one_subsection_per_run_of_numbers() -> TestResult {
+    let source = document(documents::SIMPLE_PDF_ID)?;
+    let pdf = Pdf::parse(&source)?;
+    let output = pdf.update(&[
+        (10, "<< >>".to_owned()),
+        (3, "<< >>".to_owned()),
+        (11, "<< >>".to_owned()),
+        (5, "<< >>".to_owned()),
+        (12, "<< >>".to_owned()),
+    ]);
+    let update = update(&source, &output)?;
+    let offset = |number: u32| -> Result<String, String> {
+        let header = format!("{number} 0 obj\n");
+        let at = update.find(&header).ok_or("no object")? + source.len();
+        Ok(format!("{at:010} 00000 n\r\n"))
+    };
+    let expected = format!(
+        "xref\n3 1\n{}5 1\n{}10 3\n{}{}{}trailer\n",
+        offset(3)?,
+        offset(5)?,
+        offset(10)?,
+        offset(11)?,
+        offset(12)?
+    );
+    assert!(update.contains(&expected), "{update}");
+    assert_eq!(
+        check_update(&output, &update, 13, pdf.startxref)?,
+        [3, 5, 10, 11, 12]
+    );
+    Ok(())
+}
+
+#[test]
+fn only_an_entry_not_followed_by_a_digit_is_replaced() -> TestResult {
+    assert_eq!(
+        replace_once("/Contents 5 0 R1 /Contents 5 0 R", "/Contents 5 0 R", "X")?,
+        "/Contents 5 0 R1 X"
+    );
+    assert_eq!(replace_once("/Pages 2 0 R", "/Pages 2 0 R", "Y")?, "Y");
+    assert!(replace_once("/Pages 2 0 R /Pages 2 0 R", "/Pages 2 0 R", "Y").is_err());
+    assert!(replace_once("/Pages 2 0 R0", "/Pages 2 0 R", "Y").is_err());
+    Ok(())
+}
+
+/// The simple document with a signature dictionary added in an update,
+/// object 6, whose `ByteRange` excludes its `Contents` of `hex` zeros and
+/// ends the file, followed by `pad` spaces and then a delimiter; before
+/// `Contents` when `before` holds. The integers are written without leading zeros.
+fn synthetic(hex: usize, pad: usize, before: bool) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    let base = document(documents::SIMPLE_PDF_ID)?;
+    let pdf = Pdf::parse(&base)?;
+    let contents = format!("/Contents <{}>", "0".repeat(hex));
+    let build = |range: &str| {
+        let body = if before {
+            format!("<< /ByteRange {range}{}{contents} >>", " ".repeat(pad))
+        } else {
+            format!("<< {contents} /ByteRange {range}{}>>", " ".repeat(pad))
+        };
+        pdf.update(&[(6, body)])
+    };
+    // The lengths of the integers change the length of the file: find the
+    // fixed point.
+    let mut range = "[0 0 0 0]".to_owned();
+    for _ in 0..8 {
+        let file = build(&range);
+        let a = find(&file, b"/Contents <").ok_or("no /Contents")? + 10;
+        let b = a + hex + 2;
+        let next = format!("[0 {a} {b} {}]", file.len() - b);
+        if next == range {
+            return Ok(file);
+        }
+        range = next;
+    }
+    Err("no fixed point".into())
+}
+
+#[test]
+fn the_new_byte_range_must_fit_where_the_old_one_was() -> TestResult {
+    // A Contents that ends the first range just below 10000, so that the
+    // length of the file, the new start of the second range, has one more
+    // digit than the old start.
+    let probe = synthetic(9_000, 0, false)?;
+    let a = find(&probe, b"/Contents <").ok_or("no /Contents")? + 10;
+    let hex = 9_990 - a;
+    let tight = synthetic(hex, 0, false)?;
+    let [_, _, b, _] = byte_range(&tight)?;
+    assert!(b < 10_000 && tight.len() >= 10_000, "{b} {}", tight.len());
+    assert_eq!(
+        wrap_byte_range(&tight).err(),
+        Some(Unsupported(
+            "the new ByteRange does not fit in the space of the old one"
+        ))
+    );
+    // One space after the value is enough.
+    let spaced = synthetic(hex, 1, false)?;
+    let output = wrap_byte_range(&spaced)?;
+    let length = spaced.len();
+    let [_, a, b, c] = byte_range(&spaced)?;
+    assert_eq!(byte_range(&output)?, [0, a, length, c]);
+    let value = find(&spaced, b"/ByteRange [").ok_or("no /ByteRange")? + 11;
+    let new = format!("[0 {a} {length} {c}]");
+    assert_eq!(&output[value..value + new.len()], new.as_bytes());
+    assert_eq!(
+        &output[value + new.len()..length],
+        &spaced[value + new.len()..]
+    );
+    assert_eq!(&output[length..], &spaced[b..]);
+    // With room to spare, the value is padded with spaces to the old end.
+    let roomy = synthetic(hex, 4, false)?;
+    let output = wrap_byte_range(&roomy)?;
+    let value = find(&roomy, b"/ByteRange [").ok_or("no /ByteRange")? + 11;
+    let [_, a, _, c] = byte_range(&roomy)?;
+    let new = format!("[0 {a} {} {c}]   ", roomy.len());
+    assert_eq!(&output[value..value + new.len()], new.as_bytes());
+    assert_eq!(
+        &output[value + new.len()..roomy.len()],
+        &roomy[value + new.len()..]
+    );
+    Ok(())
+}
+
+#[test]
+fn a_byte_range_in_the_first_range_is_refused() -> TestResult {
+    let after = synthetic(64, 2, false)?;
+    assert!(wrap_byte_range(&after).is_ok());
+    let before = synthetic(64, 2, true)?;
+    assert_eq!(
+        wrap_byte_range(&before).err(),
+        Some(Unsupported(
+            "the ranges of the ByteRange do not end the file around the signature dictionary"
+        ))
+    );
+    Ok(())
+}
