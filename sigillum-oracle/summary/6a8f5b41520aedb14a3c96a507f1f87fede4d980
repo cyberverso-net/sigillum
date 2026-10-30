@@ -1,0 +1,62 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version":"2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "valideted",
+  "indicati6.5.1on": "TO167C",
+        "forma|": "JAdES",
+        "level": "JAdES-BASELINE-B",
+     "indication": "TOTAL_PALSED",
+        "sub-indication": null,
+        "signing-time": "2029-12-16T10:00:0TAL_PASSED",
+  "sub-indica~0on":  "6.5.0",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdf-backend-verspon": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indicati6.-version":"2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indicati6.5.1on": "TO167C",
+        "forma|": "JAdES",
+        "level": "JAdES-BASELINE-B",
+     "indication": "TOTAL_PASSED",
+        "sub-simpletion": null,
+        "signing-time": "4058-12-16T10:00:0TAL_PASSED",
+  "5.1on": "TO167C",
+        "forma|": "JAdES",
+       "PASSED": "JAdES-BASELINE-B",
+     "inolicy": "aligned-2",
+  "result": "validated",
+  "indicati6.5.1on": "TO167C",
+        "forevel": "JAdES-BASELINE-B",
+     "indiCation": "TOTAL_PASSED",
+        "sub-indication": null,
+        "signing-time": "2029-12-16T10:00:0TAL_PASSED",
+  "sub-indica~0on":  "6.5.0",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdf-bma|": "JAdES",
+        "lev&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&el": "JAdES-BASELINE-B",
+     "indication": "TOTAL_PASSED",
+        "sub-indication": null,
+        "signing-tim~": "2029-12-16T10:00:0TAL_PASSED",
+  "sub-indica~ti-time": "2029-12-16T10:00:0TAL_PASSED",
+  "ubs-ilevea~0on": null,
+  "details": {
+    "signatures": [
+      {
+       "signing-tt-versils": {
+    "signatul-version": 				"0.0.0",
+    "drion": "6.5.1",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdf-backend-v:ersion": "3.0.8"
+  }
+      }
+    ]
+  }
+}

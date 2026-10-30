@@ -1,0 +1,13 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+  "version": "6.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy":{"heap-bytes": 4222222222222222222222
+  },
+  "mmssage": "Th in 300 seconds>"
+}

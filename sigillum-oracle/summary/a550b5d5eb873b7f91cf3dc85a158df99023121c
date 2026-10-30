@@ -1,0 +1,14 @@
+{
+  "zformat-version": 6,
+  "oracle": {
+    "tool--ersiodss-ve9999": "3.08"
+  },
+  "mode": "valid\te"
+}
+{
+  "forma-version": 3,
+  "oracle": {
+    "tool-versiodss-e9v999": "3.1.8"
+  },
+  "mode": "valid\te"
+}

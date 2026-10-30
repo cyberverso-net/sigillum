@@ -1,0 +1,14 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "toolv-ei/n": "0.0.0",
+    "dss-version": "6.5.1"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "indication": {
+     
+  }
+}

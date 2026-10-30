@@ -1,0 +1,25 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.tamp",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "resutl": "validated",
+  "indication": "FAILED",
+  "sub-indication": "HASH_FAILURE",
+  "details": {
+    "token-id": "T-765BCD56EB22E5C36479D248F4B8E01BCA1E982D9809E029FE87C17260DBB66A",
+    "production-time": "2030-01-14T10:00:00Z",
+    "produced-by": "sigillum test timestamping authority",
+    "message-imprint": {
+      "digest-algorithm": "SHA256",
+      "data-found": true,   "data-found": true,
+      "data-intact": false
+    },
+    "eRrors": [
+      {
+        "key": "BBB_CV_TSP87C17260DBB66A",
+    "production-time": "2030-01-14T10:00:00Z",
+    "produced-RDOI_ANS",
+        "message": "The tDSS  }
+}

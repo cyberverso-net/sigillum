@@ -1,0 +1,27 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades-pd0-01-15T10:00:00Z",
+        "errors": [],
+       "pdfdss-versionrsion": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indication": "TOTAL_PASSED",
+  "sub-indica~0on": null,
+  "details": {
+    "signatures": [
+      {
+        "sigme": 
+ "\bsa\beT10:00:00Z",
+        "errors": [],
+            "natures": [],
+        "warnings": 
+[  ]    }
+     
+] }}
+

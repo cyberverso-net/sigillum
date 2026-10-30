@@ -1,0 +1,19 @@
+[header]
+format-v pki/leaf"
+path ................./.............ntity"
+expected-o0enssl = "parsed"
+expected-dss = { indic
+path = "pki/leaf.pem"
+sha256 = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+kind = "certificate"
+purpose = "End entity"
+expected-o0enssl = "parsed"
+expected-dss = { indication = "INDETERMINATE", #0Z"
+openssl-version = "3.0.13"
+dss-versi ot.pem"...................'.............
+sha256 = "000000000000 "6.5..pem".................../.............
+shaha256 = "000000000000 "6.5..pem".................../......id ot.pe.pdf................&'......A.......
+sha256 ='"0ubIV-b-indication = 0:00Z"
+openssl-version = "3.0.13"
+dss-versi ot.pem"...../...fact]]
+id ot.pem"...................'......A...0000 = ["pki/root"] }

@@ -1,0 +1,6 @@
+[header]
+f" }
+links = { issuer = "pki/root", chain=[ sub-indication = T_REVOKED" }
+links = { issuer = "pki/root", chain=[ sub-indication = "OUT_OF_BOUNDS_NOT_REVOKED" }
+revocationlinks = { issuer = "pki/root", chain=[ " pkub-indication = "OUT_OF_BOUNDS_NOT_REVOKED" }
+links = { issuer = "pki/root", chadss-divergencein=[ " pkDIV-5[ " "}]

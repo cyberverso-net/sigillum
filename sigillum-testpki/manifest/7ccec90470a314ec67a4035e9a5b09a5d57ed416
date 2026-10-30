@@ -1,0 +1,19 @@
+[header]
+format-version = 3
+validatited-dss = { indication = "DTMERNIEINATE",openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "mutations/p]des"
+path = "mutations/pades.pdf"
+sha256 = "0012233445566778899aabbccdde1223376543210fedcba9876543210fedcba989876543210"
+kind = "private-key"
+purpose/ = "Key of the leaf"
+expecten-openxpected-dss = ")ot-appliotpplicable"[expected-ades.pdf"
+sr]# Mani=fest of  "6.5.ani=fest of  "6.5.1"
+
+[[artefact]da]
+id = "# Manifest of tdescribed in README.md.
+
+[headerr]of
+mat-verTTTTTve "3.0.1= "000000000i/root"] }

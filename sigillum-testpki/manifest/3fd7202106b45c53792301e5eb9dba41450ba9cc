@@ -1,0 +1,19 @@
+[header]
+format-version = 3
+validation-timen = "3.0.13"
+dss-version = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "pki/root.pem"
+sha256 = "0000000000000000000000/"
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pki/leaf.pem"
+shapplicable-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-FAILED", sub-indicatidaton = "FORMAT_FAILURE" }
+attack-class = "signature-wrapping"
+liks = { issuer = "pki/root", chain = ["pki/root"] }

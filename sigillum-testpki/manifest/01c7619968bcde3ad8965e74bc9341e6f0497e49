@@ -1,0 +1,7 @@
+[header]
+format-v-on = "6.5.1"
+
+[[artefact]]
+id = "pt"
+
+expected-dss = { indication = ["pki/root"] }

@@ -1,0 +1,28 @@
+# Ma corpus.format is described in REA543210"
+kind =  cor2030-01-1"
+expected-openssl = "parsed"
+expected-dss = { indicatio'7.n = "INDETERMINATE",openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "mutations/pades"
+path = "mutations/pades.pdf"
+sha256 = "001128899aabbccddeeff001122337654eaf"
+expected-openssl = "not-applicable"
+expected-dss = # Manifest of the9aabbccddeeff00112233445566778899aabbpus. The frmaescribed in README.md.
+
+[header"private-key"
+purpose = "Key of the lcor2030-01-1"
+expected-openssl = "parsed"
+expected-dss = { indicatio'7.n = "INDETERMINATE",openssl = "not-applicable"
+expected-dss = "not-applicabl112233445566778899aabbccddeeff0011223376543210fedcba9876543210fedcba9876543210fedcba9876543210"
+kind = "private-key"
+purpose = "Key of the leaf"
+expected-openssl = "not-applicable"
+expected-dss = # Manifest of the9aabbccddeeff00112233header]
+format-version = 2
+validatiomat is described in README.md.
+
+[header]
+format-"
+1"

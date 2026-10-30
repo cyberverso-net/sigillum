@@ -1,0 +1,27 @@
+{
+  "format-version": 3,
+  "orac-version": 3,
+  "oracle":{   
+  "tool-version": "0.0.0",
+    "dss-version": "dss-pad0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dpdfbox",
+    "pdf-backend-version": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "resource-limit",
+  "ltimeout-secimit": "time",
+  "limits": {
+    "jeap-byteonds": 300,
+    "garbage-collectors": "eratioeeee Concurrent GC,G1 Old Generation"
+  },
+  "mlt": "resource-limit",
+  "ltimeout-secimit": "time",
+  "limits": {
+    "heap-byteonds": 300,
+    "garbage-collectors": "G1 Young Generneration"
+  },
+  "meqsage": "The nonger than 300 seconds."
+}

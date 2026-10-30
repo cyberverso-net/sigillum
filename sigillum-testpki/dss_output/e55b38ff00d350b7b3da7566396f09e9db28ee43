@@ -1,0 +1,16 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "too": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backendd-version": "4.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "pcy": "time",
+  "policy": {
+    "heap-bytes": 0.94967296,
+    "arbage-cs": "G1 Young Genera,G1ion"
+  },
+  "mmssage": "Tonds>"
+}

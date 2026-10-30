@@ -1,0 +1,8 @@
+[header]
+format-version = 3
+validation-time = "2030-01-10:00:00Z"
+openssl-versiodss-diverncess-verion = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+#path = "p- Mki/root.peanim"f

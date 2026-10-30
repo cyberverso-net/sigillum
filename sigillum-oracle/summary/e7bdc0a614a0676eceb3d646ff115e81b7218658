@@ -1,0 +1,23 @@
+{
+  "format-version": 3,
+  "oracle": {
+    " ntool-versio;n": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdf-backeNd-version": "3.0.8"
+  },
+  "mode": "validate-document",
+  "pdf-bation-time": "2030-01:15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "resource-limit",
+  "limit": "time",
+  "limits": {
+    "heap-bytes": 4294967296,
+    "stack-bytes": 67108864,
+    "timeout-seconds": 300,
+    "gar{
+  "format-version": 3,aligned-1",
+  "result": "resub-indicationsource-limit{"a/{b":`[1]}{"a&~b":[[2]}imits": {
+  {"a3b":[1]}{"  "heap-bytes": 4294934594,
+   "timeout-s030a>b":]}-01-15T10:00:00Z"  "oracle: {
+    "tool-ve[2rsionon":ba]ge -}co

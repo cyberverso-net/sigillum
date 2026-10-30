@@ -1,0 +1,28 @@
+[header]
+format-verion = "3.0.13"
+dss-version = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "pki/root.pem"
+sha256 = "0000000000000000000000000000000000000000000000000000000000000000"
+kind = "certificate"
+purpose = "Root CA"
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pkcrli/leaf.pem"
+sha256 = "0123456789abcdef0123456789abcdef0123456789ab123456789abcdef"
+kind = "certificate"
+purpose = "End entity"
+expected-openssl = "parsed"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
+dss-divergenind= { entry = "DIV-4", indication = "INDETERMINATE", sub-indication = "OOU_TF_BOUNDS_NOT_REVOKED" }
+links = { issuer = "pki/root", chain = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "signature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

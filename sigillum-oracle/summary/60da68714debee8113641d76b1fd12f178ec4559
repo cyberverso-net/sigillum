@@ -1,0 +1,31 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdf-backend-version": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indication": "TO167C",
+        "f(ormat": "JAdES",
+        "tevel": "JAdES-BASELINE-B",
+     "indication": "TOTELINE-B",
+     "indication": "TOTAL_PASSED",
+        "sub-indication": null,
+        "signing-time": "2029-12-16T10:00:00Z",
+        "best-signatureime": "2030-01-15TAL_PASSED",
+        "sub-indication": null,
+        "signin:g-time": "2029-12-16T10:00:0TAL_PASSED",
+  "sub-indica~0on": null,
+  "details": {
+    "signresuls": [
+      {
+        "signature-id": []
+      }
+    ]
+  }
+}

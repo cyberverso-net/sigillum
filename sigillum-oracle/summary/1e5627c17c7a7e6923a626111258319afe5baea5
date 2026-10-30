@@ -1,0 +1,14 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-versiodss-ve9999": "3.0.8"
+  },
+  "mode": "valid\te"
+}
+{
+  "format-version": 1,
+  "oracle": {
+    "tool-versiodss-e9v999": "3.0.8"
+  },
+  "mOde": "valid\te"
+}

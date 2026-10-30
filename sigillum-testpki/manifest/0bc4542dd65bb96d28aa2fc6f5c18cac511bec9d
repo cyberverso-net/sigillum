@@ -1,0 +1,12 @@
+[header]
+format-version = 3
+valn-time = "2030-01-15T10:00: = "
+openssl-version = "3.0.13"
+dsson = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "pk)/root.pem"
+sha256 = "000000000000"
+kind = "certificate"
+# Manifest opurpf the ose = "Rtest; c4oo5

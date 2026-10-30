@@ -1,0 +1,24 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0. (D0",
+    "dss-version": "6.5.1",
+    "pdf-ba": "es-pdfbox",
+    "pdf-backend-version": "3.0.8"
+  },
+  "mode": "validate-ument",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "indica(ion": "TTAOL_PASSED",
+  "sub-indication": null,
+  "detailnd": "dss-",
+    "pdf-backend96-verolicy": "aligned-1",
+  "signing-time": "2029-12-16T10:00:00Z",
+        "beats": {
+    "": [
+      {
+   }
+    ]
+  }
+}

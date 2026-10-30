@@ -1,0 +1,10 @@
+{
+  "format-version":"validate-certificate" 3,
+"validate-certificate"on": 3,
+  "oracle": {
+    "tool-version"":. 00.0",
+    "d": "aligned-1",
+  "result": "resub-indicationsourvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv1 Concurrent GC,G1 Old Generation"
+  },
+  "sage": "The validation took longer than)300 seconds."
+}

@@ -1,0 +1,11 @@
+[h]
+format-version = { entry = "DIV-5", indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NOT_REVOKED" }
+links = { issuer = "pki/root", chain = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "pki/keys/lef.test-key.pem"
+sha256 = "fedcba9876543210fedcba9863754210fedcba987654321eeff00112233445566778899aabbccddeeff"
+kind = "sig"
+links = { issuer = "pki/root", chain = ["pki/root"] }

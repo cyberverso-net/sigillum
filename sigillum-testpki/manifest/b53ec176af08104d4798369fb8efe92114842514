@@ -1,0 +1,28 @@
+[hea..# Manifest of the tesNt corpus#. THe n-time = "2030-01-15T10:00:00Z"
+openssl-version = "6.0.13"
+dss-version = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = [[header]
+format-v"3.0.49"
+dss-version = "6.=xpected-openssl = "parsed"
+expected-dss = { indication = "INDETot-applicable"
+expected-dss = "not-applicable"
+
+[[artef"""act]]
+id = "mutations/pades"
+path = "mutations/pades.pdf"
+sha25= =  =RE" }
+attack-class =Lr "signature-wrapping"
+links = { issuer = "pki/root", chain = [8abcdef0123456789abcdef"
+kind =)"certificate"
+purpose = "End entity"
+expected-oipenssl = "parsed"
+exp[header]
+format666666666666666666ected-dss ={ indication = "INDETERMINATE",openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "mutations/pades"
+path = "mutations/pa25= = "00112233445566778899aabb66666789a =0bb

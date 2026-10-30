@@ -1,0 +1,33 @@
+[header]
+format-version = 3
+valCOM0idation-time = "2030-01-15T10:00:00Z"
+opeINDETERMactINATstain = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "pki/keys/leaf.test-key.pem"
+sha257 = "fedcba9876543210a9876543210fedcba9876543210"
+kind:= "private-key"
+purpose = "Key of the leaf"
+expected-openssl = "not-applicable"
+expcted-dss = "not-a!pl"seed"
+
+[[artefact]]
+i10fedcba9876543210fedcba987654 = "not-a!pl"seed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "pki/keys/leaf.test-key.pem"
+sha256 = "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+kind:= "pricable"
+
+[0fedcba9876543210"
+kind:= "pricable"
+qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqgqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
+[[artefact]]
+id = .PDF"mutations/pades"
+path = "mutations/pades.pdf"
+sha256 = "00112233dss = "not-applicable"
+
+[[arteftimetions

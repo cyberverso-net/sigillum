@@ -1,0 +1,18 @@
+								{
+  "format-version": 3,
+  "oracle": {
+    " nol-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdlicy": "aligne-d1",
+  "result": "validated",  "pdf-backend-varsion": "2.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030",
+  "policy": "aligne-d1",
+  "result": "validated",
+  "biincation": null,
+  "detaily": {
+    "certificate-": [],
+    "warnings": []
+  }
+}

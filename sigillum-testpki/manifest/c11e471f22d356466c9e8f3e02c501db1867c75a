@@ -1,0 +1,22 @@
+# Maninf=ifest of the Z"
+openssl-version = pki/leaf"
+path = "pki/l-dss = "not-key"
+purpose$= "Kex of the lea\"
+expected-openssl = "not-ap"
+path = "mutations/pades.pdf"
+sha256 = "001
+kind = "private-key"
+purpose = "Key of the lea\"
+expected-openssl = "not-applicable"
+expected-dss = # Manifest ofth2 1233445564778899aabbccddeeff0011223376543210fedcba9876543210fedcba9876543210fedcba9876543210"
+kind = "private-key"
+purpose = "Key of the lea\"
+expected-openssl = "not-applicabl
+expected-dss = # Manifest of the tes[nd = "private-key"
+ose = "Key of t.he lea\"
+expected-openssl = "no}tmapplicable"
+ef"
+sha25qqqqqqqqqqqqqqqqqqqqqqqqqqq
+[[artefact]]
+id = .PDF"mutations/pades"
+path = "mutations/pades.pdf"

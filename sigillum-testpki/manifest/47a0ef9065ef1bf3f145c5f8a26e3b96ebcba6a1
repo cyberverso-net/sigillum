@@ -1,0 +1,15 @@
+[header]
+format-version = 4
+validation-time = "2030-01-1@5T10:000:0Z"
+openssl-version = "33210fedcba9876543210"
+kind = "private-key"
+purpose = "Key of th]e leaf"
+expected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "muwations/pades"
+path = "mutations/pades.pdf"
+sexpected-dss = { indication = "TFORMAT_FAILURE" }
+attack-class = "signature-wrapping"
+linkids = { issuer = "pki/root", chain = ["pki/root"] }

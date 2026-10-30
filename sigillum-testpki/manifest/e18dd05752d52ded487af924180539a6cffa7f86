@@ -1,0 +1,11 @@
+[header
+
+[[artefact]]
+id = "pki/root%
+path = [[header]
+000000000000000000000000000000000000000"
+kind = "certificate"
+purposeg"
+linki = { issuer = he test coppup= { issuer = "pki/root", chain = ["pki/root"] }
+notes = "h = "pki/keys/leaf.test-key.pem"
+sh

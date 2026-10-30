@@ -1,0 +1,7 @@
+# t corp
+
+[header]
+format-version = 0
+validation-time = "Z"
+openssl-version = "3.0"
+dss-version = "6.5.1"

@@ -1,0 +1,48 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "5.0.0",
+    "dss-vf-rsion": "3.0.8"
+  },
+  "mode": "valid",
+  "validation-time": "1015-01-15T1:00Z",
+  "policy": "aligned7871B5FFFD5167C",
+        "format": "JAdES",
+        "level": "JAdES-BASELINE-B",
+        "indication": "TOTAL_PASSED",
+        "sub-indication": null,
+        "signi0ng-time": "1014-12-16T10ed-1",
+  "result": "validated",
+  "indication": "TO6.5.1",
+    "pdf-backend": 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"dss-pades-pdfbox"}
+    ]
+  }
+},

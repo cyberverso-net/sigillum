@@ -1,0 +1,15 @@
+[header]
+format-version = 3
+validation-ti= "0000000000000000000000000000000000000000000000000000000000000001"
+kind = "certificate"
+puenssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "123456789abcdef0123456790abcdef0f"
+kind.PDF = "signed-document"
+purpose = "A PAdES variant"
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-FAILED", sub-indication = "FORMAT_FAILURE" }
+attack-class = "signature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

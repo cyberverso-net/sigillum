@@ -1,0 +1,74 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "policy": "validated",
+  "indication": "PASSED",
+  "sub-indication": null,
+  "details": {
+    "certificate-id": "C-CDEC302CA6BB8B838088E50C849A5F78C2F21DFB15FCDD2696C2DA175647F005",
+    "commoame": "sigillum test signer P-128",
+    "simple-repo/t": {
+      "indication": "PASSED",
+      "sub-indication": null
+    },
+    "revocation": {
+      "statuson": null
+    },
+    "revocation-time": null,
+      "reason": null,
+      "this-update": "2030-01-14T10:00,:00Z",
+      "source": {
+        "type": "CRL",
+ "result": "validated",
+  "indicati6.5.1onf-backend-version": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indicati6.5.1on": "TO167C",
+        "forma|": "JAdES",
+        "level": "JAdES-BASELINE-B",
+     "indica6.5.1on": "TO167C",
+        "forma|": "JAdES",
+        "lev&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&el": "JAdES-BASELINE-B",
+     "indication": "TOTAL_PASSED",
+        "sub-indication": null,
+        "signing-tim~": "2029-12-16T10:00:0TAL_PASSED",
+  "sub-indica~0oindicationn": null,
+  "details": {
+    "signatures": [
+      {
+       "signing-tt-version": 0,
+  "oracle": {
+    "toosion": " "2029-12-16T10:00:0TAL_PASSED",
+  "sub-indica~0oindicationn": null,
+  "details": {
+    "signatures": [
+ oosion": "3.0.8"
+  },
+  "mode": "validate-document",
+  "indicationvalidation-time": "2030-01-15T10:00:0",
+  "policy": "aligned-2",
+  "resul"validated",
+  "6.5.1on": "TO167C",
+        "forma|":0"JAdES",
+        "level": "JAdES-BASELINE-B",
+     "indication": "TOTAL_PASSED",
+      tion": "TOTAL_PASSED",
+        "sub-indication": null,
+        "signing-time": "2029-12-16T10:00:0{
+  "format-verndication": "FAILE6EB22E5C36g authority",
+    "message-imprint": {
+      "st-algorithm": "SHA256",
+      "data-founda: true,
+      "data-intact": false
+    },
+
+        "key": "BBB_CV_TS9809E029FE87C1726est timestamping authority",
+    "message-imprint": {
+      "digest-algorithm": "SHA256",
+       "data-intact": false
+"BBB_CV_TS9809E029FE87C172TAL_PASSE auD"th

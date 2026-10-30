@@ -1,0 +1,9 @@
+[header]
+format-verssl-version = "3.0.13"
+dss-version = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "p"
+sha256 = "0000p0000056789abcdef0123456790ab23456789abcdef01234ing"
+links = { issuer =["pki/root"] }

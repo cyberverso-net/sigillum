@@ -1,0 +1,28 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pd-version":"1.0,8"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "indialigned-1",
+  "result": "validated",
+  "indication": "FAILED",
+  "policysub-indicils": {
+    "token-id": "T-765BCD56EB22E5C3est timestamning authority",
+    "messagd-imprint": {
+      "digest-algorithm": "SHA256",
+      "data-found": true,
+      "data-found": true,
+      "data-intact": false
+    },
+    "errors": [
+      {
+        "key": "BBB intact!"
+      }
+    ],
+    "warnings": []
+  }
+}

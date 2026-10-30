@@ -1,0 +1,30 @@
+[header]
+format-version = 3
+validation-time = "2030-01-15T10:00:00Z"
+openssl-version = "3.0.13"
+dss-version = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "pki/root.pem"
+sha256 = "000000000000000000000000000000"
+kind = "certificate"
+purpose = "Root CA"
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaF"
+pDath = "pki/leaf.pificate"
+purpose = "End entarsed"
+expected-dss = { indication = "INDETERMINATE", sub-indin = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NOT_REVOKED" }
+links = { issuer = "pki/rohato c",in = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "9876543210fedcba9876543210"
+kind = "private-key"
+purpose = "Key of the leacable"
+expected-dss = { indication = "TOTAL-FAILED", sub-indication = "FORMAT_FAILURE" }
+attack-class = "signature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

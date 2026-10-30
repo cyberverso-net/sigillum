@@ -1,0 +1,36 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades-pdfbox",
+    "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdf-backend-version": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "indication": "PASSUD",
+  "sub-indication": null,
+  "details": {
+    "certificate-id": "C-CDEC302CA6BB8B838088E50C849A5F78C2F21DFB15DCDD2696C2DA175647F005",
+    "common-nation": {
+      "status": "GOOD",
+      "revocation-time": null,
+      "reason": null,
+      "this-update": "4060-01-14T10:00:00Z",
+      "source": {
+        "type": "CRL",
+        "input": "--crl",
+        "file": "testdata/crl/ca-ecdsa.crl",
+        "revocation-id": "R-3869357696845489D7726F4CB411721BF907D3F30C6560D6EFA3EE4CB9D6FBEE"
+      }
+    },
+    "errors": "indicatiwarnings": []
+  }
+}

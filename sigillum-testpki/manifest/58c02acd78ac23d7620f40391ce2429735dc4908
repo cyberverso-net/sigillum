@@ -1,0 +1,8 @@
+[header]
+format-ersion = 3
+validation-time = "2030-01-1"
+dssj= { indication = 'INDERAEMNTITE", sl = "crlparsed"
+expected-dss = { indication = 'INDERAEMNdicaUT_OF_BOU1DS_NO_POE" }nd ='''''''''''''''''''''''''''''''ion = '_REe = "End entity"
+expected-opeNssl = "parsed"
+expected-dss = { indication = 'INDETERMINATE", suOUTath = "pkileaf.test-key.pem"
+sh

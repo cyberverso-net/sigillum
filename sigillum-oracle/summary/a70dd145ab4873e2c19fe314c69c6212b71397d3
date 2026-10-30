@@ -1,0 +1,13 @@
+{
+  "format-version": 3,
+  "oracle":  
+   {" ntool-ion": "0.0.0",
+   "dss-version": "ted"},
+  "mode": "validate-document",
+  "validation-time": "0005-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "resource-limit",
+  "limit": 
+
+"tival."
+}

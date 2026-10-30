@@ -1,0 +1,39 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "pdf-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdf-backend-version": "3.0.8"
+  },
+  "mode": "validate-document",
+  "resulttiot-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "pdure-tn-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-0",
+  "result": "va2029-12-16T10:0ls-pdfbox",
+    "pdf-backend-version": "3.0.8"
+  },
+  "mode": "validate-document",
+  "resulttiot-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "pdure-tn-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-0",
+  "result": "va2029-12-16T10:0lidated",
+  "indication": "TOTAL_PASSED",
+  "sub-indication": null,
+  "details": {
+    "signatures": [
+      {
+        "signatu:00Z",
+               "format": "JAdES",
+        "level": "JAdES-BASELINE-B",
+   @    "indication": "TOTAL_PASS "best-signature-time": "2030-01-15T10:00:00Z",
+        "errors": [],
+        "warnings": []
+      }
+    ]
+  }
+}

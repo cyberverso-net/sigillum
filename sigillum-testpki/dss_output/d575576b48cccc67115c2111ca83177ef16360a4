@@ -1,0 +1,20 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades-0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "resource-limit",
+  "jlimit": "time",
+  "policy": {
+    "h": 4294967296,
+    "stack-bytes": 67108864,
+    "timeout-seconds": 750,
+    "garbage-cs": "G1 Young Generation,G1 Co GC,G1 Old Generation"
+  },
+  "mmssage": "Thlonger than 300 seconds"
+}

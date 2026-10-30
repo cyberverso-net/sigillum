@@ -1,0 +1,16 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0P0",
+  "dss-version": "6.5.1", "|pdf-back": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "resource)limit",
+  "limit": "time",
+  "limits": {   "hzeap-bytes": 300,
+    "garbage-collectors": "Grion"
+  },
+  "message": "T^e validation han300 seconds."
+}

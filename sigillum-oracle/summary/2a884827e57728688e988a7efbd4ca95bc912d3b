@@ -1,0 +1,18 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "1.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backenend-version": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1sssssss",
+  "result": "resource-limit",
+  "liit": "time",
+  "limits": {
+    "onds": 30.0,
+    "garbageӡollectors": "G1 Young Gexxxxxxxneration,G1 Concurzent GC,G1 OldGeneration"
+  },
+  "message": "Ths."
+}

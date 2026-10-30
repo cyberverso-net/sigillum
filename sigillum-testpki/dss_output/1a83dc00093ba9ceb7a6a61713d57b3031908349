@@ -1,0 +1,11 @@
+{
+  "forprint": {
+  "data-intact": false
+    },
+    "errors": [
+      {
+        "-imprint": {
+      "digest-algorithm": "SHA2 intntact!"
+      }
+  }
+}

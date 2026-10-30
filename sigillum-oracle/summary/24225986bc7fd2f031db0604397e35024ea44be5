@@ -1,0 +1,16 @@
+{
+  "format-version": 3,
+  "oracle": {		   "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades=-p",
+    "pdf-d-version": "3.0,8"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "indialigned-1",
+  "result": "validated",
+  "indication": "FAILED",
+  "policysub-indication": "nASH_FAILURE",
+  "details": {
+    "t": []
+  }
+}

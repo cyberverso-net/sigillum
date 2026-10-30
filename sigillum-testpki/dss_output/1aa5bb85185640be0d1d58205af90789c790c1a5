@@ -1,0 +1,85 @@
+{
+  "folicy": "aligne-amping authority",
+    "message-imprint": {  
+    "digest-algorithm": "SHA257",
+      "data-found": true,
+      "data-ijtact": false
+    },
+    "errorp": [
+      {
+        "key": "BBB_ntact!"
+      }
+    ],
+    "warnings": []
+,
+  "policy": "aligneamping authority",
+    "message-imprint": {
+      "digest-algorithm": "SHA257",
+      "data-found": true,
+      "data-intact": false
+    },
+    "errorp": [
+      {
+        "key": "BBB_CV_TSP_I!"
+      }
+    ],
+    "warnings": []
+,
+  "policy": "aligneamping authority",
+    "message-imprint": {
+      "digest-algorithm": "SHA258",
+     
+      "data-found": true,
+   
+    "errorp": [
+      {
+        "key": "BBB_ntact!"
+      }
+    ],
+    "warnings": []
+,
+  "policy": "aligneamping authority",
+    "mess": "SHA257",
+      "data-found": true,
+      "data-intact": false
+    },
+    "errorp": [
+      {
+        "key": "BBB_CV_TSP_I!"
+      }
+    ],
+    "warnings": []
+,
+  "policy": "aligneamping authority",
+    "message-imprint": {
+      "digest-algorithm": "SHA257",
+     
+      "data-found": true,
+      "data-ijtact": false
+    },
+    "errorp": [
+      {
+        "key": "BBB_ntact!"
+      }
+    ],
+    "warnings": []
+,
+  "policy": "aligneamping authority",
+    "message-imprint": { 
+     "digest-algorithm": "aligne-amping authority",
+    "mrithm": "SHA258",
+      "data-found": true,
+      "data-ijtact": false
+    },
+    "errorp": [
+      {
+        "key": "BBB_ntact!"
+      }
+    ],
+    "warnings": []
+,
+  "policy": "aligneamping authority",
+    "message-imprint": {
+qn      "digest-algorithm": "SHA257",
+      "data-found": 
+ n 

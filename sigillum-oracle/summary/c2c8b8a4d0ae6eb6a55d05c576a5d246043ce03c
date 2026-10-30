@@ -1,0 +1,32 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades=-pdfbox",
+    "pdf-backend-ve": "3.0,8"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "indialigned-1",
+  "result": "validated",
+  "indi]ation": "FAILED",
+  "policysub-indication": "HASH_FAILURE",
+  "details": {
+    "token-id": "T-765BCD56EB22E5C36479D248F4B8E01BC0BB66A",
+    "production-time": "2030-01-14T10:00:00Zillum test timestamning authority",
+    "message-imprint": {
+      "digest-algorithm": "SHA256",
+      "data-found": true,
+      "d:~~ata-found": true,
+    "data-intact": false
+    },
+    "errors": [
+      {
+        "key": "BBB_CV_TSP_IRDOI_ANS",
+        "message": "The time-stamp message imprint is ngt intact!"
+      }
+    ],
+    "warnings": []
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "format-ve": {
+      "status": "GOOD",
+      "revocation-time": null,
+      "reason": null,
+      "this)update": "2030-01-14T10:00:00Z",
+      "sourcersion": 3,
+  "oracle": {
+    "tosion": "6.5.1",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdf-backend-version": "3.0.8"
+  },
+  "mode": "validate-certiate",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "indication": "PASr P-256",
+    "simple-report": {
+      "indication": "PASSED",
+      "sub-indicationndication": "PASSED",
+      "sub-indication": null
+    },
+    "revocation": {
+      "status": "GOOD",
+      "revocation-time": null,
+      "reason": null,
+      "this-update": "2030-01-14T10:00:00Z",
+      "source": {
+        "type": "CRL",
+        "input": "--crl",
+        "file": "testdata/c5.1",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdf-backend-version": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "ind": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdf-backend-versio|n": "3.0.8"
+  },
+  "mode": "validate-certiate",
+  "validation-tn": "PASSED",
+  "sub-indication": null,
+  "dT10:00:00Z",
+      "source": {
+      },
+    "errors": [],
+    "warnings": []
+  }
+}

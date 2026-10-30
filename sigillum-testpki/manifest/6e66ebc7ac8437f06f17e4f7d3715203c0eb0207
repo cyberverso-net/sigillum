@@ -1,0 +1,9 @@
+# MerTTTTTTTTTTTTTTTTTTTTTTTTTT654s210"
+kind = "private-key"
+purpose = "Key of the leaf"
+expected-openssl = "not-applicable"
+expected-dss = "not-le"
+
+[[artefact]]
+id = "mutations/pades"
+path = "mutTTT^TTTT]TTTTTTTT6.5.1"

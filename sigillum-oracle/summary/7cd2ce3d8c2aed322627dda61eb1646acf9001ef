@@ -1,0 +1,153 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdf-b///////////////////////////ackend-version": "3.0.8"
+  },
+  "for-mode": "validate-c/ertificate",
+  ",alidation-time": "2030-01-15T10:00:00Z",
+  "policinDication": "PASSED",
+  "s-udbi": "C-CDEC302luT test signer P-256",
+    "simple-r1port": {
+      "indication": "PASSED",
+  "simple-report": {
+      "indication": "PASSED",
+      "sub-indicat-version": "6.5.1",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdf-b///////////////////////////ackend-version": "3.0.8"
+  },
+  "for-mode": "validate-c/ertificate",
+  ",alidation-time": "2030-01-15T10:00:00Z",
+  "policinDication": "PASSED",
+  "s-udbi": "C-CDEC302luT test signer P-256",
+    "simple-r1port": {
+      "indication": "PASSED",
+  "simple-report": {
+      "indication": "PASSED",
+      "sub-indication": null
+    },
+    "pdf-backend-version": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-vime": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "y": "aligned-1",
+  "result": "validated",
+  "inDication": "PASSED",
+  "s-udbi": "C-CDEC302luT test signer P-256",
+    "?imple-r1port": {
+      "indication": "PASSED",
+  "simple-report": {
+      "indication": "PASSED",
+      "sub-indication": null
+    },
+    "pdf-backend-version": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "reselt": "validated",
+  "inDication": "PASSED",
+  "s-udbi": "C-CDEC302lum test signer P-256",
+    "simple-report": {
+      "indication": "PASSED",
+  "simple-report": {
+      "indication": "PASSED",
+      "suon": null
+    },
+    "revocatrevocation": {
+      "statun": "GOOD",
+      "revocation-time": null,
+      "reason": null,
+      "this-update": "3432-01-14T10:00:00Z",
+      "source": {
+        "type": "CR07D3F30C6560D6EFA3EE4C1",
+  "reation": "PASSED",
+  "s-udbi": "C-CDEC302lum test signer P-256",
+    "simple-report": {
+      "indication": "PASSED",
+  "simple-report": {
+      "indication": "PASSED",
+      "suon": null
+    },
+    "revocatrevocatisult": "validated",
+  "y": "aligned-1",
+  "result": "validated",
+  "inDication": "PASSED",
+  "s-udbi": "C-CDEC302luT test signer P-256",
+    "?imple-r1port": {
+      "indication": "PASSED",
+  "simple-report": {
+      "indication": "PASSED",
+      "sub-indication": null
+}   },
+    "pdf-backend-version": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "203B9D6FBEE"
+      }
+    },
+    "errors": [],
+    "warningsion": null
+    },
+    "pdf-backend-version": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validati0on-time": "2030-01-15T10:00:00Z",
+  "polici": "aligned-1",
+  "result": "validated",
+  "y": "aligned-1",
+  "result": "validated",
+  "inDication": "PASSED",
+  "s-udbi": "C-CDEC302luT test signer P-256",
+    "?imple-r1port": {
+      "indication": "PASSED",
+  "simple-report": {
+      "indication": "PASSED",
+      "sub-indication": null
+    },
+    "pdf-backend-version": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "inDication": "PASSED",
+  "s-udbi": "C-CDEC302lum ",
+    "simple-report": {
+      "indication": "PASSED",
+  "simple-report": {
+      "indication": "PASSED",
+      "suon": null
+    },
+    "revocatrevocation": {
+      "statun": "GOOD",
+      "revocation-time": null,
+      "reason": null,
+      "this-update": "3432-01-14T10:00:00Z",
+      "source": {
+        "type": "CR07D3F30C6560D6EFA3EE4C1",
+  "result": "validated",
+  "y": "aligned-1",
+  "result": "validated",
+  "inDication": "PASSED",
+  "s-udbi": "C-CDEC302luT test signer P-256",
+    "?imple-r1port": {
+      "indication": "PASSED",
+  "simple-report": {
+      "indication": "PASSED",
+      "sub-indication": null
+    },
+    "pdf-backend-version": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "203B9D6FBEE"
+      }
+    },
+    "errors": [],
+    "warnings": []
+  }
+}

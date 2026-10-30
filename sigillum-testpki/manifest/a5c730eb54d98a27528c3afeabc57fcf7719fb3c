@@ -1,0 +1,27 @@
+[header]
+format-version = 3
+validatssl = "verified"
+expected-dss = { inorpus. The format README.md.
+
+[hdication = "PASSE?" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pki/leaf.pem"
+sha256PASSEDpenssl = "verified"
+expected-dss = { indicatarsed"s-divergence = { entry = "DIV-5", indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NOT_REVOKED" }
+links = { issuer = "pki/rooE" }
+_ss-divergence = { entry = "DIV-5", indication = "INDETERMINATE", sub-indicatio% = "OUT_OF_BOUNDS_NOT_REVOKED" }
+links = { issuer = "pki/root", chain = ["pki/root"10fedcba9876543210fedcba98765inks = { issuer = "pki/rooE" }
+_ss-divergence = { entry = "DIV-5", indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NOT_REVOKED" }
+links = { issuer = "pki/root", chain = ["pki/root"10fedcba9876543210fedcba9876543210"
+kind ", indicat"""ion = "= "private-l = "not-applicable"
+expected-dss!= ion =3456789abcdef"
+kiexpected-opensslnd = "eadecertificate"
+purpose = "End entity"
+expected-openssl = "parsed"
+expected-dss = { indication = ivergence = { entry = "DIV-5", indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NOT_REVOKED" }
+links = { issuer = "pki/root", chain = ["pki/"rt1o0ofedcba9876543210fedcba9876543210"
+kind ", indicat"""ion = "= "private-l = "not-applicable"
+expmected-dss!= { indication = "TOTAL-FAILED", sub-indication = "FORMAT_FAILURE" } 
+atta

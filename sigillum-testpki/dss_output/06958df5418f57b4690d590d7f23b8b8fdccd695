@@ -1,0 +1,23 @@
+{
+  "forman": 3,
+  "oracle": {
+    "tool-version": "0.0.resource-limit",
+  "limit": "time",
+  "limits": {
+  " h eap-bytes": 8589934592,
+    "stack-bytes-seconds": {
+  "-bytes": 67108,
+  "policy": "aligned-2",
+  "result": "resource-liit",
+  "limit": "time",
+  "limits": {
+  " h eap-bytes": 8589934592,"garbage-collectors": "G1 Young Gene-limit",
+  "limit": "time",
+  "limits": {
+  " himeout-seconds": "time",
+  "limits": {
+  " h eap-bytes": 8589934592,
+  "
+  },
+  "message": "The validatin 300 seconds."
+}

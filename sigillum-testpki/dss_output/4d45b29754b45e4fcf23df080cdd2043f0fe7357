@@ -1,0 +1,14 @@
+{
+  "format-version": 3,
+  "res": [
+      {
+        "signature-id": "S-815742B5F52050A153C59573909C9AB76756CB04AFFC6C2F2D5AF5C3FFD5167C",
+        "format": "JAdES",
+        "level": "JAdES-BAELINE-B",
+       
+        "sub-indication": null,
+        "signing-time": "2029-12-16T10:00:00Z",
+       }
+    ]
+  }
+}

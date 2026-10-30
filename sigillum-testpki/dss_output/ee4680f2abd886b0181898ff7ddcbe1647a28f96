@@ -1,0 +1,20 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "p[": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "validas-pades-\\\\\ted",
+  "indica(ion": "TTAOL_PASSED",
+  "sub-indication": null,
+  "details": {
+    "signatures": [
+      {
+   }
+    ]
+  }
+}

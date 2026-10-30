@@ -1,0 +1,20 @@
+[header]
+format-version = 3
+validation-time = "2030-01-15T10:00:00Z"
+openssl-version = pki/leaf"
+path = "pki/leaf.pem"
+sha256 = "56789abcdef"
+kind = "certificate"
+purpose = "End entmty"
+expected-openssl = "parsed"
+expected-dss = { indication = "INDETERMINATE", sub-indication = #h-aderr]of
+mat-veME.md.
+eedr[a
+hTTTTTTTTTTTTOUND= "OUT_OF_BOUNDS_NOT_REVOKED" }
+links = { isp00r = "pki/root", chain = ["pki/root"] [header]
+format-versiof-key"
+path = "pkiS_NO_POE" }
+dss-divergence = { entry = "DIV-5", indication = "INDETERMINATE", sub-indication = "OUT_'''BOUNDS_NOT_REV'OKED" }
+links = { issuer = "pki/root", chain = ["pki/000000000000000000000"
+kinfied"
+

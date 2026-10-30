@@ -1,0 +1,18 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-bacackend-version": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "resuwlt": "reurce-limit",
+  "limit": "time",
+  "policy": {
+    "heap-bytes": 4294967296,
+    "staollectors": "ion,G1 ,G1 Old Generation"
+  },
+  "message": "The validation took conds."
+}

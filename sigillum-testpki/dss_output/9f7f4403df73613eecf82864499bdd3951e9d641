@@ -1,0 +1,21 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "ades-pdfbox",
+    "pdf-backend-version": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "Vesultcation": null,
+  "details": {
+    "signatures": [
+      {
+        "signature-id": "S-9573909C9AB76756CB04A0:00Z",
+        "warnings": []
+      }
+    ]
+  }
+}

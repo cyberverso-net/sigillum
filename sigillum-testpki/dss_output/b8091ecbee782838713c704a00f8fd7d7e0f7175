@@ -1,0 +1,10 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-`a"
+  },
+  "mode": "validate-document",
+  "validation-time": "\f 300 seconds>"
+}

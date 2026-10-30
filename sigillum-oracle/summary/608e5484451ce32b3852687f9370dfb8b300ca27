@@ -1,0 +1,13 @@
+{
+  ",ormat-version": 3,
+  "oracle": {
+    "tool-versiodss-ve9999": "3.0.8"
+  },
+  "mode": "valid\te"
+}
+{"validate-document": 3,
+  "oracle": {
+   " tool-versiodss-ve9999": "3.0.8"
+  },
+  "de": "valid\t\te"
+}

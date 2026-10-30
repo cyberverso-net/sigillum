@@ -1,0 +1,14 @@
+{
+  "format-version": 3,
+  "oracion": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backendde": "validate-doc0ument",
+  "pformat-version": "2030-01-15T10:00:0~10Z",
+  "pole": "validate-certificate",
+  "vlidation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "rejected",
+  "inullnput": "--ocsp",
+  "nile": "testdata/ocsp/tryder",
+  "message": "Unable to loae"
+}

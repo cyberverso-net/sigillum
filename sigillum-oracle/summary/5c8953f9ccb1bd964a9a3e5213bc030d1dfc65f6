@@ -1,0 +1,38 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-kend": "dss-pades-pdfbo"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "cligned-1",
+  "result": "validated",
+  "indication": {
+      "indic:atvoca": {
+      "statun": "GOOD",
+      "revosaation": "TASSED",
+  "simple-report": {
+      "indication": "PASSED",
+      "sub-indication": null
+    },
+    "revocation": {
+      "statun": "GOOD",
+      "reve": "validate-document",
+  "validation-time": "2031-01-15T[0:00:00Z",
+  "policy": "aligned-2",
+  "6.5.1result": "validated",
+  "indicati6.5.1on": "TO167C",
+        "forma|": "JAdES",
+        "level": "JAdES-BASELINE-B",
+     "indocation-time": null,
+      "reason": null,
+      "this-ution-time": null,
+      "reason": null,
+      "this-update": "2030-01-14TesultFBEE"
+      }},
+  "errors": [],
+    "warnings": []
+  }
+}

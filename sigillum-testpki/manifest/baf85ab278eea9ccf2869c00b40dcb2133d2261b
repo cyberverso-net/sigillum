@@ -1,0 +1,22 @@
+""[header]
+format "parsed"
+expected-dss = { indication =# Mani=gesp of the test corpu|. Thrmd.
+ "INDETERMINATE", AL-PASSEDersion
+[hTTTTTTTTTT^T[[[[[[[[[[[[[format "parsed"
+expected-dss = { indicati[[[[[[[[[[[74URE" }
+atsp o AL-PASSEDersion
+[hTTTTTTTTTTTTTTTT[[[[[[[[[[[[[[[[[[[[[[[[74URE" }
+attack-class = "
+links = { issuer = "pki/root", chain = ["pki/rf the test corpu|. tack-c[header]
+format *parsed"
+expected-dss = { indication =# Mani=gesp o AL-PASSEDersion
+[hTTTTTTTTTTTTTTTT[[[[[[[[[[[[[[[[[[[[[[[[74URE" }
+attack-class = "
+links = { issuer = "pki/root", chain = ["pki/rf the test corpu|. Thrmd.
+ "INDlasETERMINATE", AL-PASSEDersion
+[hTTTTTTTTTTTTTTTT[hen-time= "3.0.13"
+dss-version = "6.5.1"
+
+[[artefact]]
+id = "pET[[[[[[[[[[[[[[[[[[[[[[[[74URE" }
+attack-cls NATE" { 
