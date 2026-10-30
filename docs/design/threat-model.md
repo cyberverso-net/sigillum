@@ -188,7 +188,7 @@ The attack classes below are documented in *1 Trillion Dollar Refund: How To Spo
 | Id | Threat | Mitigation | Evidence |
 | --- | --- | --- | --- |
 | S1 | A5 publishes a malicious dependency update | `cargo deny`; `cargo vet` (#5); grouped and reviewed Dependabot updates; required checks | CI |
-| S2 | A5 tampers with CI | Actions pinned by hash; least-privilege workflow permissions; OpenSSF Scorecard | CI; Scorecard |
+| S2 | A5 tampers with CI | Actions pinned by hash; least-privilege workflow permissions; OpenSSF Scorecard. The one path by which CI writes the contents of the repository is the job *Save the corpus* of `fuzz-nightly.yml`, which pushes the branch `fuzz-corpus` with the `GITHUB_TOKEN` of the run, runs no code of the repository and runs only for `main`. That only this job writes the branch is enforced by the workflow and by the review of changes on `main`; a ruleset on the branch blocks its deletion and force pushes but cannot restrict who pushes, since GitHub does not accept GitHub Actions as a bypass actor here and a deploy key would be a long-lived credential (S6), as [quality-gates.md](../development/quality-gates.md#nightly-fuzzing) describes. A corpus altered there can only change which inputs are fuzzed | CI; Scorecard; ruleset |
 | S3 | Unauthorised change reaches `main` | Pull requests required; signed commits verified; bypass limited to pull requests | Ruleset |
 | S4 | Release artefacts differ from the repository | Trusted publishing to crates.io, signed tags and an SBOM per release (#7); build provenance attestations to be considered | #7 |
 | S5 | Users install the unrelated `sigillum` or `sigillum-core` crates by mistake | The README and crate documentation state the crate names; every published crate carries the `sigillum-` prefix with a functional name | Documentation |
@@ -204,6 +204,7 @@ The attack classes below are documented in *1 Trillion Dollar Refund: How To Spo
 6. A compromised trust service whose keys remain valid (see *Outside the model*).
 7. Compromise of the single maintainer's account or signing key (threat S6).
 8. A replayed timestamp token over the same signature value, or a replayed OCSP response, accepted because the nonce recorded in an altered state was removed or replaced (threats G5 and G7). The other checks of the token or response still apply, including the `genTime` of a signature timestamp against the signing time and the `thisUpdate` and `nextUpdate` of an OCSP response ([ADR-0026](adr/0026-public-api-conventions.md), decision 6).
+9. Findings of the nightly fuzzing are public until the run is deleted, because the repository is public: the failing input, in the artefact of the run for 7 days, and the log, with the stack trace and the input itself, printed by libFuzzer and cargo fuzz, for the 90 days of log retention. Deleting the run is therefore a required step of the triage of every finding, which is handled through a private security advisory. The corpus of a target with a finding is not saved that night, so neither the failing input nor inputs derived from it enter the history of the corpus branch ([quality-gates.md](../development/quality-gates.md#nightly-fuzzing)).
 
 ## Decisions
 

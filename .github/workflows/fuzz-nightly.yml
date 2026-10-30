@@ -1,0 +1,241 @@
+name: Nightly fuzzing
+
+# Every cargo-fuzz target of the repository runs each night for at least
+# FUZZ_SECONDS, one job per target, starting from the corpus that earlier
+# runs kept on the branch CORPUS_BRANCH. The corpus of each target is then
+# minimised with `cargo fuzz cmin`. An input that fails, while fuzzing or
+# while minimising, is uploaded as an artefact and fails the run.
+#
+# Only the job "Save the corpus" writes the branch, once per run after
+# every fuzzing job has ended, with the GITHUB_TOKEN of the run: it alone
+# has contents: write, and it runs no code of the repository. A push made
+# with GITHUB_TOKEN starts no other workflow.
+on:
+  schedule:
+    - cron: "41 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One run at a time for each branch, so that the corpus branch, written
+# only by runs of main, has one writer.
+concurrency:
+  group: fuzz-nightly-${{ github.ref }}
+  cancel-in-progress: false
+
+# bash with -o pipefail, so that a command that fails before a pipe fails the step.
+defaults:
+  run:
+    shell: bash
+
+env:
+  # The nightly and the cargo-fuzz of tools/dev-image/versions.env, which
+  # tools/dev-image/check-versions.sh compares with these values.
+  RUST_NIGHTLY: nightly-2026-10-25
+  CARGO_FUZZ_VERSION: 0.13.2
+  CORPUS_BRANCH: fuzz-corpus
+  FUZZ_SECONDS: 600
+  # The time limit of one input, in seconds, instead of the 1200 s of
+  # libFuzzer, so that an input that runs for a minute is a finding.
+  FUZZ_TIMEOUT: 60
+  # Gives git the token of the job, from the environment, when GitHub asks
+  # for credentials, so that the token never appears in a command line.
+  CREDENTIAL_HELPER: >-
+    !f() { test "$1" = get || exit 0; echo username=x-access-token; echo "password=$GH_TOKEN"; }; f
+
+jobs:
+  targets:
+    name: List the fuzz targets
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      matrix: ${{ steps.list.outputs.matrix }}
+      corpus: ${{ steps.corpus.outputs.exists }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Test the listing of the fuzz targets and the minimisation
+        run: |
+          .github/scripts/test-fuzz-targets.sh
+          .github/scripts/test-fuzz-minimise.sh
+      - name: List the fuzz targets
+        id: list
+        run: |
+          matrix=$(.github/scripts/fuzz-targets.sh)
+          echo "$matrix" | jq .
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+      # git ls-remote exits with 2 when the branch does not exist, and with
+      # another code when the remote cannot be read, which fails the run.
+      - name: Look for the corpus branch
+        id: corpus
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          code=0
+          git -c "credential.helper=$CREDENTIAL_HELPER" \
+            ls-remote --exit-code --heads "https://github.com/$GITHUB_REPOSITORY.git" "refs/heads/$CORPUS_BRANCH" || code=$?
+          case "$code" in
+            0) echo "exists=true" >> "$GITHUB_OUTPUT" ;;
+            2) echo "The branch $CORPUS_BRANCH does not exist yet: every target starts from its seeds."
+               echo "exists=false" >> "$GITHUB_OUTPUT" ;;
+            *) exit "$code" ;;
+          esac
+
+  fuzz:
+    name: Fuzz ${{ matrix.crate }} ${{ matrix.target }}
+    needs: targets
+    runs-on: ubuntu-latest
+    # Building, FUZZ_SECONDS of fuzzing, FUZZ_TIMEOUT for the last input
+    # and the minimisation, with a wide margin.
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.targets.outputs.matrix) }}
+    env:
+      CRATE: ${{ matrix.crate }}
+      TARGET: ${{ matrix.target }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check out the corpus branch
+        if: needs.targets.outputs.corpus == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.CORPUS_BRANCH }}
+          path: corpus-branch
+          persist-credentials: false
+      - name: Restore the corpus
+        id: restore
+        working-directory: ${{ matrix.directory }}
+        run: |
+          mkdir -p "corpus/$TARGET"
+          kept="$GITHUB_WORKSPACE/corpus-branch/$CRATE/$TARGET"
+          if [ -d "$kept" ]; then
+            cp -R "$kept/." "corpus/$TARGET/"
+          fi
+          echo "The corpus holds $(find "corpus/$TARGET" -type f | wc -l) inputs."
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
+        with:
+          toolchain: ${{ env.RUST_NIGHTLY }}
+      - name: Install cargo-fuzz
+        run: cargo "+$RUST_NIGHTLY" install --locked "cargo-fuzz@$CARGO_FUZZ_VERSION"
+      # cargo fuzz has no --locked option: fetching with --locked first
+      # fails when the lock file does not match the manifest.
+      - name: Fetch the dependencies
+        working-directory: ${{ matrix.directory }}
+        run: cargo "+$RUST_NIGHTLY" fetch --locked
+      # --fuzz-dir names the fuzz project, which cargo fuzz otherwise looks
+      # for from the package that contains the working directory.
+      - name: Fuzz
+        id: fuzz
+        working-directory: ${{ matrix.directory }}
+        run: |
+          corpora=("corpus/$TARGET")
+          if [ -d "seeds/$TARGET" ]; then corpora+=("seeds/$TARGET"); fi
+          options=("-max_total_time=$FUZZ_SECONDS" "-timeout=$FUZZ_TIMEOUT" -print_final_stats=1)
+          if [ -f "$TARGET.dict" ]; then options+=("-dict=$TARGET.dict"); fi
+          cargo "+$RUST_NIGHTLY" fuzz run --fuzz-dir . "$TARGET" "${corpora[@]}" -- "${options[@]}"
+      # Only after successful fuzzing: a target with a crash that persists
+      # is not minimised until the crash is fixed. The script fails on an
+      # input that fails during the merge, which libFuzzer skips.
+      - name: Minimise the corpus
+        id: minimise
+        working-directory: ${{ matrix.directory }}
+        run: |
+          "$GITHUB_WORKSPACE/.github/scripts/fuzz-minimise.sh" "$TARGET"
+      # Failing inputs may expose a vulnerability: they are kept for a short
+      # time only, and handled as quality-gates.md describes.
+      - name: Upload the failing inputs
+        if: failure() && (steps.fuzz.outcome == 'failure' || steps.minimise.outcome == 'failure')
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: crash-${{ matrix.crate }}-${{ matrix.target }}
+          path: ${{ matrix.directory }}/artifacts/${{ matrix.target }}/
+          if-no-files-found: warn
+          retention-days: 7
+      # The corpus is passed on only when fuzzing and minimising succeeded.
+      # After a finding, or any other failure, the corpus that the branch
+      # holds for the target stays as it is, so that a failing input, or
+      # inputs derived from it, are kept only in the artefact of the run
+      # and never in the history of the branch (issue #81).
+      - name: Prepare the corpus
+        working-directory: ${{ matrix.directory }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/corpus/$CRATE"
+          cp -R "corpus/$TARGET" "$RUNNER_TEMP/corpus/$CRATE/$TARGET"
+      - name: Upload the corpus
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: corpus-${{ matrix.crate }}-${{ matrix.target }}
+          path: ${{ runner.temp }}/corpus/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  save:
+    name: Save the corpus
+    needs: [targets, fuzz]
+    # Only runs of the workflow of main write the branch.
+    if: ${{ !cancelled() && needs.targets.result == 'success' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      # To push the corpus branch. The OpenSSF Scorecard check
+      # Token-Permissions reports this job-level write permission; it is
+      # accepted because the job runs no code of the repository and writes
+      # only the corpus branch.
+      contents: write
+    steps:
+      - name: Download the corpus of each target
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: corpus-*
+          path: ${{ runner.temp }}/corpus
+          merge-multiple: true
+      # Each target whose corpus was passed on replaces its directory; the
+      # others, including every target with a finding, keep theirs. A push
+      # that is not a fast-forward is refused, so that nothing written since
+      # the branch was read is lost.
+      - name: Commit and push the corpus
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXISTS: ${{ needs.targets.outputs.corpus }}
+          NEW: ${{ runner.temp }}/corpus
+        run: |
+          remote="https://github.com/$GITHUB_REPOSITORY.git"
+          git init -q "$RUNNER_TEMP/store"
+          cd "$RUNNER_TEMP/store"
+          git config credential.helper "$CREDENTIAL_HELPER"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if [ "$EXISTS" = true ]; then
+            git fetch -q --depth=1 "$remote" "refs/heads/$CORPUS_BRANCH"
+            git checkout -q FETCH_HEAD
+          else
+            git checkout -q --orphan corpus
+            {
+              echo "# Fuzzing corpus"
+              echo
+              echo "The corpus of each cargo-fuzz target of $GITHUB_REPOSITORY, as <crate>/<target>/, kept between the runs of .github/workflows/fuzz-nightly.yml, which alone writes this branch."
+            } > README.md
+          fi
+          mkdir -p "$NEW"
+          for directory in "$NEW"/*/*/; do
+            [ -d "$directory" ] || continue
+            target=${directory#"$NEW"/}
+            target=${target%/}
+            rm -rf "$target"
+            mkdir -p "$(dirname "$target")"
+            cp -R "$directory" "$target"
+            echo "$target: $(find "$target" -type f | wc -l) inputs"
+          done
+          git add -A
+          if git diff --cached --quiet; then
+            echo "The corpus did not change."
+            exit 0
+          fi
+          git commit -q -m "Save the corpus of run $GITHUB_RUN_ID"
+          git push "$remote" "HEAD:refs/heads/$CORPUS_BRANCH"

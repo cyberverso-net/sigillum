@@ -25,6 +25,11 @@ jobs:
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
         with:
           toolchain: stable
+      # The listing of the targets and the minimisation of the nightly fuzzing.
+      - name: Test the scripts of the nightly fuzzing
+        run: |
+          .github/scripts/test-fuzz-targets.sh
+          .github/scripts/test-fuzz-minimise.sh
       - name: Check the fuzz targets of sigillum-testpki
         run: cargo check --locked --manifest-path crates/sigillum-testpki/fuzz/Cargo.toml
       - name: Check the fuzz targets of sigillum-oracle
