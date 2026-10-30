@@ -1,11 +1,14 @@
 # Configuration of cargo mutants (https://mutants.rs/config-file.html).
 #
 # examine_globs lists the critical modules of
-# docs/development/quality-gates.md, "Critical modules": the code that
+# docs/development/quality-gates.md, "Mutation testing": the code that
 # signs, verifies or parses. The mutation-score threshold applies to them:
-# authors test the mutants of their diff that fall in them, and
-# .github/workflows/mutants.yml tests all of them every night. A -f or
-# --file option on the command line replaces this list for that run.
+# .github/workflows/mutants.yml tests the mutants of the diff of each pull
+# request that fall in them, and all of them every night.
+#
+# A -f or --file option on the command line adds to this list; it does not
+# replace it. To test other files alone, add --no-config, which ignores
+# this file.
 examine_globs = [
     # Library crates: all of their code.
     "crates/sigillum-pki/src/**/*.rs",
@@ -13,22 +16,25 @@ examine_globs = [
     "crates/sigillum-cades/src/**/*.rs",
     "crates/sigillum-pades/src/**/*.rs",
     "crates/sigillum-jades/src/**/*.rs",
-    # sigillum-testpki: issuance and signing of the test PKI and of the
-    # timestamp tokens, the parsers of untrusted input, and the OpenSSL and
-    # DSS checks of the corpus.
+    # sigillum-testpki: issuance and signing of the test PKI, of the
+    # timestamp tokens and of the signed corpus, the parsers of untrusted
+    # input, and the OpenSSL and DSS checks of the corpus.
     "crates/sigillum-testpki/src/manifest.rs",
     "crates/sigillum-testpki/src/mutations.rs",
+    "crates/sigillum-testpki/src/signed.rs",
     "crates/sigillum-testpki/src/openssl.rs",
+    "crates/sigillum-testpki/src/openssl/process.rs",
     "crates/sigillum-testpki/src/dss.rs",
     "crates/sigillum-testpki/src/timestamp.rs",
     "crates/sigillum-testpki/src/timestamp/input.rs",
     "crates/sigillum-testpki/src/pki/keys.rs",
+    "crates/sigillum-testpki/src/pki/hierarchy.rs",
     "crates/sigillum-testpki/src/pki/issue.rs",
     "crates/sigillum-testpki/src/pki/crl.rs",
     "crates/sigillum-testpki/src/pki/ocsp.rs",
-    # sigillum-oracle: the parser of summary.json and the comparison of
-    # results. src/dss.rs is left out: it is built only with the dss
-    # feature, which needs Java, so its mutants would not be built.
+    # sigillum-oracle: the parser of summary.json, the comparison of
+    # results and the validation runs. src/dss.rs is left out, as
+    # quality-gates.md explains.
     "crates/sigillum-oracle/src/summary.rs",
     "crates/sigillum-oracle/src/compare.rs",
     "crates/sigillum-oracle/src/validation.rs",

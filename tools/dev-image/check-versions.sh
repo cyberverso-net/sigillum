@@ -65,10 +65,12 @@ llvm_cov=$(sed -n 's/.*tool: cargo-llvm-cov@\([0-9.]*\).*/\1/p' "$workflows/cove
 [ "$(value CARGO_LLVM_COV_VERSION)" = "$llvm_cov" ] \
     || differs "CARGO_LLVM_COV_VERSION is $(value CARGO_LLVM_COV_VERSION), coverage.yml installs $llvm_cov"
 
-# cargo mutants: the version that mutants.yml installs.
-mutants=$(sed -n 's/.*tool: cargo-mutants@\([0-9.]*\).*/\1/p' "$workflows/mutants.yml")
-[ "$(value CARGO_MUTANTS_VERSION)" = "$mutants" ] \
-    || differs "CARGO_MUTANTS_VERSION is $(value CARGO_MUTANTS_VERSION), mutants.yml installs $mutants"
+# cargo mutants: the version that the mutation workflows install.
+for file in mutants.yml mutants-config.yml; do
+    mutants=$(sed -n 's/.*tool: cargo-mutants@\([0-9.]*\).*/\1/p' "$workflows/$file")
+    [ "$(value CARGO_MUTANTS_VERSION)" = "$mutants" ] \
+        || differs "CARGO_MUTANTS_VERSION is $(value CARGO_MUTANTS_VERSION), $file installs $mutants"
+done
 
 # The minimum supported Rust version of the workspace.
 msrv=$(sed -n 's/^rust-version *= *"\([^"]*\)".*/\1/p' "$root/Cargo.toml" | head -n 1)
