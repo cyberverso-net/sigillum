@@ -672,6 +672,57 @@ fn a_crl_without_a_covered_certificate_cannot_be_checked() -> TestResult {
 // The divergences recorded in docs/design/divergences.md, which the
 // manifest names in the field dss-divergence.
 
+/// The entries `DIV-<number>` that `text` names.
+fn divergence_entries(text: &str) -> Vec<&str> {
+    let mut found: Vec<&str> = text
+        .match_indices("DIV-")
+        .filter_map(|(start, _)| {
+            let digits = text[start + 4..]
+                .bytes()
+                .take_while(u8::is_ascii_digit)
+                .count();
+            (digits > 0).then(|| &text[start..start + 4 + digits])
+        })
+        .collect();
+    found.sort_unstable();
+    found.dedup();
+    found
+}
+
+/// Every entry of the register that the notes of an artefact name, such as
+/// DIV-7 for `mutations/pades-incremental-update`, whose `expected-dss` is
+/// the result of DSS, is a row of divergences.md that names the artefact
+/// (issue #112).
+#[test]
+fn every_divergence_named_in_the_notes_is_a_row_that_names_the_artefact() -> TestResult {
+    let manifest = committed()?;
+    let docs = std::fs::read_to_string(
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../docs/design/divergences.md"),
+    )?;
+    let mut named = Vec::new();
+    for artefact in &manifest.artefacts {
+        for entry in divergence_entries(artefact.notes.as_deref().unwrap_or_default()) {
+            register_row(&docs, entry, &artefact.id)?;
+            named.push(format!("{entry} {}", artefact.id));
+        }
+    }
+    assert!(
+        named.contains(&"DIV-7 mutations/pades-incremental-update".to_owned()),
+        "{named:?}"
+    );
+    assert!(named.contains(&"DIV-6 mutations/jades-tampered-header".to_owned()));
+    Ok(())
+}
+
+#[test]
+fn divergence_entries_are_read_as_whole_numbers() {
+    assert_eq!(
+        divergence_entries("DIV-7 and DIV-12, then DIV-7 again; DIV- alone"),
+        ["DIV-12", "DIV-7"]
+    );
+    assert!(divergence_entries("no entry").is_empty());
+}
+
 #[test]
 fn every_divergence_of_the_manifest_is_a_row_of_divergences_md_that_names_the_artefact()
 -> TestResult {
@@ -691,12 +742,10 @@ fn every_divergence_of_the_manifest_is_a_row_of_divergences_md_that_names_the_ar
     Ok(())
 }
 
-/// Checks that the register of `docs` has exactly one row for the entry of
-/// `divergence`, that its cell "Test vector" names `id`, and that the row
-/// names the result of DSS that the manifest records: its indication, with
-/// hyphens or underscores, and its sub-indication, each as a whole word.
-fn check_row(docs: &str, id: &str, divergence: &Divergence) -> Result<(), String> {
-    let entry = divergence.entry.as_str();
+/// The one row of the register of `docs` for `entry`, after checking that
+/// it has the columns of the register and that its cell "Test vector"
+/// names `id`.
+fn register_row<'a>(docs: &'a str, entry: &str, id: &str) -> Result<&'a str, String> {
     let cells = |line: &str| -> Vec<String> {
         line.trim()
             .trim_start_matches('|')
@@ -733,6 +782,16 @@ fn check_row(docs: &str, id: &str, divergence: &Divergence) -> Result<(), String
     if !row_cells[column].contains(&format!("`{id}`")) {
         return Err(format!("the test vectors of {entry} do not name {id}"));
     }
+    Ok(row)
+}
+
+/// Checks that the register of `docs` has exactly one row for the entry of
+/// `divergence`, that its cell "Test vector" names `id`, and that the row
+/// names the result of DSS that the manifest records: its indication, with
+/// hyphens or underscores, and its sub-indication, each as a whole word.
+fn check_row(docs: &str, id: &str, divergence: &Divergence) -> Result<(), String> {
+    let entry = divergence.entry.as_str();
+    let row = register_row(docs, entry, id)?;
     let indication = divergence.indication.as_str();
     let named = |word: &str| names_word(row, word);
     if !named(indication) && !named(&indication.replace('-', "_")) {

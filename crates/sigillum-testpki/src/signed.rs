@@ -77,8 +77,10 @@ const SHADOW_VARIANTS: [Variant; 3] = [
     Variant::PadesShadowHideAndReplace,
 ];
 
-/// The label of the signer of the documents prepared for shadow attacks.
-const SHADOW_SIGNER: &str = "p256";
+/// The signer of the documents prepared for shadow attacks,
+/// `pki/signer-p256`: an entry of [`SIGNERS`] by reference, so that it
+/// cannot be missing from the plan.
+const SHADOW_SIGNER: &Signer = &SIGNERS[2];
 
 impl Variant {
     /// The name in identifiers.
@@ -306,13 +308,11 @@ pub fn plan() -> Vec<Fixture> {
         }
     }
     for variant in SHADOW_VARIANTS {
-        for signer in SIGNERS.iter().filter(|s| s.label == SHADOW_SIGNER) {
-            fixtures.push(Fixture {
-                variant,
-                level: Level::B,
-                signer,
-            });
-        }
+        fixtures.push(Fixture {
+            variant,
+            level: Level::B,
+            signer: SHADOW_SIGNER,
+        });
     }
     fixtures
 }

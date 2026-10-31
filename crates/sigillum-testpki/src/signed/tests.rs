@@ -817,3 +817,11 @@ fn shadow_purposes_name_the_class() -> TestResult {
     );
     Ok(())
 }
+
+/// Issue #112: the signer of the shadow documents is an entry of SIGNERS,
+/// taken by reference, so a missing signer cannot leave them unsigned.
+#[test]
+fn the_shadow_signer_is_the_p256_signer_of_the_corpus() {
+    assert_eq!(SHADOW_SIGNER.label, "p256");
+    assert!(SIGNERS.contains(SHADOW_SIGNER));
+}

@@ -25,6 +25,12 @@ use crate::documents;
 /// PAdES signatures of the corpus are a few tens of kilobytes long.
 pub const MAX_PDF_LEN: usize = 4 * 1024 * 1024;
 
+/// The largest `/Size`: one more than the largest number of indirect
+/// objects, 8,388,607, of ISO 32000-1:2008, Annex C, clause C.2, Table C.1,
+/// within which conforming writers should remain. It keeps every object
+/// number, and `/Size` itself, far from the limit of `u32`.
+pub(crate) const MAX_SIZE: u32 = 8_388_608;
+
 /// The most cross-reference sections that are followed through `/Prev`.
 const MAX_SECTIONS: usize = 64;
 
@@ -47,7 +53,7 @@ pub(crate) const SHADOW_REPLACE_NOTES: &str = "The signed document, documents/sh
 pub(crate) const SHADOW_HIDE_AND_REPLACE_NOTES: &str = "The signed document, documents/shadow-hide-and-replace, holds a second page tree, object 6, with a page of other text, which no object in use refers to. An incremental update (ISO 32000-1:2008, clause 7.5.6) appended after the signed revision writes the catalog, object 1, again with that page tree as its Pages, and adds no other object: the content shown after signing was signed. The variant follows the hide-and-replace class of the shadow attacks of Shadow Attacks: Hiding and Replacing Content in Signed PDFs (NDSS 2021), threat D2 of the threat model. The DSS result is a prediction: the signature and its ByteRange cover the signed revision, which is intact, clause 7.5.6 lets a signed file be updated, and ETSI EN 319 102-1 V1.4.1 sets no check of the changes in later revisions, so the signature validates as its source does. DSS 6.5.1 gives this result in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only, with the warnings BBB_FC_IVDBSFR_ANS, a visual difference on page 1, and BBB_FC_DSCNUOM_ANS, undefined object modifications after the signature revision.";
 
 /// The notes of the partial `ByteRange`.
-pub(crate) const PARTIAL_BYTE_RANGE_NOTES: &str = "The second range of the ByteRange of the signature dictionary starts at the end of the source file, where a copy of the second signed range of the source is appended: the bytes that the ByteRange covers are those that were signed, so the digest and the signature value still verify over them. The ByteRange no longer covers the signature dictionary in use, nor the rest of the signed revision after the Contents string, and the value of the ByteRange is the only byte changed in the file before the copy. The variant follows the signature wrapping attack of 1 Trillion Dollar Refund (ACM CCS 2019), threat D3 of the threat model. ETSI EN 319 142-1 V1.2.1, clause 6.3, item k), requires the ByteRange to cover the entire file, including the Signature Dictionary but excluding the entry with key Contents, which ISO 32000-1:2008, clause 12.8.1, recommends. The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1: the signature is not conformant to its base format, so the format checking (clause 5.2.2) fails and the validation process for basic signatures returns FAILED with FORMAT_FAILURE (clause 5.3.4, step 1), reported as TOTAL-FAILED with FORMAT_FAILURE (clause 5.1.3, Table 6). DSS 6.5.1 gives this result in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only, with the errors BBB_FC_IBRV_ANS, the ByteRange is not consistent, and BBB_CV_IRDOI_ANS, the reference data object is not intact.";
+pub(crate) const PARTIAL_BYTE_RANGE_NOTES: &str = "The second range of the ByteRange of the signature dictionary starts at the end of the source file, where a copy of the second signed range of the source is appended: the bytes that the ByteRange covers are those that were signed, and their SHA-256 digest is the value of the message-digest attribute. The ByteRange no longer covers the signature dictionary in use, nor the rest of the signed revision after the Contents string, and the digits of the value of the ByteRange are the only bytes changed in the file before the copy. The variant follows the signature wrapping attack of 1 Trillion Dollar Refund (ACM CCS 2019), threat D3 of the threat model. The bytes between the two ranges are no longer the Contents string of the signature dictionary in use, so the ByteRange no longer marks out the signed data of that dictionary, and the signature cannot be processed as its base format defines it: ISO 32000-1:2008, clause 12.8.1, Table 252, has the ByteRange describe the exact byte range for the digest calculation, which excludes the Contents entry, and recommends that it cover the entire file. ETSI EN 319 142-1 V1.2.1, clause 6.3, item k), requires the ByteRange to cover the entire file, including the Signature Dictionary but excluding the entry with key Contents, but that is a requirement of the baseline profile, and ETSI EN 319 102-1 V1.4.1, clause 5.2.2.1, NOTE, leaves conformance to a profile out of the format checking. The DSS result is therefore a prediction that rests on the reading of DSS for its base format: the format checking (clause 5.2.2) fails and the validation process for basic signatures returns FAILED with FORMAT_FAILURE (clause 5.3.4, step 1), reported as TOTAL-FAILED with FORMAT_FAILURE (clause 5.1.3, Table 6). DSS 6.5.1 gives this result in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only, with the errors BBB_FC_IBRV_ANS, the ByteRange is not consistent, and BBB_CV_IRDOI_ANS, the reference data object is not intact. DSS reads the bytes between the two ranges as the hexadecimal value of Contents; they differ from it here, so DSS marks the ByteRange not valid in its diagnostic data and validates the signature over an empty signed content instead, whose digest does not match the message-digest attribute: its diagnostic data gives that digest matcher as found but not intact, and the signature as not intact.";
 
 /// A PDF file of the corpus, read through its last cross-reference
 /// section and the sections that `/Prev` leads to.
@@ -202,10 +208,10 @@ impl<'a> Section<'a> {
             };
             let (first, count) = (integer(first)?, integer(count)?);
             let start = end + 1;
-            let length = count.checked_mul(20).ok_or(NOT_READ)?;
-            let entries = rest.get(start..start + length).ok_or(NOT_READ)?;
+            let stop = subsection_end(start, count).ok_or(NOT_READ)?;
+            let entries = rest.get(start..stop).ok_or(NOT_READ)?;
             subsections.push((first, entries));
-            at = start + length;
+            at = stop;
         }
     }
 
@@ -213,17 +219,13 @@ impl<'a> Section<'a> {
     /// or `Err` if it gives it free, or `None` if it does not list it.
     fn find(&self, number: usize) -> Option<Result<usize, Unsupported>> {
         for &(first, entries) in &self.subsections {
-            if number < first || number >= first + entries.len() / 20 {
+            let listed = number
+                .checked_sub(first)
+                .filter(|index| *index < entries.len() / 20);
+            let Some(index) = listed else {
                 continue;
-            }
-            let entry = &entries[(number - first) * 20..(number - first + 1) * 20];
-            let result = std::str::from_utf8(entry)
-                .map_err(|_| NOT_READ)
-                .and_then(|entry| match (&entry[10..11], &entry[16..18]) {
-                    (" ", " n") => integer(&entry[..10]),
-                    _ => Err(Unsupported("the object is not in use")),
-                });
-            return Some(result);
+            };
+            return Some(entry_offset(&entries[index * 20..(index + 1) * 20]));
         }
         None
     }
@@ -236,6 +238,49 @@ impl<'a> Section<'a> {
             .map(|(_, value)| integer(value))
             .transpose()
     }
+}
+
+/// The position after the entries of a subsection of `count` entries of 20
+/// bytes that start at `start`, or `None` if it overflows.
+fn subsection_end(start: usize, count: usize) -> Option<usize> {
+    count.checked_mul(20)?.checked_add(start)
+}
+
+/// The offset that a cross-reference entry of 20 bytes gives (clause
+/// 7.5.4): ten digits of offset, a space, five digits of generation, a
+/// space and `n`, read as bytes. An entry of type `f`, or of a generation
+/// other than 0, is refused.
+fn entry_offset(entry: &[u8]) -> Result<usize, Unsupported> {
+    let digits = |range: std::ops::Range<usize>| {
+        entry
+            .get(range)
+            .is_some_and(|field| field.iter().all(u8::is_ascii_digit))
+    };
+    if entry.len() != 20
+        || !digits(0..10)
+        || entry[10] != b' '
+        || !digits(11..16)
+        || entry[16] != b' '
+    {
+        return Err(NOT_READ);
+    }
+    match entry[17] {
+        b'n' => {}
+        b'f' => return Err(Unsupported("the object is not in use")),
+        _ => return Err(NOT_READ),
+    }
+    if &entry[11..16] != b"00000" {
+        return Err(Unsupported("the object is not of generation 0"));
+    }
+    // Ten ASCII digits, which fit in a usize of 64 bits.
+    entry[..10]
+        .iter()
+        .try_fold(0usize, |value, digit| {
+            value
+                .checked_mul(10)?
+                .checked_add(usize::from(digit - b'0'))
+        })
+        .ok_or(NOT_READ)
 }
 
 /// The position after the line at `at` of `bytes`, which must be `word`
@@ -283,7 +328,15 @@ impl<'a> Pdf<'a> {
         let mut entries = Vec::new();
         for (name, value) in trailer_entries(section.trailer)? {
             match name {
-                "Size" => size = Some(u32::try_from(integer(value)?).map_err(|_| NOT_READ)?),
+                "Size" => {
+                    let value = u32::try_from(integer(value)?).map_err(|_| NOT_READ)?;
+                    if value > MAX_SIZE {
+                        return Err(Unsupported(
+                            "/Size is larger than the limit of indirect objects",
+                        ));
+                    }
+                    size = Some(value);
+                }
                 "Prev" => {}
                 // A hybrid-reference file (clause 7.5.8.4) is not read here.
                 "XRefStm" => return Err(NOT_READ),
@@ -319,6 +372,9 @@ impl<'a> Pdf<'a> {
     /// The most recent copy of the object `number`, between its
     /// `<number> 0 obj` line and the end-of-line marker before `endobj`.
     pub(crate) fn object(&self, number: u32) -> Result<&'a [u8], Unsupported> {
+        if number >= self.size {
+            return Err(Unsupported("the object number is not below /Size"));
+        }
         let number = usize::try_from(number).map_err(|_| NOT_READ)?;
         if number == 0 {
             return Err(NOT_READ);
@@ -335,15 +391,35 @@ impl<'a> Pdf<'a> {
     }
 
     /// The file with an incremental update appended (clause 7.5.6): the
-    /// objects `objects`, given by number with their content, a
-    /// cross-reference section with one subsection per run of consecutive
-    /// numbers, and a trailer with the entries of the last one, `/Size`
-    /// raised when an object is new, and `/Prev`.
-    fn update(&self, objects: &[(u32, String)]) -> Vec<u8> {
+    /// objects `changed`, given by number with their content, which must
+    /// be below `/Size`, each once, then the objects `added`, which take
+    /// the numbers from `/Size` on, a cross-reference section with one
+    /// subsection per run of consecutive numbers, and a trailer with the
+    /// entries of the last one, `/Size` raised by the objects added, and
+    /// `/Prev`. A new object therefore never takes the number of another,
+    /// and `/Size` stays within [`MAX_SIZE`].
+    fn update(&self, changed: &[(u32, String)], added: &[String]) -> Result<Vec<u8>, Unsupported> {
+        let mut numbers: Vec<u32> = changed.iter().map(|(number, _)| *number).collect();
+        if numbers.iter().any(|number| *number >= self.size) {
+            return Err(Unsupported("the object number is not below /Size"));
+        }
+        numbers.sort_unstable();
+        if numbers.windows(2).any(|pair| pair[0] == pair[1]) {
+            return Err(Unsupported("the update writes an object twice"));
+        }
+        let size = u32::try_from(added.len())
+            .ok()
+            .and_then(|count| self.size.checked_add(count))
+            .filter(|size| *size <= MAX_SIZE)
+            .ok_or(Unsupported("the update needs more objects than the limit"))?;
         let mut out = self.bytes.to_vec();
-        let mut offsets: Vec<(u32, usize)> = Vec::with_capacity(objects.len());
+        let mut offsets: Vec<(u32, usize)> = Vec::with_capacity(changed.len() + added.len());
+        let objects = changed
+            .iter()
+            .map(|(number, object)| (*number, object))
+            .chain((self.size..size).zip(added));
         for (number, object) in objects {
-            offsets.push((*number, out.len()));
+            offsets.push((number, out.len()));
             out.extend_from_slice(format!("{number} 0 obj\n{object}\nendobj\n").as_bytes());
         }
         offsets.sort_unstable();
@@ -361,10 +437,6 @@ impl<'a> Pdf<'a> {
             }
             at = end;
         }
-        let size = offsets
-            .iter()
-            .map(|(number, _)| number + 1)
-            .fold(self.size, u32::max);
         let mut trailer = format!("trailer\n<< /Size {size}");
         for (name, value) in &self.entries {
             trailer.push_str(&format!(" /{name} {value}"));
@@ -374,7 +446,7 @@ impl<'a> Pdf<'a> {
             self.startxref
         ));
         out.extend_from_slice(trailer.as_bytes());
-        out
+        Ok(out)
     }
 }
 
@@ -447,7 +519,7 @@ pub fn add_page_content(pdf: &[u8]) -> Result<Vec<u8>, Unsupported> {
         "/Contents 5 0 R",
         &format!("/Contents [5 0 R {added} 0 R]"),
     )?;
-    Ok(file.update(&[(3, page), (added, documents::stream("", ADDED_CONTENT))]))
+    file.update(&[(3, page)], &[documents::stream("", ADDED_CONTENT)])
 }
 
 /// Empties the overlay of the hide document of [`crate::documents`],
@@ -464,7 +536,7 @@ pub fn remove_overlay(pdf: &[u8]) -> Result<Vec<u8>, Unsupported> {
         return Err(Unsupported("object 6 is not the overlay"));
     }
     replace_once(file.object_text(3)?, "/Contents [5 0 R 6 0 R]", "")?;
-    Ok(file.update(&[(6, documents::stream("", ""))]))
+    file.update(&[(6, documents::stream("", ""))], &[])
 }
 
 /// Replaces the value of the text field of the replace document of
@@ -487,10 +559,10 @@ pub fn replace_field_value(pdf: &[u8]) -> Result<Vec<u8>, Unsupported> {
         return Err(Unsupported("object 6 is not the text field as signed"));
     }
     let appearance = file.size;
-    Ok(file.update(&[
-        (6, documents::amount_field(AMOUNT_REPLACED, appearance)),
-        (appearance, documents::amount_appearance(AMOUNT_REPLACED)),
-    ]))
+    file.update(
+        &[(6, documents::amount_field(AMOUNT_REPLACED, appearance))],
+        &[documents::amount_appearance(AMOUNT_REPLACED)],
+    )
 }
 
 /// Writes the catalog, object 1, again with `/Pages 6 0 R` instead of
@@ -509,7 +581,7 @@ pub fn switch_page_tree(pdf: &[u8]) -> Result<Vec<u8>, Unsupported> {
         return Err(Unsupported("object 6 is not the second page tree"));
     }
     let catalog = replace_once(file.object_text(1)?, "/Pages 2 0 R", "/Pages 6 0 R")?;
-    Ok(file.update(&[(1, catalog)]))
+    file.update(&[(1, catalog)], &[])
 }
 
 /// Moves the second range of the `ByteRange` of the only signature of a

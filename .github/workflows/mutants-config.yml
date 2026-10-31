@@ -3,6 +3,8 @@ name: Mutation testing configuration
 # Checks the configuration of mutants.yml when it, its scripts or the
 # sources it selects change. Not a required check: it has a paths filter.
 on:
+  push:
+    branches: [story/112-pades-attack-variants]
   pull_request:
     paths:
       - .cargo/mutants.toml

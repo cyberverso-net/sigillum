@@ -255,6 +255,11 @@ fn the_wrapped_byte_range_skips_the_live_signature_dictionary() -> TestResult {
     // The gap between the two ranges holds more than the Contents string.
     assert!(length - a > b - a);
     assert_eq!(wrap_byte_range(&source)?, output);
+    // The output is still read, through the last section of the copy, which
+    // is the last section of the source.
+    let read = Pdf::parse(&output)?;
+    assert_eq!(read.startxref, Pdf::parse(&source)?.startxref);
+    assert_eq!(read.object(3)?, Pdf::parse(&source)?.object(3)?);
     // The output's ByteRange no longer ends the file at its second range of
     // the source, so the mutation does not apply twice.
     assert!(wrap_byte_range(&output).is_err());
@@ -398,9 +403,9 @@ fn prepared_objects_compare_with_white_space_collapsed() -> TestResult {
         .replace(" /", "\n/")
         .replace("<< ", "<<\n")
         .replace(" >>", "\n>>");
-    let rewritten = pdf.update(&[(6, one_per_line)]);
+    let rewritten = pdf.update(&[(6, one_per_line)], &[])?;
     assert!(replace_field_value(&rewritten).is_ok());
-    let other = pdf.update(&[(6, documents::amount_field("100 EUX", 7))]);
+    let other = pdf.update(&[(6, documents::amount_field("100 EUX", 7))], &[])?;
     assert!(replace_field_value(&other).is_err());
     Ok(())
 }
@@ -502,13 +507,15 @@ fn a_missing_object_is_reported_as_such() -> TestResult {
 fn an_update_has_one_subsection_per_run_of_numbers() -> TestResult {
     let source = document(documents::SIMPLE_PDF_ID)?;
     let pdf = Pdf::parse(&source)?;
-    let output = pdf.update(&[
-        (10, "<< >>".to_owned()),
-        (3, "<< >>".to_owned()),
-        (11, "<< >>".to_owned()),
-        (5, "<< >>".to_owned()),
-        (12, "<< >>".to_owned()),
-    ]);
+    // Objects 4 and 1 written again, and three new objects, 6 to 8.
+    let output = pdf.update(
+        &[(4, "<< >>".to_owned()), (1, "<< >>".to_owned())],
+        &[
+            "<< /A 1 >>".to_owned(),
+            "<< /A 2 >>".to_owned(),
+            "<< /A 3 >>".to_owned(),
+        ],
+    )?;
     let update = update(&source, &output)?;
     let offset = |number: u32| -> Result<String, String> {
         let header = format!("{number} 0 obj\n");
@@ -516,18 +523,19 @@ fn an_update_has_one_subsection_per_run_of_numbers() -> TestResult {
         Ok(format!("{at:010} 00000 n\r\n"))
     };
     let expected = format!(
-        "xref\n3 1\n{}5 1\n{}10 3\n{}{}{}trailer\n",
-        offset(3)?,
-        offset(5)?,
-        offset(10)?,
-        offset(11)?,
-        offset(12)?
+        "xref\n1 1\n{}4 1\n{}6 3\n{}{}{}trailer\n",
+        offset(1)?,
+        offset(4)?,
+        offset(6)?,
+        offset(7)?,
+        offset(8)?
     );
     assert!(update.contains(&expected), "{update}");
     assert_eq!(
-        check_update(&output, &update, 13, pdf.startxref)?,
-        [3, 5, 10, 11, 12]
+        check_update(&output, &update, 9, pdf.startxref)?,
+        [1, 4, 6, 7, 8]
     );
+    assert_eq!(updated_object(&update, 8)?, "<< /A 3 >>");
     Ok(())
 }
 
@@ -557,13 +565,13 @@ fn synthetic(hex: usize, pad: usize, before: bool) -> Result<Vec<u8>, Box<dyn st
         } else {
             format!("<< {contents} /ByteRange {range}{}>>", " ".repeat(pad))
         };
-        pdf.update(&[(6, body)])
+        pdf.update(&[], &[body])
     };
     // The lengths of the integers change the length of the file: find the
     // fixed point.
     let mut range = "[0 0 0 0]".to_owned();
     for _ in 0..8 {
-        let file = build(&range);
+        let file = build(&range)?;
         let a = find(&file, b"/Contents <").ok_or("no /Contents")? + 10;
         let b = a + hex + 2;
         let next = format!("[0 {a} {b} {}]", file.len() - b);
@@ -630,6 +638,144 @@ fn a_byte_range_in_the_first_range_is_refused() -> TestResult {
         Some(Unsupported(
             "the ranges of the ByteRange do not end the file around the signature dictionary"
         ))
+    );
+    Ok(())
+}
+
+/// The simple document with the cross-reference entry of object 3
+/// replaced by `entry`, of 20 bytes.
+fn with_entry_of_object_3(entry: &[u8; 20]) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    let mut pdf = document(documents::SIMPLE_PDF_ID)?;
+    let xref = rfind(&pdf, b"xref\n0 6\n").ok_or("no xref")? + 9;
+    let at = xref + 3 * 20;
+    assert!(pdf[at..at + 20].ends_with(b" 00000 n\r\n"));
+    pdf[at..at + 20].copy_from_slice(entry);
+    Ok(pdf)
+}
+
+/// Issue #112: a malformed entry, with a character of two bytes across the
+/// fields, is refused without a panic.
+#[test]
+fn a_malformed_cross_reference_entry_is_refused() -> TestResult {
+    let mut multibyte = *b"000000000xx00000 n\r\n";
+    multibyte[9..11].copy_from_slice("\u{e9}".as_bytes());
+    for (name, entry) in [
+        ("a character of two bytes", multibyte),
+        ("a letter in the offset", *b"00000000a9 00000 n\r\n"),
+        ("a letter in the generation", *b"0000000009 0000a n\r\n"),
+        ("no space after the offset", *b"0000000009000000 n\r\n"),
+        ("no space before the type", *b"0000000009 000000n\r\n"),
+    ] {
+        let pdf = with_entry_of_object_3(&entry)?;
+        let parsed = Pdf::parse(&pdf)?;
+        assert_eq!(parsed.object(3).err(), Some(NOT_READ), "{name}");
+        assert!(add_page_content(&pdf).is_err(), "{name}");
+    }
+    // An entry of another generation is refused, as offset reads generation 0.
+    let pdf = with_entry_of_object_3(b"0000000009 00001 n\r\n")?;
+    assert_eq!(
+        Pdf::parse(&pdf)?.object(3).err(),
+        Some(Unsupported("the object is not of generation 0"))
+    );
+    let free = with_entry_of_object_3(b"0000000009 00000 f\r\n")?;
+    assert_eq!(
+        Pdf::parse(&free)?.object(3).err(),
+        Some(Unsupported("the object is not in use"))
+    );
+    Ok(())
+}
+
+/// Issue #112: the end of the entries of a subsection is computed without
+/// overflow, and a count beyond the file is refused.
+#[test]
+fn a_subsection_longer_than_the_file_is_refused() -> TestResult {
+    assert_eq!(subsection_end(10, 2), Some(50));
+    assert_eq!(subsection_end(usize::MAX - 10, 1), None);
+    assert_eq!(subsection_end(0, usize::MAX / 20 + 1), None);
+    let source = document(documents::SIMPLE_PDF_ID)?;
+    let at = rfind(&source, b"xref\n0 6\n").ok_or("no xref")? + 5;
+    let long = [&source[..at], b"0 999999999", &source[at + 3..]].concat();
+    let parsed = Pdf::parse(&long);
+    assert!(parsed.is_err());
+    Ok(())
+}
+
+/// The simple document with its trailer giving `/Size size`.
+fn with_size(id: &str, size: u32) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    let source = document(id)?;
+    let at = rfind(&source, b"/Size ").ok_or("no /Size")?;
+    let end = at
+        + 6
+        + source[at + 6..]
+            .iter()
+            .take_while(|b| b.is_ascii_digit())
+            .count();
+    Ok([
+        &source[..at],
+        format!("/Size {size}").as_bytes(),
+        &source[end..],
+    ]
+    .concat())
+}
+
+/// Issue #112: /Size is at most one more than the largest number of
+/// indirect objects of ISO 32000-1:2008, Annex C, Table C.1, and a new
+/// object never takes a number past it.
+#[test]
+fn the_size_is_bounded_by_the_limit_on_indirect_objects() -> TestResult {
+    assert_eq!(MAX_SIZE, 8_388_608);
+    assert!(Pdf::parse(&with_size(documents::SIMPLE_PDF_ID, 8_388_608)?).is_ok());
+    for size in [8_388_609, u32::MAX] {
+        assert!(
+            Pdf::parse(&with_size(documents::SIMPLE_PDF_ID, size)?).is_err(),
+            "{size}"
+        );
+    }
+    // One new object fits under the limit, and none past it.
+    let last = add_page_content(&with_size(documents::SIMPLE_PDF_ID, 8_388_607)?)?;
+    assert!(last.ends_with(b"%%EOF\n"));
+    assert!(text(&last).contains("/Contents [5 0 R 8388607 0 R]"));
+    assert!(text(&last).contains("/Size 8388608"));
+    assert_eq!(
+        add_page_content(&with_size(documents::SIMPLE_PDF_ID, 8_388_608)?).err(),
+        Some(Unsupported("the update needs more objects than the limit"))
+    );
+    // A mutation that adds no object works at the limit.
+    assert!(remove_overlay(&with_size(documents::SHADOW_HIDE_PDF_ID, 8_388_608)?).is_ok());
+    Ok(())
+}
+
+/// Issue #112: an object read or written again must be below /Size, so that
+/// a new object, which takes the number /Size, never takes the number of
+/// another.
+#[test]
+fn objects_at_or_past_the_size_are_refused() -> TestResult {
+    // With /Size 3, the page, object 3, is past the last object.
+    let small = with_size(documents::SIMPLE_PDF_ID, 3)?;
+    assert_eq!(
+        Pdf::parse(&small)?.object(3).err(),
+        Some(Unsupported("the object number is not below /Size"))
+    );
+    assert!(add_page_content(&small).is_err());
+    // With /Size 6, object 6 of the replace document is past the last object.
+    let six = with_size(documents::SHADOW_REPLACE_PDF_ID, 6)?;
+    assert!(replace_field_value(&six).is_err());
+    let six = with_size(documents::SHADOW_HIDE_PDF_ID, 6)?;
+    assert!(remove_overlay(&six).is_err());
+    let six = with_size(documents::SHADOW_HIDE_AND_REPLACE_PDF_ID, 6)?;
+    assert!(switch_page_tree(&six).is_err());
+    // An update refuses to write an object at or past /Size again, or one
+    // object twice.
+    let source = document(documents::SIMPLE_PDF_ID)?;
+    let pdf = Pdf::parse(&source)?;
+    assert_eq!(
+        pdf.update(&[(6, String::new())], &[]).err(),
+        Some(Unsupported("the object number is not below /Size"))
+    );
+    assert_eq!(
+        pdf.update(&[(3, String::new()), (3, String::new())], &[])
+            .err(),
+        Some(Unsupported("the update writes an object twice"))
     );
     Ok(())
 }

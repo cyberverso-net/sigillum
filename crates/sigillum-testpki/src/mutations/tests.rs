@@ -443,6 +443,13 @@ fn each_variant_records_its_expected_results() -> TestResult {
                 assert!(notes.contains("ETSI EN 319 142-1 V1.2.1"), "{notes}");
                 assert!(notes.contains("clause 12.8.1"), "{notes}");
                 assert!(notes.contains("BBB_FC_IBRV_ANS"), "{notes}");
+                // The basis of the prediction, and why DSS reports the data
+                // not intact although the bytes covered are those signed.
+                assert!(notes.contains("clause 5.2.2.1, NOTE"), "{notes}");
+                assert!(notes.contains("BBB_CV_IRDOI_ANS"), "{notes}");
+                assert!(notes.contains("empty signed content"), "{notes}");
+                assert!(!notes.contains("still verify"), "{notes}");
+                assert!(notes.contains("the only bytes changed"), "{notes}");
             }
         }
         // The entry is valid in the manifest.
