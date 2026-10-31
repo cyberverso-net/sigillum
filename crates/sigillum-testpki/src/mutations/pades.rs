@@ -95,10 +95,17 @@ fn is_delimiter(byte: u8) -> bool {
     )
 }
 
+/// The most entries that a trailer dictionary may hold. The trailers of the
+/// corpus hold four at most.
+pub(crate) const MAX_TRAILER_ENTRIES: usize = 32;
+
 /// The entries of a trailer dictionary, from `<<` to `>>`: names with
 /// values that are integers, indirect references, hexadecimal strings or
 /// arrays without nested arrays, dictionaries or literal strings, as the
-/// trailers of the corpus hold.
+/// trailers of the corpus hold, and at most [`MAX_TRAILER_ENTRIES`] of
+/// them. The text is read once, from left to right, with the white space
+/// of ISO 32000-1:2008, clause 7.2.2, Table 1: an indirect reference is
+/// read token by token, and no step looks past the token it reads.
 fn trailer_entries(text: &str) -> Result<Vec<(&str, &str)>, Unsupported> {
     let inner = text
         .trim_matches(|c: char| c.is_ascii() && is_white(c as u8))
@@ -114,10 +121,19 @@ fn trailer_entries(text: &str) -> Result<Vec<(&str, &str)>, Unsupported> {
         }
         at
     };
+    let digits = |mut at: usize| {
+        while bytes.get(at).is_some_and(u8::is_ascii_digit) {
+            at += 1;
+        }
+        at
+    };
     loop {
         at = skip(at);
         if at == bytes.len() {
             return Ok(entries);
+        }
+        if entries.len() == MAX_TRAILER_ENTRIES {
+            return Err(Unsupported("the trailer has more entries than the limit"));
         }
         if bytes[at] != b'/' {
             return Err(NOT_READ);
@@ -146,26 +162,30 @@ fn trailer_entries(text: &str) -> Result<Vec<(&str, &str)>, Unsupported> {
                 at = inner[at..].find('>').ok_or(NOT_READ)? + at + 1;
             }
             Some(byte) if byte.is_ascii_digit() => {
-                // An integer, or an indirect reference: two integers and R.
-                let words: Vec<&str> = inner[at..].split_ascii_whitespace().take(3).collect();
-                let reference = words.len() == 3
-                    && words[2].starts_with('R')
-                    && words[..2].iter().all(|w| integer(w).is_ok());
-                let mut end = at;
-                while bytes.get(end).is_some_and(u8::is_ascii_digit) {
-                    end += 1;
-                }
-                if reference {
-                    end = at + inner[at..].find('R').ok_or(NOT_READ)? + 1;
-                }
-                at = end;
+                // An integer, or an indirect reference (clause 7.3.10): two
+                // integers and R, separated by white space, R followed by
+                // white space, a delimiter or the end.
+                let first_end = digits(at);
+                let second = skip(first_end);
+                let second_end = digits(second);
+                let r = skip(second_end);
+                let reference = second > first_end
+                    && second_end > second
+                    && r > second_end
+                    && bytes.get(r) == Some(&b'R')
+                    && bytes
+                        .get(r + 1)
+                        .is_none_or(|&b| is_white(b) || is_delimiter(b))
+                    && integer(&inner[at..first_end]).is_ok()
+                    && integer(&inner[second..second_end]).is_ok();
+                at = if reference { r + 1 } else { first_end };
             }
             _ => return Err(NOT_READ),
         }
         if name.is_empty() {
             return Err(NOT_READ);
         }
-        entries.push((name, inner[value_start..at].trim_end()));
+        entries.push((name, &inner[value_start..at]));
     }
 }
 
@@ -380,7 +400,13 @@ impl<'a> Pdf<'a> {
         let offset = self.offset(number)?;
         let start = line_after(self.bytes, offset, format!("{number} 0 obj").as_bytes())?;
         let end = find(&self.bytes[start..], b"endobj").ok_or(NOT_READ)? + start;
-        Ok(self.bytes[start..end].trim_ascii_end())
+        let mut object = &self.bytes[start..end];
+        while let Some((last, rest)) = object.split_last()
+            && is_white(*last)
+        {
+            object = rest;
+        }
+        Ok(object)
     }
 
     /// The most recent copy of the object `number`, as text.

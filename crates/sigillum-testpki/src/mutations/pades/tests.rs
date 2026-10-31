@@ -779,3 +779,64 @@ fn objects_at_or_past_the_size_are_refused() -> TestResult {
     );
     Ok(())
 }
+
+/// Issue #112: the trailer reader takes NUL as white space, as ISO
+/// 32000-1:2008, clause 7.2.2, Table 1, does, also between the parts of an
+/// indirect reference, and reads at most MAX_TRAILER_ENTRIES entries, so
+/// that a trailer of many entries separated by NUL is refused after a
+/// bounded number of them.
+#[test]
+fn the_trailer_reader_takes_pdf_white_space_and_bounds_its_entries() -> TestResult {
+    assert_eq!(
+        trailer_entries("<</Root\u{0}1\u{0}0\u{0}R\u{0}/Size\u{0}6>>")?,
+        [("Root", "1\u{0}0\u{0}R"), ("Size", "6")]
+    );
+    assert_eq!(
+        trailer_entries("<< /Root 1\u{c}0\t\r\nR >>")?,
+        [("Root", "1\u{c}0\t\r\nR")]
+    );
+    // Not a reference: R not followed by white space or a delimiter, or
+    // parts not separated by white space.
+    for refused in [
+        "<< /Root 1 0 Rx >>",
+        "<< /Root 1 0R >>",
+        "<< /Root 1\u{0}0\u{0}R1 >>",
+    ] {
+        assert!(trailer_entries(refused).is_err(), "{refused:?}");
+    }
+    assert_eq!(MAX_TRAILER_ENTRIES, 32);
+    let trailer = |count: usize| {
+        let mut text = String::from("<<");
+        for index in 0..count {
+            text.push_str(&format!("/K{index}\u{0}{index}\u{0}"));
+        }
+        text.push_str(">>");
+        text
+    };
+    assert_eq!(
+        trailer_entries(&trailer(MAX_TRAILER_ENTRIES))?.len(),
+        MAX_TRAILER_ENTRIES
+    );
+    assert_eq!(
+        trailer_entries(&trailer(MAX_TRAILER_ENTRIES + 1)).err(),
+        Some(Unsupported("the trailer has more entries than the limit"))
+    );
+    // A trailer of a hundred thousand entries separated by NUL is refused
+    // at the limit, after reading MAX_TRAILER_ENTRIES of them.
+    assert_eq!(
+        trailer_entries(&trailer(100_000)).err(),
+        Some(Unsupported("the trailer has more entries than the limit"))
+    );
+    Ok(())
+}
+
+/// Issue #112: the white space before `endobj` is that of ISO 32000-1:2008,
+/// clause 7.2.2, Table 1, NUL included.
+#[test]
+fn an_object_ends_before_pdf_white_space() -> TestResult {
+    let source = document(documents::SIMPLE_PDF_ID)?;
+    let pdf = Pdf::parse(&source)?;
+    let output = pdf.update(&[(4, "<< /A 1 >>\u{0}\u{c}\t".to_owned())], &[])?;
+    assert_eq!(Pdf::parse(&output)?.object(4)?, b"<< /A 1 >>");
+    Ok(())
+}
