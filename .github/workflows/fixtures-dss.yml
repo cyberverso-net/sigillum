@@ -79,3 +79,19 @@ jobs:
             grep -o '<[A-Za-z]*Warning[^>]*>[^<]*<' "$out/simple-report.xml" || echo "no warning in the simple report"
             grep -io '<[^>]*\(KeySize\|ExpirationDate\|AlgoExpir\)[^>]*>' "$out/diagnostic-data.xml" "$out/detailed-report.xml" | sort | uniq -c | head -20 || true
           done
+      - name: Show the DSS warnings of a document signed with the 2048-bit key
+        run: |
+          for name in cades-enveloping-b-b-rsa cades-enveloping-b-b-rsa-pss; do
+            out="$RUNNER_TEMP/doc-$name"
+            signer="signer-rsa-2048"; ca="ca-rsa"
+            if [ "$name" = cades-enveloping-b-b-rsa-pss ]; then signer="signer-rsa-pss-sha256"; ca="ca-rsa-pss"; fi
+            java -jar tools/dss-oracle/target/dss-oracle.jar validate-document \
+              --document "testdata/signed/$name.p7m" --certificate "testdata/pki/$signer.pem" \
+              --certificate "testdata/pki/$ca.pem" --trust-anchor testdata/pki/root-ca.pem \
+              --ocsp "testdata/ocsp/$signer.der" --crl testdata/crl/root-ca.crl \
+              --validation-time 2030-01-15T10:00:00Z --out "$out"
+            echo "== $name"
+            jq -c . "$out/summary.json"
+            grep -o '<Warning[^>]*>[^<]*</Warning>' "$out/detailed-report.xml" | sort | uniq -c
+            grep -o '<[A-Za-z]*Warning[^>]*>[^<]*<' "$out/simple-report.xml" || true
+          done
