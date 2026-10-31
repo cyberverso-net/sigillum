@@ -6,8 +6,6 @@ name: Mutation testing
 # all of them, on main. Not a required check: a shortfall can be justified
 # in the pull request, as quality-gates.md states.
 on:
-  push:
-    branches: [story/112-pades-attack-variants]
   pull_request:
   schedule:
     - cron: "23 1 * * *"
@@ -55,11 +53,6 @@ jobs:
       - name: Write the diff of the pull request
         if: github.event_name == 'pull_request'
         run: git diff HEAD^1 HEAD > "$RUNNER_TEMP/changes.diff"
-      - name: Write the diff of the branch (temporary)
-        if: github.event_name == 'push'
-        run: |
-          git fetch --no-tags --depth=1 origin 5025cba305b788371057925947d658311ce3662d
-          git diff 5025cba305b788371057925947d658311ce3662d HEAD > "$RUNNER_TEMP/changes.diff"
       # Three jobs on the four processors of the runner, and round-robin
       # sharding, which spreads the slow files over the shards. The exit
       # code is kept for the report job, which judges it.
