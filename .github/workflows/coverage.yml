@@ -2,7 +2,7 @@ name: Coverage
 
 on:
   push:
-    branches: [main, story/112-pades-attack-variants]
+    branches: [main]
   pull_request:
   # The job does not fail on the coverage threshold yet. The trigger lets it
   # become a required check without a change to the workflow; the merge
@@ -103,7 +103,7 @@ jobs:
         env:
           EVENT: ${{ github.event_name }}
           GROUP_BASE: ${{ github.event.merge_group.base_sha }}
-          BEFORE: 5025cba305b788371057925947d658311ce3662d
+          BEFORE: ${{ github.event.before }}
         run: |
           base=$(.github/scripts/coverage-base.sh)
           if [ "$base" = "$(git rev-parse HEAD)" ]; then

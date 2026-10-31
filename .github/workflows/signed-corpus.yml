@@ -2,7 +2,7 @@ name: Signed corpus
 
 on:
   push:
-    branches: [main, story/112-pades-attack-variants]
+    branches: [main]
   pull_request:
 
 permissions:
