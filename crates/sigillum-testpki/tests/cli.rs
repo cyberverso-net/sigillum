@@ -1430,7 +1430,7 @@ fn generate_documents_writes_the_documents_and_the_manifest()
         &manifest.to_string_lossy(),
     ])?;
     assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
-    assert!(text(&output.stdout).contains("wrote 4 files"));
+    assert!(text(&output.stdout).contains("wrote 7 files"));
     let ids: Vec<String> = load(&manifest)?
         .artefacts
         .into_iter()
@@ -1442,7 +1442,10 @@ fn generate_documents_writes_the_documents_and_the_manifest()
             "documents/simple",
             "documents/signature-field",
             "documents/text",
-            "documents/payload"
+            "documents/payload",
+            "documents/shadow-hide",
+            "documents/shadow-replace",
+            "documents/shadow-hide-and-replace"
         ]
     );
     assert!(std::fs::read(dir.join("documents/simple.pdf"))?.starts_with(b"%PDF-1.7"));
