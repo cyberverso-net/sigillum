@@ -1,7 +1,0 @@
-{
-  "format-veon": 3,
-  "orace": {
-    "tool-version":  "3.0.8"
-  },
-  "mode": "validate-document",
-  "validation-time": "2030-01-{}

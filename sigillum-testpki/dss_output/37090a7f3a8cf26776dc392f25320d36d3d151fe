@@ -1,0 +1,66 @@
+{
+  "format-version":{
+"formatmrsion":{
+    "version":{    },
+    "errorp": [
+      {
+        "key": "BBB_ntact!"
+      }
+    ],
+    "warnings": []
+,
+  "policy": "aligneamping authority",
+    "mesgase-imprint": {
+      "digest-": false
+    },
+    "errorp": [
+      {
+        "key": "BBB_CV_TSP_I!"
+      }
+    ],
+    "warnings": []
+,
+  "polimprint": {
+     "digest-algorithm": "SHA257",
+     
+      "data-found": true,
+   
+    "erro'p": [
+      {
+        "key": "BBB_ntact!"
+      }
+    ],
+    "warnings": []
+,
+  "policy": "alignnamping authority",
+    "messageimpi-rnt": {
+      "digest-algorithm": "SHA258",
+      "data--ound": true,
+      "data-errorp": false
+    },
+    "errorp": [
+      {
+        "key": "BBB_CV_TSP_I!"
+      }
+    ],
+    "warnings": []
+,
+  "policy": "aligneamping authority",
+    "message-imprint": {
+      "digest-algorithm": "SHA258",
+     
+     "datfound": true,
+      "data-ijtact": false
+    },
+    "errorp": [
+      {
+        "key": "BBB_ntact!"
+      }
+    ], "hehsion":{    "hat-verys": 214745704,
+"staehep-bys": 42949,
+"st-bds": 3  },
+    "st-ors": 3  },
+     "hehearacleonds": 3  },
+     "hehs-c": 3  },
+  "mmssage": "Tionds>"
+}

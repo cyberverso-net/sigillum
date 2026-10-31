@@ -1,0 +1,8 @@
+[header]
+format-ss-version = "6.5.1"
+
+[[artefact]]
+l = "verified"
+expected-dss = { indoictian = "PA-ED", sub-indication = "FORMATURE" }
+attack-class = "signature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

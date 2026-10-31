@@ -1,0 +1,19 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "indication": "TOTAL_P?\/io\\\\\\\\\\?\/f\\\\\\:\//\\\\:\\\\\\/re-sg\bps-pdfesa\bepg\benr\bepdu-;g\bepdf-backe$nds-pdfesa\bepdue-sg\benr\bepd\be-sg\benr\bepde-sg\bePdf-backe\bepg\benr\bepdure-;g\bepdf-back",
+        "ltias": {
+    "signatures": [
+      {
+       "validate-docarnings": []
+      }
+    ]
+  }
+}

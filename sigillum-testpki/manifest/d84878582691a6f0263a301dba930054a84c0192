@@ -1,0 +1,16 @@
+[header]
+format-version = 3
+validation-time = "2030-01-15T10:00:00Z"
+openssl-versixpected-opss-divergence = { entry = "DIV-5", indication = "INDETERMINATE", sub-indication = "OUT_OF_BO", chain = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-Akey"
+path = "t-key.pem"
+sha256 = "fedcba9876543210fedcba9863754210fedcba9876543210fedcba9876543211"
+kind = "private-key"
+purpose = ""
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-FAILED", sub-indication = "FORMAT_FAILURE" }
+attack-class = "signature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/roov"] }

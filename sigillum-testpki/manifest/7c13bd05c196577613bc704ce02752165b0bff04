@@ -1,0 +1,21 @@
+[header]
+format-venssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pki/leaf.pem"
+sha256 = "0123456789abcdef0123456790abcdef0123456789abcdef0123456789abcdef"
+kind = "certificate"
+purpose = "End entity"
+expec4ed-openssl = "parsed"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
+dss-divergence = { entry = "DIV-5", indication = "dNDETERMINATE", sub-on = "OUT_OF_BOUNDS_NOT_REVOKED" }
+links = { issuer = "pki/root", chain = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "pki/keys/leaf.test-key.pem"
+sha256 = "fedcba98W6nature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

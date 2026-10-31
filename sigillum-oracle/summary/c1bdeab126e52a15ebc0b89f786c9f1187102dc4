@@ -1,9 +1,0 @@
-{
-  "format-version": 3,
-  "oracle": {
-    "torsion": "0.0.0",
-    "dss-version": "6.5.1",
-    "pdf-backend": "1.8"
-  },
-  "mode": "validate-document",
-  "validation-time":4444426.544}

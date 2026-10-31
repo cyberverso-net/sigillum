@@ -1,0 +1,36 @@
+								{
+  "format-version": 3,
+  "oracle"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+: {
+    " nol-version": "0.0.0",
+    "dss-version": "",
+  "r": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligne-d1",
+  "result": "validated",
+  "indication": "signing-timePASSED",
+  "s-udbiincation": null,
+  "details": {
+    "certifgs": [] 
+}} 
+

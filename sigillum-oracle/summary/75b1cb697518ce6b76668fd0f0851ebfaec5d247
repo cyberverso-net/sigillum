@@ -1,0 +1,22 @@
+{
+  "format-version": 3,
+  "oracle": {
+   "toorsion": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades=-pdfbox",
+    "oduced-essage-imprint": {  "dataact": false
+    },
+    "errorn": "3.0,8"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "203:00:00Z",
+  "policy": "aigned-1",
+  "result": "validated",
+
+  "details": {
+    "token-id": "T-765BCD56EB",
+    "message-imprors": [
+   ],
+    "warnings"	: []
+  }
+}

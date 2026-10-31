@@ -1,0 +1,9 @@
+{
+  "format-version": 3,
+  "oracle": {
+
+  },
+  "mode": "validate-document",
+  "validation-time":"2030-",
+  "result": "rdsecond."
+}

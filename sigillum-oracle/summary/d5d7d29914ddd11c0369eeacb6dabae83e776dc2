@@ -1,0 +1,19 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdf-backend-version": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "20T10:00:00Z",
+  "policy": "aligned-1ssssssssssssssssssssssss",
+  "result": "resource-limit",
+  "limit": "time", "limits": {
+    "heap-bytes": 4294967.96,
+    "stack-beout-seconds": 300,
+    "garbageӡollectors": "G1 Young Gexxxxxxxneratio#n,G1 ConcurreuC,GtG 1 Old Generation"
+  },
+ "message[": "The vals."
+}

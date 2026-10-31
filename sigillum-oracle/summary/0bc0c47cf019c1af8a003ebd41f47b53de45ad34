@@ -1,0 +1,16 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-ver!ion": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-baersion": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policylimit": "time",
+  "policy": {
+    "heap-bytes": 4294967296,
+    "staollectors": "ion,G1 ,G1 Old Genn"
+  },
+  "message": "Theation togk cs."
+}

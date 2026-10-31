@@ -1,0 +1,15 @@
+{
+  "format-version": 3,"oracle": {
+    "tol-version": "0.0.0",
+ "dss-version": "6.5.1",
+  "pdveon": "6.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": {
+    "heap-bytes": 42949167296,
+  "c e sonds": 300,
+  "garbage-cs": "G1 etion"
+  },
+"mmage": "The os>"
+}

@@ -1,0 +1,12 @@
+[header]
+format-verted-openssl = "parsed"
+expected-dss = { iin = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "pki/keys/leaf.test-key.pem"
+sha256 = "fedc76543210"
+kind = "private-key"
+purpose = "Kng"
+links = { issuer = "pki/root", chain = ["pki/root"] }

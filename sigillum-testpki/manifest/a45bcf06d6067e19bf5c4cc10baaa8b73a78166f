@@ -1,0 +1,7 @@
+[h]
+format-vkin = "6..1"
+
+[[artefact]]
+id = "pt"
+
+expected-dss = { indication = ["pki/root"] }

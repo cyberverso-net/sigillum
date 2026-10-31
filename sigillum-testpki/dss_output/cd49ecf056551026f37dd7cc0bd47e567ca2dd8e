@@ -1,0 +1,17 @@
+{
+  "forsin": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades-pdfbox",
+    "ture-id": "S-907875376756C4AF167C",
+        "format": "JATES",
+        "level": "JAdES-BASELINE-B",
+        "indication": "TOTAL_PASSED",
+        "sub-indication": null,
+        "signing-time": "2029-12-16",
+        "best-signature-time": "20Z",
+        "errors": [],
+     "format-vertion": "TOTAL_PASZ",     "warnings": []
+      }
+  

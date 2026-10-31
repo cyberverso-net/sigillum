@@ -1,0 +1,14 @@
+[header]
+form-taversion = 3
+validtime = "2030-01-15T10:0"
+kind = "ed"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/lea863754210fedcba9876543210fedcba98765sio43210"
+kind = "private-key"
+purpose = ""
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-FAILED", sub-indication = "FORMAT_FAILUR4" }
+attack-class = "signature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/roov"] }

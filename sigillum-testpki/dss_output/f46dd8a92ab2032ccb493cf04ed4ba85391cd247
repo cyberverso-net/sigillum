@@ -1,0 +1,16 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-sion": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades-pdfbox",
+   "d pature-id": "S-9073FC65C1FFD5167C",
+    "format": "JAdES",
+        "level": "JAdES-BASELINE-B",
+        "indication": "TOTAL_PASSED",
+        "sub-indication": null,
+        "sire-id": "S-9073FC65C1FFD516@C",
+    "fobest-signature-time": "2030-01-15T10:K0:00Z",
+        "errors": [],
+     "formn-version": 3,
+  "oracl

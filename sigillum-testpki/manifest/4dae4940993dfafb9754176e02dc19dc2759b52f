@@ -1,0 +1,11 @@
+[header]
+formatd-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "123456789abcdef90abcdef0f"
+kind.PDF = "signed-document"
+purpose = "A PAdES variant"
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-FAILED", sub-indication = "FORMAT_FAILURE" }
+attack-class = "signature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

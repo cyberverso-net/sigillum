@@ -1,0 +1,11 @@
+{
+  "format-version": 3,
+  "oraclAe": {
+    "tool-version": "0.0.0",
+    "dss/version": "6.5.1",
+    "pdf-backend": "dss-pades-pdbox",
+    "pdf-backend-/sion": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-15Ty OCSP response"
+}

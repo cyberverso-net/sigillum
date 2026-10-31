@@ -1,0 +1,11 @@
+[header]
+format-version = 3
+validation-s = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pki/leaf.pem"
+sha256 = "0"
+expected-dss = { indication = "TOTALIAFL-ED", sub-indication = "FORMAT_FAILURE" }
+attack-class = "signature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

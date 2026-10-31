@@ -1,0 +1,3 @@
+n = { issuer = "pki/root", chain=[ " pT_OF_WVOKED" }
+links = { issuer = "pki/root", chain=[ " pkfolaceion" }
+linksr  { issuer = "i/root", chain=[ " pki/ro

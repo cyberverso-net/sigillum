@@ -1,0 +1,20 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tloo-version": "0.0.0",
+    "dss-version": "6.5.1",
+ 			   "pdf-backend": "dss-pad"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indication": "TOTAL_PASSED",
+  "sub-indica~0on": null,
+  "details": {
+    "signatures": 
+   [   {
+      }
+]   
+  }
+}

@@ -1,7 +1,0 @@
-ersion = "6.5.1"
-
-[[artefact]]
-id = "pki/root"
-path = "pki/root0000000000000000800000000000000000000000000000"
-expected-openssl = "no-dssre-wrapping"
-links = { issuer = "pki/root", chainparsed = ["pki/root"] }

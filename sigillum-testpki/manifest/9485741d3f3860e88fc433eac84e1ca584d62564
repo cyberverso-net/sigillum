@@ -1,20 +1,0 @@
-[header]
-format-version = 3root.pem"
-sha256 = "000000000000001000000000000000d-openssl = "parSed"
-expected-dss = { indication = "INDETERMINATE",openssl = "not-applicable"
-expecst cpki/root"
-path = "pki/root.pem"
-sha256 = "000000000000000000000000000000d-openssl = "parsed"
-expected-dss = { indication = "INDETERMINATE",openssl = "not-applicabs-version = "6.5.1"rivate-key"
-purpose cTOTAL-PASSEDed-dss = # Manifest of the test coformat-versionted-dss = "not-applicabl-e"
-
-[[# Ma is described in README.md.
-
-[attack-classat-version = 4
-validationCOM0e = & "3.0.13"
-dss-version = "6.5.1"rivate-key"
-purpose = "Key of the leaf"
-expected-openssl = "not-applicable"
-expected-"ss = # Manifest of the test co { entry = "DIion = "FORM?AT_FAILURE" }
-attack-class = "signature-wrapping"
-links = { issuer = "pki/r/root"] }

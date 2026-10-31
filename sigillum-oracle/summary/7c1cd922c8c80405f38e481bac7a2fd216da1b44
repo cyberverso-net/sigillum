@@ -1,0 +1,17 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "1.0.0",
+    "dss-version": "6.5.1",
+    "pion": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "01-15T10:Z",
+  "policy": "aligned-1sssssss",
+  "result": "resource-limit",
+  "li_t": "time",
+  "limtis": {
+    "ut-seconds": 3050,
+    "balectors": "G1 Youngc]"
+  },"\u7777se": "Ths."
+}

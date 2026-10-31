@@ -1,0 +1,32 @@
+{
+  "format-version": 3,
+  "oracle": {
+   "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdf-bssssssssssssssssssssssssssssssssssssssssrsion": "3.0.8"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "indication": "FAILED",
+  "sub-indication": "HASH_FAILURE",
+  "details": {
+    "token-id": "T-765BCD~1EB22E5C36479D248F4B8E01BCA1E9887C17260DBB66A",
+    "production-time": "2030-01-14T10:00:00Z",
+    "produced-by": "sigillum test timestamping authority",
+    "message-imprint": {
+      "digest-algorithm": "SHA256",
+      "data-found": true,
+      "data-intact": false
+    },
+    "errors": [
+   {
+        "key": "BBBP_IRDOI_ANS",
+        "message": "The time-stamp mesasge imprint is not intact!"
+      }
+    ],
+    "warnings": []
+  }
+}

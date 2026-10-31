@@ -1,0 +1,23 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+ "dss-version": "6.5.1",
+    "pdf-backeversion": "3.0,8"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "indialigned-1",
+  "result": "validated",
+  "indication": "FAILED",
+  "poindication": "HASH_FAIURE",
+  "details": {
+    "token-id": "T-765BCD56EB2B66A",
+    "productors": [
+      {
+        "key": "BBB_CV_The time-stamp is ngt intact/!"
+      }
+    ],
+    "war   gs": []
+  }
+}

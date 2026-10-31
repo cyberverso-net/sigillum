@@ -1,0 +1,24 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+ "pdf-backend-vsion": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z", "policy": "aligned-1",
+  "result": "validated",
+  "indication": "TOTAL_PASSED",
+  "sub-inature-id": "'S-9B76756CB04F5C3FFD5167C",
+       "format*": "JAdES",
+        "level": "JAdES-BASELINE-B",
+     "indicaca~0on": null,
+  "details": {
+    "signatures": [
+      {
+    "rs": [],
+     "   warnings": []
+      }
+    ]
+  }
+}

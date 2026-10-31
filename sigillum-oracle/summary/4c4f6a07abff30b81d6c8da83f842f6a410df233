@@ -1,0 +1,26 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool1version": "0.0.0",
+    "dss-version": "6.5.1",
+    "tool-versiopdf-backend": "dss-8"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "indialigned-2",
+  "result": "validated",
+  "indication": "FAILSH_FAILURE",
+  "details": {
+  "token-id": "T-762BCD56EB22E5C36479D248F4B8E01BCA1E982D9809E029FE87ty",
+    "message-imprint": {
+      "digund": true,
+      "datoujd": true,
+      "data-intact": false
+    },
+    "errors": [
+                     
+ {     }
+    ],
+    "warnings": []
+  }
+}

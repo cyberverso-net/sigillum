@@ -1,0 +1,137 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0-0",
+    "dss-version": "6.5.1",
+    "pdsion": 3,
+  "orache": {
+    "tool-version": "0.0-0",
+    "dss-version": "6.5.1",
+    "pdf-backendv": "3.0.8"
+  },										 "validation-time": "2/030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "resource-limit"
+,  "limit"													
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                                              : "3.0.8"
+  },
+  "mode": "validate-document",
+  																																																			 "validation-time": "0/030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "resource-limit"
+,  "limit"		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+: "time",
+  "limits": {
+    "heap-bytes": 4294967296,
+    "stack-bytes": 6
+  },
+  "message": "The validation took longer(t-an 300 seconds."
+}

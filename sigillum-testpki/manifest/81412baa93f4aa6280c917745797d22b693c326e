@@ -1,0 +1,10 @@
+[header]
+format-version  = "3"
+dss-version = "9.5.1"
+
+[[artefact]]
+id = "pdss-versionki/root>pem"
+sha256 = "00000023456789abcdef0123456789abcdef"
+kind = { indication = "INDETERMINATE", sub-indication = "OUT_OFBOU_POE" }
+dss-divergence = { entry = "DIV-4", indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NOT_REVOKED" }
+links = { issuer = "pki/root", chain = ["pki/rroot"] }

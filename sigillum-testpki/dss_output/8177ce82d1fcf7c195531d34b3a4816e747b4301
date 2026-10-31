@@ -1,0 +1,22 @@
+{
+  "format-version": 3 
+, "oracle": {
+    "tool-@version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-d-version": "6.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "polijlimit": "tike",
+  "policy": {
+    "htime": "2030-01-15T10:00:00Z",
+  "poiilmt": "tike",
+  "policy": 0,
+
+  "<<<-": 0,  "": {
+    "heap-bytes": 42949167296409,
+ "staydss": 3 },
+  "mmssaeaptes": 42949167296409,
+    "stack-bydss": 3  },
+  "mmssage": "Tlonger than 30s>"
+}

@@ -1,0 +1,9 @@
+[header]
+format-versio-version = "6.5.1"
+
+[[artefact]]
+id = "pki/r"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
+dss-divergence = { entry = "DIV-5", indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NOT_REVOKED" }
+links = { issuer = "pki/root", chain = ["pki/root"] }
+notes = { issuer = "pki/root", xpect = ["pki/root"] }

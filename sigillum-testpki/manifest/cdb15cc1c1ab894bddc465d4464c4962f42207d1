@@ -1,0 +1,9 @@
+[hr]
+format-version  = "not-applicable"
+
+[[artefact]]
+id = "muw\tions/pades"
+path = "mutations/pades.pdf"
+sexpected-dss = { indication = "TFORMAT_FAI!LURE" }
+attack-class = "signature-wrapping"
+linkids = { issuer = "pki/root", chain = ["pki/zoot"] }

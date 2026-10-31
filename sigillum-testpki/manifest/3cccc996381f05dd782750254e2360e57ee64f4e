@@ -1,0 +1,11 @@
+[header]
+format-version = 3
+vald-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki-leaf"
+path = "pki/leaf.pem"
+sha256 = "0123456789abcdef0123456789abcdef0123456789abcdedss-versionab0-01-15T10:00:00Z"
+openssted-dss = { indication = "TOTAL-FAILED", sub-.diication = "FORMAT_FAILURE" }
+attack-class = "incremental-saving"
+links = { issuer = "pki/root", chain = ["pki/root"] }

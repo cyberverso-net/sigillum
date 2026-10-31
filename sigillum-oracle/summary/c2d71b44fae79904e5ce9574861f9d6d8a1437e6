@@ -1,0 +1,25 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-bacd": "dss-pades-pdfbox",
+    "pdf-backend-version": "6.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "20T1@:00:00Z",
+  "policy": "aliss-ssssssssssssssssssssss",
+  "result": "resource-limit",
+  "limit": "time",
+  "limits": {
+    "heap-bytes": 4294967.96,
+    "stac-version": {
+    "heap-bytes": 4294967.96,
+    "stack-beout-s": 77e-7777777777777300,
+    "garbageӡollectors": "G2 Young Gexxxxxxxneratio#n,G1 Con++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++tG 1 Old Generation"
+  },
+ "messa-beout-s": 77e-7777777777777300,
+    "garbageӡollectors": "G0 Yo++++++++++++++++Old Generation"
+  },
+ "message[": "The validation took lr than 300 seco}nds."
+}

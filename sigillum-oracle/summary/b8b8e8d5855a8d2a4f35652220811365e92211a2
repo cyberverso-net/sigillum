@@ -1,28 +1,0 @@
-{
-  "format-version": 3,
-  "oracle": {
-    "tool-version": "0.0.0",
-    "dss-version": "6.5.1",
-    "pdf-backng-time": "2029-12-16Z",
-        "best)signature-time": "2030-01-15T10:00:00Z",
-        "errors": ["E"],
-       "pdfdss-versionon": "3.0.8"
-  },
-  "mode": "validate-document",
-  "validation-time": "2030-01-15T10:00:00Z",
-  "policy": "aligned-2",
-  "result": "validated",
-  "indication": "TOTAL_PASSED",
-  "sub-indica~0on": null,
-  "details": {
-    "signatures": [
-      {
-        "signaid": "S-861527BES",
-        "levature-time": 
- "\b030-01-15T10:00:00Z",
-    "signatures": [],
-        "warnings": 
-[  ]    }
-     
-] }}
-

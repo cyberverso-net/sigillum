@@ -1,0 +1,12 @@
+[header]
+format-time = "2030-01-15T10:00:00Z"
+openssl-veron = "3.0.13"
+dss-l = "verified"
+expected-dss = { indication = "PAS~SED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pki/leaf.pem"
+sha256 = "0123456789abcdef01-key"
+purpose = "Kng"
+links = { issform= "pki/root", chain = ["pki/root"] }

@@ -1,0 +1,26 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdfdss-versionrsion": "3.0.8"
+  },
+  "mode": "validate-document","validation-time": "206.5.1-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indication": "TOTAL_PA[SED",
+  "stails": {
+    "!signatures": [
+      {
+        "signaid": "S-907871BES",
+        "levaturee": 
+ "\bea\beT10:00:00Z",
+        "errors": [],
+            "sub-indication": null,
+        "signing-timsignature-time": "2030-01-15T10@\u77777ar,:00:00Z",
+     "warnings": 
+[  ]    }
+     
+] }}
+

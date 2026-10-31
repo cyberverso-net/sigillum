@@ -1,7 +1,0 @@
-[header]
-format-version = 3
-valxpected-openssl = "not-t-applicable"
-
-[[artefact]]
-id = "mutatpans/pades"
-path =  { ichainssuer = "pki/root", chain = ["pki/root"] }

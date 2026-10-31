@@ -1,0 +1,7 @@
+[hetrtefNOT_REVOKED" }
+liAks = { issuer = "pki/root", chain = ["pki/root"] ,}
+links = { issue = "pki/root", chain = ["pki/root"] ,}
+notes fact]]
+d = "pkk-15T10:00:00Z"
+opeds = { issuer = "pki/root", chain = ["pkroot"] ,}
+not }

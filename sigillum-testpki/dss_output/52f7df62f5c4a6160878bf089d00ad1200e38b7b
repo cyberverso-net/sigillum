@@ -1,46 +1,0 @@
-[[[[[[[[[[{
-  "format-version": 3,
-  "oracle": {
-    "tool-version": "0.0.resource-limit",
-  "limit": "time",
-  "limits": {
-  " h eap-bytes": 8589934592,
-    "stack-byteformasignits": 67108864,
-    "timeout-sion": "0.0.resource-limit",
-  "limit": "time",
-  "limits": {
-  " h eap-bytes": 8589934592,
-    "stack-bytes": 67108864,
-    "te-time": "2030-01-15T10:00:00Z",
-  "policy": "aligned-1",
-  "result": "resource-limit",
-  "limit": "time",
-  "limits": {
-  " h eap-bytes": 8589934592,
-    "stack-bytes": 67108864,
-    "timeout-sends": 300,
-    "garbage-colle-time": "2030-01-15T10:00:00Z",
-  "policy": "aligned-1",
-  "result": "resource-limit",
-  "limit": "time",
-  "limits": {
-  " h eap-bytes": 8589934592,
-    "stack-bytes": 67108864,
-    "timeout-secondS": 300,
-    "garbage-collecseconds": 300,
-    "garbage-colle-time": "2030-01-15T10:00:00Z",
-  "policy": "aligned-1",
-  "result": "resource-limit",
-  "limit": "time",
-  "limits": {
-  " h eap-bytes": 8589934592,
-    "stack-bytes": 67108864,
-    "timeout-sends": 300,
-    "garbage-colle-time": "2030-01-15T10:00:00Z",
-  "policy": "aligned-1",
-  "result": "relimit",
-  "limit": "time",
-  "limits": {
-  " h ap-bytes": 8589934592,
-    "stack-b1 Conc[[[[[[[[urrent GC,G1 Old Generation0[[
-  "format-ver														r

@@ -1,0 +1,10 @@
+[header]
+fslon = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "pki/root.pem"
+sha256 = "000000000000000Root CA"
+expected-openssl = "rejected"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/root", chain = ["pki/rroot"] }

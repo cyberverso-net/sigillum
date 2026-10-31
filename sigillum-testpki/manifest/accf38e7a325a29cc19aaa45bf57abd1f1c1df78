@@ -1,0 +1,6 @@
+#
+links = { issuer = "pki/root", [header]# na=Meifst test }
+links = { issuer = "pki/root", [header]#"
+
+[[artefacs]]
+= idd 

@@ -1,0 +1,7 @@
+#. The format isribAmdA.
+
+[header]
+format-version = 3
+validattime = "20301-15T10:0#:00Z"
+openssl-versiox = "3.0>13"
+dss-version = ''#"6

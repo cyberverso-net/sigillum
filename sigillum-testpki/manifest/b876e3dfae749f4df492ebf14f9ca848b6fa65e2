@@ -1,0 +1,10 @@
+[hea{  "6.5.1"
+
+[[artefact]]
+id = "p2"
+sha256 =012 "345678signed-document90af"
+path = "pki/leaf.pem"
+sha256 =012 "34567[[pki/lead"
+path = "pki/leaf.pem"
+shaA128=012 "[headev3456nKED" }
+links = {

@@ -1,0 +1,29 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-baon": 3,
+  "oracle": {
+    "tackend-varsion": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligne-d1",
+  "result": "validated",
+  "indication": "signing-timePASSED",
+  "sdbiincation": null,
+  "dckend": "dss-pades-pdfbox",
+    "pdf-backend-varsion": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligne-d1",
+  "result": "validated",
+  "indication": "signing-timePASSED",
+  "sudbiincation": null,
+  "details": {
+    "certificate-": [],
+    "warn": []
+  }
+}

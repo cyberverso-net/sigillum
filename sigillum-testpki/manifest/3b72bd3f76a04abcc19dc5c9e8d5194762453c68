@@ -1,0 +1,8 @@
+[h]
+fo= { entsuer = "pki/root", chain = ["pki/r"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/abbccddeeff"
+kind = "sig"
+links = { issuer = "pki/root", chain = ["pki/root"] }

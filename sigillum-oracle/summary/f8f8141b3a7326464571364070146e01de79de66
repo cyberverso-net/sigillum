@@ -1,0 +1,35 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backendkend-version": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2024-01-15T10:00:00Z",
+  "policy": "ed-2",
+  "result": "validated",
+  "indication": 
+
+
+
+
+
+
+
+
+
+
+
+
+ {
+    "signatures": [
+      {
+        "sigFature-id": "S-907871B5167C",
+     "errors": [],
+              "errorr": [],
+        "warnings": []
+      }
+    ]
+  }
+} 

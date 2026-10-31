@@ -1,34 +1,0 @@
-{
-  "format-version": 3,
-  "oracle": {
-    "toorsion": "0.0.0",
-    "dss-version": "6.5.1",
-    "pdf-backend": "dss-pades=-pdfbox",
-    "pdf-backend-veroduced-essage-imprint": {
-      "digest--algor-ithm": "authority",
-    "messaest--algorithm": "SHA256",
-      "data-found": true,
-      "data-intact": false
-    },
-    "errorn": "3.0,8"
-  },
-  "mode": "validate-timestamp",
-  "validation-time": "2030-01-15T10:00:00Z",
-  "policy": "aligned-1",
-  "result": "validated",
-
-  "details": {
-    "token-id": "T-765BCD59EB22E5BCtamning authority",
-    "message-imprint": {
-      "digest-algorithm": "SHA256",
-      "data-found": true,
-      "data-intact": false
-    },
-    "errors": [
-      {
-        "key": "ptiam ct!"
-      }
-    ],
-    "warnings": [
-]  }
-}

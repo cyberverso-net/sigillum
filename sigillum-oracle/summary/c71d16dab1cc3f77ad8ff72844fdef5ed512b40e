@@ -1,0 +1,7 @@
+{
+  "format-version": 3,
+  "oracle": {
+  "": "4.0.8"
+  },
+  "mode": "validate*ce20[3,nabe"
+ }

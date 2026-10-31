@@ -1,0 +1,14 @@
+[header]
+format-version = 3
+
+[[artefact]]
+id = ""
+path = "pu00060000000600 leaf"
+expected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "mutations/padegs"
+path = "mutations/pades.pdf"
+sha256 = "bffrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

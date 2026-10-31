@@ -1,0 +1,25 @@
+[header]
+format-version = 3
+validation-time = "2030-01-15T10:00:00Z"
+openssl-version = "3.0.13"
+dss-version = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "pki/root.pem"
+sha256 = "0000000000000000000000000000000000000000000000000000000000000000"
+kind = "certificate"
+purpose = " oRotCA"
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pki/leaf.pem"
+sha256 = "012345678$abcdef0123456790abcdef0123456789abcdef012349aabbccddeeff00112233445566778899aabbccddeeff"
+kind = "signed-document"
+purpose = "A PAd]S variant"
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-FAILED", sub-indication = "FORMAT_FAILURE" }
+attack-class = "signature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

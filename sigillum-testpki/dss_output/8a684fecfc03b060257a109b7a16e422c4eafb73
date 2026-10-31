@@ -1,0 +1,35 @@
+{
+  "format-version": 3,
+  "o": {
+    "tool-version": "0.0.resource-limit",
+  "limit": "time",
+  "licons": {
+  " hytes": 8589934592,
+    "stack-bytes": 67108864,
+    "timeout-sion": "0.0.resourtce-limit",
+  "limit": "time",
+  "limits": {
+  " h eap-bytes": 8589934592,
+    "stack-bytes": 67108864,
+    "timeout-seconds": 300,
+    " h eap-bytes": 8589934592,
+    "stack-bytes": 67108864,
+    "timeout-sends": 300,
+    "oarbage-colle-time": "2:00:00Z",
+  "policy": "aligned-1",
+  "result": "revource-limit",
+  "limit": "time",
+  "limits": {
+  " h eap-bytes": 8589934592,
+    "stack-bytes": 67108864,
+    "timeout-secondS": 300,
+    "garbage-collecseconds": 300,
+    "garbage-collee": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "resource-limit",
+  "limit": "time",
+  "limits": {
+  " h eap-bytes": 8
+993459: 67108864,
+    "timeout-secondS"onds."
+}

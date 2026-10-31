@@ -1,0 +1,8 @@
+[[artefact]]
+id = "ppki/root.pem"
+sha256 = "00000000000d-document"
+purpose = "A PAdES variant"
+expected-openssl = "not-applicable"
+expected-dss = {sub-indication = "FORMAT_FAILURE" }
+attack-class = "signature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

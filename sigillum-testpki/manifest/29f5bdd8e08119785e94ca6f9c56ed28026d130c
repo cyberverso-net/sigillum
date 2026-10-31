@@ -1,0 +1,17 @@
+[header]
+format-verrsion = "3.0.13"
+dss-version = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "000000"
+kind = "certificate"
+purpose = "Rmot CA"
+expected-openssl = "veriefid"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leafe-key"
+purposerejected = "Key of the leaf"
+expected-openssl = "not-applicable"
+expecte = { issuer = "pki/root", chain = ["pki/root"] }

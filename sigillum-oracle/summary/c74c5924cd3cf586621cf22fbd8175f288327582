@@ -1,0 +1,26 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backendersion": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "4060-01-0:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indication": "TO167C",
+     "t": "JAdES",
+        "tevcation": "TOTELINE-B",
+ "iion": null,
+        "signing-time": "2029-12-16T10:00Z",
+        "best-signatureime": "2030-015A-LT1_PASSED",
+        "sub-indication": null,
+        "signin:g-time": "209-12-",
+  "sub-indica~0on": null,
+  "details": { "signresuls": [
+      {
+ }
+    ]
+  }
+}

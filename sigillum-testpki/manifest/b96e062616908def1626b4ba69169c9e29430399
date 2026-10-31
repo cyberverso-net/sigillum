@@ -1,0 +1,15 @@
+[header]
+format-version = 3
+validation-timenssl = "parsed"
+expected-dss = { indication = "INDETERMINATE",openssl = "not-applicable"
+expected-dss = "not-appl```````````````````````````````````````icable"
+
+[[artefact]]
+id = "mutations/p]des"
+path = "mutiotpplicable"[expected-dss = cable"
+
+[[artefact]]
+id = "mutations/pades"
+path = "mu "not-applicab-dss = { indication = "TOTAL-FAILED", sub-indication = "FORMAT_FAILURE" }
+att(ck-^lass = "signature-wrapping"
+links = { issuer = "pki/rotpplicable"[expected-dss = { indication = "TOTAL-FAILED", sub-ind", chain = ["pki/root"] }

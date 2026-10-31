@@ -1,0 +1,10 @@
+[header]
+format-version = 3
+validation-timend = "certificate"
+purpose = "Root CA"
+expected-openssl = "verified"
+expected-dss = { iion = "PASSED" }
+
+[[artefact]]
+i= "End entarsed"
+expected-dss = { suer = "pki/root", chain = ["pki/root"] }

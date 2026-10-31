@@ -1,4 +1,0 @@
-./pki/signer-p256-revoked.pem
-./pki/signer-p256-revoked.pem: revoked
-	This ate:
-	Reason: keyCompr

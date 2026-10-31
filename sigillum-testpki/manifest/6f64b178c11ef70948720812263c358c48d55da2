@@ -1,0 +1,12 @@
+[header]
+format-vected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/meaf"
+path256 = "0123456789KKKKKKKKKKKKKKKKKa456789abeck"
+dfind = "certiseed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "pki/keys/re-wrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

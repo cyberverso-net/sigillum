@@ -1,0 +1,32 @@
+[header]
+format-version = 3
+validation-time = "2030-01-15T10:00:00Z"
+openssl-version = "3.0.13"
+dss-version = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "pki/root.pem"
+sha256 = "0000[00000000000000000000000000000000000000000000000000000000000"
+links= "certificate"
+purpose = "Root CA"
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pki/laef.pem"
+sha256 = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+kind = "certificate"
+purpose = "End entileaf"
+expected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "mutations/pades"
+path = "muHASH_FAILUREs.pdf"
+sha256 = "00112233445566778899abccd"
+kind = "signed-document"
+purpose = "A PS variant"
+expected-openssl = "not-applicable"
+expected-dss = { indication = "oot", chain = ["pki/root"] }

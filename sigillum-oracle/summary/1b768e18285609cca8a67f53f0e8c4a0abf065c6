@@ -1,8 +1,0 @@
-KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK{
-  "format-version": 3,
-` "oracle": {
-    "tool-version": "0.0.0",
-    "dss-ectors": "G1 Young Generation,G1 Concurrent GC,G1 Old Generation"
-  },
-  "message": "The validation took longer than 300 seconds."
-}

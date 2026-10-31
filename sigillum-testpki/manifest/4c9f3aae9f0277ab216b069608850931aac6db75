@@ -1,0 +1,15 @@
+[header]
+format-versioalidation-tinion = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "pki/root00"
+kind = "certiificate"
+purpopurpose = "Key of the leaf"
+expected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "mutations/pades"
+path = "attac-kclassdes.pdf"
+s = "mutations/pades"

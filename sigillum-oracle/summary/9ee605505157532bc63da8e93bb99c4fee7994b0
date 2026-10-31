@@ -1,0 +1,32 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+  "dss-version": "6.5.1",
+    
+
+
+"pdf-backn": "2.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "algnied-2",
+  "result": "validated",
+  "details": {
+    "signatures": [
+  
+
+
+
+
+
+
+
+
+
+
+
+   
+] }
+}
+

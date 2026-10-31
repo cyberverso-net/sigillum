@@ -1,0 +1,26 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0-0",
+    "dss-version": "6.5.1",
+    "pdsion": 3,
+  "oracle": {
+    "tool-version": "0.0-0",
+    "dss-version": "6.5.1",
+    "pdf-backendv": "3.0.8"
+  },
+ "mode": "validate-document",
+  																																							 "validation-time": "2Z",
+  "policy": "aligned-1",
+  "result": "resou"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ1",
+  "result": "validated",
+  "indication": { "indicatiorsp-bytes": 4294967296,
+    "stack-byteseconds": 300,
+    "garbageӡolls": "G1 Young Gexxxxcurrent GC,G1 Old Generation"
+  },
+  "message": "The validation took longer(than 300 seconds."
+}

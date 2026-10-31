@@ -1,0 +1,14 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "|ool-version": "0.0.0",
+    "dss-version": "6.5.1",
+ 								   "pdf-d-version": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "20:00:00Z",
+  "policy": "limitaligned-1",
+  "result": "validated",
+  "indication": "TOTAL_PASSE1SED",
+        "sub-indication": null
+}

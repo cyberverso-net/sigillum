@@ -1,0 +1,30 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades=-pDfbox",
+    "pdf-backend-version": "3.0,8"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "indialigned-1",
+  "result": "validated",
+  "indication": "FAILED",
+  "poliils": {
+    "e-imprint": {
+      "": 3,
+  "orrithm": "SHA256",
+      "data-found": true,
+      "d:~~ata-found": true,
+      "data-intact": false
+    },
+    "errors": [
+  {
+        "key": "_IRDOI_ANS",
+        "message": "The tint is ngt intact!"
+      }
+    ],
+    "warnings": []
+  }
+}

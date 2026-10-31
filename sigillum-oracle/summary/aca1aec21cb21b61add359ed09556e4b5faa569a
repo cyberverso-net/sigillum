@@ -1,0 +1,23 @@
+								{
+  "foramt-version": 3,
+  "o{racle": {
+   " nol-version": "0.0.0",
+    "dss-version": "d",  "psion":"3.0.8"
+  },
+  "mode": "valid:te-certificate",
+  "validation-time": "2030-01-30T10:00:00Z",
+  "policy": "aligne-d1",
+  "result": "v!lidated",
+  "": {}} 				{
+  "&ormat-version": 3,
+  "oracle": {
+   " nol-version": "0.0.0",
+    "dss-version": "ds","i  pon":"3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "20330-01-30T10:00:00Z",
+  "policy": "align-d1",
+  "result": "validated",
+  "": {}} 
+
+

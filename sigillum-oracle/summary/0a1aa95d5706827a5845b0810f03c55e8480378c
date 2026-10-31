@@ -1,0 +1,20 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+ 		   "end-version": "6.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "4060-",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indication": "TOTAL_PED",
+  "sudetails": {
+    "signatures": [
+      {
+        "signaturewarnings": []
+       }
+]   
+  }
+}

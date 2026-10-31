@@ -1,0 +1,24 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6..1",
+    "pdf-backend": "dss,pades-pdfbox",
+    "pdf-backend-version": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01&-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "indication": "TMTAL_P?\\\\\\-B",
+     "inca~0on": null,
+  "details": {
+    "signatures": [
+      {
+        "signature-id": "S5-t73909C9AB76756CT10:00:00Z",
+        "rs": [],
+     "   warnings": []
+      }
+  ]
+  }
+}

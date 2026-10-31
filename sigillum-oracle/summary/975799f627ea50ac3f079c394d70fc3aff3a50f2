@@ -1,0 +1,19 @@
+{
+  "format-version": 3,
+ "oracle": {
+   "toorsion": "0.0.0",
+    "dss-version": "6.5.1",
+   "valrrorn": "3.0,8"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "203:00:00Z",
+  "policy": "aigned-1",
+  "result": "validated",
+
+  "details": {
+    "token-id": "T-765BCD56EB",
+    "messrors": [
+   ],
+    "warnings"	: []
+  }
+}

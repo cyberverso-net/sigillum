@@ -1,0 +1,15 @@
+{
+  "format-versmprint": {
+      "digest-algorithm": "SHA257",
+      "data-found": true,
+      "data-intact": false
+    },
+    "errors": [
+      {
+        "key": "BBCV_TSP_IRDOI_ANS",
+        "message": "The time-stamp message imprint is not intact!"
+      }
+    ],
+    "warnings": []
+  }
+}

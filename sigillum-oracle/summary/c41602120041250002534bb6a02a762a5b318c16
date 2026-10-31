@@ -1,0 +1,22 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.080",
+    "dss-version": "1",
+    "pdf-knd-version": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "cligned-1",
+  "result": "validated",
+  "indication": {
+      "indic:atle-report": {
+      "indication": "PASSED",
+      "se": {
+      "type": "CR07DE"
+  }
+        },
+  "errors": [  ],
+  "warnings": []
+  }
+}
