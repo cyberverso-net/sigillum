@@ -421,6 +421,8 @@ fn each_variant_records_its_expected_results() -> TestResult {
                 assert_eq!(entry.dss_divergence, None);
                 assert_eq!(entry.attack_class, Some(AttackClass::IncrementalSaving));
                 assert!(notes.contains("DIV-7"), "{notes}");
+                assert!(notes.contains("provisional"), "{notes}");
+                assert!(!notes.contains("is to"), "{notes}");
                 assert!(notes.contains("BBB_FC_DSCNUOM_ANS"), "{notes}");
                 assert!(notes.contains("clause 7.5.6"), "{notes}");
             }
@@ -433,6 +435,10 @@ fn each_variant_records_its_expected_results() -> TestResult {
                 assert!(notes.contains("clause 7.5.6"), "{notes}");
                 assert!(notes.contains("NDSS 2021"), "{notes}");
                 assert!(notes.contains("BBB_FC_IVDBSFR_ANS"), "{notes}");
+                // The maintainer's decision on issue #112: DIV-7, provisional,
+                // covers the shadow variants too.
+                assert!(notes.contains("DIV-7"), "{notes}");
+                assert!(notes.contains("provisional"), "{notes}");
             }
             Mutation::PadesPartialByteRange => {
                 assert_eq!(entry.expected_openssl, OpensslResult::NotApplicable);

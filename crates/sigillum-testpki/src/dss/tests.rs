@@ -706,10 +706,14 @@ fn every_divergence_named_in_the_notes_is_a_row_that_names_the_artefact() -> Tes
             named.push(format!("{entry} {}", artefact.id));
         }
     }
-    assert!(
-        named.contains(&"DIV-7 mutations/pades-incremental-update".to_owned()),
-        "{named:?}"
-    );
+    for id in [
+        "mutations/pades-incremental-update",
+        "mutations/pades-shadow-hide",
+        "mutations/pades-shadow-replace",
+        "mutations/pades-shadow-hide-and-replace",
+    ] {
+        assert!(named.contains(&format!("DIV-7 {id}")), "{named:?}");
+    }
     assert!(named.contains(&"DIV-6 mutations/jades-tampered-header".to_owned()));
     Ok(())
 }
