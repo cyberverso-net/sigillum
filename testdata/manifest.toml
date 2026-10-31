@@ -1197,6 +1197,33 @@ expected-openssl = "not-applicable"
 expected-dss = "not-applicable"
 
 [[artefact]]
+id = "documents/shadow-hide"
+path = "documents/shadow-hide.pdf"
+sha256 = "9e1afec97d0e9f7abcda3323eedc631de6a723f14f1e253370d2ee59fca4443f"
+kind = "document"
+purpose = "A small PDF of one page prepared for a shadow attack of the hide class: a second line of text under a white rectangle drawn by a content stream of its own, which mutations/pades-shadow-hide empties after signing."
+expected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "documents/shadow-replace"
+path = "documents/shadow-replace.pdf"
+sha256 = "b3bd6472aeceea49fca3bc9565348fa8b0397cbad19c6466e6989eaac27751c5"
+kind = "document"
+purpose = "A small PDF of one page prepared for a shadow attack of the replace class: a text field named Amount with the value 100 EUR and its appearance, which mutations/pades-shadow-replace replaces after signing."
+expected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "documents/shadow-hide-and-replace"
+path = "documents/shadow-hide-and-replace.pdf"
+sha256 = "0e51c68aa72215691973b3e9d5dac705da39cc1a7e8236bb3c4da427bd0efa3c"
+kind = "document"
+purpose = "A small PDF of one page prepared for a shadow attack of the hide-and-replace class: a second page tree with a page of other text, which no object in use refers to and which mutations/pades-shadow-hide-and-replace makes the page tree of the catalog after signing."
+expected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
 id = "signed/cades-enveloping-b-b-rsa"
 path = "signed/cades-enveloping-b-b-rsa.p7m"
 sha256 = "4847a2d8e4a14d053435b4aabb269a45fa1f73deb51025d56627adaa12c775d1"
@@ -1901,6 +1928,39 @@ links = { issuer = "pki/signer-ed25519", chain = ["pki/signer-ed25519", "pki/ca-
 notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The signature timestamp is from pki/tsa, at the signing time. DSS embedded the OCSP responses of the signer and of pki/tsa and crl/root-ca, selected at the validation time, with the certificates of both chains, so the validation needs no revocation data linked; timestamp-chain still links the chain of pki/tsa. The protected header carries x5c, as Implementing Regulation (EU) 2026/248, Annex I, requires. At B-LT, x5c holds the signing certificate and the chain below the trust anchor: DSS leaves pki/root-ca, given as trust anchor, out of it, and holds it in the validation data of etsiU. Under its default validation policy, DSS 6.5.1 reports INDETERMINATE with CRYPTO_CONSTRAINTS_FAILURE_NO_POE instead, because that policy does not authorise EdDSA; the aligned policy does."
 
 [[artefact]]
+id = "signed/pades-shadow-hide-b-b-p256"
+path = "signed/pades-shadow-hide-b-b-p256.pdf"
+sha256 = "0f81fcddefe5359a1c0b0d74f445a73fd6395dec6f5b546efff63915f849d901"
+kind = "signed-document"
+purpose = "PAdES baseline signature, invisible, of a document prepared for a shadow attack of the hide class, at B-B, over documents/shadow-hide, by pki/signer-p256 with ECDSA on P-256 and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-p256", "crl/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA. The document is prepared for a shadow attack; mutations/pades-shadow-hide adds the later change after signing."
+
+[[artefact]]
+id = "signed/pades-shadow-replace-b-b-p256"
+path = "signed/pades-shadow-replace-b-b-p256.pdf"
+sha256 = "231d2c5a9fa14f6d75b4ba270b70af74f1f01b584bf1aaffd35f9385517de22e"
+kind = "signed-document"
+purpose = "PAdES baseline signature, invisible, of a document prepared for a shadow attack of the replace class, at B-B, over documents/shadow-replace, by pki/signer-p256 with ECDSA on P-256 and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-p256", "crl/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA. The document is prepared for a shadow attack; mutations/pades-shadow-replace adds the later change after signing."
+
+[[artefact]]
+id = "signed/pades-shadow-hide-and-replace-b-b-p256"
+path = "signed/pades-shadow-hide-and-replace-b-b-p256.pdf"
+sha256 = "e6252b3077cb77f13e8f8ca2df229ed29e803eba288502cedb8d88642fc8f05a"
+kind = "signed-document"
+purpose = "PAdES baseline signature, invisible, of a document prepared for a shadow attack of the hide-and-replace class, at B-B, over documents/shadow-hide-and-replace, by pki/signer-p256 with ECDSA on P-256 and SHA-256, created by DSS."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-p256", "crl/root-ca"] }
+notes = "The DSS result is a prediction from ETSI EN 319 102-1 V1.4.1, which DSS 6.5.1 gives in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only. The signature value and the signed attributes verify (clause 5.2.7), the chain builds to pki/root-ca (clause 5.2.6), and no certificate of the chain is revoked (clause 5.2.6.4, step 4). The revocation data linked cover the signer and its CA. The document is prepared for a shadow attack; mutations/pades-shadow-hide-and-replace adds the later change after signing."
+
+[[artefact]]
 id = "mutations/cades-modified-signed-attribute"
 path = "mutations/cades-modified-signed-attribute.p7m"
 sha256 = "4d702a5793c7ef5bf451831edebec206d6f03cc3946c50da87fe73dac3309545"
@@ -1944,3 +2004,63 @@ expected-openssl = "not-applicable"
 expected-dss = "rejected"
 links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-p256", "crl/root-ca"] }
 notes = "The protected header holds iat twice, 1892109600 and then 1892196000, and the signature value was not computed again (ADR-0014). RFC 7515, section 4, lets a JWS parser reject duplicate Header Parameter names or keep the lexically last one. DSS 6.5.1 rejects the JWS, so the validate-document mode of tools/dss-oracle gives rejected, and sigillum rejects them under ADR-0016. Because the header changed, the signature value no longer verifies either: a verifier that keeps the last iat fails on the signature, so the fixture alone does not show that a verifier checks for duplicate names."
+
+[[artefact]]
+id = "mutations/pades-incremental-update"
+path = "mutations/pades-incremental-update.pdf"
+sha256 = "4aad77180d0216ebb8f094f492ff6c3952f9fbcac83fd94839fd2dfdf7300f8a"
+kind = "signed-document"
+purpose = "PAdES signature signed/pades-b-b-p256, with a content stream added to its page in an incremental update after signing."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+attack-class = "incremental-saving"
+links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-p256", "crl/root-ca"] }
+notes = "An incremental update (ISO 32000-1:2008, clause 7.5.6) appended after the signed revision adds a content stream, object 10, which draws the text added after signing, and writes the page, object 3, again with it in its Contents. The signature and its ByteRange cover the signed revision, which is intact. The variant follows the incremental saving attack of 1 Trillion Dollar Refund (ACM CCS 2019), threat D1 of the threat model. DSS 6.5.1 gives TOTAL-PASSED in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only, and reports the change after signing as the warnings BBB_FC_IVDBSFR_ANS, a visual difference on page 1, and BBB_FC_DSCNUOM_ANS, undefined object modifications after the signature revision; the aligned policy is not changed for it. The result that sigillum gives for the change after signing is decided by the phase 2 ADR on revision analysis (ADR-0015): TOTAL-FAILED, or TOTAL-PASSED for the signed revision with a conformance finding for the change (ADR-0017, rule 4). The difference from DSS is the provisional divergence DIV-7 of docs/design/divergences.md, withdrawn under the second option."
+
+[[artefact]]
+id = "mutations/pades-shadow-hide"
+path = "mutations/pades-shadow-hide.pdf"
+sha256 = "991d5a6678e1fa9d4ee12bc6753112369be90285f0f6960b262c79a58980e15f"
+kind = "signed-document"
+purpose = "PAdES signature signed/pades-shadow-hide-b-b-p256 of a document prepared for a shadow attack of the hide class, with the overlay that covers a line of text emptied in an incremental update after signing."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+attack-class = "shadow-hide"
+links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-p256", "crl/root-ca"] }
+notes = "The signed document, documents/shadow-hide, draws a second line of text, shadow content, covered when signed, and then a white rectangle over it, object 6, a content stream of its own. An incremental update (ISO 32000-1:2008, clause 7.5.6) appended after the signed revision writes object 6 again as an empty stream, which shows the line. The variant follows the hide class of the shadow attacks of Shadow Attacks: Hiding and Replacing Content in Signed PDFs (NDSS 2021), threat D2 of the threat model. The DSS result is a prediction: the signature and its ByteRange cover the signed revision, which is intact, clause 7.5.6 lets a signed file be updated, and ETSI EN 319 102-1 V1.4.1 sets no check of the changes in later revisions, so the signature validates as its source does. DSS 6.5.1 gives this result in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only, with the warnings BBB_FC_IVDBSFR_ANS, a visual difference on page 1, and BBB_FC_DSCNUOM_ANS, undefined object modifications after the signature revision. The result that sigillum gives for the change after signing is decided by the phase 2 ADR on revision analysis (ADR-0015), as for the incremental update: the provisional divergence DIV-7 of docs/design/divergences.md covers this variant."
+
+[[artefact]]
+id = "mutations/pades-shadow-replace"
+path = "mutations/pades-shadow-replace.pdf"
+sha256 = "673229842e681906d5d675051bed4cd84fe0c8d43ef5b6304851a0aae2bf8831"
+kind = "signed-document"
+purpose = "PAdES signature signed/pades-shadow-replace-b-b-p256 of a document prepared for a shadow attack of the replace class, with the value and appearance of its text field replaced in an incremental update after signing."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+attack-class = "shadow-replace"
+links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-p256", "crl/root-ca"] }
+notes = "The signed document, documents/shadow-replace, holds a text field, Amount, object 6, with the value 100 EUR and an appearance that shows it, object 7. An incremental update (ISO 32000-1:2008, clause 7.5.6) appended after the signed revision writes object 6 again with the value 900 EUR and a new appearance that shows it. The variant follows the replace class of the shadow attacks of Shadow Attacks: Hiding and Replacing Content in Signed PDFs (NDSS 2021), threat D2 of the threat model. The DSS result is a prediction: the signature and its ByteRange cover the signed revision, which is intact, clause 7.5.6 lets a signed file be updated, and ETSI EN 319 102-1 V1.4.1 sets no check of the changes in later revisions, so the signature validates as its source does. DSS 6.5.1 gives this result in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only, with the warning BBB_FC_IVDBSFR_ANS, a visual difference on page 1. The result that sigillum gives for the change after signing is decided by the phase 2 ADR on revision analysis (ADR-0015), as for the incremental update: the provisional divergence DIV-7 of docs/design/divergences.md covers this variant."
+
+[[artefact]]
+id = "mutations/pades-shadow-hide-and-replace"
+path = "mutations/pades-shadow-hide-and-replace.pdf"
+sha256 = "de092278acb0541621aacab5abb9ed1718f8e646e701c80b8bf185d807602553"
+kind = "signed-document"
+purpose = "PAdES signature signed/pades-shadow-hide-and-replace-b-b-p256 of a document prepared for a shadow attack of the hide-and-replace class, with the prepared page tree made the page tree of the catalog in an incremental update after signing."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED" }
+attack-class = "shadow-hide-and-replace"
+links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-p256", "crl/root-ca"] }
+notes = "The signed document, documents/shadow-hide-and-replace, holds a second page tree, object 6, with a page of other text, which no object in use refers to. An incremental update (ISO 32000-1:2008, clause 7.5.6) appended after the signed revision writes the catalog, object 1, again with that page tree as its Pages, and adds no other object: the content shown after signing was signed. The variant follows the hide-and-replace class of the shadow attacks of Shadow Attacks: Hiding and Replacing Content in Signed PDFs (NDSS 2021), threat D2 of the threat model. The DSS result is a prediction: the signature and its ByteRange cover the signed revision, which is intact, clause 7.5.6 lets a signed file be updated, and ETSI EN 319 102-1 V1.4.1 sets no check of the changes in later revisions, so the signature validates as its source does. DSS 6.5.1 gives this result in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only, with the warnings BBB_FC_IVDBSFR_ANS, a visual difference on page 1, and BBB_FC_DSCNUOM_ANS, undefined object modifications after the signature revision. The result that sigillum gives for the change after signing is decided by the phase 2 ADR on revision analysis (ADR-0015), as for the incremental update: the provisional divergence DIV-7 of docs/design/divergences.md covers this variant."
+
+[[artefact]]
+id = "mutations/pades-partial-byte-range"
+path = "mutations/pades-partial-byte-range.pdf"
+sha256 = "ca3943133e8c164eac5ed5157e6993f5f792cc6941fec66e577e715073af463c"
+kind = "signed-document"
+purpose = "PAdES signature signed/pades-b-b-p256, with a ByteRange that skips the signature dictionary and the rest of the signed revision after the Contents string, and covers a copy of the signed bytes appended to the file."
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-FAILED", sub-indication = "FORMAT_FAILURE" }
+attack-class = "signature-wrapping"
+links = { issuer = "pki/signer-p256", chain = ["pki/signer-p256", "pki/ca-ecdsa", "pki/root-ca"], revocation = ["ocsp/signer-p256", "crl/root-ca"] }
+notes = "The second range of the ByteRange of the signature dictionary starts at the end of the source file, where a copy of the second signed range of the source is appended: the bytes that the ByteRange covers are those that were signed, and their SHA-256 digest is the value of the message-digest attribute. The ByteRange no longer covers the signature dictionary in use, nor the rest of the signed revision after the Contents string, and the digits of the value of the ByteRange are the only bytes changed in the file before the copy. The variant follows the signature wrapping attack of 1 Trillion Dollar Refund (ACM CCS 2019), threat D3 of the threat model. The bytes between the two ranges are no longer the Contents string of the signature dictionary in use, so the ByteRange no longer marks out the signed data of that dictionary, and the signature cannot be processed as its base format defines it: ISO 32000-1:2008, clause 12.8.1, Table 252, has the ByteRange describe the exact byte range for the digest calculation, which excludes the Contents entry, and recommends that it cover the entire file. ETSI EN 319 142-1 V1.2.1, clause 6.3, item k), requires the ByteRange to cover the entire file, including the Signature Dictionary but excluding the entry with key Contents, but that is a requirement of the baseline profile, and ETSI EN 319 102-1 V1.4.1, clause 5.2.2.1, NOTE, leaves conformance to a profile out of the format checking. The DSS result is therefore a prediction that rests on the reading of DSS for its base format: the format checking (clause 5.2.2) fails and the validation process for basic signatures returns FAILED with FORMAT_FAILURE (clause 5.3.4, step 1), reported as TOTAL-FAILED with FORMAT_FAILURE (clause 5.1.3, Table 6). DSS 6.5.1 gives this result in the validate-document mode of tools/dss-oracle under the aligned policy (ADR-0023), with the linked files only, with the errors BBB_FC_IBRV_ANS, the ByteRange is not consistent, and BBB_CV_IRDOI_ANS, the reference data object is not intact. DSS reads the bytes between the two ranges as the hexadecimal value of Contents; they differ from it here, so DSS marks the ByteRange not valid in its diagnostic data and validates the signature over an empty signed content instead, whose digest does not match the message-digest attribute: its diagnostic data gives that digest matcher as found but not intact, and the signature as not intact."
