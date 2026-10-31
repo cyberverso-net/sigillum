@@ -339,15 +339,22 @@ pub const CERTIFICATES: [CertSpec; 32] = [
         0x0104,
         "Issuing CA of the Ed25519 family.",
     ),
-    signer(
-        "signer-rsa-2048",
-        "sigillum test signer RSA 2048",
-        Rsa(2048),
-        "ca-rsa",
-        Sig::RsaPkcs1Sha256,
-        0x1001,
-        "End-entity signing certificate with an RSA 2048-bit key, signed with RSA PKCS#1 v1.5 and SHA-256.",
-    ),
+    // The only RSA key below 3000 bits, the key of the legacy-key-size
+    // documents of the signed corpus (issue #156).
+    CertSpec {
+        notes: Some(
+            "Its key is 2048 bits, the only RSA key of the test PKI below 3000 bits. The legacy-key-size case is the signed documents of the signer rsa, signed/*-rsa, made with this key; their notes give the reasoning and the result of DSS. The X.509 validation of this certificate checks the signature of its issuer, made with a 3072-bit key, so DSS 6.5.1 gives PASSED without the warning on the key size that it gives for those documents.",
+        ),
+        ..signer(
+            "signer-rsa-2048",
+            "sigillum test signer RSA 2048",
+            Rsa(2048),
+            "ca-rsa",
+            Sig::RsaPkcs1Sha256,
+            0x1001,
+            "End-entity signing certificate with an RSA 2048-bit key, signed with RSA PKCS#1 v1.5 and SHA-256, the key of the legacy-key-size documents.",
+        )
+    },
     signer(
         "signer-rsa-3072",
         "sigillum test signer RSA 3072",
@@ -360,11 +367,11 @@ pub const CERTIFICATES: [CertSpec; 32] = [
     signer(
         "signer-rsa-sha3-256",
         "sigillum test signer RSA SHA3-256",
-        Rsa(2048),
+        Rsa(3072),
         "ca-rsa",
         Sig::RsaPkcs1Sha3_256,
         0x1003,
-        "End-entity signing certificate with an RSA 2048-bit key, signed with RSA PKCS#1 v1.5 and SHA3-256.",
+        "End-entity signing certificate with an RSA 3072-bit key, signed with RSA PKCS#1 v1.5 and SHA3-256.",
     ),
     signer(
         "signer-rsa-pss-sha256",
@@ -602,7 +609,7 @@ pub const CERTIFICATES: [CertSpec; 32] = [
         signer(
             "signer-rsa-revoked",
             "sigillum test signer RSA revoked",
-            Rsa(2048),
+            Rsa(3072),
             "ca-rsa",
             Sig::RsaPkcs1Sha256,
             0x1004,
@@ -614,7 +621,7 @@ pub const CERTIFICATES: [CertSpec; 32] = [
         signer(
             "signer-rsa-pss-revoked",
             "sigillum test signer RSASSA-PSS revoked",
-            Rsa(2048),
+            Rsa(3072),
             "ca-rsa-pss",
             Sig::RsaPssSha256,
             0x1103,

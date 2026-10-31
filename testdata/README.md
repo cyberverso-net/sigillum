@@ -70,7 +70,7 @@ Regeneration works as follows:
 | `pki/root-ca` | Self-signed root CA, RSA 3072-bit key, the trust anchor of every chain |
 | `pki/ca-rsa`, `pki/ca-rsa-pss`, `pki/ca-ecdsa`, `pki/ca-ed25519` | One issuing CA per signature family: RSA PKCS#1 v1.5, RSASSA-PSS, ECDSA (P-384 key, SHA-384) and Ed25519 |
 | `pki/ca-ecdsa-p521` | A second ECDSA issuing CA, with a P-521 key that signs with SHA-512 |
-| `pki/signer-*` | End-entity signing certificates: RSA PKCS#1 v1.5 with 2048-bit and 3072-bit keys, RSASSA-PSS with SHA-256 and SHA-384, ECDSA with P-256 and P-384 keys (issued by `pki/ca-ecdsa`) and a P-521 key (issued by `pki/ca-ecdsa-p521`), Ed25519, and RSA PKCS#1 v1.5 with SHA3-256 |
+| `pki/signer-*` | End-entity signing certificates: RSA PKCS#1 v1.5 with a 3072-bit key, and with a 2048-bit key in `pki/signer-rsa-2048`, the key of the legacy-key-size documents; RSASSA-PSS with SHA-256 and SHA-384, ECDSA with P-256 and P-384 keys (issued by `pki/ca-ecdsa`) and a P-521 key (issued by `pki/ca-ecdsa-p521`), Ed25519, and RSA PKCS#1 v1.5 with SHA3-256 |
 | `pki/tsa` | Timestamping authority, with the critical extended key usage `id-kp-timeStamping` (RFC 3161, section 2.3) |
 | `pki/ocsp-responder` | Delegated OCSP responder of `pki/ca-ecdsa`, with `id-kp-OCSPSigning` and `id-pkix-ocsp-nocheck` (RFC 6960, section 4.2.2.2) |
 | `pki/signer-expired`, `pki/signer-not-yet-valid` | Expired one day before, and valid from one day after, the validation time |
@@ -89,6 +89,7 @@ The certificates follow RFC 5280, sections 4.1 and 4.2:
 - Subject key identifiers use method 1 of RFC 7093, section 2. Every certificate but the root carries the authority key identifier of its issuer.
 - The planned signing time of the signed corpus is 30 days before the validation time, 2029-12-16T10:00:00Z. The revoked end entities are separate certificates, so that the other signers stay valid for the fixtures that use them. Their revocations are recorded in the CRLs below.
 - Every certificate but the root carries a CRL distribution point and authority information access URIs under `http://example.invalid/`, a domain reserved by RFC 2606 that never resolves. End entities other than the OCSP responder also name an OCSP responder.
+- Every RSA key has 3072 bits, which ETSI TS 119 312 V2.1.1, Table 6, recommends with no end date, except the key of `pki/signer-rsa-2048`, which signs the legacy-key-size documents of the signed corpus, described there. The validation of that certificate itself checks the signature of `pki/ca-rsa`, made with a 3072-bit key, so DSS gives PASSED without a warning on the key size. `pki/signer-rsa-sha3-256`, `pki/signer-rsa-revoked` and `pki/signer-rsa-pss-revoked` test SHA3-256 and revocation, not the key size, so they have 3072-bit keys like the others.
 - Algorithm identifiers follow RFC 4055 for RSA, RFC 5758 for ECDSA and RFC 8410 for Ed25519. SHA3-256 with RSA PKCS#1 v1.5 uses the identifier of the NIST Computer Security Objects Register, `2.16.840.1.101.3.4.3.14`, with NULL parameters, as OpenSSL encodes it; the register does not specify the parameters.
 
 ### Timeline
@@ -320,6 +321,8 @@ The three `shadow-` documents prepare, before signing, the content that a shadow
 | `signed/pades-shadow-hide-b-b-p256`, `signed/pades-shadow-replace-b-b-p256`, `signed/pades-shadow-hide-and-replace-b-b-p256` | An invisible PAdES signature at B-B by `pki/signer-p256` of `documents/shadow-hide`, `documents/shadow-replace` and `documents/shadow-hide-and-replace`, the sources of the shadow-attack variants, `.pdf` |
 
 The level is `b-b`, `b-t` or `b-lt`. The signers are `rsa` (`pki/signer-rsa-2048`, RSA PKCS#1 v1.5 with SHA-256), `rsa-pss` (`pki/signer-rsa-pss-sha256`, RSASSA-PSS with SHA-256), `p256` (`pki/signer-p256`, ECDSA with SHA-256) and `ed25519` (`pki/signer-ed25519`). That is 64 signatures, and the three signatures of the documents prepared for shadow attacks, 67 in all. DSS 6.5.1 creates every combination of the story, Ed25519 included, so none is left out for want of support.
+
+The 16 signatures of the signer `rsa` are the legacy-key-size case, as their purpose states. Their key has 2048 bits: Table 6 of ETSI TS 119 312 V2.1.1 rates RSA keys of at least 1900 and fewer than 3000 bits as legacy, with the end date 2026-12-31, and clause 8.4 ends the validity of certificates with such keys no later than 2028-12-31, so the key is past its end date at the signing and validation times. Under the aligned policy, DSS 6.5.1 gives TOTAL_PASSED with the warning `ASCCM_AR_ANS_AKSNR` on the key size, because it applies its expiry date for such keys at level WARN only, as the notes of [ADR-0023](../docs/design/adr/0023-validation-policy-of-the-dss-oracle.md) record. The predictions are TOTAL-PASSED. Once the expiry dates of the project's own cryptographic policy are set in phase 2, the difference becomes a class 1 divergence of [ADR-0019](../docs/design/adr/0019-divergence-classes-and-intentional-restrictions.md).
 
 Every signature is made as follows:
 
