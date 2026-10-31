@@ -367,6 +367,8 @@ impl<'a> Pdf<'a> {
 
     /// The most recent copy of the object `number`, between its
     /// `<number> 0 obj` line and the end-of-line marker before `endobj`.
+    /// The number must be below `/Size`, which is one greater than the
+    /// highest object number in the file (clause 7.5.5, Table 15).
     pub(crate) fn object(&self, number: u32) -> Result<&'a [u8], Unsupported> {
         if number >= self.size {
             return Err(Unsupported("the object number is not below /Size"));
@@ -392,8 +394,10 @@ impl<'a> Pdf<'a> {
     /// the numbers from `/Size` on, a cross-reference section with one
     /// subsection per run of consecutive numbers, and a trailer with the
     /// entries of the last one, `/Size` raised by the objects added, and
-    /// `/Prev`. A new object therefore never takes the number of another,
-    /// and `/Size` stays within [`MAX_SIZE`].
+    /// `/Prev`. When `/Size` is correct (clause 7.5.5, Table 15), a new
+    /// object therefore never takes the number of another; the
+    /// cross-reference sections are not checked against it. `/Size`
+    /// stays within [`MAX_SIZE`].
     fn update(&self, changed: &[(u32, String)], added: &[String]) -> Result<Vec<u8>, Unsupported> {
         let mut numbers: Vec<u32> = changed.iter().map(|(number, _)| *number).collect();
         if numbers.iter().any(|number| *number >= self.size) {
