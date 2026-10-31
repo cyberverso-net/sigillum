@@ -74,5 +74,8 @@ jobs:
               --crl testdata/crl/root-ca.crl --ocsp "testdata/ocsp/$name.der" \
               --validation-time 2030-01-15T10:00:00Z --out "$out"
             echo "== $name"
-            jq . "$out/summary.json"
+            jq -c '{indication, warnings: .details.warnings}' "$out/summary.json"
+            grep -o '<Warning[^>]*>[^<]*</Warning>' "$out/detailed-report.xml" | sort | uniq -c || echo "no Warning element in the detailed report"
+            grep -o '<[A-Za-z]*Warning[^>]*>[^<]*<' "$out/simple-report.xml" || echo "no warning in the simple report"
+            grep -io '<[^>]*\(KeySize\|ExpirationDate\|AlgoExpir\)[^>]*>' "$out/diagnostic-data.xml" "$out/detailed-report.xml" | sort | uniq -c | head -20 || true
           done
