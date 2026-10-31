@@ -6,6 +6,8 @@ name: Mutation testing
 # all of them, on main. Not a required check: a shortfall can be justified
 # in the pull request, as quality-gates.md states.
 on:
+  push:
+    branches: [story/156-rsa-3072-fixtures]
   pull_request:
   schedule:
     - cron: "23 1 * * *"
@@ -28,7 +30,7 @@ jobs:
     runs-on: ubuntu-24.04
     # 45 minutes on a pull request, so that a run over its budget fails
     # visibly instead of holding the runners; 240 for all critical modules.
-    timeout-minutes: ${{ github.event_name == 'pull_request' && 45 || 240 }}
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -42,7 +44,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          fetch-depth: 2
+          fetch-depth: 0
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
         with:
           toolchain: stable
@@ -50,9 +52,8 @@ jobs:
         with:
           tool: cargo-mutants@27.1.0
           fallback: none
-      - name: Write the diff of the pull request
-        if: github.event_name == 'pull_request'
-        run: git diff HEAD^1 HEAD > "$RUNNER_TEMP/changes.diff"
+      - name: Write the diff of the branch
+        run: git diff 5025cba305b788371057925947d658311ce3662d HEAD > "$RUNNER_TEMP/changes.diff"
       # Three jobs on the four processors of the runner, and round-robin
       # sharding, which spreads the slow files over the shards. The exit
       # code is kept for the report job, which judges it.

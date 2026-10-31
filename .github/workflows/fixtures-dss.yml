@@ -2,7 +2,7 @@ name: Fixture verification with DSS
 
 on:
   push:
-    branches: [main]
+    branches: [main, story/156-rsa-3072-fixtures]
   pull_request:
   # This workflow reports a required check. The merge queue does not merge
   # a group until every required check is reported for it.
@@ -64,3 +64,15 @@ jobs:
           offline target/debug/sigillum-testpki verify --dss --java "$JAVA_HOME/bin/java" \
             --dss-oracle tools/dss-oracle/target/dss-oracle.jar
           offline "$DSS_TESTS"
+      - name: Show the DSS warnings of the RSA signer certificates
+        run: |
+          for name in signer-rsa-2048 signer-rsa-3072 signer-rsa-sha3-256; do
+            out="$RUNNER_TEMP/warn-$name"
+            java -jar tools/dss-oracle/target/dss-oracle.jar validate-certificate \
+              --certificate "testdata/pki/$name.pem" --certificate testdata/pki/ca-rsa.pem \
+              --trust-anchor testdata/pki/root-ca.pem --crl testdata/crl/ca-rsa.crl \
+              --crl testdata/crl/root-ca.crl --ocsp "testdata/ocsp/$name.der" \
+              --validation-time 2030-01-15T10:00:00Z --out "$out"
+            echo "== $name"
+            jq . "$out/summary.json"
+          done
