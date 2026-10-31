@@ -248,20 +248,24 @@ fn subsection_end(start: usize, count: usize) -> Option<usize> {
 
 /// The offset that a cross-reference entry of 20 bytes gives (clause
 /// 7.5.4): ten digits of offset, a space, five digits of generation, a
-/// space and `n`, read as bytes. An entry of type `f`, or of a generation
+/// space and `n`, each field read from its own bytes, so that no character
+/// spans two of them. An entry of type `f`, or of a generation
 /// other than 0, is refused.
 fn entry_offset(entry: &[u8]) -> Result<usize, Unsupported> {
-    let digits = |range: std::ops::Range<usize>| {
-        entry
-            .get(range)
-            .is_some_and(|field| field.iter().all(u8::is_ascii_digit))
+    if entry.len() != 20 {
+        return Err(NOT_READ);
+    }
+    let field = |range: std::ops::Range<usize>| {
+        std::str::from_utf8(&entry[range])
+            .map_err(|_| NOT_READ)
+            .and_then(integer)
     };
-    if entry.len() != 20
-        || !digits(0..10)
-        || entry[10] != b' '
-        || !digits(11..16)
-        || entry[16] != b' '
-    {
+    let offset = field(0..10)?;
+    let generation = field(11..16)?;
+    if entry[10] != b' ' {
+        return Err(NOT_READ);
+    }
+    if entry[16] != b' ' {
         return Err(NOT_READ);
     }
     match entry[17] {
@@ -269,18 +273,10 @@ fn entry_offset(entry: &[u8]) -> Result<usize, Unsupported> {
         b'f' => return Err(Unsupported("the object is not in use")),
         _ => return Err(NOT_READ),
     }
-    if &entry[11..16] != b"00000" {
+    if generation != 0 {
         return Err(Unsupported("the object is not of generation 0"));
     }
-    // Ten ASCII digits, which fit in a usize of 64 bits.
-    entry[..10]
-        .iter()
-        .try_fold(0usize, |value, digit| {
-            value
-                .checked_mul(10)?
-                .checked_add(usize::from(digit - b'0'))
-        })
-        .ok_or(NOT_READ)
+    Ok(offset)
 }
 
 /// The position after the line at `at` of `bytes`, which must be `word`
