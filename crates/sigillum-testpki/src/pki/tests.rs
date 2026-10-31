@@ -1191,26 +1191,22 @@ fn rsa_keys_have_the_sizes_of_their_purpose() -> TestResult {
     Ok(())
 }
 
-/// Issue #156: the purpose and notes of the legacy-key fixture say what it
-/// is, with the clauses of ETSI TS 119 312 V2.1.1 that make its key legacy,
-/// and its predictions are those of a valid certificate.
+/// Issue #156: the certificate of the 2048-bit key refers to the signed
+/// documents of the signer rsa, which are the legacy-key-size case, and
+/// keeps the predictions of a valid certificate.
 #[test]
-fn the_legacy_key_fixture_states_its_purpose() -> TestResult {
+fn the_legacy_key_certificate_refers_to_its_documents() -> TestResult {
     let legacy = spec("signer-rsa-2048")?;
     assert!(
-        legacy.purpose.contains("legacy-key fixture"),
+        legacy.purpose.contains("legacy-key-size documents"),
         "{}",
         legacy.purpose
     );
     let notes = legacy.notes.ok_or("no notes for signer-rsa-2048")?;
-    for wanted in [
-        "legacy-key fixture",
-        "ETSI TS 119 312 V2.1.1",
-        "Table 6",
-        "clause 8.4",
-    ] {
+    for wanted in ["2048 bits", "signer rsa", "PASSED without"] {
         assert!(notes.contains(wanted), "{wanted}: {notes}");
     }
+    assert!(!notes.contains("Table 6"), "{notes}");
     assert_eq!(legacy.expected_openssl, OpensslResult::Verified);
     assert_eq!(
         (

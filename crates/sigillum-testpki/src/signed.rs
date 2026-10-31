@@ -210,6 +210,10 @@ pub const SIGNERS: [Signer; 4] = [
     },
 ];
 
+/// The signer whose 2048-bit key makes its signatures the legacy-key-size
+/// case of the corpus (issue #156).
+const LEGACY_KEY_SIZE_SIGNER: &str = "rsa";
+
 /// The timestamping authority of B-T and B-LT, and its issuing CA.
 const TSA: &str = "tsa";
 const TSA_CA: &str = "ca-ecdsa";
@@ -373,12 +377,17 @@ impl Fixture {
             sha256: sha256_hex(contents),
             kind: Kind::SignedDocument,
             purpose: format!(
-                "{}, at {}, over {}, by {} with {}, created by DSS.",
+                "{}, at {}, over {}, by {} with {}, created by DSS{}.",
                 self.variant.description(),
                 self.level.name(),
                 self.variant.document(),
                 signer,
-                self.signer.description
+                self.signer.description,
+                if self.signer.label == LEGACY_KEY_SIZE_SIGNER {
+                    ": the legacy-key-size case"
+                } else {
+                    ""
+                }
             ),
             // openssl cms -verify checks CMS signatures only (ADR-0014).
             expected_openssl: if self.variant.is_cades() {
@@ -438,6 +447,9 @@ impl Fixture {
         }
         if self.variant == Variant::JadesCompact {
             notes.push_str(" The compact serialisation has no unprotected header for unsigned properties (RFC 7515, section 7.1), so it is created at B-B only.");
+        }
+        if self.signer.label == LEGACY_KEY_SIZE_SIGNER {
+            notes.push_str(" The key of pki/signer-rsa-2048 is 2048 bits, which makes this signature the legacy-key-size case of the corpus. ETSI TS 119 312 V2.1.1, Table 6, rates RSA keys of at least 1900 and fewer than 3000 bits as legacy, with the end date 2026-12-31, and clause 8.4 allows no new certificate with such a key after that date and ends the validity of the certificates issued by then no later than 2028-12-31, so the key is past that end date at the signing and validation times. Under the aligned policy, DSS 6.5.1 gives TOTAL_PASSED with the warning ASCCM_AR_ANS_AKSNR, that the algorithm with this key size is no longer considered reliable for signature creation: it applies the expiry date of its policy for such keys, 2027-01-01, at level WARN only, because the date is after the update date of its policy, 2026-02-01, as the notes of ADR-0023 record. Once the expiry dates of the project's own cryptographic policy are set in phase 2, this difference becomes a class 1 divergence (ADR-0019).");
         }
         if self.signer.label == "ed25519" {
             notes.push_str(" Under its default validation policy, DSS 6.5.1 reports INDETERMINATE with CRYPTO_CONSTRAINTS_FAILURE_NO_POE instead, because that policy does not authorise EdDSA; the aligned policy does.");

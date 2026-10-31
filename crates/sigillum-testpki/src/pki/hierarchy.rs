@@ -339,10 +339,11 @@ pub const CERTIFICATES: [CertSpec; 32] = [
         0x0104,
         "Issuing CA of the Ed25519 family.",
     ),
-    // The only RSA key below 3000 bits: the legacy-key fixture (issue #156).
+    // The only RSA key below 3000 bits, the key of the legacy-key-size
+    // documents of the signed corpus (issue #156).
     CertSpec {
         notes: Some(
-            "The legacy-key fixture, and the only RSA key of the test PKI below 3000 bits. ETSI TS 119 312 V2.1.1, Table 6, rates RSA keys of at least 1900 and fewer than 3000 bits as legacy, with the end date 2026-12-31. Clause 8.4 allows no new certificate with such a key after that date, and ends the validity of the certificates issued by then no later than 2028-12-31. At the validation time the key is past that end date, and this certificate, issued later, does not follow clause 8.4. DSS 6.5.1 applies the expiry date of its policy for such keys, 2027-01-01, at level WARN only, because the date is after the update date of its policy, 2026-02-01, as the notes of ADR-0023 record. It therefore accepts the signatures made with this key, such as signed/cades-enveloping-b-b-rsa, with a warning that the key size is no longer considered reliable for signature creation. The X.509 validation of this certificate checks the signature of its issuer, made with a 3072-bit key, and DSS gives PASSED without that warning.",
+            "Its key is 2048 bits, the only RSA key of the test PKI below 3000 bits. The legacy-key-size case is the signed documents of the signer rsa, signed/*-rsa, made with this key; their notes give the reasoning and the result of DSS. The X.509 validation of this certificate checks the signature of its issuer, made with a 3072-bit key, so DSS 6.5.1 gives PASSED without the warning on the key size that it gives for those documents.",
         ),
         ..signer(
             "signer-rsa-2048",
@@ -351,7 +352,7 @@ pub const CERTIFICATES: [CertSpec; 32] = [
             "ca-rsa",
             Sig::RsaPkcs1Sha256,
             0x1001,
-            "End-entity signing certificate with an RSA 2048-bit key, signed with RSA PKCS#1 v1.5 and SHA-256, and the legacy-key fixture of the test PKI.",
+            "End-entity signing certificate with an RSA 2048-bit key, signed with RSA PKCS#1 v1.5 and SHA-256, the key of the legacy-key-size documents.",
         )
     },
     signer(

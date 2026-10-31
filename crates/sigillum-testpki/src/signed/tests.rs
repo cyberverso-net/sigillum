@@ -484,7 +484,7 @@ fn purposes_describe_each_variant() -> TestResult {
     let cases = [
         (
             "signed/cades-enveloping-b-b-rsa",
-            "CAdES baseline signature, enveloping, at B-B, over documents/text, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS.",
+            "CAdES baseline signature, enveloping, at B-B, over documents/text, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS: the legacy-key-size case.",
         ),
         (
             "signed/cades-detached-b-t-rsa-pss",
@@ -500,11 +500,11 @@ fn purposes_describe_each_variant() -> TestResult {
         ),
         (
             "signed/jades-flattened-b-b-rsa",
-            "JAdES baseline signature in the flattened JWS JSON serialisation, at B-B, over documents/payload, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS.",
+            "JAdES baseline signature in the flattened JWS JSON serialisation, at B-B, over documents/payload, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS: the legacy-key-size case.",
         ),
         (
             "signed/jades-general-b-b-rsa",
-            "JAdES baseline signature in the general JWS JSON serialisation, at B-B, over documents/payload, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS.",
+            "JAdES baseline signature in the general JWS JSON serialisation, at B-B, over documents/payload, by pki/signer-rsa-2048 with RSA PKCS#1 v1.5 and SHA-256, created by DSS: the legacy-key-size case.",
         ),
     ];
     for (id, purpose) in cases {
@@ -716,5 +716,53 @@ fn jades_notes_describe_x5c_at_each_level() -> TestResult {
             );
         }
     }
+    Ok(())
+}
+
+/// Issue #156: the signatures of the signer rsa, made with a 2048-bit key,
+/// are the legacy-key-size case, with the reasoning of ETSI TS 119 312
+/// V2.1.1 and the result of DSS in their notes, and unchanged predictions.
+#[test]
+fn the_rsa_signatures_are_the_legacy_key_size_case() -> TestResult {
+    let mut count = 0;
+    for fixture in plan() {
+        let artefact = fixture.artefact(b"x");
+        let notes = artefact.notes.ok_or("no notes")?;
+        let legacy = fixture.signer.label == "rsa";
+        assert_eq!(
+            artefact.purpose.contains("legacy-key-size case"),
+            legacy,
+            "{}",
+            artefact.id
+        );
+        assert_eq!(notes.contains("Table 6"), legacy, "{}", artefact.id);
+        if legacy {
+            count += 1;
+            for wanted in [
+                "2048 bits",
+                "ETSI TS 119 312 V2.1.1, Table 6",
+                "clause 8.4",
+                "TOTAL_PASSED",
+                "ASCCM_AR_ANS_AKSNR",
+                "level WARN",
+                "ADR-0023",
+                "phase 2",
+                "class 1 divergence (ADR-0019)",
+            ] {
+                assert!(notes.contains(wanted), "{wanted}: {notes}");
+            }
+        }
+        assert_eq!(
+            artefact.expected_dss,
+            DssResult::Indication {
+                indication: Indication::TotalPassed,
+                sub_indication: None,
+            },
+            "{}",
+            artefact.id
+        );
+        assert_eq!(artefact.dss_divergence, None, "{}", artefact.id);
+    }
+    assert_eq!(count, 16);
     Ok(())
 }
