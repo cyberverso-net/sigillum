@@ -98,6 +98,31 @@ fn the_variants_and_their_sources() {
                 PathBuf::from("mutations/jades-duplicate-header-parameter.jws"),
                 "signed/jades-compact-b-b-p256",
             ),
+            (
+                "mutations/pades-incremental-update".to_owned(),
+                PathBuf::from("mutations/pades-incremental-update.pdf"),
+                "signed/pades-b-b-p256",
+            ),
+            (
+                "mutations/pades-shadow-hide".to_owned(),
+                PathBuf::from("mutations/pades-shadow-hide.pdf"),
+                "signed/pades-shadow-hide-b-b-p256",
+            ),
+            (
+                "mutations/pades-shadow-replace".to_owned(),
+                PathBuf::from("mutations/pades-shadow-replace.pdf"),
+                "signed/pades-shadow-replace-b-b-p256",
+            ),
+            (
+                "mutations/pades-shadow-hide-and-replace".to_owned(),
+                PathBuf::from("mutations/pades-shadow-hide-and-replace.pdf"),
+                "signed/pades-shadow-hide-and-replace-b-b-p256",
+            ),
+            (
+                "mutations/pades-partial-byte-range".to_owned(),
+                PathBuf::from("mutations/pades-partial-byte-range.pdf"),
+                "signed/pades-b-b-p256",
+            ),
         ]
     );
 }
@@ -262,6 +287,45 @@ fn a_jws_without_one_integer_iat_in_a_compact_header_is_refused() {
     }
 }
 
+fn passed() -> DssResult {
+    DssResult::Indication {
+        indication: Indication::TotalPassed,
+        sub_indication: None,
+    }
+}
+
+#[test]
+fn the_pades_variants_carry_the_attack_classes_of_the_threat_model() {
+    let classes: Vec<(Mutation, Option<AttackClass>)> =
+        MUTATIONS.iter().map(|m| (*m, m.attack_class())).collect();
+    assert_eq!(
+        classes,
+        [
+            (Mutation::CadesModifiedSignedAttribute, None),
+            (Mutation::CadesModifiedContent, None),
+            (Mutation::JadesTamperedHeader, None),
+            (Mutation::JadesDuplicateHeaderParameter, None),
+            (
+                Mutation::PadesIncrementalUpdate,
+                Some(AttackClass::IncrementalSaving)
+            ),
+            (Mutation::PadesShadowHide, Some(AttackClass::ShadowHide)),
+            (
+                Mutation::PadesShadowReplace,
+                Some(AttackClass::ShadowReplace)
+            ),
+            (
+                Mutation::PadesShadowHideAndReplace,
+                Some(AttackClass::ShadowHideAndReplace)
+            ),
+            (
+                Mutation::PadesPartialByteRange,
+                Some(AttackClass::SignatureWrapping)
+            ),
+        ]
+    );
+}
+
 #[test]
 fn each_variant_records_its_expected_results() -> TestResult {
     let manifest = committed_manifest()?;
@@ -278,7 +342,7 @@ fn each_variant_records_its_expected_results() -> TestResult {
         assert_eq!(entry.sha256, sha256_hex(b"contents"));
         assert_eq!(entry.kind, Kind::SignedDocument);
         assert_eq!(entry.links, source.links);
-        assert_eq!(entry.attack_class, None::<AttackClass>);
+        assert_eq!(entry.attack_class, mutation.attack_class());
         assert!(
             entry.purpose.contains(mutation.source()),
             "{}",
@@ -348,6 +412,50 @@ fn each_variant_records_its_expected_results() -> TestResult {
                     "{notes}"
                 );
                 assert!(notes.contains("rejects them under ADR-0016"), "{notes}");
+            }
+            Mutation::PadesIncrementalUpdate => {
+                // The decision recorded on issue #32: the result of DSS 6.5.1,
+                // with the divergence of sigillum in divergences.md.
+                assert_eq!(entry.expected_openssl, OpensslResult::NotApplicable);
+                assert_eq!(entry.expected_dss, passed());
+                assert_eq!(entry.dss_divergence, None);
+                assert_eq!(entry.attack_class, Some(AttackClass::IncrementalSaving));
+                assert!(notes.contains("DIV-7"), "{notes}");
+                assert!(notes.contains("provisional"), "{notes}");
+                assert!(!notes.contains("is to"), "{notes}");
+                assert!(notes.contains("BBB_FC_DSCNUOM_ANS"), "{notes}");
+                assert!(notes.contains("clause 7.5.6"), "{notes}");
+            }
+            Mutation::PadesShadowHide
+            | Mutation::PadesShadowReplace
+            | Mutation::PadesShadowHideAndReplace => {
+                assert_eq!(entry.expected_openssl, OpensslResult::NotApplicable);
+                assert_eq!(entry.expected_dss, passed());
+                assert_eq!(entry.dss_divergence, None);
+                assert!(notes.contains("clause 7.5.6"), "{notes}");
+                assert!(notes.contains("NDSS 2021"), "{notes}");
+                assert!(notes.contains("BBB_FC_IVDBSFR_ANS"), "{notes}");
+                // The maintainer's decision on issue #112: DIV-7, provisional,
+                // covers the shadow variants too.
+                assert!(notes.contains("DIV-7"), "{notes}");
+                assert!(notes.contains("provisional"), "{notes}");
+            }
+            Mutation::PadesPartialByteRange => {
+                assert_eq!(entry.expected_openssl, OpensslResult::NotApplicable);
+                assert_eq!(entry.expected_dss, failed("FORMAT_FAILURE"));
+                assert_eq!(entry.dss_divergence, None);
+                assert_eq!(entry.attack_class, Some(AttackClass::SignatureWrapping));
+                assert!(notes.contains("clause 6.3"), "{notes}");
+                assert!(notes.contains("ETSI EN 319 142-1 V1.2.1"), "{notes}");
+                assert!(notes.contains("clause 12.8.1"), "{notes}");
+                assert!(notes.contains("BBB_FC_IBRV_ANS"), "{notes}");
+                // The basis of the prediction, and why DSS reports the data
+                // not intact although the bytes covered are those signed.
+                assert!(notes.contains("clause 5.2.2.1, NOTE"), "{notes}");
+                assert!(notes.contains("BBB_CV_IRDOI_ANS"), "{notes}");
+                assert!(notes.contains("empty signed content"), "{notes}");
+                assert!(!notes.contains("still verify"), "{notes}");
+                assert!(notes.contains("the only bytes changed"), "{notes}");
             }
         }
         // The entry is valid in the manifest.
@@ -809,8 +917,14 @@ fn the_limits_are_those_documented() -> TestResult {
     assert_eq!(MAX_SOURCE_LEN, 4_194_304);
     assert_eq!(MAX_JWS_LEN, 1_048_576);
     assert_eq!(MAX_HEADER_LEN, 65_536);
+    assert_eq!(MAX_PDF_LEN, 4_194_304);
     for mutation in MUTATIONS {
-        assert!(source_bytes(mutation)?.len() * 100 < MAX_CMS_LEN.min(MAX_JWS_LEN));
+        let limit = if mutation.path().extension().is_some_and(|e| e == "pdf") {
+            MAX_PDF_LEN
+        } else {
+            MAX_CMS_LEN.min(MAX_JWS_LEN)
+        };
+        assert!(source_bytes(mutation)?.len() * 100 < limit, "{mutation:?}");
     }
     Ok(())
 }

@@ -1322,8 +1322,8 @@ proptest::proptest! {
     }
 }
 
-// The field attack-class, added in format version 3. The PAdES variants
-// that use it come with #112; these tests build their entries.
+// The field attack-class, added in format version 3, which the PAdES
+// variants under mutations/ carry; these tests build their own entries.
 
 /// A signed document `id` at `path`, with the given extra lines.
 fn signed_document(id: &str, path: &str, extra: &str) -> String {

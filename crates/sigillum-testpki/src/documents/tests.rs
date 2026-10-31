@@ -21,7 +21,7 @@ fn position(haystack: &[u8], needle: &[u8]) -> Option<usize> {
 }
 
 #[test]
-fn generates_the_four_base_documents() -> TestResult {
+fn generates_the_seven_base_documents() -> TestResult {
     let files = generate();
     let ids: Vec<&str> = files.iter().map(|f| f.artefact.id.as_str()).collect();
     assert_eq!(
@@ -30,7 +30,10 @@ fn generates_the_four_base_documents() -> TestResult {
             "documents/simple",
             "documents/signature-field",
             "documents/text",
-            "documents/payload"
+            "documents/payload",
+            "documents/shadow-hide",
+            "documents/shadow-replace",
+            "documents/shadow-hide-and-replace"
         ]
     );
     let paths: Vec<String> = files
@@ -43,7 +46,10 @@ fn generates_the_four_base_documents() -> TestResult {
             "documents/simple.pdf",
             "documents/signature-field.pdf",
             "documents/text.txt",
-            "documents/payload.json"
+            "documents/payload.json",
+            "documents/shadow-hide.pdf",
+            "documents/shadow-replace.pdf",
+            "documents/shadow-hide-and-replace.pdf"
         ]
     );
     for file in &files {
@@ -141,19 +147,141 @@ fn the_simple_pdf_has_a_valid_file_structure() -> TestResult {
 #[test]
 fn the_content_stream_length_is_exact() -> TestResult {
     let files = generate();
-    for id in ["documents/simple", "documents/signature-field"] {
+    for id in [
+        "documents/simple",
+        "documents/signature-field",
+        "documents/shadow-hide",
+        "documents/shadow-replace",
+        "documents/shadow-hide-and-replace",
+    ] {
         let pdf = &find(&files, id)?.contents;
         let body = text(pdf);
-        let length_at = body.find("/Length ").ok_or("no /Length")?;
-        let length: usize = body[length_at + 8..]
-            .split(' ')
-            .next()
-            .ok_or("no length")?
-            .parse()?;
-        let stream = position(pdf, b"stream\n").ok_or("no stream")? + 7;
-        // Clause 7.3.8.1: the end-of-line marker before endstream is not counted.
-        assert_eq!(&pdf[stream + length..stream + length + 10], b"\nendstream");
+        let mut streams = 0;
+        let mut from = 0;
+        // Every stream of the file, each after its own /Length.
+        while let Some(found) = body[from..].find("/Length ") {
+            let length_at = from + found;
+            let length: usize = body[length_at + 8..]
+                .split(' ')
+                .next()
+                .ok_or("no length")?
+                .parse()?;
+            let stream =
+                length_at + position(&pdf[length_at..], b"stream\n").ok_or("no stream")? + 7;
+            // Clause 7.3.8.1: the end-of-line marker before endstream is not counted.
+            assert_eq!(
+                &pdf[stream + length..stream + length + 10],
+                b"\nendstream",
+                "{id}"
+            );
+            streams += 1;
+            from = stream + length;
+        }
+        assert!(streams >= 1, "{id}");
     }
+    Ok(())
+}
+
+/// The object `number` of a PDF written by this module, without its
+/// `obj` and `endobj` lines.
+fn object(pdf: &[u8], number: usize) -> Result<String, String> {
+    let body = text(pdf);
+    let start = body
+        .find(&format!("\n{number} 0 obj\n"))
+        .ok_or(format!("no object {number}"))?
+        + format!("\n{number} 0 obj\n").len();
+    let end = start + body[start..].find("\nendobj\n").ok_or("no endobj")?;
+    Ok(body[start..end].to_owned())
+}
+
+/// The content of the stream object `number`.
+fn stream_content(pdf: &[u8], number: usize) -> Result<String, String> {
+    let object = object(pdf, number)?;
+    let start = object.find("\nstream\n").ok_or("no stream")? + 8;
+    let end = object.rfind("\nendstream").ok_or("no endstream")?;
+    Ok(object[start..end].to_owned())
+}
+
+#[test]
+fn the_shadow_hide_document_covers_a_line_with_an_overlay() -> TestResult {
+    let files = generate();
+    let pdf = &find(&files, "documents/shadow-hide")?.contents;
+    check_structure(pdf, 6)?;
+    assert_eq!(object(pdf, 1)?, "<< /Type /Catalog /Pages 2 0 R >>");
+    // The page draws its content and then the overlay, in that order
+    // (ISO 32000-1:2008, clause 7.7.3.3, Table 30, Contents).
+    assert!(object(pdf, 3)?.contains("/Contents [5 0 R 6 0 R]"));
+    let content = stream_content(pdf, 5)?;
+    assert!(content.contains("(sigillum test document)"), "{content}");
+    assert!(
+        content.contains("72 740 Td (shadow content, covered when signed) Tj"),
+        "{content}"
+    );
+    // A white rectangle, filled, over the second line (clauses 8.6.8 and 8.5.3).
+    assert_eq!(stream_content(pdf, 6)?, "1 g 66 734 300 20 re f");
+    assert_eq!(object(pdf, 6)?, overlay_object());
+    Ok(())
+}
+
+#[test]
+fn the_shadow_replace_document_has_a_filled_text_field() -> TestResult {
+    let files = generate();
+    let pdf = &find(&files, "documents/shadow-replace")?.contents;
+    check_structure(pdf, 7)?;
+    let catalog = object(pdf, 1)?;
+    assert!(
+        catalog.contains("/AcroForm << /Fields [6 0 R] /DA (/Helv 12 Tf 0 g) /DR << /Font << /Helv 4 0 R >> >> >>"),
+        "{catalog}"
+    );
+    assert!(object(pdf, 3)?.contains("/Annots [6 0 R]"));
+    // Clause 12.7.4.3: a text field with its value, merged with its widget,
+    // whose normal appearance shows the value.
+    assert_eq!(object(pdf, 6)?, amount_field(AMOUNT_SIGNED, 7));
+    assert!(object(pdf, 6)?.contains("/FT /Tx /T (Amount) /V (100 EUR)"));
+    assert_eq!(object(pdf, 7)?, amount_appearance(AMOUNT_SIGNED));
+    assert_eq!(
+        stream_content(pdf, 7)?,
+        "/Tx BMC BT /Helv 12 Tf 2 6 Td (100 EUR) Tj ET EMC"
+    );
+    assert!(object(pdf, 7)?.starts_with("<< /Type /XObject /Subtype /Form /BBox [0 0 200 20]"));
+    Ok(())
+}
+
+#[test]
+fn the_shadow_hide_and_replace_document_holds_an_unused_page_tree() -> TestResult {
+    let files = generate();
+    let pdf = &find(&files, "documents/shadow-hide-and-replace")?.contents;
+    check_structure(pdf, 8)?;
+    assert_eq!(object(pdf, 1)?, "<< /Type /Catalog /Pages 2 0 R >>");
+    assert_eq!(object(pdf, 6)?, HIDDEN_PAGES);
+    assert!(object(pdf, 7)?.contains("/Parent 6 0 R"));
+    assert!(object(pdf, 7)?.contains("/Contents 8 0 R"));
+    assert!(stream_content(pdf, 8)?.contains("(sigillum shadow document, shown after signing)"));
+    // No object of the document in use refers to the second page tree.
+    for number in 1..=5 {
+        assert!(!object(pdf, number)?.contains("6 0 R"), "{number}");
+        assert!(!object(pdf, number)?.contains("7 0 R"), "{number}");
+    }
+    Ok(())
+}
+
+#[test]
+fn the_shadow_documents_have_their_own_identifiers() -> TestResult {
+    let files = generate();
+    let pdfs: Vec<&GeneratedFile> = files
+        .iter()
+        .filter(|file| file.artefact.path.extension().is_some_and(|e| e == "pdf"))
+        .collect();
+    assert_eq!(pdfs.len(), 5);
+    let mut identifiers: Vec<String> = Vec::new();
+    for file in pdfs {
+        let body = text(&file.contents);
+        let at = body.find("/ID [<").ok_or("no /ID")?;
+        identifiers.push(body[at..at + 75].to_owned());
+    }
+    identifiers.sort();
+    identifiers.dedup();
+    assert_eq!(identifiers.len(), 5);
     Ok(())
 }
 

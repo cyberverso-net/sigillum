@@ -9,6 +9,10 @@
 //! the CRL of the root CA, which it checks at the validation time. No
 //! clock is read, and the signatures are deterministic, so the corpus is
 //! reproduced byte for byte with the same DSS version.
+//!
+//! The plan ends with three PAdES signatures at B-B of the documents that
+//! [`crate::documents`] prepares for the shadow attacks of threat D2, from
+//! which `generate mutations` derives the attack variants (issue #112).
 
 use std::ffi::OsString;
 use std::fmt;
@@ -45,9 +49,17 @@ pub enum Variant {
     JadesFlattened,
     /// JAdES in the general JWS JSON serialisation (RFC 7515, section 7.2.1).
     JadesGeneral,
+    /// PAdES, as [`Variant::Pades`], of the document prepared for a shadow
+    /// attack of the hide class.
+    PadesShadowHide,
+    /// PAdES of the document prepared for a shadow attack of the replace class.
+    PadesShadowReplace,
+    /// PAdES of the document prepared for a shadow attack of the
+    /// hide-and-replace class.
+    PadesShadowHideAndReplace,
 }
 
-/// The variants, in the order of the corpus.
+/// The variants signed at every level by every signer, in the order of the corpus.
 const VARIANTS: [Variant; 6] = [
     Variant::CadesEnveloping,
     Variant::CadesDetached,
@@ -56,6 +68,19 @@ const VARIANTS: [Variant; 6] = [
     Variant::JadesFlattened,
     Variant::JadesGeneral,
 ];
+
+/// The variants of the documents prepared for shadow attacks, signed at
+/// B-B by [`SHADOW_SIGNER`] only, after the others.
+const SHADOW_VARIANTS: [Variant; 3] = [
+    Variant::PadesShadowHide,
+    Variant::PadesShadowReplace,
+    Variant::PadesShadowHideAndReplace,
+];
+
+/// The signer of the documents prepared for shadow attacks,
+/// `pki/signer-p256`: an entry of [`SIGNERS`] by reference, so that it
+/// cannot be missing from the plan.
+const SHADOW_SIGNER: &Signer = &SIGNERS[2];
 
 impl Variant {
     /// The name in identifiers.
@@ -67,6 +92,9 @@ impl Variant {
             Self::JadesCompact => "jades-compact",
             Self::JadesFlattened => "jades-flattened",
             Self::JadesGeneral => "jades-general",
+            Self::PadesShadowHide => "pades-shadow-hide",
+            Self::PadesShadowReplace => "pades-shadow-replace",
+            Self::PadesShadowHideAndReplace => "pades-shadow-hide-and-replace",
         }
     }
 
@@ -74,7 +102,10 @@ impl Variant {
     fn format(self) -> &'static str {
         match self {
             Self::CadesEnveloping | Self::CadesDetached => "cades",
-            Self::Pades => "pades",
+            Self::Pades
+            | Self::PadesShadowHide
+            | Self::PadesShadowReplace
+            | Self::PadesShadowHideAndReplace => "pades",
             Self::JadesCompact | Self::JadesFlattened | Self::JadesGeneral => "jades",
         }
     }
@@ -84,7 +115,10 @@ impl Variant {
         match self {
             Self::CadesEnveloping => "p7m",
             Self::CadesDetached => "p7s",
-            Self::Pades => "pdf",
+            Self::Pades
+            | Self::PadesShadowHide
+            | Self::PadesShadowReplace
+            | Self::PadesShadowHideAndReplace => "pdf",
             Self::JadesCompact => "jws",
             Self::JadesFlattened | Self::JadesGeneral => "json",
         }
@@ -96,6 +130,9 @@ impl Variant {
             Self::CadesEnveloping | Self::CadesDetached => documents::TEXT_ID,
             Self::Pades => documents::SIMPLE_PDF_ID,
             Self::JadesCompact | Self::JadesFlattened | Self::JadesGeneral => documents::JSON_ID,
+            Self::PadesShadowHide => documents::SHADOW_HIDE_PDF_ID,
+            Self::PadesShadowReplace => documents::SHADOW_REPLACE_PDF_ID,
+            Self::PadesShadowHideAndReplace => documents::SHADOW_HIDE_AND_REPLACE_PDF_ID,
         }
     }
 
@@ -110,6 +147,15 @@ impl Variant {
                 "JAdES baseline signature in the flattened JWS JSON serialisation"
             }
             Self::JadesGeneral => "JAdES baseline signature in the general JWS JSON serialisation",
+            Self::PadesShadowHide => {
+                "PAdES baseline signature, invisible, of a document prepared for a shadow attack of the hide class"
+            }
+            Self::PadesShadowReplace => {
+                "PAdES baseline signature, invisible, of a document prepared for a shadow attack of the replace class"
+            }
+            Self::PadesShadowHideAndReplace => {
+                "PAdES baseline signature, invisible, of a document prepared for a shadow attack of the hide-and-replace class"
+            }
         }
     }
 
@@ -118,7 +164,10 @@ impl Variant {
         match self {
             Self::CadesEnveloping => &["--packaging", "enveloping"],
             Self::CadesDetached => &["--packaging", "detached"],
-            Self::Pades => &[],
+            Self::Pades
+            | Self::PadesShadowHide
+            | Self::PadesShadowReplace
+            | Self::PadesShadowHideAndReplace => &[],
             Self::JadesCompact => &["--serialisation", "compact"],
             Self::JadesFlattened => &["--serialisation", "flattened"],
             Self::JadesGeneral => &["--serialisation", "general"],
@@ -127,6 +176,17 @@ impl Variant {
 
     fn is_cades(self) -> bool {
         matches!(self, Self::CadesEnveloping | Self::CadesDetached)
+    }
+
+    /// The variant of `generate mutations` derived from this signature, for
+    /// a document prepared for a shadow attack.
+    fn shadow_mutation(self) -> Option<&'static str> {
+        match self {
+            Self::PadesShadowHide => Some("mutations/pades-shadow-hide"),
+            Self::PadesShadowReplace => Some("mutations/pades-shadow-replace"),
+            Self::PadesShadowHideAndReplace => Some("mutations/pades-shadow-hide-and-replace"),
+            _ => None,
+        }
     }
 
     fn is_jades(self) -> bool {
@@ -232,7 +292,8 @@ pub struct Fixture {
 
 /// The signatures of the corpus: every variant at every level, except the
 /// compact serialisation of JAdES, which is created at B-B only, for every
-/// signer.
+/// signer; then the documents prepared for shadow attacks, at B-B by
+/// `pki/signer-p256`.
 pub fn plan() -> Vec<Fixture> {
     let mut fixtures = Vec::new();
     for variant in VARIANTS {
@@ -250,6 +311,13 @@ pub fn plan() -> Vec<Fixture> {
             }
         }
     }
+    for variant in SHADOW_VARIANTS {
+        fixtures.push(Fixture {
+            variant,
+            level: Level::B,
+            signer: SHADOW_SIGNER,
+        });
+    }
     fixtures
 }
 
@@ -260,6 +328,9 @@ fn path_of(id: &str) -> Result<&'static str, SignedError> {
         documents::TEXT_ID => Ok("documents/text.txt"),
         documents::SIMPLE_PDF_ID => Ok("documents/simple.pdf"),
         documents::JSON_ID => Ok("documents/payload.json"),
+        documents::SHADOW_HIDE_PDF_ID => Ok("documents/shadow-hide.pdf"),
+        documents::SHADOW_REPLACE_PDF_ID => Ok("documents/shadow-replace.pdf"),
+        documents::SHADOW_HIDE_AND_REPLACE_PDF_ID => Ok("documents/shadow-hide-and-replace.pdf"),
         _ => Err(SignedError::NotInManifest(id.to_owned())),
     }
 }
@@ -444,6 +515,11 @@ impl Fixture {
             } else {
                 " x5c holds the signing certificate and the chain up to pki/root-ca."
             });
+        }
+        if let Some(mutation) = self.variant.shadow_mutation() {
+            notes.push_str(&format!(
+                " The document is prepared for a shadow attack; {mutation} adds the later change after signing."
+            ));
         }
         if self.variant == Variant::JadesCompact {
             notes.push_str(" The compact serialisation has no unprotected header for unsigned properties (RFC 7515, section 7.1), so it is created at B-B only.");
@@ -672,6 +748,9 @@ fn required_ids() -> Vec<String> {
         documents::TEXT_ID.to_owned(),
         documents::SIMPLE_PDF_ID.to_owned(),
         documents::JSON_ID.to_owned(),
+        documents::SHADOW_HIDE_PDF_ID.to_owned(),
+        documents::SHADOW_REPLACE_PDF_ID.to_owned(),
+        documents::SHADOW_HIDE_AND_REPLACE_PDF_ID.to_owned(),
     ]);
     ids
 }

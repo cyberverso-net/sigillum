@@ -9,18 +9,30 @@
 //!
 //! The variants of this module are two CAdES signatures, one with a
 //! modified signed attribute and one with modified encapsulated content
-//! and intact signed attributes, and two JAdES signatures in the JWS compact serialisation
+//! and intact signed attributes, two JAdES signatures in the JWS compact serialisation
 //! (RFC 7515, section 7.1): one with a tampered protected header, one with
-//! a protected header parameter given twice. The PAdES variants are added
-//! by #112.
+//! a protected header parameter given twice, and five PAdES documents that
+//! carry the attacks on PDF signatures of threats D1 to D3 of the threat
+//! model, written by [`pades`]: content added in an incremental update
+//! after signing, a shadow attack of each of the classes hide, replace and
+//! hide-and-replace, and a `ByteRange` that does not cover the whole file.
 
 use std::fmt;
 use std::path::{Path, PathBuf};
 
 use base64ct::{Base64UrlUnpadded, Encoding};
 
-use crate::manifest::{Artefact, Divergence, DssResult, Indication, Kind, Manifest, OpensslResult};
+use crate::manifest::{
+    Artefact, AttackClass, Divergence, DssResult, Indication, Kind, Manifest, OpensslResult,
+};
 use crate::pki::{self, GenerateError, GeneratedFile, Summary, sha256_hex};
+
+pub mod pades;
+
+pub use pades::{
+    MAX_PDF_LEN, add_page_content, remove_overlay, replace_field_value, switch_page_tree,
+    wrap_byte_range,
+};
 
 /// The directory of the variants, relative to the manifest.
 pub const DIRECTORY: &str = "mutations";
@@ -37,15 +49,41 @@ pub enum Mutation {
     JadesTamperedHeader,
     /// JAdES with a protected header parameter, `iat`, given twice.
     JadesDuplicateHeaderParameter,
+    /// PAdES with content added to its page in an incremental update after
+    /// signing (threat D1).
+    PadesIncrementalUpdate,
+    /// PAdES of the document prepared for a shadow attack of the hide
+    /// class, with the overlay emptied after signing (threat D2).
+    PadesShadowHide,
+    /// PAdES of the document prepared for a shadow attack of the replace
+    /// class, with the value of its text field replaced after signing
+    /// (threat D2).
+    PadesShadowReplace,
+    /// PAdES of the document prepared for a shadow attack of the
+    /// hide-and-replace class, with the prepared page tree made the page
+    /// tree of the catalog after signing (threat D2).
+    PadesShadowHideAndReplace,
+    /// PAdES whose `ByteRange` skips the live signature dictionary and
+    /// covers a copy of the signed bytes appended to the file (threat D3).
+    PadesPartialByteRange,
 }
 
 /// The variants, in the order of the corpus.
-pub const MUTATIONS: [Mutation; 4] = [
+pub const MUTATIONS: [Mutation; 9] = [
     Mutation::CadesModifiedSignedAttribute,
     Mutation::CadesModifiedContent,
     Mutation::JadesTamperedHeader,
     Mutation::JadesDuplicateHeaderParameter,
+    Mutation::PadesIncrementalUpdate,
+    Mutation::PadesShadowHide,
+    Mutation::PadesShadowReplace,
+    Mutation::PadesShadowHideAndReplace,
+    Mutation::PadesPartialByteRange,
 ];
+
+/// The PAdES signature that the incremental update and the partial
+/// `ByteRange` derive from.
+const PADES_SOURCE: &str = "signed/pades-b-b-p256";
 
 /// The JAdES signature that both JAdES variants derive from.
 const JADES_SOURCE: &str = "signed/jades-compact-b-b-p256";
@@ -58,6 +96,27 @@ impl Mutation {
             Self::CadesModifiedContent => "cades-modified-content",
             Self::JadesTamperedHeader => "jades-tampered-header",
             Self::JadesDuplicateHeaderParameter => "jades-duplicate-header-parameter",
+            Self::PadesIncrementalUpdate => "pades-incremental-update",
+            Self::PadesShadowHide => "pades-shadow-hide",
+            Self::PadesShadowReplace => "pades-shadow-replace",
+            Self::PadesShadowHideAndReplace => "pades-shadow-hide-and-replace",
+            Self::PadesPartialByteRange => "pades-partial-byte-range",
+        }
+    }
+
+    /// The class of attack on PDF signatures that a PAdES variant carries,
+    /// as the threat model lists it.
+    pub fn attack_class(self) -> Option<AttackClass> {
+        match self {
+            Self::CadesModifiedSignedAttribute
+            | Self::CadesModifiedContent
+            | Self::JadesTamperedHeader
+            | Self::JadesDuplicateHeaderParameter => None,
+            Self::PadesIncrementalUpdate => Some(AttackClass::IncrementalSaving),
+            Self::PadesShadowHide => Some(AttackClass::ShadowHide),
+            Self::PadesShadowReplace => Some(AttackClass::ShadowReplace),
+            Self::PadesShadowHideAndReplace => Some(AttackClass::ShadowHideAndReplace),
+            Self::PadesPartialByteRange => Some(AttackClass::SignatureWrapping),
         }
     }
 
@@ -71,6 +130,11 @@ impl Mutation {
         let extension = match self {
             Self::CadesModifiedSignedAttribute | Self::CadesModifiedContent => "p7m",
             Self::JadesTamperedHeader | Self::JadesDuplicateHeaderParameter => "jws",
+            Self::PadesIncrementalUpdate
+            | Self::PadesShadowHide
+            | Self::PadesShadowReplace
+            | Self::PadesShadowHideAndReplace
+            | Self::PadesPartialByteRange => "pdf",
         };
         PathBuf::from(format!("{}.{extension}", self.id()))
     }
@@ -82,6 +146,10 @@ impl Mutation {
                 "signed/cades-enveloping-b-b-p256"
             }
             Self::JadesTamperedHeader | Self::JadesDuplicateHeaderParameter => JADES_SOURCE,
+            Self::PadesIncrementalUpdate | Self::PadesPartialByteRange => PADES_SOURCE,
+            Self::PadesShadowHide => "signed/pades-shadow-hide-b-b-p256",
+            Self::PadesShadowReplace => "signed/pades-shadow-replace-b-b-p256",
+            Self::PadesShadowHideAndReplace => "signed/pades-shadow-hide-and-replace-b-b-p256",
         }
     }
 
@@ -97,6 +165,11 @@ impl Mutation {
             Self::CadesModifiedContent => modify_encapsulated_content(source),
             Self::JadesTamperedHeader => tamper_protected_header(source),
             Self::JadesDuplicateHeaderParameter => duplicate_protected_header_parameter(source),
+            Self::PadesIncrementalUpdate => add_page_content(source),
+            Self::PadesShadowHide => remove_overlay(source),
+            Self::PadesShadowReplace => replace_field_value(source),
+            Self::PadesShadowHideAndReplace => switch_page_tree(source),
+            Self::PadesPartialByteRange => wrap_byte_range(source),
         }
     }
 
@@ -153,6 +226,56 @@ impl Mutation {
                 None,
                 "The protected header holds iat twice, 1892109600 and then 1892196000, and the signature value was not computed again (ADR-0014). RFC 7515, section 4, lets a JWS parser reject duplicate Header Parameter names or keep the lexically last one. DSS 6.5.1 rejects the JWS, so the validate-document mode of tools/dss-oracle gives rejected, and sigillum rejects them under ADR-0016. Because the header changed, the signature value no longer verifies either: a verifier that keeps the last iat fails on the signature, so the fixture alone does not show that a verifier checks for duplicate names.",
             ),
+            Self::PadesIncrementalUpdate => (
+                format!(
+                    "PAdES signature {}, with a content stream added to its page in an incremental update after signing.",
+                    source.id
+                ),
+                OpensslResult::NotApplicable,
+                passed(),
+                None,
+                pades::INCREMENTAL_UPDATE_NOTES,
+            ),
+            Self::PadesShadowHide => (
+                format!(
+                    "PAdES signature {} of a document prepared for a shadow attack of the hide class, with the overlay that covers a line of text emptied in an incremental update after signing.",
+                    source.id
+                ),
+                OpensslResult::NotApplicable,
+                passed(),
+                None,
+                pades::SHADOW_HIDE_NOTES,
+            ),
+            Self::PadesShadowReplace => (
+                format!(
+                    "PAdES signature {} of a document prepared for a shadow attack of the replace class, with the value and appearance of its text field replaced in an incremental update after signing.",
+                    source.id
+                ),
+                OpensslResult::NotApplicable,
+                passed(),
+                None,
+                pades::SHADOW_REPLACE_NOTES,
+            ),
+            Self::PadesShadowHideAndReplace => (
+                format!(
+                    "PAdES signature {} of a document prepared for a shadow attack of the hide-and-replace class, with the prepared page tree made the page tree of the catalog in an incremental update after signing.",
+                    source.id
+                ),
+                OpensslResult::NotApplicable,
+                passed(),
+                None,
+                pades::SHADOW_HIDE_AND_REPLACE_NOTES,
+            ),
+            Self::PadesPartialByteRange => (
+                format!(
+                    "PAdES signature {}, with a ByteRange that skips the signature dictionary and the rest of the signed revision after the Contents string, and covers a copy of the signed bytes appended to the file.",
+                    source.id
+                ),
+                OpensslResult::NotApplicable,
+                failed("FORMAT_FAILURE"),
+                None,
+                pades::PARTIAL_BYTE_RANGE_NOTES,
+            ),
         };
         Artefact {
             id: self.id(),
@@ -165,8 +288,16 @@ impl Mutation {
             links: source.links.clone(),
             notes: Some(notes.to_owned()),
             dss_divergence,
-            attack_class: None,
+            attack_class: self.attack_class(),
         }
+    }
+}
+
+/// TOTAL-PASSED without a sub-indication.
+fn passed() -> DssResult {
+    DssResult::Indication {
+        indication: Indication::TotalPassed,
+        sub_indication: None,
     }
 }
 

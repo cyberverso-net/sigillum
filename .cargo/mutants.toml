@@ -35,6 +35,7 @@ examine_globs = [
     # input, and the OpenSSL and DSS checks of the corpus.
     "crates/sigillum-testpki/src/manifest.rs",
     "crates/sigillum-testpki/src/mutations.rs",
+    "crates/sigillum-testpki/src/mutations/pades.rs",
     "crates/sigillum-testpki/src/signed.rs",
     "crates/sigillum-testpki/src/openssl.rs",
     "crates/sigillum-testpki/src/openssl/process.rs",
