@@ -1158,3 +1158,77 @@ fn the_constructors_give_the_documented_defaults() -> TestResult {
     assert_eq!(built.name, "signer-p256");
     Ok(())
 }
+
+/// Issue #156: the RSA SHA-3 and revocation signers have 3072-bit keys,
+/// which ETSI TS 119 312 V2.1.1, Table 6, still recommends at the
+/// validation time, and `pki/signer-rsa-2048` is the only RSA key below
+/// 3000 bits, the legacy-key fixture.
+#[test]
+fn rsa_keys_have_the_sizes_of_their_purpose() -> TestResult {
+    let expected = [
+        ("signer-rsa-2048", 2048),
+        ("signer-rsa-sha3-256", 3072),
+        ("signer-rsa-revoked", 3072),
+        ("signer-rsa-pss-revoked", 3072),
+    ];
+    for (name, bits) in expected {
+        assert_eq!(spec(name)?.key, KeyType::Rsa(bits), "{name}");
+        let cert = certificate(name)?;
+        let public = rsa::RsaPublicKey::from_public_key_der(
+            &cert.tbs_certificate.subject_public_key_info.to_der()?,
+        )?;
+        let modulus_bits = rsa::traits::PublicKeyParts::n(&public).bits();
+        assert_eq!(modulus_bits, bits, "{name}");
+        let key = KeyPair::derive(spec(name)?.key, name)?;
+        assert_eq!(key.key_type(), KeyType::Rsa(bits), "{name}");
+    }
+    let legacy: Vec<&str> = CERTIFICATES
+        .iter()
+        .filter(|s| matches!(s.key, KeyType::Rsa(bits) if bits < 3000))
+        .map(|s| s.name)
+        .collect();
+    assert_eq!(legacy, ["signer-rsa-2048"]);
+    Ok(())
+}
+
+/// Issue #156: the purpose and notes of the legacy-key fixture say what it
+/// is, with the clauses of ETSI TS 119 312 V2.1.1 that make its key legacy,
+/// and its predictions are those of a valid certificate.
+#[test]
+fn the_legacy_key_fixture_states_its_purpose() -> TestResult {
+    let legacy = spec("signer-rsa-2048")?;
+    assert!(
+        legacy.purpose.contains("legacy-key fixture"),
+        "{}",
+        legacy.purpose
+    );
+    let notes = legacy.notes.ok_or("no notes for signer-rsa-2048")?;
+    for wanted in [
+        "legacy-key fixture",
+        "ETSI TS 119 312 V2.1.1",
+        "Table 6",
+        "clause 8.4",
+    ] {
+        assert!(notes.contains(wanted), "{wanted}: {notes}");
+    }
+    assert_eq!(legacy.expected_openssl, OpensslResult::Verified);
+    assert_eq!(
+        (
+            legacy.expected_dss.indication,
+            legacy.expected_dss.sub_indication
+        ),
+        (Indication::Passed, None)
+    );
+    assert_eq!(legacy.dss_divergence, None);
+    for name in [
+        "signer-rsa-sha3-256",
+        "signer-rsa-revoked",
+        "signer-rsa-pss-revoked",
+    ] {
+        let other = spec(name)?;
+        assert!(!other.purpose.contains("legacy"), "{name}");
+        assert!(!other.purpose.contains("2048"), "{name}");
+        assert_eq!(other.dss_divergence, None, "{name}");
+    }
+    Ok(())
+}

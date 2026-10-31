@@ -1050,7 +1050,7 @@ fn public_keys_are_compared_after_decoding() -> TestResult {
     }
     // A key of the same type and curve as the certificate, but another key.
     for (key_name, certificate_name) in [
-        ("signer-rsa-2048", "signer-rsa-sha3-256"),
+        ("signer-rsa-3072", "signer-rsa-sha3-256"),
         ("signer-p384", "ca-ecdsa"),
         ("signer-p521", "ca-ecdsa-p521"),
         ("signer-ed25519", "ca-ed25519"),

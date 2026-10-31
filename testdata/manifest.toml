@@ -124,10 +124,11 @@ id = "pki/signer-rsa-2048"
 path = "pki/signer-rsa-2048.pem"
 sha256 = "8f4fe8be2b51a719325cc1a56495346dea66d8a3018908f3f15f9be26e6f2f56"
 kind = "certificate"
-purpose = "End-entity signing certificate with an RSA 2048-bit key, signed with RSA PKCS#1 v1.5 and SHA-256."
+purpose = "End-entity signing certificate with an RSA 2048-bit key, signed with RSA PKCS#1 v1.5 and SHA-256, and the legacy-key fixture of the test PKI."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
 links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"], revocation = ["crl/ca-rsa", "ocsp/signer-rsa-2048"] }
+notes = "The legacy-key fixture, and the only RSA key of the test PKI below 3000 bits. ETSI TS 119 312 V2.1.1, Table 6, rates RSA keys of at least 1900 and fewer than 3000 bits as legacy, with the end date 2026-12-31. Clause 8.4 allows no new certificate with such a key after that date, and ends the validity of the certificates issued by then no later than 2028-12-31. At the validation time the key is past that end date, and this certificate, issued later, does not follow clause 8.4. DSS 6.5.1 applies the expiry date of its policy for such keys, 2027-01-01, at level WARN only, because the date is after the update date of its policy, 2026-02-01, as the notes of ADR-0023 record. It therefore accepts the signatures made with this key, such as signed/cades-enveloping-b-b-rsa, with a warning that the key size is no longer considered reliable for signature creation. The X.509 validation of this certificate checks the signature of its issuer, made with a 3072-bit key, and DSS gives PASSED without that warning."
 
 [[artefact]]
 id = "pki/keys/signer-rsa-2048"
@@ -160,9 +161,9 @@ expected-dss = "not-applicable"
 [[artefact]]
 id = "pki/signer-rsa-sha3-256"
 path = "pki/signer-rsa-sha3-256.pem"
-sha256 = "db627a4df436eb53945949ac0daf91fd40f2688e49ba96338d748951dc331b9a"
+sha256 = "987d18b3617f47d8b16fe16cb36b5d11b346a2728f82b4e52763693ffa6866cf"
 kind = "certificate"
-purpose = "End-entity signing certificate with an RSA 2048-bit key, signed with RSA PKCS#1 v1.5 and SHA3-256."
+purpose = "End-entity signing certificate with an RSA 3072-bit key, signed with RSA PKCS#1 v1.5 and SHA3-256."
 expected-openssl = "verified"
 expected-dss = { indication = "PASSED" }
 links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"], revocation = ["crl/ca-rsa", "ocsp/signer-rsa-sha3-256"] }
@@ -170,7 +171,7 @@ links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"], revocati
 [[artefact]]
 id = "pki/keys/signer-rsa-sha3-256"
 path = "pki/keys/signer-rsa-sha3-256.test-key.pem"
-sha256 = "16fbd954d240b8b12cd3498503c7791cb205a1c1baa2357bac2f09f116fe056c"
+sha256 = "2ad0dc6736bf8791161037b5f8252e33634f3598efb86a516e1e563d6b4cdc89"
 kind = "private-key"
 purpose = "PKCS#8 private key of pki/signer-rsa-sha3-256, a test key with no value."
 expected-openssl = "parsed"
@@ -530,7 +531,7 @@ expected-dss = "not-applicable"
 [[artefact]]
 id = "pki/signer-rsa-revoked"
 path = "pki/signer-rsa-revoked.pem"
-sha256 = "e89a73fa94bb68e189f5cd50a683534ccd5a1e9c209a5e65b4ee7c77b3e4c6a3"
+sha256 = "897a33135cbb75f44bdf12fd7232cdd37218b487884bef73f745dfe5375d3039"
 kind = "certificate"
 purpose = "End-entity signing certificate of the RSA PKCS#1 v1.5 family, revoked for key compromise before the planned signing time."
 expected-openssl = "rejected"
@@ -540,7 +541,7 @@ links = { issuer = "pki/ca-rsa", chain = ["pki/ca-rsa", "pki/root-ca"], revocati
 [[artefact]]
 id = "pki/keys/signer-rsa-revoked"
 path = "pki/keys/signer-rsa-revoked.test-key.pem"
-sha256 = "eb37c67cbd0f8083825a658fa7361acf0b7f77e17005c34b54500e8bab5d09fe"
+sha256 = "4367df5e6ea3ecd6e286bfd3712464d04b81c91cbbf9ae4c6e65c3aa88c89830"
 kind = "private-key"
 purpose = "PKCS#8 private key of pki/signer-rsa-revoked, a test key with no value."
 expected-openssl = "parsed"
@@ -549,7 +550,7 @@ expected-dss = "not-applicable"
 [[artefact]]
 id = "pki/signer-rsa-pss-revoked"
 path = "pki/signer-rsa-pss-revoked.pem"
-sha256 = "0033c38af92d0e1e6d7292edc6a0dce6ce2e98a0b80fb3f0f15767218b127b38"
+sha256 = "d056bcc3ff30373639b1587c5e8f3a312096e1e14faf2c7d2e7f4d11c1942de8"
 kind = "certificate"
 purpose = "End-entity signing certificate of the RSASSA-PSS family, revoked for key compromise before the planned signing time."
 expected-openssl = "rejected"
@@ -559,7 +560,7 @@ links = { issuer = "pki/ca-rsa-pss", chain = ["pki/ca-rsa-pss", "pki/root-ca"], 
 [[artefact]]
 id = "pki/keys/signer-rsa-pss-revoked"
 path = "pki/keys/signer-rsa-pss-revoked.test-key.pem"
-sha256 = "74773c487ac461bc60e1b1237669b741e33ff3eb12ac698e7059c7bf060f609e"
+sha256 = "aa6c7b2182ac31e07720369789f10bfa4be201d1afcda8b8a8b31251d7a73173"
 kind = "private-key"
 purpose = "PKCS#8 private key of pki/signer-rsa-pss-revoked, a test key with no value."
 expected-openssl = "parsed"
