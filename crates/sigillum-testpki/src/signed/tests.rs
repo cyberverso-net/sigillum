@@ -643,6 +643,19 @@ fn test_oracle(timeout: Duration) -> Result<JavaOracle, Box<dyn std::error::Erro
     })
 }
 
+/// The launcher runs in the current directory, with the time limit of the
+/// oracle and 1 MiB for each output (issue #164).
+#[test]
+fn the_launcher_is_limited_to_one_mebibyte_of_output() -> TestResult {
+    let java = std::env::current_exe()?;
+    let timeout = Duration::from_secs(7);
+    assert_eq!(
+        test_oracle(timeout)?.program(),
+        Program::new(&java, ".").with_limits(timeout, 1_048_576)
+    );
+    Ok(())
+}
+
 #[test]
 fn a_launcher_that_runs_too_long_is_stopped() -> TestResult {
     let started = std::time::Instant::now();

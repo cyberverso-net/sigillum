@@ -7,7 +7,7 @@ use cms::content_info::{CmsVersion, ContentInfo};
 use cms::signed_data::{SignedData, SignerInfo};
 use const_oid::db::{rfc5911, rfc5912, rfc8410};
 use der::asn1::{GeneralizedTime, ObjectIdentifier, OctetString};
-use der::{Decode, DecodePem, Encode};
+use der::{Decode, Encode};
 use sha2::{Digest, Sha256};
 use signature::Verifier;
 use spki::{DecodePublicKey, SubjectPublicKeyInfoOwned};
@@ -55,8 +55,18 @@ fn tsa() -> Result<Tsa, Box<dyn std::error::Error>> {
     authority("tsa")
 }
 
+/// The certificate with this name in the test PKI. The PEM block is
+/// decoded in full before its content is read as DER, because
+/// `Certificate::from_pem` of `der` 0.7.10 reads the block as it goes and
+/// does not end when a read goes past the end of the block, for example
+/// a block holding only the octet 0x01, a tag with no length (issue #164).
 fn certificate(name: &str) -> Result<Certificate, Box<dyn std::error::Error>> {
-    Ok(Certificate::from_pem(pki_file(&certificate_id(name))?)?)
+    let (label, der) =
+        der::pem::decode_vec(pki_file(&certificate_id(name))?).map_err(der::Error::from)?;
+    if label != "CERTIFICATE" {
+        return Err(format!("a PEM block labelled {label}").into());
+    }
+    Ok(Certificate::from_der(&der)?)
 }
 
 /// A token taken apart.

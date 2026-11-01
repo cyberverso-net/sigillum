@@ -6,7 +6,7 @@ use std::sync::OnceLock;
 
 use const_oid::db::{rfc4519, rfc5280, rfc5912, rfc6960, rfc8410};
 use der::asn1::{ObjectIdentifier, OctetString};
-use der::{Decode, DecodePem, Encode};
+use der::{Decode, Encode};
 use rand_core::RngCore;
 use sha2::{Digest, Sha256, Sha384};
 use signature::Verifier;
@@ -49,9 +49,20 @@ fn file(id: &str) -> Result<&'static GeneratedFile, Box<dyn std::error::Error>> 
 }
 
 pub(super) fn certificate(name: &str) -> Result<Certificate, Box<dyn std::error::Error>> {
-    Ok(Certificate::from_pem(
-        &file(&certificate_id(name))?.contents,
-    )?)
+    decode_certificate(&file(&certificate_id(name))?.contents)
+}
+
+/// Decodes a certificate from PEM. The PEM block is decoded in full
+/// before its content is read as DER, because `Certificate::from_pem` of
+/// `der` 0.7.10 reads the block as it goes and does not end when a read
+/// goes past the end of the block, for example a block holding only the
+/// octet 0x01, a tag with no length (issue #164).
+pub(super) fn decode_certificate(pem: &[u8]) -> Result<Certificate, Box<dyn std::error::Error>> {
+    let (label, der) = der::pem::decode_vec(pem).map_err(der::Error::from)?;
+    if label != "CERTIFICATE" {
+        return Err(format!("a PEM block labelled {label}").into());
+    }
+    Ok(Certificate::from_der(&der)?)
 }
 
 fn spec(name: &str) -> Result<&'static CertSpec, Box<dyn std::error::Error>> {
@@ -129,6 +140,19 @@ pub(super) fn verifies(
             .verify(message, &ed25519_dalek::Signature::from_slice(signature)?)
             .is_ok(),
     })
+}
+
+/// A PEM block whose content is not a certificate is refused at once, so
+/// that a generator that writes such a block makes the tests fail rather
+/// than hang (issue #164). The block holds the single octet 0x01, a tag
+/// with no length.
+#[test]
+fn a_pem_block_that_is_not_a_certificate_is_refused() -> TestResult {
+    let pem = der::pem::encode_string("CERTIFICATE", der::pem::LineEnding::LF, &[1])
+        .map_err(der::Error::from)?;
+    assert!(decode_certificate(pem.as_bytes()).is_err());
+    assert!(decode_certificate(b"no PEM").is_err());
+    Ok(())
 }
 
 #[test]

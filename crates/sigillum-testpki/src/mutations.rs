@@ -606,8 +606,10 @@ impl<'a> CompactJws<'a> {
         let mut found = None;
         let mut depth = 0usize;
         let mut expect_name = false;
-        let mut at = 0;
-        while let Some(&byte) = bytes.get(at) {
+        // Each step takes the next byte, so the scan always ends; a string
+        // is skipped as a whole.
+        let mut positions = bytes.iter().enumerate();
+        while let Some((at, &byte)) = positions.next() {
             match byte {
                 b'"' => {
                     // Valid JSON: every string is closed.
@@ -628,7 +630,9 @@ impl<'a> CompactJws<'a> {
                         }
                         expect_name = false;
                     }
-                    at = end;
+                    // Skip the content of the string and its closing
+                    // quotation mark, at `end`.
+                    positions.nth(length);
                 }
                 // A name follows an opening brace or a comma. Only names
                 // at depth 1 are read; a value at depth 1 always follows
@@ -642,7 +646,6 @@ impl<'a> CompactJws<'a> {
                 b',' => expect_name = true,
                 _ => {}
             }
-            at += 1;
         }
         let after_name = found.ok_or(Unsupported(
             "the protected header has no iat at the top level",

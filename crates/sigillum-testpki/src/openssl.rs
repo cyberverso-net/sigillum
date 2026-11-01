@@ -386,12 +386,24 @@ impl Scratch {
         let nanos = SystemTime::now()
             .duration_since(SystemTime::UNIX_EPOCH)
             .map_or(0, |elapsed| elapsed.subsec_nanos());
-        for _ in 0..100 {
-            let path = base.join(format!(
+        Self::create_first_unused(&base, || {
+            format!(
                 "sigillum-testpki-openssl-{}-{nanos}-{}",
                 std::process::id(),
                 COUNTER.fetch_add(1, Ordering::Relaxed)
-            ));
+            )
+        })
+    }
+
+    /// Creates the directory `base/name` for the first of up to 100 names
+    /// given by `next_name` that is not in use yet. A name in use is
+    /// skipped; any other error ends the search.
+    fn create_first_unused(
+        base: &Path,
+        mut next_name: impl FnMut() -> String,
+    ) -> std::io::Result<Self> {
+        for _ in 0..100 {
+            let path = base.join(next_name());
             match std::fs::create_dir(&path) {
                 Ok(()) => return Ok(Self { path }),
                 Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => {}
