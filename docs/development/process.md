@@ -105,7 +105,7 @@ Dependabot proposes version updates weekly, as configured in `.github/dependabot
 
 | Entry | Groups | Review |
 | --- | --- | --- |
-| `cargo` | `rustcrypto-dalek`, which moves the RustCrypto and dalek crates together within the generation that [ADR-0011](../design/adr/0011-asn1-x509-cms-foundations.md) pins | The normal checks, with `cargo vet` as described in [quality-gates.md](quality-gates.md) |
+| `cargo` | `rustcrypto-dalek`, which moves the RustCrypto and dalek crates together within each generation in use, as [ADR-0011](../design/adr/0011-asn1-x509-cms-foundations.md) and [ADR-0025](../design/adr/0025-build-phase-1-on-der-0-8.md) set. `cms` and `rsa`, pinned to release candidates, are outside the group and arrive in pull requests of their own (ADR-0025, rule 2) | The normal checks, with `cargo vet` as described in [quality-gates.md](quality-gates.md). For `cms` and `rsa`, also the full quality gates and the differential tests, and for `rsa` the patched versions of RUSTSEC-2023-0071 ([ADR-0020](../design/adr/0020-accepted-advisories-der-0-7.md), rule 5) |
 | `maven` | `dss` for the DSS artefacts, and `maven-routine` for the plugins and the other libraries | `dss`: an oracle change, as below. `maven-routine`: the normal checks, and the licence table in [tools/dss-oracle/README.md](../../tools/dss-oracle/README.md) |
 | `github-actions` | None | The normal checks |
 

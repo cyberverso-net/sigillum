@@ -11,5 +11,15 @@ categories.workspace = true
 keywords.workspace = true
 readme = "../../README.md"
 
+# ADR-0025, rule 1: the der 0.8 generation of the RustCrypto crates.
+[dependencies]
+# ADR-0025, rule 2: a release candidate, pinned exactly and updated on its
+# own, with its default features and its `builder` feature off.
+cms = { version = "=0.3.0-rc.0", default-features = false }
+const-oid = "0.10.2"
+der = { version = "0.8.3", features = ["alloc", "derive", "oid"] }
+spki = { version = "0.8.1", features = ["alloc"] }
+x509-cert = { version = "0.3.0", default-features = false }
+
 [lints]
 workspace = true

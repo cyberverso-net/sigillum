@@ -12,10 +12,15 @@ ignore = [
     # which timing attacks do not apply.
     { id = "RUSTSEC-2023-0071", reason = "Marvin attack on RSA private-key operations; accepted under ADR-0020" },
     # crypto-bigint 0.5, used by elliptic-curve 0.13 in the der 0.7
-    # generation of ADR-0011. The advisory reports secret-dependent
-    # branches in operations intended to be constant time; the fix is in
-    # 0.7.6 only.
-    { id = "RUSTSEC-2026-0387", reason = "Timing variability in crypto-bigint 0.5; accepted under ADR-0020" },
+    # generation. The advisory reports secret-dependent branches in
+    # operations intended to be constant time; the fix is in 0.7.6 only.
+    # This entry now covers sigillum-testpki only, which signs with test
+    # keys and stays on the der 0.7 generation (ADR-0025, rule 5). The
+    # library crates are on the der 0.8 generation, with crypto-bigint 0.7.
+    # Ignores apply to the whole workspace, so the CI check
+    # .github/scripts/check-library-graph.sh fails if crypto-bigint 0.5
+    # enters the dependency graph of a library crate.
+    { id = "RUSTSEC-2026-0387", reason = "Timing variability in crypto-bigint 0.5; accepted for sigillum-testpki only, under ADR-0020 and ADR-0025" },
 ]
 
 [licenses]

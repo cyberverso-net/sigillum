@@ -1,0 +1,31 @@
+name: Library dependency graph
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # A required check needs this trigger: the merge queue does not merge a
+  # group until every required check is reported for it.
+  merge_group:
+    types: [checks_requested]
+
+permissions:
+  contents: read
+
+jobs:
+  graph:
+    name: No crypto-bigint 0.5 or der 0.7 in the library
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
+        with:
+          toolchain: stable
+      - name: Test the check
+        run: .github/scripts/test-check-library-graph.sh
+      # ADR-0025: deny.toml accepts RUSTSEC-2026-0387 for sigillum-testpki
+      # only, so crypto-bigint 0.5 must not reach a library crate.
+      - name: Check that no library crate depends on crypto-bigint 0.5 or der 0.7
+        run: .github/scripts/check-library-graph.sh

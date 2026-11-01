@@ -11,5 +11,32 @@ categories.workspace = true
 keywords.workspace = true
 readme = "../../README.md"
 
+# ADR-0025, rule 1: the der 0.8 generation of the RustCrypto crates. Default
+# features that reach `getrandom` are off: the crate does not draw random
+# numbers, and `getrandom` does not build for wasm32-unknown-unknown without
+# a backend chosen by the application.
+[dependencies]
+# aes 0.9.3 needs Rust 1.89, above the minimum supported Rust version.
+aes = "0.9.2"
+aes-gcm = { version = "0.11.1", default-features = false, features = ["aes", "alloc"] }
+cbc = "0.2.1"
+const-oid = "0.10.2"
+der = { version = "0.8.3", features = ["alloc", "derive", "oid"] }
+ed25519-dalek = "3.0.0"
+elliptic-curve = { version = "0.14.3", default-features = false, features = ["arithmetic"] }
+p256 = { version = "0.14.0", default-features = false, features = ["ecdsa"] }
+p384 = { version = "0.14.0", default-features = false, features = ["ecdsa"] }
+p521 = { version = "0.14.0", default-features = false, features = ["ecdsa"] }
+# ADR-0025, rule 2: a release candidate, pinned exactly and updated on its
+# own. ADR-0010: public-key operations only, enforced by clippy.toml.
+rsa = "=0.10.0-rc.19"
+# Lookup identifiers only, as docs/project/scope.md allows.
+sha1 = "0.11.0"
+sha2 = "0.11.1"
+sha3 = "0.12.0"
+signature = "3.0.0"
+spki = { version = "0.8.1", features = ["alloc"] }
+x509-cert = { version = "0.3.0", default-features = false }
+
 [lints]
 workspace = true
