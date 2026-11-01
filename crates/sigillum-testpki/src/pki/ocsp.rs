@@ -32,7 +32,7 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use der::DateTime;
-use der::DecodePem;
+use der::Decode;
 use der::asn1::{GeneralizedTime, OctetString};
 use sha1::{Digest, Sha1};
 use sha2::Sha256;
@@ -636,6 +636,19 @@ fn encoding<E>(_: E) -> PkiError {
     PkiError::Encoding
 }
 
+/// Decodes a certificate of the test PKI from PEM. The PEM block is
+/// decoded in full before its content is read as DER, because
+/// `Certificate::from_pem` of `der` 0.7.10 reads the block as it goes and
+/// does not end when a read goes past the end of the block, for example
+/// a block holding only the octet 0x01, a tag with no length.
+fn certificate_from_pem(pem: &[u8]) -> Result<Certificate, PkiError> {
+    let (label, der) = der::pem::decode_vec(pem).map_err(encoding)?;
+    if label != "CERTIFICATE" {
+        return Err(PkiError::Encoding);
+    }
+    Certificate::from_der(&der).map_err(encoding)
+}
+
 /// Generates every response of [`responses`], in that order, with the
 /// test PKI of `validation_time`, regenerated in memory so that the
 /// responses always match `generate pki`.
@@ -655,7 +668,7 @@ pub fn generate(validation_time: OffsetDateTime) -> Result<Vec<GeneratedFile>, P
         let pem = contents
             .get(certificate_id(name).as_str())
             .ok_or_else(|| unknown(name))?;
-        Certificate::from_pem(pem).map_err(|_| PkiError::Encoding)
+        certificate_from_pem(pem)
     };
     // The keys of the test PKI are derived from their names, as the key
     // files of generate pki are.

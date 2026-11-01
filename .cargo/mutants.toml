@@ -54,3 +54,26 @@ examine_globs = [
     "crates/sigillum-oracle/src/compare.rs",
     "crates/sigillum-oracle/src/validation.rs",
 ]
+
+# Equivalent mutants: each changes the code without changing what it
+# computes, so no test can catch it. docs/development/quality-gates.md,
+# "Mutation testing", gives the rule. Each pattern names the file, the
+# operator and the function, and no line, so that it keeps matching when
+# the file changes, and matches no mutant of the function that is not
+# equivalent. That holds only while the function keeps its operators: the
+# pull request that changes an excluded function checks its exclusion
+# again.
+exclude_re = [
+    # (length << 8) | octet: the low eight bits of length << 8 are zero
+    # and octet is below 256, so | and ^ give the same value (issue #164).
+    '^crates/sigillum-testpki/src/openssl\.rs:\d+:\d+: replace \| with \^ in length_at$',
+    '^crates/sigillum-testpki/src/timestamp/input\.rs:\d+:\d+: replace \| with \^ in check_value$',
+    # (serial[0] & 0x3f) | 0x40: the mask clears bit 6, which 0x40 sets,
+    # so | and ^ give the same octet (issue #164).
+    '^crates/sigillum-testpki/src/timestamp\.rs:\d+:\d+: replace \| with \^ in serial_number$',
+    # KeyCertSign | CRLSign and DigitalSignature | NonRepudiation: each
+    # joins two distinct flags of the key usage bit string (RFC 5280,
+    # section 4.2.1.3), whose bits differ, so | and ^ give the same set
+    # (issue #164).
+    '^crates/sigillum-testpki/src/pki/issue\.rs:\d+:\d+: replace \| with \^ in extensions$',
+]

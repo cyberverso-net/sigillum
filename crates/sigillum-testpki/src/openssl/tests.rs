@@ -1782,6 +1782,62 @@ fn a_scratch_directory_is_removed_when_dropped() -> TestResult {
     Ok(())
 }
 
+/// A name already in use is skipped for the next one (issue #164).
+#[test]
+fn a_scratch_directory_skips_a_name_in_use() -> TestResult {
+    let base = base("in-use")?;
+    std::fs::create_dir(base.0.join("taken"))?;
+    let mut names = ["taken", "free"].into_iter();
+    let scratch =
+        Scratch::create_first_unused(&base.0, || names.next().unwrap_or("exhausted").to_owned())?;
+    assert_eq!(scratch.path(), base.0.join("free"));
+    assert!(scratch.path().is_dir());
+    Ok(())
+}
+
+/// When every name is in use, the search ends after 100 names.
+#[test]
+fn a_scratch_directory_needs_an_unused_name() -> TestResult {
+    let base = base("all-in-use")?;
+    std::fs::create_dir(base.0.join("taken"))?;
+    let mut calls = 0;
+    let result = Scratch::create_first_unused(&base.0, || {
+        calls += 1;
+        "taken".to_owned()
+    });
+    assert_eq!(
+        result.map_err(|error| error.kind()).err(),
+        Some(std::io::ErrorKind::AlreadyExists)
+    );
+    assert_eq!(calls, 100);
+    Ok(())
+}
+
+/// An error other than a name in use, here a base that does not exist,
+/// ends the search at once and is returned unchanged (issue #164).
+#[test]
+fn a_scratch_directory_reports_other_errors_at_once() -> TestResult {
+    let base = base("missing")?;
+    let missing = base.0.join("does-not-exist");
+    let mut calls = 0;
+    let result = Scratch::create_first_unused(&missing, || {
+        calls += 1;
+        format!("name-{calls}")
+    });
+    assert_eq!(
+        result.map_err(|error| error.kind()).err(),
+        Some(std::io::ErrorKind::NotFound)
+    );
+    assert_eq!(calls, 1);
+    assert_eq!(
+        Scratch::create_in(&missing)
+            .map_err(|error| error.kind())
+            .err(),
+        Some(std::io::ErrorKind::NotFound)
+    );
+    Ok(())
+}
+
 /// Bundles are named by bare file names, without the path of the scratch
 /// directory, so that a path with commas or white space cannot be split
 /// by `openssl ts -untrusted`.

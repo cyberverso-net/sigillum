@@ -7,7 +7,7 @@ use std::sync::OnceLock;
 
 use const_oid::db::{rfc5280, rfc5912, rfc6960};
 use der::asn1::OctetString;
-use der::{Decode, DecodePem, Encode};
+use der::{Decode, Encode};
 use proptest::prelude::*;
 use sha1::{Digest, Sha1};
 use time::OffsetDateTime;
@@ -19,7 +19,7 @@ use x509_ocsp::{BasicOcspResponse, CertStatus, OcspResponse, OcspResponseStatus,
 
 use super::super::hierarchy::{self, CERTIFICATES};
 use super::super::keys::{KeyPair, KeyType, SignatureAlgorithm};
-use super::super::tests::{TestResult, VALIDATION_TIME, certificate, verifies};
+use super::super::tests::{TestResult, VALIDATION_TIME, certificate, decode_certificate, verifies};
 use super::super::{certificate_id, crl, key_id, sha256_hex};
 use super::*;
 use crate::manifest::{Indication, Kind, Links};
@@ -681,6 +681,41 @@ fn every_response_is_produced_within_the_validity_of_its_signer() -> TestResult 
     Ok(())
 }
 
+/// The generator reads the certificates of the test PKI from their PEM
+/// files. A block whose content is not a certificate, here the single
+/// octet 0x01, a tag with no length, is an encoding error at once, not a
+/// read that never ends (issue #164).
+#[test]
+fn a_pem_block_that_is_not_a_certificate_is_an_encoding_error() -> TestResult {
+    let pem = der::pem::encode_string("CERTIFICATE", der::pem::LineEnding::LF, &[1])
+        .map_err(der::Error::from)?;
+    assert_eq!(
+        certificate_from_pem(pem.as_bytes()).err(),
+        Some(PkiError::Encoding)
+    );
+    assert_eq!(
+        certificate_from_pem(b"no PEM").err(),
+        Some(PkiError::Encoding)
+    );
+    let responder = super::super::tests::generated()?
+        .iter()
+        .find(|f| f.artefact.id == certificate_id(RESPONDER))
+        .ok_or("no responder")?;
+    assert_eq!(
+        certificate_from_pem(&responder.contents)?,
+        decode_certificate(&responder.contents)?
+    );
+    // A valid certificate under another label is refused too.
+    let (_, der) = der::pem::decode_vec(&responder.contents).map_err(der::Error::from)?;
+    let relabelled = der::pem::encode_string("PUBLIC KEY", der::pem::LineEnding::LF, &der)
+        .map_err(der::Error::from)?;
+    assert_eq!(
+        certificate_from_pem(relabelled.as_bytes()).err(),
+        Some(PkiError::Encoding)
+    );
+    Ok(())
+}
+
 #[test]
 fn generation_is_reproducible() -> TestResult {
     assert_eq!(generate(VALIDATION_TIME)?.as_slice(), files()?);
@@ -939,7 +974,7 @@ fn the_responder_certificate_is_embedded_unchanged() -> TestResult {
         .find(|f| f.artefact.id == certificate_id(RESPONDER))
         .ok_or("no responder")?
         .contents;
-    let responder = Certificate::from_pem(pem)?;
+    let responder = decode_certificate(pem)?;
     let basic = basic(&file("signer-p256")?.contents)?;
     assert_eq!(basic.certs.unwrap_or_default(), vec![responder]);
     Ok(())
