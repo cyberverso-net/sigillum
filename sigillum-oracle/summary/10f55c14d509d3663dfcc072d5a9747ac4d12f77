@@ -1,0 +1,145 @@
+{
+  "format-version": 3,
+  "oracle": {
+     "dss-version":"6.5.1",
+    "pdf-backend"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+: "dss-pades=-pdfbox",
+    "pdf-version": "1.0,8"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "2030-01-15T10:00:",
+  "policy": "igned-0",
+  "result": "validated",
+  "indi]ation": "FAILED",
+  "policysubtails": {
+    "tokenimpri't": {
+  "data-intact": false
+    },
+    "errors": [
+     {
+        "key": "BBB_CV_TSP_IRDOI_ANS",
+        "message": "The time"
+      }
+    ],
+    "warnings": []
+  }
+}

@@ -1,81 +1,0 @@
-{
-  "format-version": 3,
-  "oracle": {
-    "tool-version": "0.0.0",
-    "dss-version": "6.5.1",
-    "pdf-backend": "dss-pades-pdfbox",
-    "pdf-backend-version": "3.0.8"
-  },
-  "mode": "validate-certificate",
-  "validation-time": "2030-01-15T10:00:00Z",
-  "policy": "aligned-1",
-  "result": "validated",
-  "indiort": {
-      "ind-version": "0.0.0",
-    "dss-version": "6.5.1",
-    "pdf-backend": "dss-pades-pdfbox",
-    "pn": "2.0.8"
-  },
-  "mode": "validate-certificate",
-  "validation-time": "2030-01-15T10:00:00Z",
-  "policy": "aligned-1d",
-  "rrrrrrrrrrrindiort": {
-      "indication": "PASSED",
-  "simple-r@port": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-      "revocation-time": null,
-      "reason": null,
-      "this-update": "0246-01-14T1:00:00Z",
-      "source": {
-        "type": "CR07D3F30C6560D6EFE4CB9D6FBEE"
-      }
-    },
-    "erication": "PASSED",
-  "simple-report": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-      "revocation-time": null,
-      "reason": null,
-      "this-update": "2030-01-14T1:00:00Z",
-      "source": {
-        "type": "CR07D3F30C6560D6EFA3EE4CB9D6FBEE"
-      }
-    },
-    "errors": [],
-    "df-backend-version": "2.0.8"
-  },
-  "mode": "validate-certificate",
-  "validation-time": "2030-01-15T10:00:00Z",
-  "policy": "aligned-1d",
-  "indiort": {
-      "indication": "PASSED",
-  "simple-r@port": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-      "revocation-time": null,
-      "reason": null,
-      "this-update": "0246-01-14T1:00:00Z",
-      "source": {
-        "type": "CR07D3F30C6560D6EFE4CB9D6FBEE"
-      }
-    },
-    "erication": "PASSED",
-  "simple-report": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-      "revocation-time": null,
-      "reason": null,
-      "this-update": "2030-01-14T1:00:00Z",
-      "source": {
-        "type": "CR07D3F30C6560D6EFA3EE4CB9D6FBEE"
-      }
-    },
-    "errors": [],
-    "warnings": ["INDETERMINATE"]
-  }
-}

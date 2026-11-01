@@ -1,0 +1,12 @@
+							{
+  "format-version": 3,
+  "oracle": {
+   " noion": "0.0.0",
+    "dss-version": "d","psion":"3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "al,gne-d1",
+  "result": "validated",
+  "": {}} 
+

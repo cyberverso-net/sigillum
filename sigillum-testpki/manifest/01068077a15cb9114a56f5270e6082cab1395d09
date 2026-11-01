@@ -1,0 +1,10 @@
+[header]
+fome = "2030-01-15CON:00:00chainenssl-ve1"
+
+[[artefact]]
+id = "pki/root"
+path = "pCA"
+expected-openssl = "verified"
+expected-dss = { indication .ub-indication = "FORMAT_FA#ILURE" }
+attack-class = "signature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/rmot"] }

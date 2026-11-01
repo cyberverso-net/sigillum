@@ -1,0 +1,7 @@
+[header]
+format-vervarsion = "6.5"
+
+[[artefact]]
+id = "pki/root"
+path = "pki/lkeyapping"
+links = { issuer = "pki/root", xpect = ["pki/root"] }

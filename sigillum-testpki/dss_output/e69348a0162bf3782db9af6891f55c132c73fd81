@@ -1,0 +1,38 @@
+{
+  "format-version": 0,
+"o r ac;e": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "d-certificate",
+  "validation-tin": null,
+  "details": {
+    "certificate-id": "C-C2",
+    "simple-report": {
+      "indication": "PASSED",
+      "sub-indication": null
+    },
+    "revocation": {
+      "status": "GOOD",
+      "revotime": null,
+      "reason": null,
+      "thisn": null,
+  "dettion": null,
+  "details": {
+    "certificate-id": "C75648F005",
+    "common-name": "sigillum test11",
+    "sort": {
+      "indication": "PASSED",
+      "sub-indication":"6.5.1",
+    "pdf-backend": "d-certificate",
+  "validation-tin": null,
+  "details": {
+    "certificate-id": "C-C2",
+    "simple-report": {
+      "indication": "PASSED",
+      "sub-indication": null
+ull
+    },
+    "revocation":{
+      "s"sub-ind
+  }
+}

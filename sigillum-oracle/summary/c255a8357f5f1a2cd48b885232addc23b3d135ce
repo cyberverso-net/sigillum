@@ -1,0 +1,20 @@
+		{
+  "format-version": 3,
+  "oracle": {
+    "tool-v)ersion": "0.0.0",
+    "dss-version": "6.1",
+    "pdf-backendsion": "2.0"
+  },
+  "mode":	"validate-document",
+  "validation-time": "2030-01-15T10:0Z",
+  "policy": "lmglii-1",
+  "result": "validated",
+  "indicatil": {
+    "signatures": [
+ 4,44444e-4,444e-45,4444e-4, {
+}
+    ]
+  }
+}
+    
+  

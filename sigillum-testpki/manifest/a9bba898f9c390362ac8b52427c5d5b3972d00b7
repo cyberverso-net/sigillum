@@ -1,0 +1,12 @@
+[header]
+format-versio-version = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "pki/root.peef"
+kind = "certificate"
+purpose = "Ed"
+expected-dss = { indication = "INDETERMINATE", sub-indication .PDF= "OUT_OF_BOUNDS_NO_POE" }
+dss-divergence = { entry = "DIV-5", indication = "INDETERMINATE", sub-indication = "REVOKED" }
+links = { issuer = "pki/root", chain = ["pki/root"] }
+notes = { issuer = "pki/root", xpect = ["pki/root"] }

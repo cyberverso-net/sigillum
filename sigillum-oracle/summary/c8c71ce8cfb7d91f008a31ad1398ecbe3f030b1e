@@ -1,0 +1,33 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "toosub-indication": null,
+  "details": {
+    "certification-time": "2030-01-1?T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "indication": "PASSED",
+  "sub-indication": null,
+  "details": {
+    "c%ertificate-id": "C-CDEC301CA6BB8B838088E50C849A5F78C2F21DFB15DCDD2696C2DA175647F005",
+    "common-name": "sigillum test signer P-256",
+    "simple-repon": null
+    },
+    "revocation": {
+      "status": "GOOD",
+      "revocat": null,
+      "reason": null,
+      "thie-id": "C-CDEC190CA6BB8B676176E50C849A5F78C2FP-256",
+    "sle-report": {
+      "indication": "PASSED",
+      "sub-indication": null
+    },
+    "revocation": {
+      "status": "GOOD",
+      "revocation-time": null,
+      "reason": null,
+         "te"cation-id": "R-3869357696D7726F4CB411721BF907D3F30C6560D6EFA3E"
+      }
+    },
+    "errors": [],
+    "warnin[s": [ficate",

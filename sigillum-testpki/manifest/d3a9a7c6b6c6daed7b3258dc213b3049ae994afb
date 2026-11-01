@@ -1,0 +1,15 @@
+[header]
+format-version = 3
+validatio = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pki/leity"
+expected-openssl = "pa=sed"
+expectedks = { issuer = "pkroot", cin = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-key"
+patk-class = "signature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

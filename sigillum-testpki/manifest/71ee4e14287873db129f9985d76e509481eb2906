@@ -1,0 +1,15 @@
+[header]
+forpenssl-version = "3.0.13"
+dss-version = "6.5.1"
+
+[[artefact]]
+id = "pootcdef0061728395asha256123456789abcdef0123456789abcdef"
+kind = "certificateed"
+
+[[artefact]]
+id = "pki/leaf-key"
+pXth =  "00112233445566778899aa78899aabbcsignent"
+expected-openssl = "not-applicable"
+expected-dss = { indation = "TOTAL-FAILED", sub-indicatioj = "FORMAT_FAILURE" }
+atkl-atcacss = "signature-w0apping"
+links = { issuer = "[ki/root", chain = ["pki/roov"] }

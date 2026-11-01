@@ -1,0 +1,15 @@
+{
+  "format-version": 3,
+  "oracle": {" ooon": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "djsox",
+   "pion": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "10",
+  "policy": "aligned-1",
+  "result": "resource-limit",
+  "limit": 
+
+"tivalidati00 seconds."
+}

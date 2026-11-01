@@ -1,0 +1,10 @@
+[header]
+forted-s = "seed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "pki/keyest-key.pem"
+sha256 = "f543210"
+kind = "private-key"
+purpose = "Kng"
+links = { issuer = "pki/root", chain = ["pki/root"] }

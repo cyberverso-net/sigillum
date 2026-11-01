@@ -1,0 +1,13 @@
+[header]
+format-version = 3
+va = "3.0.13"
+dss-version = "5.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "p.pem"
+sha256 = "0ed"
+
+[[artefact]]
+id = "able"
+expected-dss = { catin = ["pki/root"] }

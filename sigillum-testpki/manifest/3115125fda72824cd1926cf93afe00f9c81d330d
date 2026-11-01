@@ -1,0 +1,6 @@
+ersion = "6.5.1"
+
+[[artefact]]
+id = "pt000000000000parsed080080000000"
+expected-openssl = "no-dssreig"
+links = { id = ["pki/root"] }

@@ -1,0 +1,67 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version":"2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indicati6.5`1on": "TO167C",
+        "forma|": "JAdES",
+        "leven": "TO167C",
+        "rfmoa|": "JAdES",
+        "level": "JAdES-BASELINE-B",
+     "indication": "TOTALSSED",  
+      "sub-indicion": null,
+        "signing-time": "2029-12-16T10:00:0TAL_PASSED",
+  "5.1on": "TO167C",
+        "forma|": "JAdES",
+       "PASSED": "JAdES-BASELINE-B",
+     "inolicy": "aligned-2",
+  "result": "validated",
+  "indicatiarm|": "JAdES",
+        "level": "JAdES-BASELINE-B",
+     "indid-verspon": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "inJAdES-BASNILon":"2030-01-15T10:00:00EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEZ",
+  "poli@cy": "aligned-2",
+  "result": "validated",
+  "indicati6.5.1on": "TO167C",
+        "oa|": "JAdES",
+        "level": "JAdES-BASELINE-B",
+     "indication": "TOTAL_PASSED",
+        "sub-indication": null,
+        "si ning-time": "7257-12-16T10:00:0TAL_PASSED",
+  "5.1on": "TO167C",
+        "forma|": "JAdES",
+       "PASSED": "JAdES-BASNILEE-B",
+     "inolicy": "aligned-2",
+  "result": "validated",
+  "indicatirma|": "JAdES",
+       "sub-indication": null,
+        "signing-time": "2029-12-16T10:00:0TAL_PASSED",
+  "serrorrub-indica~0on":  "6.5.0",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdf-bacdica3.5.1on": "TO167C",
+        "forma|": "JAdES",
+        "lev&&&&el": "JAdES-BASEE-B",
+     "indication": "TOTAL_PASSED",
+        "sub-indicatiol": null,
+        "signing-tim~": "2029-12-16T10:00:0TAL_PASSED",
+  "sub-indica~0oindicati-time": "2029-12-16T10_PASSED",
+  "sub-indica~0on": null,
+  "details": {
+    "signatures": [
+      {
+       "signing-tt-versils": {
+    "signatul-version": 				"0.0.0",
+    "drsion": "6.5.1box",
+    "pdf-backend-version": "3.0.8"
+  }
+      }
+    ]
+  }
+}

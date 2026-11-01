@@ -1,0 +1,14 @@
+{
+  "format-version": 3,
+  "oracle": {		   "dss-version": "6.5.1",
+    "pdf-backion": "2.0,8"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "indiael-gn",
+  "result": "validated",
+  "indicatioj": "FAILED",
+  "p": {
+    "t": []
+ }
+}

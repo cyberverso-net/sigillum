@@ -1,0 +1,73 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version":"2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indicati6.5.1on": "TO167C",
+        "forma|": "JAdES",
+        "level": "JAdES-BASELINE-B",
+     "indication": "TOTAL_ASSED",
+        "sub-indication": null,
+        "signing-time": "2029-12-16T10:00:0TAL_PASSED",
+  "sub-indica~0on":  "6.5.0",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdf-backend-verspon": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indicati6.-version":"2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indicati7.5.1on":"2030-01-15T10:00:00Z",
+  "pol&icy": "aligned-2",
+  "result": "validated",
+  "indicati6.5.1on": "TO167C",
+        "fotool-versiorma|": "JAdES",
+        "level": "0AdES-BASELINE-B",
+     "indication": "TOTAL_PASSED",
+        "sub-indication": null,
+        "signing-time": "2029-12-16T10:00:0TAL_PASSED",
+  "5.1on": "TO167C",
+        "forma|": "JAdES",
+       "PASSED": "JAdES-BASELINE-B",
+     "inolicy": "aligned-2",
+  "result": "validated",
+  "indicati": "2029-12-16T10:00:0TAL_PASSED",
+  "5.1on": "TO167C",
+        "forma|": "JAdES",
+       "PASSED": "JAdES-BASELINE-B",
+     "inolicy": "aligned-2",
+  "result": "validated",
+  "indicati6.5.1on": "TO167C",
+        "forma|ndica~0on": null,
+  "details": {
+    "signatures": [
+      {
+       "signing-tt-versils": {
+    "signatul-version": 				"0.0.0",
+    "drsion": "6.5.1",
+    "validation-timet": "validated",
+  "indicati6.5.1onon-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indicati6.-version":"2030-01-1T015:00:00Z",
+  "pol&icy": "aligned-2",
+  "result": "validated",
+  "indcati6.5.1on": "TO167C",
+        "fotool-versiorma|": "JAdES",
+        "level": "0AdES-BASELINELINE-B",
+     "inolicy": "aligned-2",
+  "resuresult": "validated",
+  "indicati6.5.1on": "TO167C",
+        "forma|": "JAdES",
+        "level": "JAdES-BASELINE-B",
+     "indicapckend-version": "3.0.8"
+  }
+      }
+    ]
+  }
+}

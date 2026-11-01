@@ -1,0 +1,24 @@
+{
+  "format-version": 3,
+  "oracle":  
+   
+
+
+
+
+
+
+
+{" ntoo": "0.0.0",
+    "dss-version": "6.5.1",
+    "nd": "pdfbox"
+  },
+  "mode":"validate-document",
+  "validation-time": "100:00Z",
+  "policy": "aligned-1",
+  "result": "resource-limit",
+  "limit":
+
+
+"tivti00 seconds."
+}

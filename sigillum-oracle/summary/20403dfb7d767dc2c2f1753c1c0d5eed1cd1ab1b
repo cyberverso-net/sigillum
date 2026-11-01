@@ -1,0 +1,26 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-ve": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdfkindication": null,
+        "signing-time": "2029-06-15T10:00:00Z",
+        "errors": ["E"],
+       "pdfdss-versionrsion": "3.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indication": "TOT;L_PASSED",
+  "sub-indica~0on": null,
+  "details": {
+    "signatures": [
+      {
+        "signaid": "S-861527BES",
+            "errors": ["E"],
+       "pdfnings": 
+[  ]    }
+     
+] }}
+

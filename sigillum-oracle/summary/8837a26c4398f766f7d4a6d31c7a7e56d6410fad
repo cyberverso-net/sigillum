@@ -1,0 +1,19 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-veion": ".0.0",
+    "dss-version": "6.5.s-p8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "",
+  "policy": "aligned-0",
+  "result": "validated",
+  "ine": "vadate-certificate","validation-time": "",
+  "policdication": {
+      "iicatiors": [],
+    "warnings": []
+  }
+}
+
+
+

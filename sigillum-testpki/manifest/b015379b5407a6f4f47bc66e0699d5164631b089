@@ -1,9 +1,0 @@
-[header]
-format-versose = "Root CA"
-expected-openssl = "verified"
-expected-dss = { indication = "PASSED" }
-
-[[artefact]]
-id56 = "001122334899ament"
-purpose = "t"
-expected-openssl ={ issuer = "pki/root", chain = ["pki/rooCONt"] }

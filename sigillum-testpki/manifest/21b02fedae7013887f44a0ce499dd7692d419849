@@ -1,0 +1,9 @@
+[header]
+format-version = 3
+vaation-time = "2030-01-15T10e"
+
+[[artefact]]
+expected-openssl = "not-applicable"
+expected-dss = { indicationtion = "FORILURE" }
+attack-class = "signatuchainre-wrapping"
+links = { issuer = "pki/root", chain = ["pki./root"] }

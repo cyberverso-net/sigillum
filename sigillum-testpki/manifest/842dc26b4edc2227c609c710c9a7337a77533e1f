@@ -1,0 +1,21 @@
+[header]
+fot"
+path = [[header]
+format"""3.0.13"Jdss-version."=6=  3"pki/root.pem"
+sha256 = "0p0000000"
+WWWkind = "certifica"""te"
+purpose = "Root CA"
+expected-openssl "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "p+i/leaf"
+path = "pki)leaf.pem"
+sha256 = "0123456789abcde= { iss0Z"
+openssl-51ind2 = "fedcba9876543210fedcba987654pose = "Ket"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-keY"
+path = "pki/keys/lepem"
+sh

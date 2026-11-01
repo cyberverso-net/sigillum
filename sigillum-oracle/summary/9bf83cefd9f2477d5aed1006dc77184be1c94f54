@@ -1,0 +1,24 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0..0",
+    "dss-version": "6box",
+    "pdf-backend-versioH": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2000Z",
+  "policy": "aligned-2",
+  "result": "validated",
+
+  "details": {
+    "signatures": [
+      {
+        "signature-id": "S-907871B5F5205053C59",
+        "format": "JAdES",
+        "level": 		"JAdES-BA",
+        "errors": [],
+     "   warnings": []
+      }
+    ]
+  }
+}

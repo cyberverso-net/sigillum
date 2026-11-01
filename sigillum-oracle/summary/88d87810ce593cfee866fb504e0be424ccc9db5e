@@ -1,0 +1,12 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-Version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades-0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2000:00Z",
+  "policy": "aligned-1",
+  "result": "resourseconds."
+}

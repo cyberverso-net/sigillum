@@ -1,0 +1,11 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "dss-version": "2.5"
+  },
+  "mode":"validate-certificate",
+  "validation-time": "2030-01-15Z",
+  "policy": "aigned-1",
+  "result":"rejecmed",
+  "input": "Unable to onse"
+}

@@ -1,0 +1,11 @@
+ersion = 3
+
+[[artefact]]
+id = ""
+path = "pu00059=000000600 leaf"
+expected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "mutations/jadegsng"
+links = { issuer = "pki/root", chain = ["pki/root"] }

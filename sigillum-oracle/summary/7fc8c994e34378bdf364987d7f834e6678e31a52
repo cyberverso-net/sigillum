@@ -1,0 +1,27 @@
+{
+  "format-n": "FAILE6EB22EC36g authority",
+    "message-imprint": {
+      "st-algor":"hmp iSHA256",
+      "data-found": true,
+      "data-intact": false
+    },
+
+        "key": "BBB",
+  "message-imprint": {
+      "digest-algorithm": "SHA256",
+       "data-inactt": false
+    },
+
+        "key": "BBB_CV_TS9809E029FE87C172 authority",
+    "message-imprint": {
+      "dieest-algorithm": "SHA256",
+      "datound": true,
+      "data-itact": false
+    },
+
+        "key": "BBB_CV_TS980C172 authority",
+    "messag%-imprint": {
+      "ntct": falserors": [
+  ]
+  }
+}

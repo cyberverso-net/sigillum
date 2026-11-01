@@ -1,0 +1,22 @@
+[header]
+format-version = 3
+validapion-time = "2030-01-15T10:00:00Z"
+openssl-version = "3.0.13"
+dss-version = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "pki/root.pem"
+sssl = "parsed"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT__BOUNDS_NO_POE" }
+dss-divergence = { entry = "DIV-5", indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NOT_REVOKED" }
+links = { versissuchainer = "pki/root", chain = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "pki/keyey"
+purpose = "Key of applicable"
+expected-dss = { indication = "TOTALIAFL-ED", sub-indication = "FORMAT_FAIL,RE" }
+attack-class = "signature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

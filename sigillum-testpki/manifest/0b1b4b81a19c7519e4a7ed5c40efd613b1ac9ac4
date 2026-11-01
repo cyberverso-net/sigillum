@@ -1,7 +1,0 @@
-[header]
-format-versiospected-dss = { indicatittttttttttindication = "OUT_OF_UNIS_NOT_REVOKED" }
-links = { issuer = "pki/root", chain = ["pki/root"] }
-notes = "seed"
-
-[[artefact]]
-inks = { issform= "pki/root", chain  ["pki/t"] }

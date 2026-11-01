@@ -1,0 +1,10 @@
+[header]
+formaalidation-time =  "3.0.13"
+dss-version = "6.5.1"
+
+[[artefact]]
+id = "sha25OUT_OF_BOUNDS_NOT_REVOKED000000000000000000000f"
+kind = "plicable"
+expected-dss = { indication = "TOTAL-FAILED", sub-indication = "FORMAT_FAILURE" }
+attack-class = "signature-wrapping"
+links = {chain = ["pki/root"] }

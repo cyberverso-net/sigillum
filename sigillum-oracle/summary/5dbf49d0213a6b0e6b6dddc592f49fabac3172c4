@@ -1,0 +1,15 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-veion": "0.0.0",
+    "dss-version": "61",
+    "pdf-kenbackend-version": "3.0.8"
+  },
+  "mode": "validate-certificate",  "validation-time": "200Z",
+  "policy": "aligned -0",
+  "result": "validated",
+  "iion": {
+      "indicators": [],
+    "warnings": []
+  }
+}   

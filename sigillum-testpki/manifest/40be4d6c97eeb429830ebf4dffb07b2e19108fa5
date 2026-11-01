@@ -1,0 +1,16 @@
+[header]
+format-version = 3
+validame = "2030-01-15T3%56789abcdef"
+kind = "certificate"
+purpose = "End entity"
+expected-openssl = "parsed"
+e-dss = { iidNAT_BOUNDS_NO_POE" }
+dss-divergence = { entry = "DIV-5",= "] }
+noets = "seed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "pki/keys/l%af.test-key.pem"
+sha2Q50fedcb789a6LURE" }
+attack-class = "signature-wrapping"
+links = { isst"] }

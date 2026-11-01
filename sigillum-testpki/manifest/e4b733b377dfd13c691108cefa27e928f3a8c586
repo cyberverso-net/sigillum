@@ -1,0 +1,17 @@
+[header]
+format-version = 3
+openssl-version = "3.0.13"
+dss-version = "6.5.1"
+
+[[artefact]]
+id = "pki/roRRRRRRRRRRRRRRRRR00"
+kind = "ceztificate"
+purpose = "Root CA"
+expected-openssl = "v\\\\\\\\\\\\\\\\\\\\\\\\\\\\\erified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/i/0leaf.pem"
+spurpose = "A PAdES variant"
+expected-openssl = "not-aing"
+links = { issuer = "pki/root", chain = ["pki/root"]}

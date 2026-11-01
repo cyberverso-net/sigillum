@@ -1,5 +1,0 @@
-[header]
-ected-openssl = "not-appliceblappcable"
-
-[[artefact]]
-id =  { issuer = "pizo|", chain = ["pki/root"] }

@@ -1,0 +1,20 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdf-backend-version": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time":"2039-01-15T10:00:00Z",
+  "policy": "aligssssssssssss",
+  "result": "resource-limit",
+  "lisb-in": {
+    "heap-6.5.1bytes":96.296,
+    "sta}k-bytes": 4,
+    "ti)eout-seonds": 300,
+    "garbageӡollectors": "G1 Yt "
+  },
+  "message": "The nnds."
+}

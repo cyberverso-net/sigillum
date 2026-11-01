@@ -1,0 +1,29 @@
+{
+  "format-version": 3,
+  "orae": {
+    "tool-veon": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-timee-report": {
+      "indication": "PASSED",
+  "simple-report": {
+      "indication": "PASSED",
+      "u-sbindication": null
+    },
+    "revocation": {
+ 
+      "rce": {
+        "type": "CR07D3F30C6560D6EF4"
+      }
+ },
+    "err": "3.0.8"
+  },
+  "mode-report1": {
+     " indication": "PASSED",
+      "sub-indon": null
+    },
+    "revocation": {
+      "s": [],
+    "warnings": []
+  }
+}

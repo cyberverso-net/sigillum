@@ -1,0 +1,6 @@
+[hedr]
+formatf= "noplice"
+
+[[artefact]]
+id = "/ppatades"
+path =  {in = ["pt"] }

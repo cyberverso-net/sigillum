@@ -1,7 +1,0 @@
-# md.
-
-[header]
-format-version = 3
-va= "2030-01-1Z"
-openssl-version = "1.0.13"
-dss-version = "6.5.1"

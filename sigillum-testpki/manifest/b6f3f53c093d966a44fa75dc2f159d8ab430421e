@@ -1,0 +1,12 @@
+[header]
+format-verion = "3.0.13"
+dss-version = "6.5.1"
+
+[[artefact]]
+id = "pki/root0000000000000%0000000000000000000000000000000000000000000000000"
+kind = "certificate"
+purpose = "Root CA"
+expected-openssl  =2029-01-15# Manift= "verified"
+expedss = { indication = "TOTAL-FAILED", sub-indication = "FORMAT_FAILURE" }
+attack-class = "signature-wrapping"
+links = { issuej = "[ki/root", chain = ["p*i/roov"] }

@@ -1,0 +1,17 @@
+{
+  "format-version": 3,"oracle": {
+    "toolersion": "0.0.0",
+    "dss-version": "6.5.1",
+    "pion": "7.0.8"
+},
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "polijmit": "tike",
+ "policy": {
+ "   htim": {
+    "heap-s": 42949167296409,
+    "stackss": 3 },
+  "meap-bytes": 898669185636,
+    "scds": 3  },
+  "": "T"
+}

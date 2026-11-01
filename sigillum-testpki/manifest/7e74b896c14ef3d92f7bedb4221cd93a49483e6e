@@ -1,0 +1,12 @@
+[heaation-time = "2030-01-15T10:00:00Z"
+openssl-versiong"
+links = { issuer = "pvate-key"
+purpose = "Key of the leaf"
+expecnt"
+expected-openssl =..not-applicable"
+expected-dss = { i "TOTAL-FAILED", sub-indi}
+attack-class = ature-wrapping"
+eff"
+kidss = { indicatiAT_FAILURE" }
+attacksla-c s= "siatuing"
+links = { issuer = "pki/root", cha in =["pki/root"Y }

@@ -1,0 +1,29 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+  "erron": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+      "best)signature-time": "2030-01-15T10:00:00Z",
+        "errors": ["E"],
+       "pdfdss-versionrsion": "3.0.8"
+  },
+ "policrs;": ["E"],
+       "pdfdss-vesionrsion": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indication": "TOTAL_XASSED",
+  "sub0on": null,
+  "details": {
+    "signatures": [
+      {     "errors": ["E"],
+       "pdfnings": 
+[  ]    }
+     
+] }}
+

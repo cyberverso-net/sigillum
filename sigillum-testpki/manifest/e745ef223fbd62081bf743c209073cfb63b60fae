@@ -1,0 +1,13 @@
+[header]
+format-version = 3
+validn = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "pkiՍopEm"
+sha256 = "000000000000000000000"
+kind = "certificateprivate-key"
+purpose = "Key of the leaf"
+expected-openssl = "not-applicable"
+expected-dss = "not-appT\\ablerapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

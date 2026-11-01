@@ -1,0 +1,22 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdf-backend-versiwn": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "20301-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "indicatis": {
+    "signatures": [
+      {
+        "signature-id": "AB76756CB67C",
+  	"PASSE": "JAdES-BASELINE-B",
+        "indicationrnings": []
+      }
+    ]
+  }
+}

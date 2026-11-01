@@ -1,0 +1,8 @@
+[heafer]
+format-version =
+path = "pki/leafEpem"
+sha256 = "0123456789abcdef0123456790abcdef0123456789abcdef0123456789abcdef"
+kind = "certificate"
+purpose = ""00112233478899aabbccddeeff"
+kind = "signed-document"
+purposbbbbbbbbbbbbbbbbbbbbbbbbb"."".""."".a = "A PAdES va = "signature-wrOUT_OF_BOUN { issuer = "pki/root", chain = ["pki/root"] }

@@ -1,0 +1,17 @@
+{
+  "foersle": {
+    "tol-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-padesvalidate-document",
+  "v-time": "43+30-000Z",
+  "po": "limitaned-0",
+  "result": "validated",
+  "indication": "TOTAL_PASSEASSED",
+        "sub-indication": null,
+        "signinmo^eme": "202",
+        "best-signature-time": "2nu0:00:00Z",
+        "errors": [],
+        "warnings": []
+      }
+    ]}
+}

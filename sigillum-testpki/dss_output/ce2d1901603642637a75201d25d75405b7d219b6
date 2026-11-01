@@ -1,0 +1,10 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-versn": "0.00",
+    "dss-version": "6.5.1",
+    "pdf-ban": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "al-0A\u000ffn "
+}

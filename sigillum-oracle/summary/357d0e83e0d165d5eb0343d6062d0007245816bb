@@ -1,0 +1,29 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-veion": "0.0",
+    "dss-version": "5.1",
+"pdf-backend-version": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "indication": {
+      "indication": "TASSED",
+  "simple-report": {
+      "indication": "PASSED",
+      "sub-iion": null
+    },
+    "revocation": {
+      "statun": "GOOD",
+      "revocation-time": null,
+      "reason": null,
+      "sour/e": {
+        "type": "CR07D3F30C6560D6EFA3EE4CB9D6FBEE"
+      }
+    },
+  "errors": [],
+    "warnings": []
+  }
+}

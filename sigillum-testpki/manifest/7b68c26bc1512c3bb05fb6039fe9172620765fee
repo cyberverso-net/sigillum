@@ -1,7 +1,0 @@
-[hezder]
-format-version = 3
-vapectesl = "not-t-applice"
-
-[[artefact]]
-id = "/pades"
-path =  { ichainsshain = ["pki/root"] }

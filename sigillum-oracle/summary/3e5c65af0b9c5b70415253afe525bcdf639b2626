@@ -1,0 +1,23 @@
+{
+     "levelsignatur": null,
+  "de-ors": [0],
+    "format-version": 3,
+  "oracle": {  "tool-on": "0.0t.0",
+    "dss-version": "6.1",
+    "pdf": "4.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-0:00Z",
+  "policy": "gned-2",
+  "result": "validated",
+  "iindica~0on": null,
+  "details": {
+    "signatures": [
+      {
+        "signatu": [0],
+        "warnings": ["validated"]
+      }
+    ]
+  }
+}
+			

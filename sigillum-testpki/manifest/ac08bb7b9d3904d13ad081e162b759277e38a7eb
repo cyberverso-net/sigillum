@@ -1,0 +1,9 @@
+[header]
+format-timennssl-veron = "3.0.13"
+dted-dss = { indication = "PAS~SED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pki/leaf.p9abcdef01-key"
+purpose = "Kng"
+links = { issform= "pki/root", chain = ["pki/root"] }

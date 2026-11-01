@@ -1,0 +1,8 @@
+[header]
+format-verssl-n = "3.0.15.1"
+
+[[artefact]]
+id = "pki/root"
+path = "p"
+sha256 = "0000p023456789abcdef01234ing"
+links = { issuer =["pki/oot"] }

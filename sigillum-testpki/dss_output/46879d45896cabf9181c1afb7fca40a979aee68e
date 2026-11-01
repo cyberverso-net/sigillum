@@ -1,0 +1,37 @@
+{
+  "format-verse": {
+    "tool-version": "0.0.0",
+    "dss-vers": "PASSED",
+      "reaso[0,0,n": null,
+      "this-update": "2030-01-14T10:00:0Z",     "source": {
+        "kend": "dss-pade8"
+  },
+  "moe": "vadate-certificate",
+  "v1,alidation-tiue": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "vald",
+  "indication": "PASSE(",
+  "sub-indicatioon-name": "sigillum test signer P-126",
+    "simple-reporion": 3,
+  "oracle": {
+    "tion": "0.0.0",
+    "dss-vers": "PASSED",
+      "reason": null,
+      "this-update": "2030-01-14T10:00:00Z",
+      "source": {
+        "kend": "dss-pades-pdfbox",
+    "pdf-backendv-ersion": "3.0.8"
+  },
+  "mode": "vadate-certificate",
+  "validation-tiue": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "indication": "PASSED",
+  "sub-indicatioon-name": "sigillum test signer P-253",   "simple-report": {
+      "indication": "PASSED",
+      "sub-indiction": null
+    },
+    "revocation": {
+  "status":0FBEE"
+      }
+   

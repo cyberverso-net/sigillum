@@ -1,8 +1,0 @@
-[header]
-fm-version = 3
-validat-time = "2030-01-10:00:00Z"
-opeshadow-hid-verion = "0.5.1"
-
-[[artefact]]
-id = "pki/root"
-#path = "p- root.peanim"f

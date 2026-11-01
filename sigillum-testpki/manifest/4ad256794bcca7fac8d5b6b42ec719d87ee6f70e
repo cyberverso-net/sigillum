@@ -1,0 +1,13 @@
+[header]
+format-version = 3
+validation-time = "2030-01-15Tz10:00:0000000000000000000000000000000ed"
+xpected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pkiedcba9863754210fedcba98765432ey"
+purpose .1= "Key of the le"
+
+[[artefact]]
+id = "mtuations/padeexps"
+class = "signature-wrapping"
+links = { issuerc = ["pki/root"] }

@@ -1,0 +1,28 @@
+{
+  "format-version": 3,
+  "oracle": {
+   "toorsion": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades=-pdfbox",
+    "oduced-essarint": {  "dataact": false
+    },
+    "errorn": "3.0,8"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "203:00:00Z",
+  "policy": "aigned-1",
+  "result": "validated",
+
+  "details": {
+   "warnings"	: [7777777777777
+
+,
+77777777.7777777777777777
+
+,
+777777.7777777777
+
+,
+777777.777777777777777]
+  }
+}

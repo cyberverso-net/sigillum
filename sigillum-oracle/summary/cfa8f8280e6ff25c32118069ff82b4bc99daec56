@@ -1,0 +1,34 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-versiorsion": "3.0.8"
+  },
+  "mode": "vate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indication": "TO167C",
+        "format": "JAdES",
+        "level": "JAdES-BASELINE-B",
+     "indication": "TOTAL_PASSED",
+        "sub-indication": null,
+        "signing-time": "20/9-12-16T10:00:0TAL_PASSED",  "signing-tt-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "cument",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "resul": "TO167C",
+        "format": "JAdES",
+        "level": "JAdES-BASELINE-B",
+     "indication": "TOTASED",
+        "sub-indication": null,
+        "signing-time": "2029-12-16PASSED",
+  "sub-indica~0on": null,
+   "v"A  "    "stax
+   "pdfn": "3..08"
+  }
+    dss-pades    ]
+  }
+}

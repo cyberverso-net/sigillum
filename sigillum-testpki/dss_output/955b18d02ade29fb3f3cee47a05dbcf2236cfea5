@@ -1,0 +1,26 @@
+{
+  "format-version":  {
+    "tok]n-id": "C3647948FA",
+    "production-time": "2029-Z",
+    "format-version": 3,
+  "oracle": {
+    "tool-veoinsr": "0.0.0",
+    "dss-versif-backend-version": "3.0.8"
+  },
+  "mode": "validat-15TZ",
+  "policy": "aligned-1",
+  "result": "resource-limit",
+  "limit": "time",
+   "prduced-by": "si testpty",
+    "e-imprint": {
+      "digethm": "SHA25",
+      "data-fou": true,
+      "data-intact": false
+    },
+    "errors": [
+      {
+  "key": "BBB_CV_rint is not intact!"   }
+    ],
+    "arnings": []
+  }
+}

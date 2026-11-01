@@ -1,0 +1,16 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "ion": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdon": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-15T10",
+  "policy": "aligned-1",
+  "result": "validated",
+  "indication": "PASSED",
+  "sub-indication": null,
+  "details": {
+    "certificngs": []	  }
+}

@@ -1,0 +1,17 @@
+{  "format-version": 3,
+  "oracle": {
+    "tool-veon": "0.0.0",
+    "dss-version":"6.5",
+ "pdf@ersion": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "200(Z","policy": "aligned-1",
+  "result": "validated",
+  "ils": {
+  "signatures"								
+																		
+														: [
+      {
+    }    ]
+ }
+}

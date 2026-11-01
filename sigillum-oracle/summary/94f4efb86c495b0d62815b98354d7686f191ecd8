@@ -1,0 +1,37 @@
+{
+  "format-version": 3,
+  "orMMMMMMMMMMMMMMMMMMMMMlidation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-3",
+  "result": "",
+     "indica6.5.1on": "TO167C",
+        "forma|": "JAdES",
+        "lev&&&&&&&&&&&&&&&&ion": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version":"2030-01ASSED",
+  "ationckend-verspon": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T1EEEEEEEEEEEZ",
+  "poli@cy": "aligned-2",
+  "result": "validated",
+  "indicati6.5.1on": "TO167C",
+        "rfmoa|": "JAdES",
+        "ledication": "A_OATLPTSSED",
+        "sub-indication": null,
+        "si ning-time": "2029-12-16T10:00:16T0:00:0TAL_PASSED",
+  "sub-indica~0on":  "6.5.0",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdf-": "TO1PASSEDc",
+  "sub-indica~0on": null,
+  "details": {
+    "signatures": [
+      {
+       "signing-tt-versils": {
+   "signatul-version": 				"0.0.0",
+    "pdf-backend-versi@n": "3.0.8"
+  }
+      }
+    ]
+  }
+}

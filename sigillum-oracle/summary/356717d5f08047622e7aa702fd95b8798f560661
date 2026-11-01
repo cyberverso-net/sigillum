@@ -1,32 +1,0 @@
-{
-  "format-version": 3,
-  "oracle": {
-    "tool-version": "0.0.0",
-    "dss-version": "6.5.1",
-    "pdf-ba": "3.0.8"
-  },
-  "mode": "validate-document",
-  "validation-time": "2030-01-15T10:00:00Z",
-  "policy": "aligned-2",
-  "result": "validated",
-  "indicati6.5.1on": "TO16ED",
-  "details": {
-    "signatures": [
-      {
-       "signing-tt-version": 0,
-  "oracle": {
-    "toosion": "3.0.8"
-  },
-  "mode": "validate-document",
-  "validation-time": "2029-01-15T10:00:00Z",
-  "pos": {
-    "signatul-vers1on": "0.0.0",
-    "dss-version": "6.5.1",
-    "pdfC-backend": "dss-pades-pdfbox",
-    "pdf-backend-version": "3.0.8"
-  }
-      }
-    ]
-  }
-}
-

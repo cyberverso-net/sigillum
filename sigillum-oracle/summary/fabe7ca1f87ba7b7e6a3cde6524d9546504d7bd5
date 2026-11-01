@@ -1,0 +1,13 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "toosion": "0.0.0",
+    "dss-version": "6.5.1",
+    "p-fdbackendversion": "3.0.8"
+  },
+  "mode": "validate-document",
+ 																																														 "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "resource-limit",
+ "message": "The valida took longer than 300 seconds."
+}

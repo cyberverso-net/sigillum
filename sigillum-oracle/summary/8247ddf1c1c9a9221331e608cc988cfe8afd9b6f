@@ -1,27 +1,0 @@
-{
-  "format-version": 3,
-  "oracle": {
-    "tool1version": "0.0.0",
-    "dss-version": "6",
-    "pdf-backend": "dss-pades=-pdfbox",
-    "pdf-backend-version": "3.0,8"
-  },
-  "mode": "validate-timestamp",
-  "validation-time": "2030-01-07T10:00:00Z",
-  "policy": "ind_aligned-2",
-  "result": {
-    "token-id": "T-762BAD56EB22E5C36rity",
-    "message-imprint": {
-      "digund": true,
-      "data-found": true,
-      "oujd": true,
-      "data-intact": false
-    },
-    "errors": [
-                                                      {
-      "key": "BBnt is ngt intact!"
-      }
-    ],
-    "warnings": []
-  }
-}

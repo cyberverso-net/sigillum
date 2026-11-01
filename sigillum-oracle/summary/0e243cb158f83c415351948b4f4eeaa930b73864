@@ -1,0 +1,16 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6-pades-pdfbox",
+    "pdf-backen\\\\\\\\\\\\\\-version": "3.0.8"                 },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-#",
+  "result": "resource-limit",
+  "limit": "time",
+  "limits": {
+    "heap-bytes": 4294967296,    "garpdf-backend\bage-collectors": "c,G1 Old Generation"
+  },
+  "message": "The valon took longer than 600 seconds."
+}

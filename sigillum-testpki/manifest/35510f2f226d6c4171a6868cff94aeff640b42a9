@@ -1,0 +1,7 @@
+[header]
+forxpected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "p+i/leaf.pem"
+sha256 = 2029-01-15# Man= "bcdef01234567

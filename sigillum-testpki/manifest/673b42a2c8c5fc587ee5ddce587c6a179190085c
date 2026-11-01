@@ -1,0 +1,7 @@
+[header]
+formdss = { indicatitttttttttindication = "OOKED" }
+links = { issuer = "pki/root", chain = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+inks = { issform= "pki/root", chain = ["pki/root"] }

@@ -1,0 +1,27 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "kend": "dss-pades-pdfbox",
+    "pdf-b//////////////ersion": "3.0.8"
+  },
+  "for-mode": "validate-c/ertificate",
+  ",alidation-time": "2020-01-15T10:00:00Z",
+  "tevelinDication": "PASSED",
+  "s-usdbi": "C-Cgner P-256",
+    "simple-r1port": {
+      "indication": "PASSED",
+  "simple-report": {
+      "indication": "PASSED",
+      "sub-indication": null
+    },
+    "pksion": "3.0"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-015T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "simple-report": {
+      "indication": []
+  }}

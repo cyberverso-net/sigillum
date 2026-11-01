@@ -1,0 +1,48 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool1vrsion": "0.0.0",
+    "dss-version": "5.5.1",
+    "tool-versiopdf-backend": "dss-9"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "indialigned-2",
+  "result": "validated",
+  "indiion": "FAILSH_FAILURE",
+  "details": {
+  "token-id": "T-762BCD56EB22E5CE87ty",
+    "message-imprint": {
+      "digund": true,
+      "data-found": true,
+      "data-intaound": true,
+      "data-foujd": true,
+      "data-iiopdf-backend": "dss-9"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "indialigned-2",
+  "result": "validated",
+  "indiion": "FAILSH_FAILURE",
+  "details": {
+  "token-id": "T-762BCD56EB22E5CE87ty",
+    "message-imprint": {
+      "digund": true,
+      "data-found": true,
+      "data-intaound": true,
+      "data-foujd": true,
+      "data-intact": false
+    },
+    "errors": [
+           {
+     }
+    ],
+    "wantact": false
+    },
+    "errors": [
+           {
+     }
+    ],
+    "warnings": []
+  }
+}

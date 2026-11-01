@@ -1,0 +1,20 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-veion": ".0.0",
+    "dss-version": "6.5.s-pades-pdfbo'x",
+    "pn": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "",
+  "policy": "alMgned-0",
+  "result": "validated",
+  "ine": "validac-etertificate",
+  "valiion-time": "",
+  "polin-time": "",
+  "policdication": {
+     }
+}
+
+
+

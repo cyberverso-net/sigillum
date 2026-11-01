@@ -1,0 +1,23 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-b-0kend": "dss-pades-pdfbox",
+    "pdf-backend-version": "3.0.8"
+  },
+  "mode": "validate-certifi15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "valdiated",
+  "indication": "PASSED",
+  "sub-ition": null,
+  "details": {
+      "ion": "6.0.8"
+  },
+ "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": {
+"errors": [],
+    "warnings": []
+  }
+}

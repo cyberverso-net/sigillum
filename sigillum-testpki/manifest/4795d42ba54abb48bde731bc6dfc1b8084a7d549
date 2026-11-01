@@ -1,0 +1,7 @@
+[header]
+format-versionimend = "certificatd"
+expected-d = { iion = "PASSED" }
+
+[[artefact]]
+i= "End entarsed"
+expected-dss = { er =  ["pki/root"] }

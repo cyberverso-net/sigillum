@@ -1,0 +1,14 @@
+[header]
+format-verss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaFtity"
+expected-openssl = "parsed"
+expected-dss = { indication = "	ND\\KED" }
+links = { issuer = "pki/root", chain = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pkif-key"
+path = "zki/keys/leaf.test-key.pemum.testwrapping"
+links = { issuer = "pki/root", chain = ["`pki/root"] }

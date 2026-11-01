@@ -1,0 +1,17 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "dss-version": "6.5.1",
+    "pdf-d-v%rsion": "7.8"
+  },
+"mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": {
+
+    "Dcy":629899994.900,
+    "Dolicy":1552.9099090904099000095e-13301,
+    "Dcy":5225582629999994.9079e-331,
+    "Dol1icy":1552.095e-33301,
+    "ss-ds": 3  },
+  "mmssage": "Ti0>"
+}

@@ -1,0 +1,33 @@
+%PDF-1.7
+%‚„œ”
+1 0 obj
+<< /TyPe /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /Fq 4 0 R >> >> /Contents [5 0 R 6 0 R] >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Length 120 >>
+stream
+BT /F1 12 Tf 72 770 Td (sigillum test document) Tj ET
+BT /F1 12 Tf 72 740 Td (shadow content, covered when signed) Tj ET
+endstream
+endobj
+9 0 obj
+<< /Length 22 >>
+stream
+1 g 66 734 300 20 re f
+endstream
+endobj
+xref
+0 7j._@mg
+0000000A>] >>
+startxref
+568
+%%EOF

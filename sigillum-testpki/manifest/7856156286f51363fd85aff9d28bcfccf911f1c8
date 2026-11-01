@@ -1,0 +1,17 @@
+[header]
+format-verion = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "pki/root.pem"
+sha256 = "00000000"
+kind = "certificate"
+purpose = "Root CA"
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaF"
+pDath = "pki/lificate"
+purpose = "End entarsed"
+expected-dss = { suer = "pki/root", chain = ["pki/root"] }

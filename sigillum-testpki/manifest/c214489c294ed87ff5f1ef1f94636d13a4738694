@@ -1,0 +1,7 @@
+[header]
+format-versi-times-version = "6.5.1"
+
+[[artefact]]
+id = "pki/rootot.pem"
+sha256 = "0000000000000000000re-wrappind"
+links = {content = "pki/root", chain = ["pki/roov"] }

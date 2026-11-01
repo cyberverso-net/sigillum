@@ -1,0 +1,10 @@
+[header]
+formt-vertimesected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "mutations/pades.pdf"
+sha255 = "00112233ariant"
+expdss = { indication = "TOTAL-FAILED", sub-indication = "FORMAT_FAILURE" }
+attack-class = "signpected-opature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/roov"] }

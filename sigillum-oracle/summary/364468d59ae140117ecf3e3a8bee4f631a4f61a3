@@ -1,0 +1,23 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "3.5.1",
+    "pdf-backd": "dss-pad1.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:0:00Z",
+  "policy": "aligne[-2",
+  "result": "validated",
+  "indication": "TC",
+         "tevel"																																		: "TOTAL_PASSED",
+  "sub-indica~0on": null,
+  "details": {
+    "signatures": [
+      {
+       
+    "errors  warnings": []
+      }
+    ]
+  }
+}

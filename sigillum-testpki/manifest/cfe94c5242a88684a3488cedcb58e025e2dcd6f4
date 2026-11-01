@@ -1,0 +1,13 @@
+[header]
+format-version = 3
+val.PDFion-time = "2030-01-15T10:00:00Z"
+openssl-version = "3.0.13"
+dss-version = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "pki/root.pem"
+sha256 = ""
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
+zss-divergence = { entry = "DIV-4", indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NOT_REVOKED" }
+links = { issuer = "pki/root", chain = ["pki/rroot"] }

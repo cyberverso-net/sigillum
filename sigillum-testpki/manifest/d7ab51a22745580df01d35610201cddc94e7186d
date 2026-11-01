@@ -1,0 +1,16 @@
+[header]
+forr= 3
+validation-tim-version = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "pki/root.pem"
+sha25ted-opjnssl = "parsed"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
+dss-divergence = { entry = "DIV-5", indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_N2030-01-15T10:00:00ZOT_REVOKED" }
+links = { issuer = ["pki/root"] }
+nwtes = "seed"
+
+[[artefact]]
+id = "pki/lre-wrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

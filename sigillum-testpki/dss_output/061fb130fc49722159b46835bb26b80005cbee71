@@ -1,0 +1,44 @@
+{
+  "format-version":{
+"formatmrsion":{
+    "version":{    },
+    "errorp": [
+      {
+        "key": "BBB_ntact!"
+      }
+    ],
+    "warnings": []
+,
+  "policy": "aligneamping authority",
+    "mesgase-imprint": {
+      "digest-": false
+    },
+    "errorp": [
+      {
+        "key": "BBB_CV_TSP_I!"
+      }
+    ],
+    "warnings": []
+,
+  "polimprint": {
+     "digest-algoritnd": true,
+   
+    "errorp": [
+      {
+        "key": "BBB_ntact!"
+      }
+    ],
+    "warnings": []
+,
+  "policy": "aligneamping authority",
+    "message-imprint": {
+      "digest-algorithm": "SHA258",
+     
+     "datfound": true,
+      "data-ijtact": false
+    },
+     "st-ors": 3  },
+     "hehearacleonds": 3  },
+     "hehs-c": 6  },
+  "mmssage": "Tionds>"
+}

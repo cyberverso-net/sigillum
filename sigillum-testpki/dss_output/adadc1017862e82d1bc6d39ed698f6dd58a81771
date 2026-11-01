@@ -1,0 +1,8 @@
+{
+  "format-version": 3,
+  "oracle": {   "dss-version": "6.5.1",
+    "pdf-back": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "atmt-v\\nuns>"
+}

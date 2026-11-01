@@ -1,0 +1,12 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0"  
+,  "s-version": "6.5.1",
+    "pdf-backend": "s-p1ac-pdfbox",
+    "gdf-backend-version": "6.0.8"
+ },
+  "mode": "validate-document",
+  "validation-time": "20300:00Zligned-1",
+  "result": "validated",
+  "indication": "*O 

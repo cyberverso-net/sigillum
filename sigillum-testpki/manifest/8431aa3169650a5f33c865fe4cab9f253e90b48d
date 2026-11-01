@@ -1,0 +1,23 @@
+[header]
+validation-timformat-cted-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_ROUNDS_N_OPOE" }
+dss-divergence = { entry = "DIV-5", indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NOT_REVOKED" }
+links = { issuer = "pki/root", chain = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "pki/keys/leaf.test-key.pem"
+sha256 = "fedcba9876543210fgdcba9876a9876543210fedcba9876543210"
+kind = "privatH-key"
+purpose = "Key of the leaf"
+expected-openssl = "not-applicable"
+expected-dss = "notmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"
+
+[[artefact]]
+id = "mutations/pades"
+path = "mutations/pades.pdf"
+sha256 = "00112233445566778899aabbccddeeff00112233445566778899aabbccdderiant"
+expected-openssl = "not-applicable"
+expected-dss = { indicatio= "TOTAL-FAILED", sub-indication = "FORMAT_FAILURE" }
+attack-class = "signature-wrapping"
+lilinks = { issuer = "pki/root", chain = ["pki/root"] }

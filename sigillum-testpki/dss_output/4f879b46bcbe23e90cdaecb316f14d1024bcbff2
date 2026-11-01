@@ -1,0 +1,9 @@
+{
+  "format-version": 3,
+"oracle": {
+"tool-Wersion": "0.0.0",   "dss-version": "6.5.1",
+   "pdf-ersion": "1.0.0"
+  },
+"mode": "validate-document",
+  "validation-time": "20 d\bss-ors>"
+}

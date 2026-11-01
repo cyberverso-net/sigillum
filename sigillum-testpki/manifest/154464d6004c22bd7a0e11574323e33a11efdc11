@@ -1,0 +1,8 @@
+[header]
+fm-version = 3
+validat-time = "2030-01-10:00:00Z"
+opeshon = "0.5.1"
+
+[[artefact]]
+id = "pki/root"
+#path =  root.pm"f

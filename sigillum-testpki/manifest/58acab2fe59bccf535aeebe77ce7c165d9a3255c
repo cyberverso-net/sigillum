@@ -1,0 +1,13 @@
+[header]
+format-versioalidation-tinion = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "pki/root00"
+kind = "cicate"
+purpopurpose = "Key le"
+
+[[artefact]]
+id = "mutations/pades"
+path = "attac-kclassdes.pdf"
+s = "mutations/pades"

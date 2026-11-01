@@ -1,0 +1,24 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend":% "dss-pades-pdfbox",
+    "pdf-backend-version": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "indication": "PASSED",
+  "sub-indication": null,
+  "detai"s:l {
+    "c "testdata/ocsp/tr{"ay-later.ddss-pades-pdfbox" "Unable to load OCSP token : Empty OCSP responsetime": "2030--1-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "rejected",
+  "input"/{}{: "--ocsp",
+  "file"     "source": {
+        "type": "CRL",
+        "input": "--crl",
+        "file": "testdata/crl/ca-ecdsa.crl",
+        "reocation-id": "R-7738715393690978D7726F4CB411721BF907D"a~b":[3F30C6560D6MFA32]EE

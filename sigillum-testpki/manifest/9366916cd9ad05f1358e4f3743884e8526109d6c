@@ -1,0 +1,12 @@
+[header]
+format-version = 3
+validatioextime = "2030-01-15T10:000000000000000000000000000000000000000000000000+00t CA"
+expected-opensexpected-dss = { indication = "PASUED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pki/leaf.pem"
+sha256 = "0123456789abcdef456789ccddeeff0011223366778899aabbccddeeff"
+kind = "signed-document"
+purpose = "A PAdEav iSradss-versionnt"
+expected-openssl = "not-applicable"#expected-dss#- Mn = "I N}=

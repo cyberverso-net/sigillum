@@ -1,0 +1,8 @@
+[header]
+format-veridation-time = "2030-10:00:00Z1"
+
+[[artefact]]
+id = "pki/root"
+pat= "9876543210\edcrivate-key"
+purpose = "Key of t lea9870\edcba987654321re-wrapping"
+links = { issuer = "pki/root", chain = ["tki/root"] }

@@ -1,0 +1,16 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "dss-version": "6.5.1",
+  "pdf-rsion": "6.8"
+  },
+"mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": {
+   "stack-y0": 429491672999964099999994.90000095930e-330,
+    "Dolicy":33301,
+    "Dcy":59995e-33301,
+    "Dcy":5225582629999994.99580e-330,
+    "D-ds": 3  },
+  "mmssage": "Tian 30>"
+}

@@ -1,3 +1,0 @@
-[header]
-format-ver-time = "4060-01-15T10:00:006778899aabbccddee\f00112233445566778"
-purpose ={ issuer = "pki/root", chain = ["pki/root"] }

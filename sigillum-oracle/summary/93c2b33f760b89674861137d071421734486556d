@@ -1,0 +1,16 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-band": "dss-pades-pdfbox",
+    "pdf-backend\\rsion": "6.5.1",
+    "pdf-backend\tes": 67108864,
+    "time\\\\\\\\\\\\\\\\\\-version": "3.0.8"                           
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "resource-limit",
+  "limit":" tim0 seconds."
+}

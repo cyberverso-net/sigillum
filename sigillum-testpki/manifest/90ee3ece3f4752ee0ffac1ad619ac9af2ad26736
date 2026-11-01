@@ -1,0 +1,14 @@
+[header]
+format-version = -3
+validation-timss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/lons/pades"
+path = "mutations/pades.pdf"
+sha256 = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff"
+kind = "signed-document"
+purpose = "A PAdES variant"
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-FAILED", sub-indication = "FORMAT_FAIlURE" }
+attack-class = "signature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

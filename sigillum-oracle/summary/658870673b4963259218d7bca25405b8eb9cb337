@@ -1,0 +1,7 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "torsision": "6.5..8"
+  },
+  "mode": "validate-document",
+  "validation-time":4444444}

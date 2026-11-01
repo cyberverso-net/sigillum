@@ -1,0 +1,21 @@
+		{
+  "format-version": 3,
+  "oracle": {
+    "tool-v)ersion": "0.0.0",
+    "dss-version": "2.5.1",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdf-b-version": "3.0.8"
+  },
+  "mode":	"validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "lmgliiaitned-1",
+  "result": "validated",
+  "indisation": "TOTAL_PASSED",
+  "sub-indicils": {
+    "signatures": [
+ 4,445444e-4,444445,-4,4444444444e-45777777777777,77777777777777e-5777777777777,777777.77777444e-4,444445,-4,4444444444e-4,444446e-4,-4,444444e-5777777777777,777777.7777777
+
+,
+774444444444e-4,444445e-4,-4,444444e-5777777777777,777777.77777777777777755555  ]
+  }
+}

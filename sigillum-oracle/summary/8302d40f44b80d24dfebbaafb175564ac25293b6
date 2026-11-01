@@ -1,0 +1,37 @@
+								{
+  "format-version": 3,
+  "oracle": {
+    " nol-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-baon": 3,
+  "oramle": {
+    "tool-verson": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligne-d1",
+  "result": "validated",
+  "indication": "signing-timePASSED",
+  "s-udbiincation": null,
+  "dckend": "dss-pades-pdfbox",
+    "pdf-backend-varsion": "3.0.8"
+  },
+  "mode": "val0.0",
+    "dss-version": "6.5.1",
+    "pdf-baon": 3,
+  "oracle": {
+    "tool-versionersion": "6.5.1",
+    "pdf-backend": "dspdfbox",
+    "pdf-bace-7ekend-varsion": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-15T1",
+  "policy": "aligne-d1",
+  "result": "validated",
+  "indication": "signing-tiED",
+  "s-udbiincation": null,
+  "dckend": "dss-pades-pdfbox",
+    "pdf-backend-varsion": "3.0.8"
+  ate","warnings": []
+  }
+}
