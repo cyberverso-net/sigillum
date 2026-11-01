@@ -105,6 +105,12 @@ user-id = 6743 # Ed Page (epage)
 start = "2023-03-08"
 end = "2027-10-24"
 
+[[trusted.autocfg]]
+criteria = "safe-to-deploy"
+user-id = 539 # Josh Stone (cuviper)
+start = "2022-01-01"
+end = "2027-10-24"
+
 [[trusted.base16ct]]
 criteria = "safe-to-deploy"
 user-id = 267 # Tony Arcieri (tarcieri)
@@ -174,6 +180,12 @@ end = "2027-10-24"
 [[trusted.cbc]]
 criteria = "safe-to-deploy"
 trusted-publisher = "github:RustCrypto/block-modes"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.cfg-if]]
+criteria = "safe-to-deploy"
+user-id = 55123 # rust-lang-owner
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -327,6 +339,12 @@ trusted-publisher = "github:RustCrypto/traits"
 start = "2022-01-01"
 end = "2027-10-24"
 
+[[trusted.crypto-primes]]
+criteria = "safe-to-deploy"
+user-id = 105941 # Bogdan Opanchuk (fjarri)
+start = "2022-01-01"
+end = "2027-10-24"
+
 [[trusted.ctr]]
 criteria = "safe-to-deploy"
 user-id = 267 # Tony Arcieri (tarcieri)
@@ -459,10 +477,34 @@ trusted-publisher = "github:RustCrypto/traits"
 start = "2022-01-01"
 end = "2027-10-24"
 
+[[trusted.ff]]
+criteria = "safe-to-deploy"
+user-id = 1244 # Sean Bowe (ebfull)
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.ff]]
+criteria = "safe-to-deploy"
+user-id = 6289 # Jack Grigg (str4d)
+start = "2022-01-01"
+end = "2027-10-24"
+
 [[trusted.find-msvc-tools]]
 criteria = "safe-to-run"
 user-id = 539 # Josh Stone (cuviper)
 start = "2025-08-29"
+end = "2027-10-24"
+
+[[trusted.flagset]]
+criteria = "safe-to-deploy"
+user-id = 29227
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.flagset]]
+criteria = "safe-to-deploy"
+user-id = 155667 # Richard Zak (rjzak)
+start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.ghash]]
@@ -474,6 +516,18 @@ end = "2027-10-24"
 [[trusted.ghash]]
 criteria = "safe-to-deploy"
 trusted-publisher = "github:RustCrypto/universal-hashes"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.group]]
+criteria = "safe-to-deploy"
+user-id = 1244 # Sean Bowe (ebfull)
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.group]]
+criteria = "safe-to-deploy"
+user-id = 6289 # Jack Grigg (str4d)
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -582,6 +636,54 @@ end = "2027-10-24"
 [[trusted.keccak]]
 criteria = "safe-to-deploy"
 trusted-publisher = "github:RustCrypto/sponges"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.libc]]
+criteria = "safe-to-deploy"
+user-id = 2915 # Amanieu d'Antras (Amanieu)
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.libc]]
+criteria = "safe-to-deploy"
+user-id = 4333
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.libc]]
+criteria = "safe-to-deploy"
+user-id = 5820
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.libc]]
+criteria = "safe-to-deploy"
+user-id = 51017
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.libc]]
+criteria = "safe-to-deploy"
+user-id = 55123 # rust-lang-owner
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.libc]]
+criteria = "safe-to-deploy"
+trusted-publisher = "github:rust-lang/libc"
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.libm]]
+criteria = "safe-to-deploy"
+user-id = 2915 # Amanieu d'Antras (Amanieu)
+start = "2022-01-01"
+end = "2027-10-24"
+
+[[trusted.libm]]
+criteria = "safe-to-deploy"
+user-id = 55123 # rust-lang-owner
 start = "2022-01-01"
 end = "2027-10-24"
 
@@ -724,7 +826,7 @@ start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.proc-macro2]]
-criteria = "safe-to-run"
+criteria = "safe-to-deploy"
 user-id = 3618 # David Tolnay (dtolnay)
 start = "2022-01-01"
 end = "2027-10-24"
@@ -790,19 +892,19 @@ start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.serde]]
-criteria = "safe-to-run"
+criteria = "safe-to-deploy"
 user-id = 3618 # David Tolnay (dtolnay)
 start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.serde_core]]
-criteria = "safe-to-run"
+criteria = "safe-to-deploy"
 user-id = 3618 # David Tolnay (dtolnay)
-start = "2025-09-13"
+start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.serde_derive]]
-criteria = "safe-to-run"
+criteria = "safe-to-deploy"
 user-id = 3618 # David Tolnay (dtolnay)
 start = "2022-01-01"
 end = "2027-10-24"
@@ -934,7 +1036,7 @@ start = "2022-01-01"
 end = "2027-10-24"
 
 [[trusted.syn]]
-criteria = "safe-to-run"
+criteria = "safe-to-deploy"
 user-id = 3618 # David Tolnay (dtolnay)
 start = "2022-01-01"
 end = "2027-10-24"
@@ -975,8 +1077,14 @@ user-id = 6743 # Ed Page (epage)
 start = "2025-07-08"
 end = "2027-10-24"
 
+[[trusted.typenum]]
+criteria = "safe-to-deploy"
+user-id = 243 # Paho Lurie-Gregg (paholg)
+start = "2022-01-01"
+end = "2027-10-24"
+
 [[trusted.unicode-ident]]
-criteria = "safe-to-run"
+criteria = "safe-to-deploy"
 user-id = 3618 # David Tolnay (dtolnay)
 start = "2022-01-01"
 end = "2027-10-24"

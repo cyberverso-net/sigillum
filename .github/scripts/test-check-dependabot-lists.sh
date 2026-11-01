@@ -72,11 +72,25 @@ expect 0 "the repository as it is"
 copy
 mutate "($cargo | .ignore[] | select(.\"dependency-name\" == \"der\") | .\"dependency-name\") = \"not-a-crate\""
 expect 1 "an ignore rule outside the RustCrypto group" \
-  "only in the group: der" "only in the ignore rules: not-a-crate"
+  "only in the group or updated on its own: der" "only in the ignore rules: not-a-crate"
 
 copy
 mutate "($cargo | .groups.\"rustcrypto-dalek\".patterns) += [\"der\"]"
 expect 1 "a crate listed twice in the RustCrypto group" "Listed twice in the group: der"
+
+copy
+mutate "($cargo | .groups.\"rustcrypto-dalek\".patterns) += [\"cms\"]"
+expect 1 "a crate updated on its own back in the RustCrypto group" \
+  "Updated on its own, but listed in the rustcrypto-dalek group: cms"
+
+copy
+mutate "del($cargo | .ignore[] | select(.\"dependency-name\" == \"rsa\"))"
+expect 1 "a crate updated on its own without an ignore rule" \
+  "only in the group or updated on its own: rsa"
+
+copy
+mutate "($cargo | .ignore) += [{\"dependency-name\": \"rsa\", \"update-types\": [\"version-update:semver-major\"]}]"
+expect 1 "a crate updated on its own with two ignore rules" "Listed twice in the ignore rules: rsa"
 
 copy
 mutate "del(.updates[] | select(.\"package-ecosystem\" == \"maven\"))"

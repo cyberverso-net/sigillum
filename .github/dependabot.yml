@@ -6,9 +6,13 @@ updates:
       interval: weekly
     open-pull-requests-limit: 5
     # ADR-0011: the RustCrypto and dalek crates, and the rust-random crates
-    # they depend on, move together within the pinned generation.
-    # Generation changes are handled by issue #21. Add every new dependency
-    # from these projects to both lists below; CI checks that they match.
+    # they depend on, move together within each generation in use: der 0.8
+    # in the library crates, der 0.7 in sigillum-testpki (ADR-0025).
+    # ADR-0025, rule 2: cms and rsa are pinned to release candidates and
+    # are not in the group, so that each new release arrives in its own
+    # pull request and is adopted deliberately. Add every new dependency
+    # from these projects to the group and to the ignore rules below; CI
+    # checks that the ignore rules name the group, cms and rsa.
     groups:
       rustcrypto-dalek:
         patterns:
@@ -16,7 +20,7 @@ updates:
           - aes-gcm
           - aes-kw
           - ansi-x963-kdf
-          - cms
+          - cbc
           - const-oid
           - curve25519-dalek
           - der
@@ -34,7 +38,6 @@ updates:
           - pkcs8
           - rand
           - rand_core
-          - rsa
           - sec1
           - sha1
           - sha2
@@ -46,7 +49,7 @@ updates:
           - x509-tsp
     # For 0.y.z versions, Dependabot's Cargo support treats a change of y
     # as semver-major, as Cargo does, so these rules also hold the der 0.7
-    # generation. They do not affect security updates.
+    # generation of sigillum-testpki. They do not affect security updates.
     ignore:
       - dependency-name: aes
         update-types: [version-update:semver-major]
@@ -57,6 +60,8 @@ updates:
       - dependency-name: ansi-x963-kdf
         update-types: [version-update:semver-major]
       - dependency-name: cms
+        update-types: [version-update:semver-major]
+      - dependency-name: cbc
         update-types: [version-update:semver-major]
       - dependency-name: const-oid
         update-types: [version-update:semver-major]

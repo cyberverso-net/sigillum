@@ -1,12 +1,27 @@
 
 # cargo-vet imports lock
 
+[[publisher.aead]]
+version = "0.6.1"
+when = "2026-06-17"
+trusted-publisher = "github:RustCrypto/traits"
+
 [[publisher.aes]]
 version = "0.8.4"
 when = "2024-02-13"
 user-id = 267
 user-login = "tarcieri"
 user-name = "Tony Arcieri"
+
+[[publisher.aes]]
+version = "0.9.2"
+when = "2026-07-27"
+trusted-publisher = "github:RustCrypto/block-ciphers"
+
+[[publisher.aes-gcm]]
+version = "0.11.1"
+when = "2026-08-21"
+trusted-publisher = "github:RustCrypto/AEADs"
 
 [[publisher.anstream]]
 version = "1.0.0"
@@ -43,9 +58,23 @@ user-id = 6743
 user-login = "epage"
 user-name = "Ed Page"
 
+[[publisher.autocfg]]
+version = "1.5.1"
+when = "2026-05-22"
+user-id = 539
+user-login = "cuviper"
+user-name = "Josh Stone"
+
 [[publisher.base16ct]]
 version = "0.2.0"
 when = "2023-02-26"
+user-id = 267
+user-login = "tarcieri"
+user-name = "Tony Arcieri"
+
+[[publisher.base16ct]]
+version = "1.0.0"
+when = "2026-01-03"
 user-id = 267
 user-login = "tarcieri"
 user-name = "Tony Arcieri"
@@ -57,9 +86,21 @@ user-id = 267
 user-login = "tarcieri"
 user-name = "Tony Arcieri"
 
+[[publisher.block-buffer]]
+version = "0.12.1"
+when = "2026-06-11"
+trusted-publisher = "github:RustCrypto/utils"
+
 [[publisher.block-padding]]
 version = "0.3.3"
 when = "2023-04-02"
+user-id = 5059
+user-login = "newpavlov"
+user-name = "Artyom Pavlov"
+
+[[publisher.block-padding]]
+version = "0.4.2"
+when = "2025-11-26"
 user-id = 5059
 user-login = "newpavlov"
 user-name = "Artyom Pavlov"
@@ -70,6 +111,27 @@ when = "2022-03-24"
 user-id = 5059
 user-login = "newpavlov"
 user-name = "Artyom Pavlov"
+
+[[publisher.cbc]]
+version = "0.2.1"
+when = "2026-05-20"
+trusted-publisher = "github:RustCrypto/block-modes"
+
+[[publisher.cfg-if]]
+version = "1.0.5"
+when = "2026-09-16"
+user-id = 55123
+user-login = "rust-lang-owner"
+
+[[publisher.cipher]]
+version = "0.5.2"
+when = "2026-05-19"
+trusted-publisher = "github:RustCrypto/traits"
+
+[[publisher.cmov]]
+version = "0.5.4"
+when = "2026-05-28"
+trusted-publisher = "github:RustCrypto/utils"
 
 [[publisher.cmpv2]]
 version = "0.2.0"
@@ -85,6 +147,11 @@ user-id = 267
 user-login = "tarcieri"
 user-name = "Tony Arcieri"
 
+[[publisher.cms]]
+version = "0.3.0-rc.0"
+when = "2026-10-13"
+trusted-publisher = "github:RustCrypto/formats"
+
 [[publisher.colorchoice]]
 version = "1.0.5"
 when = "2026-03-13"
@@ -98,6 +165,18 @@ when = "2023-12-15"
 user-id = 11235
 user-login = "baloo"
 user-name = "Arthur Gautier"
+
+[[publisher.const-oid]]
+version = "0.10.2"
+when = "2026-01-07"
+user-id = 267
+user-login = "tarcieri"
+user-name = "Tony Arcieri"
+
+[[publisher.cpubits]]
+version = "0.1.1"
+when = "2026-04-28"
+trusted-publisher = "github:RustCrypto/utils"
 
 [[publisher.cpufeatures]]
 version = "0.2.17"
@@ -120,6 +199,11 @@ user-id = 267
 user-login = "tarcieri"
 user-name = "Tony Arcieri"
 
+[[publisher.crypto-bigint]]
+version = "0.7.10"
+when = "2026-10-26"
+trusted-publisher = "github:RustCrypto/crypto-bigint"
+
 [[publisher.crypto-common]]
 version = "0.1.7"
 when = "2025-11-12"
@@ -127,9 +211,38 @@ user-id = 5059
 user-login = "newpavlov"
 user-name = "Artyom Pavlov"
 
+[[publisher.crypto-common]]
+version = "0.2.2"
+when = "2026-05-19"
+trusted-publisher = "github:RustCrypto/traits"
+
+[[publisher.crypto-primes]]
+version = "0.7.2"
+when = "2026-06-10"
+user-id = 105941
+user-login = "fjarri"
+user-name = "Bogdan Opanchuk"
+
+[[publisher.ctr]]
+version = "0.10.1"
+when = "2026-05-20"
+trusted-publisher = "github:RustCrypto/block-modes"
+
+[[publisher.ctutils]]
+version = "0.4.7"
+when = "2026-10-29"
+trusted-publisher = "github:RustCrypto/utils"
+
 [[publisher.curve25519-dalek]]
 version = "4.1.3"
 when = "2024-06-18"
+user-id = 6979
+user-login = "rozbb"
+user-name = "Michael Rosenberg"
+
+[[publisher.curve25519-dalek]]
+version = "5.0.0"
+when = "2026-07-06"
 user-id = 6979
 user-login = "rozbb"
 user-name = "Michael Rosenberg"
@@ -141,12 +254,24 @@ user-id = 6979
 user-login = "rozbb"
 user-name = "Michael Rosenberg"
 
+[[publisher.der]]
+version = "0.8.3"
+when = "2026-10-25"
+trusted-publisher = "github:RustCrypto/formats"
+
 [[publisher.der_derive]]
 version = "0.7.3"
 when = "2024-07-09"
 user-id = 11235
 user-login = "baloo"
 user-name = "Arthur Gautier"
+
+[[publisher.der_derive]]
+version = "0.8.0"
+when = "2026-02-11"
+user-id = 267
+user-login = "tarcieri"
+user-name = "Tony Arcieri"
 
 [[publisher.digest]]
 version = "0.10.7"
@@ -155,12 +280,22 @@ user-id = 267
 user-login = "tarcieri"
 user-name = "Tony Arcieri"
 
+[[publisher.digest]]
+version = "0.11.3"
+when = "2026-05-03"
+trusted-publisher = "github:RustCrypto/traits"
+
 [[publisher.ecdsa]]
 version = "0.16.9"
 when = "2023-11-16"
 user-id = 267
 user-login = "tarcieri"
 user-name = "Tony Arcieri"
+
+[[publisher.ecdsa]]
+version = "0.17.0"
+when = "2026-07-02"
+trusted-publisher = "github:RustCrypto/signatures"
 
 [[publisher.ed25519]]
 version = "2.2.3"
@@ -169,9 +304,21 @@ user-id = 267
 user-login = "tarcieri"
 user-name = "Tony Arcieri"
 
+[[publisher.ed25519]]
+version = "3.0.0"
+when = "2026-05-03"
+trusted-publisher = "github:RustCrypto/signatures"
+
 [[publisher.ed25519-dalek]]
 version = "2.2.0"
 when = "2025-07-09"
+user-id = 6979
+user-login = "rozbb"
+user-name = "Michael Rosenberg"
+
+[[publisher.ed25519-dalek]]
+version = "3.0.0"
+when = "2026-07-06"
 user-id = 6979
 user-login = "rozbb"
 user-name = "Michael Rosenberg"
@@ -183,12 +330,57 @@ user-id = 267
 user-login = "tarcieri"
 user-name = "Tony Arcieri"
 
+[[publisher.elliptic-curve]]
+version = "0.14.3"
+when = "2026-10-25"
+trusted-publisher = "github:RustCrypto/traits"
+
+[[publisher.ff]]
+version = "0.13.1"
+when = "2025-03-09"
+user-id = 6289
+user-login = "str4d"
+user-name = "Jack Grigg"
+
+[[publisher.ff]]
+version = "0.14.0"
+when = "2026-05-30"
+user-id = 1244
+user-login = "ebfull"
+user-name = "Sean Bowe"
+
 [[publisher.find-msvc-tools]]
 version = "0.1.0"
 when = "2025-08-29"
 user-id = 539
 user-login = "cuviper"
 user-name = "Josh Stone"
+
+[[publisher.flagset]]
+version = "0.4.7"
+when = "2025-04-04"
+user-id = 155667
+user-login = "rjzak"
+user-name = "Richard Zak"
+
+[[publisher.ghash]]
+version = "0.6.0"
+when = "2026-02-28"
+trusted-publisher = "github:RustCrypto/universal-hashes"
+
+[[publisher.group]]
+version = "0.12.0"
+when = "2022-05-04"
+user-id = 1244
+user-login = "ebfull"
+user-name = "Sean Bowe"
+
+[[publisher.group]]
+version = "0.14.0"
+when = "2026-06-01"
+user-id = 1244
+user-login = "ebfull"
+user-name = "Sean Bowe"
 
 [[publisher.hashbrown]]
 version = "0.15.2"
@@ -211,6 +403,16 @@ user-id = 5059
 user-login = "newpavlov"
 user-name = "Artyom Pavlov"
 
+[[publisher.hmac]]
+version = "0.13.0"
+when = "2026-03-29"
+trusted-publisher = "github:RustCrypto/MACs"
+
+[[publisher.hybrid-array]]
+version = "0.4.15"
+when = "2026-09-08"
+trusted-publisher = "github:RustCrypto/hybrid-array"
+
 [[publisher.indexmap]]
 version = "2.14.2"
 when = "2026-09-05"
@@ -224,6 +426,11 @@ when = "2025-02-21"
 user-id = 5059
 user-login = "newpavlov"
 user-name = "Artyom Pavlov"
+
+[[publisher.inout]]
+version = "0.2.5"
+when = "2026-10-19"
+trusted-publisher = "github:RustCrypto/utils"
 
 [[publisher.is_terminal_polyfill]]
 version = "1.70.2"
@@ -246,6 +453,22 @@ user-id = 5059
 user-login = "newpavlov"
 user-name = "Artyom Pavlov"
 
+[[publisher.keccak]]
+version = "0.2.2"
+when = "2026-08-21"
+trusted-publisher = "github:RustCrypto/sponges"
+
+[[publisher.libc]]
+version = "0.2.191"
+when = "2026-10-16"
+trusted-publisher = "github:rust-lang/libc"
+
+[[publisher.libm]]
+version = "0.2.16"
+when = "2026-01-24"
+user-id = 55123
+user-login = "rust-lang-owner"
+
 [[publisher.memchr]]
 version = "2.8.3"
 when = "2026-07-08"
@@ -267,6 +490,11 @@ user-id = 267
 user-login = "tarcieri"
 user-name = "Tony Arcieri"
 
+[[publisher.p256]]
+version = "0.14.0"
+when = "2026-07-03"
+trusted-publisher = "github:RustCrypto/elliptic-curves"
+
 [[publisher.p384]]
 version = "0.13.1"
 when = "2025-02-07"
@@ -274,9 +502,26 @@ user-id = 267
 user-login = "tarcieri"
 user-name = "Tony Arcieri"
 
+[[publisher.p384]]
+version = "0.14.0"
+when = "2026-07-06"
+trusted-publisher = "github:RustCrypto/elliptic-curves"
+
 [[publisher.p521]]
 version = "0.13.3"
 when = "2023-11-11"
+user-id = 267
+user-login = "tarcieri"
+user-name = "Tony Arcieri"
+
+[[publisher.p521]]
+version = "0.14.0"
+when = "2026-07-08"
+trusted-publisher = "github:RustCrypto/elliptic-curves"
+
+[[publisher.pem-rfc7468]]
+version = "1.0.0"
+when = "2025-11-08"
 user-id = 267
 user-login = "tarcieri"
 user-name = "Tony Arcieri"
@@ -288,6 +533,11 @@ user-id = 267
 user-login = "tarcieri"
 user-name = "Tony Arcieri"
 
+[[publisher.pkcs1]]
+version = "0.8.0-rc.5"
+when = "2026-10-05"
+trusted-publisher = "github:RustCrypto/formats"
+
 [[publisher.pkcs8]]
 version = "0.10.2"
 when = "2023-04-05"
@@ -295,12 +545,32 @@ user-id = 267
 user-login = "tarcieri"
 user-name = "Tony Arcieri"
 
+[[publisher.pkcs8]]
+version = "0.11.0"
+when = "2026-04-27"
+trusted-publisher = "github:RustCrypto/formats"
+
+[[publisher.polyval]]
+version = "0.7.3"
+when = "2026-07-17"
+trusted-publisher = "github:RustCrypto/universal-hashes"
+
+[[publisher.primefield]]
+version = "0.14.0"
+when = "2026-06-24"
+trusted-publisher = "github:RustCrypto/elliptic-curves"
+
 [[publisher.primeorder]]
 version = "0.13.6"
 when = "2023-11-16"
 user-id = 267
 user-login = "tarcieri"
 user-name = "Tony Arcieri"
+
+[[publisher.primeorder]]
+version = "0.14.0"
+when = "2026-07-03"
+trusted-publisher = "github:RustCrypto/elliptic-curves"
 
 [[publisher.proc-macro2]]
 version = "1.0.107"
@@ -323,6 +593,11 @@ user-id = 267
 user-login = "tarcieri"
 user-name = "Tony Arcieri"
 
+[[publisher.rfc6979]]
+version = "0.6.0"
+when = "2026-06-30"
+trusted-publisher = "github:RustCrypto/signatures"
+
 [[publisher.rsa]]
 version = "0.9.10"
 when = "2026-01-06"
@@ -330,12 +605,22 @@ user-id = 3079
 user-login = "dignifiedquire"
 user-name = "Friedel Ziegelmayer"
 
+[[publisher.rsa]]
+version = "0.10.0-rc.19"
+when = "2026-10-06"
+trusted-publisher = "github:RustCrypto/RSA"
+
 [[publisher.sec1]]
 version = "0.7.3"
 when = "2023-07-16"
 user-id = 267
 user-login = "tarcieri"
 user-name = "Tony Arcieri"
+
+[[publisher.sec1]]
+version = "0.8.1"
+when = "2026-03-31"
+trusted-publisher = "github:RustCrypto/formats"
 
 [[publisher.serde]]
 version = "1.0.229"
@@ -365,9 +650,19 @@ user-id = 6743
 user-login = "epage"
 user-name = "Ed Page"
 
+[[publisher.serdect]]
+version = "0.4.3"
+when = "2026-05-04"
+trusted-publisher = "github:RustCrypto/formats"
+
 [[publisher.sha1]]
 version = "0.10.7"
 when = "2026-07-10"
+trusted-publisher = "github:RustCrypto/hashes"
+
+[[publisher.sha1]]
+version = "0.11.0"
+when = "2026-03-27"
 trusted-publisher = "github:RustCrypto/hashes"
 
 [[publisher.sha2]]
@@ -377,12 +672,22 @@ user-id = 5059
 user-login = "newpavlov"
 user-name = "Artyom Pavlov"
 
+[[publisher.sha2]]
+version = "0.11.1"
+when = "2026-10-12"
+trusted-publisher = "github:RustCrypto/hashes"
+
 [[publisher.sha3]]
 version = "0.10.9"
 when = "2026-04-19"
 user-id = 5059
 user-login = "newpavlov"
 user-name = "Artyom Pavlov"
+
+[[publisher.sha3]]
+version = "0.12.0"
+when = "2026-05-15"
+trusted-publisher = "github:RustCrypto/hashes"
 
 [[publisher.signature]]
 version = "2.2.0"
@@ -391,12 +696,27 @@ user-id = 267
 user-login = "tarcieri"
 user-name = "Tony Arcieri"
 
+[[publisher.signature]]
+version = "3.0.0"
+when = "2026-05-02"
+trusted-publisher = "github:RustCrypto/traits"
+
 [[publisher.spki]]
 version = "0.7.3"
 when = "2023-11-28"
 user-id = 11235
 user-login = "baloo"
 user-name = "Arthur Gautier"
+
+[[publisher.spki]]
+version = "0.8.1"
+when = "2026-10-05"
+trusted-publisher = "github:RustCrypto/formats"
+
+[[publisher.sponge-cursor]]
+version = "0.1.0"
+when = "2026-05-08"
+trusted-publisher = "github:RustCrypto/utils"
 
 [[publisher.subtle]]
 version = "2.6.1"
@@ -461,12 +781,24 @@ user-id = 6743
 user-login = "epage"
 user-name = "Ed Page"
 
+[[publisher.typenum]]
+version = "1.20.1"
+when = "2026-05-29"
+user-id = 243
+user-login = "paholg"
+user-name = "Paho Lurie-Gregg"
+
 [[publisher.unicode-ident]]
 version = "1.0.27"
 when = "2026-10-12"
 user-id = 3618
 user-login = "dtolnay"
 user-name = "David Tolnay"
+
+[[publisher.universal-hash]]
+version = "0.6.1"
+when = "2026-02-27"
+trusted-publisher = "github:RustCrypto/traits"
 
 [[publisher.walkdir]]
 version = "2.5.0"
@@ -496,12 +828,22 @@ user-id = 6743
 user-login = "epage"
 user-name = "Ed Page"
 
+[[publisher.wnaf]]
+version = "0.14.1"
+when = "2026-09-03"
+trusted-publisher = "github:RustCrypto/elliptic-curves"
+
 [[publisher.x509-cert]]
 version = "0.2.5"
 when = "2023-12-24"
 user-id = 267
 user-login = "tarcieri"
 user-name = "Tony Arcieri"
+
+[[publisher.x509-cert]]
+version = "0.3.0"
+when = "2026-07-09"
+trusted-publisher = "github:RustCrypto/formats"
 
 [[publisher.x509-ocsp]]
 version = "0.2.1"
@@ -568,6 +910,12 @@ who = "Alex Crichton <alex@alexcrichton.com>"
 criteria = "safe-to-deploy"
 delta = "0.4.0 -> 0.4.1"
 notes = "Minor changes, nothing worrisome"
+
+[[audits.bytecode-alliance.audits.semver]]
+who = "Pat Hickey <phickey@fastly.com>"
+criteria = "safe-to-deploy"
+version = "1.0.17"
+notes = "plenty of unsafe pointer and vec tricks, but in well-structured and commented code that appears to be correct"
 
 [[audits.bytecode-alliance.audits.shlex]]
 who = "Alex Crichton <alex@alexcrichton.com>"
@@ -682,10 +1030,20 @@ using an undocumented API that `zerocopy` has provided specifically for
 aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
 
 [[audits.google.audits.quote]]
-who = "Ying Hsu <yinghsu@chromium.org>"
-criteria = "safe-to-run"
-version = "1.0.36"
-aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
+who = "Lukasz Anforowicz <lukasza@chromium.org>"
+criteria = "safe-to-deploy"
+version = "1.0.35"
+notes = """
+Grepped for "unsafe", "crypt", "cipher", "fs", "net" - there were no hits
+(except for benign "net" hit in tests and "fs" hit in README.md)
+"""
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
+[[audits.google.audits.quote]]
+who = "Adrian Taylor <adetaylor@chromium.org>"
+criteria = "safe-to-deploy"
+delta = "1.0.35 -> 1.0.36"
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
 
 [[audits.google.audits.quote]]
 who = "Lukasz Anforowicz <lukasza@chromium.org>"
@@ -728,19 +1086,11 @@ version = "0.3.1"
 aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
 
 [[audits.google.audits.rand_core]]
-who = "Android Legacy"
-criteria = "safe-to-run"
+who = "Lukasz Anforowicz <lukasza@chromium.org>"
+criteria = "safe-to-deploy"
 version = "0.6.4"
-aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
-
-[[audits.google.audits.rustc_version]]
-who = "danakj@chromium.org"
-criteria = "safe-to-run"
-version = "0.4.0"
 notes = """
-Reviewed in https://crrev.com/c/5171063
-
-Previously reviewed during security review and the audit is grandparented in.
+For more detailed unsafe review notes please see https://crrev.com/c/6362797
 """
 aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
 
@@ -748,12 +1098,6 @@ aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_p
 who = "Android Legacy"
 criteria = "safe-to-run"
 version = "1.0.6"
-aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
-
-[[audits.google.audits.semver]]
-who = "George Burgess IV <gbiv@google.com>"
-criteria = "safe-to-run"
-version = "1.0.16"
 aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
 
 [[audits.google.audits.shlex]]
@@ -790,6 +1134,107 @@ Reviewed in https://crrev.com/c/5171063
 Previously reviewed during security review and the audit is grandparented in.
 """
 aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
+[[audits.isrg.audits.fiat-crypto]]
+who = "David Cook <dcook@divviup.org>"
+criteria = "safe-to-deploy"
+version = "0.1.17"
+notes = """
+This crate does not contain any unsafe code, and does not use any items from
+the standard library or other crates, aside from operations backed by
+`std::ops`. All paths with array indexing use integer literals for indexes, so
+there are no panics due to indexes out of bounds (as rustc would catch an
+out-of-bounds literal index). I did not check whether arithmetic overflows
+could cause a panic, and I am relying on the Coq code having satisfied the
+necessary preconditions to ensure panics due to overflows are unreachable.
+"""
+
+[[audits.isrg.audits.fiat-crypto]]
+who = "Brandon Pitman <bran@bran.land>"
+criteria = "safe-to-deploy"
+delta = "0.1.17 -> 0.1.18"
+
+[[audits.isrg.audits.fiat-crypto]]
+who = "David Cook <dcook@divviup.org>"
+criteria = "safe-to-deploy"
+delta = "0.1.18 -> 0.1.19"
+notes = """
+This release renames many items and adds a new module. The code in the new
+module is entirely composed of arithmetic and array accesses.
+"""
+
+[[audits.isrg.audits.fiat-crypto]]
+who = "David Cook <dcook@divviup.org>"
+criteria = "safe-to-deploy"
+delta = "0.1.19 -> 0.1.20"
+
+[[audits.isrg.audits.fiat-crypto]]
+who = "David Cook <dcook@divviup.org>"
+criteria = "safe-to-deploy"
+delta = "0.1.20 -> 0.2.0"
+
+[[audits.isrg.audits.fiat-crypto]]
+who = "Brandon Pitman <bran@bran.land>"
+criteria = "safe-to-deploy"
+delta = "0.2.0 -> 0.2.1"
+
+[[audits.isrg.audits.fiat-crypto]]
+who = "Tim Geoghegan <timg@divviup.org>"
+criteria = "safe-to-deploy"
+delta = "0.2.1 -> 0.2.2"
+notes = "No changes to `unsafe` code, or any functional changes that I can detect at all."
+
+[[audits.isrg.audits.fiat-crypto]]
+who = "Brandon Pitman <bran@bran.land>"
+criteria = "safe-to-deploy"
+delta = "0.2.2 -> 0.2.4"
+
+[[audits.isrg.audits.fiat-crypto]]
+who = "David Cook <dcook@divviup.org>"
+criteria = "safe-to-deploy"
+delta = "0.2.4 -> 0.2.5"
+
+[[audits.isrg.audits.fiat-crypto]]
+who = "Brandon Pitman <bran@bran.land>"
+criteria = "safe-to-deploy"
+delta = "0.2.5 -> 0.2.6"
+
+[[audits.isrg.audits.fiat-crypto]]
+who = "Brandon Pitman <bran@bran.land>"
+criteria = "safe-to-deploy"
+delta = "0.2.6 -> 0.2.7"
+
+[[audits.isrg.audits.fiat-crypto]]
+who = "David Cook <dcook@divviup.org>"
+criteria = "safe-to-deploy"
+delta = "0.2.7 -> 0.2.8"
+
+[[audits.isrg.audits.fiat-crypto]]
+who = "Tim Geoghegan <timg@divviup.org>"
+criteria = "safe-to-deploy"
+delta = "0.2.8 -> 0.2.9"
+notes = "No changes to Rust code between 0.2.8 and 0.2.9"
+
+[[audits.isrg.audits.fiat-crypto]]
+who = "Tim Geoghegan <timg@divviup.org>"
+criteria = "safe-to-deploy"
+delta = "0.2.9 -> 0.3.0"
+notes = "The diff is huge, but that's because it introduces a wrapper around indexing into arrays which is used in many many places. There is no new unsafe code and no change to build scripts I can detect."
+
+[[audits.isrg.audits.rand_core]]
+who = "David Cook <dcook@divviup.org>"
+criteria = "safe-to-deploy"
+delta = "0.6.4 -> 0.9.3"
+
+[[audits.isrg.audits.rand_core]]
+who = "J.C. Jones <jc@divviup.org>"
+criteria = "safe-to-deploy"
+delta = "0.9.3 -> 0.9.5"
+
+[[audits.isrg.audits.rand_core]]
+who = "David Cook <dcook@divviup.org>"
+criteria = "safe-to-deploy"
+delta = "0.9.5 -> 0.10.0"
 
 [[audits.mozilla.audits.core_detect]]
 who = "Henri Sivonen <hsivonen@hsivonen.fi>"
@@ -880,11 +1325,33 @@ criteria = "safe-to-deploy"
 delta = "1.0.45 -> 1.0.47"
 aggregated-from = "https://raw.githubusercontent.com/mozilla/glean/main/supply-chain/audits.toml"
 
+[[audits.mozilla.audits.rand_core]]
+who = "Alex Franchuk <afranchuk@mozilla.com>"
+criteria = "safe-to-deploy"
+delta = "0.10.0 -> 0.10.1"
+aggregated-from = "https://raw.githubusercontent.com/mozilla/cargo-vet/main/supply-chain/audits.toml"
+
+[[audits.mozilla.audits.rustc_version]]
+who = "Nika Layzell <nika@thelayzells.com>"
+criteria = "safe-to-deploy"
+version = "0.4.0"
+notes = """
+Use of powerful capabilities is limited to invoking `rustc -vV` to get version
+information for parsing version information.
+"""
+aggregated-from = "https://raw.githubusercontent.com/mozilla/cargo-vet/main/supply-chain/audits.toml"
+
 [[audits.mozilla.audits.semver]]
 who = "Ben Dean-Kawamura <bdk@mozilla.com>"
 criteria = "safe-to-deploy"
 delta = "1.0.16 -> 1.0.28"
 notes = "Very few changes, mostly removes support for older Rust versions.  Some unsafe code refactored, but it seemed to be functionally equivalent to me."
+aggregated-from = "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/supply-chain/audits.toml"
+
+[[audits.mozilla.audits.semver]]
+who = "Bobby Holley <bobbyholley@gmail.com>"
+criteria = "safe-to-deploy"
+delta = "1.0.17 -> 1.0.16"
 aggregated-from = "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/supply-chain/audits.toml"
 
 [[audits.mozilla.audits.shlex]]
@@ -901,3 +1368,15 @@ who = "Nika Layzell <nika@thelayzells.com>"
 criteria = "safe-to-deploy"
 delta = "0.2.1 -> 0.2.2"
 aggregated-from = "https://raw.githubusercontent.com/mozilla/cargo-vet/main/supply-chain/audits.toml"
+
+[[audits.zcash.audits.group]]
+who = "Kris Nuttycombe <kris@nutty.land>"
+criteria = "safe-to-deploy"
+delta = "0.12.0 -> 0.12.1"
+aggregated-from = "https://raw.githubusercontent.com/zcash/zcash/master/qa/supply-chain/audits.toml"
+
+[[audits.zcash.audits.group]]
+who = "Sean Bowe <ewillbefull@gmail.com>"
+criteria = "safe-to-deploy"
+delta = "0.12.1 -> 0.13.0"
+aggregated-from = "https://raw.githubusercontent.com/zcash/zcash/master/qa/supply-chain/audits.toml"

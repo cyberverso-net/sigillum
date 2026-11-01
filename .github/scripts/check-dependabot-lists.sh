@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Checks a Dependabot configuration:
-# - the Cargo group and the ignore rules name the same crates (ADR-0011),
-#   so every ignore rule of the Cargo entry belongs to the group;
+# - the ignore rules of the Cargo entry name the crates of the Cargo group
+#   and the crates updated on their own, each once (ADR-0011, ADR-0025);
+# - no crate updated on its own is in the Cargo group;
 # - the Maven entry lists every directory that holds a pom.xml, under the
 #   current directory, and no other, so that every Maven build is watched;
 # - its dss group takes every DSS artefact, and the maven-routine group
@@ -11,6 +12,13 @@
 set -euo pipefail
 
 file="${1:-.github/dependabot.yml}"
+
+# ADR-0025, rule 2: cms and rsa are pinned to release candidates and leave
+# the rustcrypto-dalek group, so that each new release arrives in its own
+# pull request. They keep their ignore rules. Change this list together
+# with the group and the ignore rules of dependabot.yml.
+individual='cms
+rsa'
 
 if ! command -v yq >/dev/null || ! yq --version | grep -q ' v4\.'; then
   echo "This check needs yq version 4 (https://github.com/mikefarah/yq)."
@@ -41,17 +49,26 @@ for list in group ignored; do
   fi
 done
 
-group_set=$(printf '%s\n' "$group" | sort -u)
+individual_set=$(printf '%s\n' "$individual" | sort -u)
+grouped_individual=$(comm -12 <(printf '%s\n' "$group" | sort -u) <(echo "$individual_set") | sed '/^$/d')
+if [ -n "$grouped_individual" ]; then
+  while read -r crate; do
+    echo "Updated on its own, but listed in the rustcrypto-dalek group: $crate"
+  done <<< "$grouped_individual"
+  status=1
+fi
+
+expected_set=$(printf '%s\n' "$group" "$individual" | sort -u)
 ignored_set=$(printf '%s\n' "$ignored" | sort -u)
-if [ "$group_set" != "$ignored_set" ]; then
-  echo "The rustcrypto-dalek group and the ignore rules in $file differ:"
-  comm -23 <(echo "$group_set") <(echo "$ignored_set") | sed '/^$/d; s/^/  only in the group: /'
-  comm -13 <(echo "$group_set") <(echo "$ignored_set") | sed '/^$/d; s/^/  only in the ignore rules: /'
+if [ "$expected_set" != "$ignored_set" ]; then
+  echo "The rustcrypto-dalek group with the crates updated on their own, and the ignore rules in $file, differ:"
+  comm -23 <(echo "$expected_set") <(echo "$ignored_set") | sed '/^$/d; s/^/  only in the group or updated on its own: /'
+  comm -13 <(echo "$expected_set") <(echo "$ignored_set") | sed '/^$/d; s/^/  only in the ignore rules: /'
   status=1
 fi
 
 if [ "$status" -eq 0 ]; then
-  echo "The group and the ignore rules name the same $(printf '%s\n' "$group" | wc -l | tr -d ' ') crates."
+  echo "The ignore rules name the $(printf '%s\n' "$group" | wc -l | tr -d ' ') crates of the group and the $(echo "$individual_set" | wc -l | tr -d ' ') crates updated on their own."
 fi
 
 entries=$(yq '[.updates[] | select(."package-ecosystem" == "maven")] | length' "$file")
