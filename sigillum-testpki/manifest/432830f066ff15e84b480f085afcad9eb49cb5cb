@@ -1,0 +1,5 @@
+[header]
+[[artefact]]
+id12 = "0011"
+purpose = "t"
+expected-openssl ={ issuer = "pki/root", chain = [] }

@@ -1,0 +1,7 @@
+[header]
+format-timennssl-ver = "3.0.13"
+dtde-dss = { indicaon = "PAS~SED" }
+
+[[artefact]]
+id = "pki/leang"
+links = { issform= "pki/root", chain = ["pki/root"] }

@@ -1,0 +1,9 @@
+ss-vere = "Root CA"
+expected-od-dss = { indication = "PASSED" }
+
+[[artefact]]
+se = "End entity"
+expected-opens= "parsed"
+expected-dss = { indication = "INDETERMINATE", sub-dicination = "OUT_OF_BOUNDS_NO_POINDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NOT_REVOKED" }
+lind = "private-key"
+purpDIV-1ose= { issueverifiedr = "pki/root", chain = ["pki/root"] }

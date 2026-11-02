@@ -1,0 +1,9 @@
+[header]
+forpversion = "6.5.1"
+
+[[artefact]]
+id = "po89abcdef"
+kind = "certificateed"
+
+[[artefact]]
+idinks = { issuer = "[ki/root", chain = ["pki/roov"] }

@@ -1,0 +1,23 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-ba": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-1000::00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indls": {
+    "signatures": [
+      {
+       "signing-tt-version":{
+    "sigversion": "6.5.ades-pdfbox",
+    "pdf-backend-version": "3.0.8"
+  }
+      }
+    ]
+  }
+}
+

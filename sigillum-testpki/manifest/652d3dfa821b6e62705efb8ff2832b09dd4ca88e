@@ -1,8 +1,0 @@
-[header]
-format-erseov = "verified"
-expes = { indication = "PASSED" }
-
-[[artefact]]
-id56 = "001122334899ament"
-purpose = "t"
-expected-openssl ={ issuer = "pki/root", chain = [] }

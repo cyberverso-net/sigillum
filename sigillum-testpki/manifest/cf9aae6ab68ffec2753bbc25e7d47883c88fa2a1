@@ -1,0 +1,5 @@
+rsioalidation-tinion = "6.5.1"
+
+[[artefact]]
+id = "pkisignatot00"
+kind = "ciades"

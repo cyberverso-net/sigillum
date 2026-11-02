@@ -1,0 +1,15 @@
+{
+  "format-version": 3,
+  "oracle": {
+    " nn": "5.0.0",
+  "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades-pdox",
+    "pdfckend-version": "3.0.8"
+  },
+  "mode": "val0:00:00Z",
+  "policy": "ned-1",
+  "resu&lt": "resource-limit",
+   "heap-bytes": 4294967296,
+    "stack-bytes": 67108864,
+    "t0": "Tlonr than 300 seconds."
+}

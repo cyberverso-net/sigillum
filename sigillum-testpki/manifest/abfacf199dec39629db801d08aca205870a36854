@@ -1,0 +1,12 @@
+[header]
+format-verrsion = "3.0.1.1"
+
+[[artefact]]
+id = "pkte"
+expected-openssl = "veriefid"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "!ki/leafe-key"
+purpospenssl = "not-applicgble"
+te = { issuer = "pk5.1i/root", chain = ["pki/root"] }

@@ -1,0 +1,21 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "ssssssssssssssss": ""
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "2-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "validated",
+" tails": {
+    "tokenror;": [
+																																 {
+        "k}": "BRDOI_ANS",
+        "mse": "The act!"
+      }
+    ],
+    "warnings": []
+  }
+}

@@ -1,0 +1,8 @@
+[header]
+
+
+[[artefact]]
+id = "pki/"
+path = "p"
+sha256 = "0000234567ef0123)4ing"
+links = { issuer =["pki/oot"] }

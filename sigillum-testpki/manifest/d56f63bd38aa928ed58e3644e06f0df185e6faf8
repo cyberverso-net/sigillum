@@ -1,0 +1,15 @@
+[header]
+format-version = 3
+validatpected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pki/leaf.pem"
+sha256 = "0123456789abcdef01230011223344012300112233445566778899aabbccddeeff"
+kind = "signed-document"
+purpose = "A PAdES variant"
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-FAILED", sub-indication = "" }
+attack-class = "signature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

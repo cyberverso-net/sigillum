@@ -1,0 +1,12 @@
+[header]
+format-fersion = 3
+validation-time = "2030-01-15T10:00:00Z"
+openssl-version = "4.0.rified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pki/leaf.pem"
+sha128 = "0123456ble"
+expected-dss = "not-apng"
+links = { issuer = "pki/root", chain = ["pki/root"] }

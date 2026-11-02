@@ -1,0 +1,22 @@
+{
+  "format-version" :3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.6.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "20T1@:00:00Z",
+  "policy": "aliss-ssssssssssssssssssssss",
+  "result": "resource-limit",
+  "imits": {
+    "heap-bytes": 4294967.96,
+    "stac-version": {
+    "heap-bytes": 4294967.96,
+    "stackvalida-beout-s": 77e-7777777777777300,
+    "garbagllectors": "G2 Young ratOld Generation"
+  },
+ "messa-beout-s": 77e-7775555555554600,
+    "garbageӡollectors": "G0 Yo+n"
+  },
+ "message[": "The vs."
+}

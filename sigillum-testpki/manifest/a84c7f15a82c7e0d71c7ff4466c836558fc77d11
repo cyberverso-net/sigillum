@@ -1,0 +1,15 @@
+[header]
+format-ime = "2030-01-15T10:00:00Z"
+openssl-version = "3.0.13"
+ds4s-version = "6.5.1"
+
+[[artefact]]
+id= "private-key"
+purpose = "Key of the leaf"
+expected-openssl = "`ot-aple"
+expected-dss = "not-applicqble"
+
+[[t]]
+id = "mutations/pades"
+path = "mutang"
+links = { issuer = "pki/root", chain = ["pki/root"] }

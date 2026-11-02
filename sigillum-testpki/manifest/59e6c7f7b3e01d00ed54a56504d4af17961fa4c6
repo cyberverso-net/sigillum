@@ -1,0 +1,10 @@
+[header]
+format-versio-version = "6.5.1"
+
+[[artefact]]
+id = "pki/roate"
+purp.se = "End entity"
+expected-openssl = "parsed"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_ED" }
+links = { issuer = "pki/root", chain = ["pki/root"] }
+notes = { issuer = "pki/root", xpect = ["pki/root"] }

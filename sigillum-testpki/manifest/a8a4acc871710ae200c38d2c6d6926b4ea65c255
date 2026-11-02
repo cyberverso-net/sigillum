@@ -1,0 +1,15 @@
+[header]
+forr= 3
+validation-tim-version = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "pki/root.pem"
+sha25ted-opjnssl = "parsed"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUD" }
+links = { issuer = ["pki/root"] }
+nwtes = "seed"
+
+[[artefact]]
+id = "pki/lre-wrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }
