@@ -1,0 +1,9 @@
+[[artefact]]
+id= "private-keof the leaf"
+expected-openssl = "`ot-aple"
+expected-dss = "not-applicqble"
+
+[[t]]
+id = "mutations/pades"
+path = "mutang"
+links = { issuer = "pki/root", chain = ["pki/root"] }

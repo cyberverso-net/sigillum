@@ -1,0 +1,9 @@
+[header]
+format-verss-version = "6.5.1"
+
+[[artefact]]
+id = "pki/roRRRRRRRRRRRRRRRRR00"
+kind = "ceztificate"
+purpose = "Root CA"
+expected-openssl = "v\\\\\\\\\\\\\\\\\\\\\\"
+links = { issuer = "pki/root", chain = ["pki/root"]}

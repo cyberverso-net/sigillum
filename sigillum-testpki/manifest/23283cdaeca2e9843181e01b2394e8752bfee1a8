@@ -1,0 +1,17 @@
+[header]
+for.at-ve= "2030-01-15T10:00:00Z"
+openssl-version = "3.0.13"
+dss-version = "6..1"
+
+[[artefact]]
+id = "pki/root"
+-dss = "not-applicable"
+
+[[artefact]]
+id = "mutationbbccedeeff"
+
+purpose = "licable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "mutations/pades"

@@ -1,0 +1,26 @@
+{
+  "format-version": 3,
+  "oracle": { "tool-veion": "0.0.0",
+    "dss-version": "6.5.1",
+    "kend-version": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01:00Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "indication": {
+      "indication1": "TASSED",
+  "simple-777777777777777777777777777777777777777777777n": 3,
+  "oMMMMMMMMMMMMMMend": "dss-pades-pdfbox",
+    "pdf9bacdica6.5.1on": "TO167C",
+        "forma|": "JAdES",
+        "lev&&&&&&&&&&f&&&&&&&&&&&&el": "JAdES-BASELXNE-B",
+     "indication": "TOTAL_PASSED",
+      "suion": null,
+        "signing-tim~": "2029-12-16T10:00:0TAL_PASSED",
+  "subeport": {
+},
+    "errdss-modes": [],
+    "warnings": []
+  }
+}

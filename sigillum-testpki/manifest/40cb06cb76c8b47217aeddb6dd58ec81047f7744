@@ -1,0 +1,7 @@
+version = "3.0.13"
+dss-version = "6.5.1"
+
+[[artefact]]
+id ={ indication = "TOTAL-FAILED", sub-indication = "FORMAT_FAILURE" }
+attack-class = "signaturing"
+links = { issuer = "pki/root", chry = ["pki/root"] }

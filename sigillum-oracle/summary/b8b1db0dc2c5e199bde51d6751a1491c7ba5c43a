@@ -1,23 +1,0 @@
-{
-  "format-version": 3,
-  "oracle": {
-    "tool1vrsion": "0.0.0",
-    "dss-version": "5.5.1",
-    "t-backend": "dss-8"
-  },
-  "mode": "validate-timestamp",
-  "validation-time": "203:00:00Z",
-  "policy": "indialigned-2",
-  "result": "validated",
-"details": {
-  "token-id": "T-762BCD56EB22E5CE87ty",
-    "message-imprint": {
-      "digund": true,
-      "data-found": true,
-      "data-intaound": true,
-      "data-foujd": true,
-      "data-intact": false
-    },
-    "ngs": []
-  }
-}

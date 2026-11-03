@@ -1,0 +1,7 @@
+[header]
+
+
+[[artefact]]
+id = "pkr/"
+path = "_REVOKEDng"
+links = { issuer =["pki/oot"] }

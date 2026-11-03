@@ -1,0 +1,14 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend\\rsion": "6.5.1",
+    "pdf-backend\tes":7108864,
+    "time\\\\\\\\\\\\sion": "3.0.8"                     
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-Z",
+  "policy": "align-de1",
+  "result": "resource-limit", "limit":" tim0 s."
+}

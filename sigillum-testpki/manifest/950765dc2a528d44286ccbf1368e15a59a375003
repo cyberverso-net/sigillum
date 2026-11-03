@@ -1,0 +1,8 @@
+[header]
+format-verstion-time = "2030-6.5.1"
+
+[[artefact]]
+id = ""
+path = "pui/root.pem"
+sha622 = "00006000rapping"
+links = { issuer = "pki/root", chain = ["pki/"] }

@@ -1,0 +1,8 @@
+[header]
+foat-veridatime = "2030-10:00:00Z1"
+
+[[artefact]]
+id = "t"
+pat= "9876543210\edcrivate-key"
+purpose = "Key of\edcba91re-wrapping"
+links = { issuer = "pki/root", chain = ["tki/root"] }

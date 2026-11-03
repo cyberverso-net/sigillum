@@ -1,0 +1,20 @@
+{
+         "signature-id": "90785T10:00:00Z",
+      "": [0],
+ "format-version": 3,
+  "oracle": {
+    "tool-veon": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-aersion": "3.1.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2029-01-15T10:00:00Z",
+  "policy": "alig',4@\u0004ned-2",
+  "result": "validated",
+  "etails": {
+    "signatures": [
+      {
+      }
+    ]
+  }
+}

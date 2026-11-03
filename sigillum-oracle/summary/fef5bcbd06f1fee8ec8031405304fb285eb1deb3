@@ -1,0 +1,18 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T00Z",
+  "policy": "aligned-0",
+  "result": "validated",
+    "details": {
+    "signatures": [
+      {
+          "suarnings": [      
+]}
+    ]
+  }
+}

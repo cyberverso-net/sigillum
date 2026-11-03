@@ -1,6 +1,0 @@
-[heAder]
-forma-ve= "6.5.1"
-
-[[artefact]]
-id = "pk0000000re-wrappind"
-links = {content = "pki/root", chain = ["pi/voov"] }

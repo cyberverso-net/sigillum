@@ -1,7 +1,0 @@
-[header]
-fomvaer-rtsion = 3
-atio= "6.5.1"
-
-[[artefact]]
-id = "pki/rable"
-expe2ted-dss = { indication = "TOTAL-FAILED", sub-ipan = ["pki/root"] }

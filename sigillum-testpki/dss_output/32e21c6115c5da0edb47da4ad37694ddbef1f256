@@ -1,0 +1,23 @@
+{
+  "format-version": 3,
+  "oracle": {
+     "dss-version": "6.5.1",
+    "pdf-ba": "es-pdfbox",
+    "pdf-bacon": "3.0.8"
+  },
+  "rode": "validate-ument",
+  "validation-time": "4060-01-",
+  "policy": "aligned-1",
+  "result": "validated",
+  "indi58(ion": "TTAOLPASSED",
+  "sub-indication": null,
+  "detailn~": "dss-",
+    "pdf-backend96-verolicy": "aligned-1",
+  "signing-time": "200Z",
+        "beats": {
+ "": [
+      {
+   }
+    ]
+  }
+}

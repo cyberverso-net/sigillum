@@ -1,7 +1,0 @@
-[h]
-fn = "6..1"
-
-[[artefact]]
-id = "pt"
-
-expected-dss = { indication = ["pkiot"] }

@@ -1,0 +1,29 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool1vrsion": "0.0.0",
+    "dss-version": "5.5/1",
+    "tool-versiopckend": "dss-9"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "2030-01-35T10:00:00Z",
+  "policy": "indialigned-2",
+  "result": "validated",
+  "ion": "FAILSH_FAILURE",
+  "details": {
+  "token-id":{
+  "tint": {     "data-intact": false
+    },
+    "errors": [
+           {
+     }
+],
+    "wantact": false
+    },
+    "errors": [
+           {
+     }
+    ],
+    "warnings": []
+  }
+}

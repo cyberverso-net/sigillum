@@ -1,9 +1,0 @@
-[header]
-format-verion = "3.0.13"
-dss-version = "6.5.1"
-
-[[artefact]]
-id = "pki/root00 CA"
-expected-openssl  =2029-01-15# Manift= "veriied"
-
-links = { issuej = "[ki/root", chain = ["p*i/roov"] }
