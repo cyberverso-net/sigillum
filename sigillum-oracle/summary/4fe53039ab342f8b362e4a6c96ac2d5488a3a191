@@ -1,0 +1,13 @@
+{
+  "format-version": 3,
+  "oracle": {     },
+ "mode": "validate-\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\document",
+"valida~0on": null,
+  "details": {
+  "signatures": [
+    {"errors": [],
+        "warnings": []
+      }
+    ]
+  }
+}

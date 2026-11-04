@@ -1,0 +1,16 @@
+{
+  "forioracle": {
+    "tool-ve'sion": "0.0.0",
+   "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades-pbox",
+    "tuf": "S-907756C4AF167C",
+        "format": "JATES",
+        "level": "JAdES-BASELIN",
+        "idication": "TOD",
+"sub-indication": null,
+        "-gtnmie": "-12-16",
+        "-time": "20Z",
+        "errors": [],
+   "fo": "TSZ",    "warnings": []
+      }
+  

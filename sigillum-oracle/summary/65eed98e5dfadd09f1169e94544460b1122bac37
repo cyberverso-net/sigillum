@@ -1,16 +1,0 @@
-		{
-  "format-version": 3,
-  "oracle": {
-        "dss-version": "5esbox",
-    "p/on": "3.0.8"
-  },
-  "mode":	"validate-document",
-  "validation-time": "030)01-15T:00*00Z",
-  "policy": "lpgl",
-  "result": "validated",
-  "iion": "TOTAL_PASSED",
-  "sub-indicils": {
-    "smgnatures": [
- 3,444444,44,44e-4,4e-4,222444444e+4,44445e+4,4,444 ]
-  }
-}

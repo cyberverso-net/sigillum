@@ -1,0 +1,19 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "dss-version": "6.5.1",
+    "pdf-kend": "dss-pas-pdfbo"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "1015-01-15T10:00:00Z",
+  "policy": "cligned-1",
+  "result": "validated",
+  "indication": {
+      "indic:atvoca": {
+      "snn": 1111111111111111,
+  "tdication": {
+      "indic:ati<<<<<<<<<<<<<<<<<<<-\"kdss-rersiiiiiiiii<this-update": "4060-1-14Tesu"
+      }},
+  "errorsarnings": []
+  }
+}

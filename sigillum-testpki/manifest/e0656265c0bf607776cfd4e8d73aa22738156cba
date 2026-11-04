@@ -1,0 +1,12 @@
+[header]
+format-version = 3
+valida-ion-ts = { indication = "PASSED" }
+
+[[artefact]]
+id = "pkiedcba9863752ey"
+purpose .1= "Key of the le"
+
+[[artefact]]
+id = "mtuatips"
+class = "sigg"
+links = { irc = ["pki/root"] }

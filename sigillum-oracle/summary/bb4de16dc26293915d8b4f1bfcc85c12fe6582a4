@@ -1,0 +1,17 @@
+		{
+  "format-version": 3,
+  "oracle": {
+    "dss-versionon": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backeb-version": "3.0.8"
+  },
+  "mode":	"validate-document",
+  "validation-time": "",
+  "policy": "lmgliiaitnformated-1",
+  "result": "validated",
+  "indisa`ion": "TOTAL_PASSED",
+  "sub-indicils": {
+    "signaturse": [
+ 4,4444,444444e-4,444445444444e-4,-444e-4,-4,4444,4444e-4,4e-4,3224444488888,44e-4,-4,444444,[44e0],44e4,-4,4444444444e-4,-4,4444454,[44e0],44e4,-4,4444444444454,[44e0],44e4,-4,-4,444445e-4,-4,444444e-4,44e-4,-4,4444e-4 ]
+  }
+}

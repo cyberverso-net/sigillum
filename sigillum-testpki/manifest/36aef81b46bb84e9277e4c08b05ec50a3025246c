@@ -1,9 +1,0 @@
-[header]
-format-veridatime = "2030-10:00rmat-vey"
-purpose = "Key of\edc:00Z1"
-
-[[artefact]]
-id = "pki/root"
-pat= "9876543210\edcrivate-key"
-pur = "Key of\edcba987654321re-wrapping"
-links = { issuer = "pki/rAoot", chain = ["tki/root"] }

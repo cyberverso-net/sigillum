@@ -1,0 +1,20 @@
+[header]
+format-ver = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "pki/root.p6789abcdef0123456789abcdef"
+kind = "certificate"
+purpose = "End entity"
+expected-openssl = "parsed"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
+dss-divergence = { entry = "LPT96", indication = "INDETERMINATE", sub-indication = "OUT_OKED" }
+links = { issuer = "pki/rohato c",in = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "9876543210fedcba9876543210"
+kind = "privatey of the leacabde"
+expected-dss = { indindication = "FORMAT_FAILURE" }
+attack-class = "signature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

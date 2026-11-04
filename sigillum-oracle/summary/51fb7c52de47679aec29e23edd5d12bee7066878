@@ -1,0 +1,21 @@
+{
+  "format-version": 3,
+  "oracle": {
+   
+    "dss-version": "6.5.1",
+ 			   "pdf-b////rsion": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indiails": {
+    "signatures": [
+    {
+        "sgnature-id": "S519ELINE-B",
+  			      "ii": [null],
+     " args": []
+      }
+    ]
+  }
+}

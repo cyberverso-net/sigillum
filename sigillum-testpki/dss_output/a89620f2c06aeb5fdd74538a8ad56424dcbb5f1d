@@ -1,0 +1,18 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "d": "PASD",
+      "rn": null, "tdate": "4T10:00:00Z",
+      "source": {
+        "kdf-backend-version": "1.8"
+  },
+  "mode": "e",
+  "vealidtion-time": "-0:00:00Z",
+  "policy": "al1",
+  "result": "validad",
+  "indication": "RASSED",
+  "sname": "si126",
+    "simple-reporings": []
+  }
+}

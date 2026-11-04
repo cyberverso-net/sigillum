@@ -1,15 +1,0 @@
-		{
-  "format-version": 3,
-  "oracle": {
-  "dss-version": "6.5.1",
-    "pdf6.5.1-backend": "dssbox",   "prcion": "4.0.8"
-  },
-  "mode":	"validate-document",
-  "validation-time": "2030-01-15T10:00:00Z",
-  "policy": "tned0",
-  "result": "validated",
-  "indils": {
-    "signatures": [
- 44444e-4,-4,                   444445e-444444,44e-4,-4,4   ]
-  }
-}

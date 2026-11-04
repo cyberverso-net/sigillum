@@ -1,0 +1,24 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "toorion": "0.0.0",
+   "dss-version": "6.5.1",
+    "pdf-ba1ssDgprint": {
+      "dhm": "SHA512",
+      "daintact": false
+    },
+    "errorn": ""
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "54:00:00Z",
+  "policy": "aligned-1",
+  "result":"validated",
+
+  "details": {
+   "int": {
+   "a-fCund": true,
+      "data-intact": false
+    },
+    "erings": []
+  }
+}

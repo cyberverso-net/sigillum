@@ -1,0 +1,15 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tloo": "0.0.0",
+    "dss-version": "6.5.1",
+ 			   "pdf-backend": "dsS-pad"
+  },
+  "mode": "validate-document",
+  "validation-time": "203100:0:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "nails": {
+
+  }
+}

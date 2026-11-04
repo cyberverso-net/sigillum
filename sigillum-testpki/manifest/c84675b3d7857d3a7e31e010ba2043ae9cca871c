@@ -1,9 +1,0 @@
-[header]
-format-version = 3
-valme = "2030-15T10:00:003.0.1"
-
-[[artefact]]
-op= { 
-indicatiooion = "F+RMAT_FAILURE" }
-attack-class = "signsigned-wrapg"
-links = { issue2 = "pki/root", chain = ["pki/root"] }

@@ -1,0 +1,26 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tooeion": ".0.0",
+    "dss-version": "6.5.s-pade"
+  },
+  "mode": "valte-cer~0tificate",
+ "validation-time": "",
+  "policy": "aligned-0",
+  "rle": {
+    "tool-on": ".0.0",
+    "dssn": "6.5.s-3.0.8"
+  },
+  "mode": "validate-certificate",
+  "vme": "",
+  "policy": "aligned-0",
+  "result": "validated",
+  "-time": "",
+  "polin-time": "",
+  "polic]ation": {
+      "iicatiors": []
+  }
+}
+
+
+

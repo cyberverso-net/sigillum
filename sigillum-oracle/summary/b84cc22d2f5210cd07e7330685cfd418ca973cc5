@@ -1,0 +1,30 @@
+{
+  "format-version": 3,
+  "oracle": {																																			
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades=-pdfbox",
+    "pde": {																																			
+    "tool-version": "0.0.0",
+  "pdf-d-version": "3.0,8"
+  },
+  "mode": "validate-timeamp",
+  "validacy": "indialigAILD",
+  "policysub-indication": "HASH_FAILURE",
+  "f-d-version": "3.0,8"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "indialigned-1",
+  "result": "validated",
+  "indication": "FAILED",
+  "policysub-indication": "HASH_FAILURE",
+  "details": {
+   "productors": [
+      {
+        "key": "BBB_CV_TS-stamp messagimprint is ngt intact/!"
+      }
+    ],
+    "warnings": []
+  }
+}

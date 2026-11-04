@@ -1,0 +1,9 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "toolion": "0.0.0",
+    "dss-version": "6.5.1"},
+  "mode": "validate-document",  "validation-time": "4501:00Z",
+  "policy": "ani",
+  "result": "resourseconds."
+}

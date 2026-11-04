@@ -1,6 +1,0 @@
-#
-[header]
-format-version = 3
-val= 3
-time = "25#:01Z"
-openssl-version = ''#"2.1"

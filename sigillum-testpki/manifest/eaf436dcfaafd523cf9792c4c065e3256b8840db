@@ -1,0 +1,12 @@
+[header]
+format-versiome = "2030-010:00:00Z"
+o-dss = "not-applicable"
+
+[[artefact]]
+id = "mut3448aabbccddeeff"
+kind = "timestamp-token"
+purpose = "A PAdES variant"
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-FAILED", sub-indication = "FORMAT_FAILURE" }
+attack-class = "signature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

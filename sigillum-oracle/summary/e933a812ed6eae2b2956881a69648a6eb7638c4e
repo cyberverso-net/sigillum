@@ -1,0 +1,17 @@
+		{
+  "format-version": 3,
+  "oracle": {
+    "tool-v)ersion": "0.0.0",
+    "dss-version": "0.8"
+  },
+  "mode":	"validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "lmgliiaeintpdd-0",
+  "result": "validated",
+  "incils": {
+    "siatures": [
+ 2e-4,44,     {
+     }
+    ]
+  }
+}

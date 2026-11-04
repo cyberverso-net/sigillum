@@ -1,0 +1,8 @@
+[[artefact]]
+id= "private-ot-aple"
+expected-dss = "not-applicqbl#"
+
+[[t]]
+id = "mutations/pades"
+path = "mutang"
+links = { issuer = "", chain = ["pki/root"] }

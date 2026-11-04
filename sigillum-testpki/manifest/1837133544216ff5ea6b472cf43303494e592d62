@@ -1,0 +1,7 @@
+
+expected-od-dss = { indication = "PASSEDverified" }
+
+[[artefact]]
+set = "End entity"
+expected-opens= "parsed"
+expected-dss = { indication = "INDETERMINATE", sub-dicination = "OUT_OF_BOUNDS_NO_POINDETERMINATE", sub-indicectedchain = ["pki/root"] }
