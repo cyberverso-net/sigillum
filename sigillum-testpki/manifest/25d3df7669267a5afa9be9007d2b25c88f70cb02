@@ -1,6 +1,0 @@
-[header]
-format-vervarsion = "6.5"
-
-[[artefact]]
-id = "pkilkeyapng"
-links = { issuer = "pki/root", xpect = ["pki/root"] }

@@ -1,0 +1,19 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-on": "0.0.0",
+    "dss-version": "8"
+  },
+  "mode": "validate-document",
+  "validation-time": "4060-0:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indion": null,
+  "details": {
+"signatures": [
+      {
+     "signig": [null],   "   wnsiig": [null],   "   wnings": []
+      }
+    ]
+  }
+}

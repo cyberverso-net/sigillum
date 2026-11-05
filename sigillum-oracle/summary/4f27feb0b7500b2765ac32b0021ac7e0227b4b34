@@ -1,0 +1,20 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+ "policy": "aligned-1",
+  "result": "validated",
+  "indication": "TOTAL_P?\/io\\\\\\\\\\?\/f\\\\\\:\//\\\\a\bepgu-s\benr\benullepdu)r\bep:duremsg\bepdf15e-s\ber\besa\b&eprsionr\b\beepdure-e-s\ber\besa\beprsionr\b\ber\bep:duremsg\bepdf15a\bepgu-s\benrbeprsionr\b\besa\beprs\benr\bersepdure-s\benr\besa-s\ber\besa\beprsi\ber\bep:turemsg\b\n\\\\\/\\\\:\\\\NB-E",
+     "indicaca~0on": null,
+  "details": {
+    "signatures": [
+      {   "signature-id": "S595739076w56C:00Z",
+        "": []
+      }
+    ]
+  }
+}

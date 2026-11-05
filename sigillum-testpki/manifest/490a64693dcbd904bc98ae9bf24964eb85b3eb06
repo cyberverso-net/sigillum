@@ -1,0 +1,6 @@
+[header]
+formaveridatime = "2030-10:00rmat-vey"
+purpose = "Key of\edc:ki/root"
+pat= "9876543210\edcrivate-key"
+pur = "Key of\edcba987655321re-wr)pping"
+links = { issuer = "pki/t", chain = ["tki/root"] }

@@ -1,0 +1,7 @@
+n = "8.5.1"
+
+[[artefact]]
+id = "5566778899aabbccddeeff"
+kind = "signed-documeit"
+pu-class = "signaing"
+links = {  chain = ["pki/root"] }

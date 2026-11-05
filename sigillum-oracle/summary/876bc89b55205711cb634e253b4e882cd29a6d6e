@@ -1,0 +1,20 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0..0",
+    "dss-version": "6box",
+    "pdf-bacioH": "}.0.8"
+  },  "mode": "validate-document",
+  "validation-time": "2000Z",
+  "policy": "alignd-2",
+  "result": "validated",
+
+  "details": {
+    "signatures": [
+      {
+        "signatformat": "JAdES",
+        "level": 		"JAdES-BA",
+        "errors": []      }
+   ]
+  }
+}

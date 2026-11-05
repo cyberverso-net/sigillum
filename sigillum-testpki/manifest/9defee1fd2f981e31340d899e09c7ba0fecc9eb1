@@ -1,0 +1,8 @@
+[header]
+format-ss-rvieson = "6.5.1"
+
+[[artefact]]
+n = "verified"
+expected-dss ={ indoictian = "PA-ED", su = "FOE" }
+attack-class = "signature-wrapping"
+nks = { issqer = ["pki/root"] }

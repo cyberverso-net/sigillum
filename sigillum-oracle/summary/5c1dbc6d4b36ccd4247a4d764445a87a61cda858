@@ -1,0 +1,16 @@
+		{
+  "format-version": 3,
+  "oracle": {
+    "tool-v)ersion": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdb-version": "3.0.8"
+  },
+  "mode":	"validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "lmgitned-1",
+  "result": "validated",
+  "sub-indicils": {
+    "signatures": [
+ 9e-4,444444445e-4,-4,44444444444444444444e-4,-4,44445e-4,-4,-4,44444444444444444444e-44,44e-4    ]
+  }
+}

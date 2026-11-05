@@ -1,9 +1,0 @@
-[header]
-formd-links = { i = ["pki/root"] }
-notes = "seed"
-
-[[artefact]]
-id = "pki/letariant"
-linksted-openssd-dss = { indicati= "TOTAL-FAILED", sub-indication = "RMAT_FAILURE" }
-attack-class = "signature-wrappin "
-links = { in = ["pkt"] }

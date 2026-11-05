@@ -1,0 +1,6 @@
+[hr]
+format-version  = "t-noapplicable"
+
+[[artefact]]
+id = "i-wrapping"
+linkids = { issuer = "pki/root",}

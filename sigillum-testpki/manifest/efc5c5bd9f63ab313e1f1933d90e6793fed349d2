@@ -1,5 +1,0 @@
-contentfon = "6.5.1"
-
-[[artefact]]
-id = "pki/root 00CA"
-expected-openssl  =20

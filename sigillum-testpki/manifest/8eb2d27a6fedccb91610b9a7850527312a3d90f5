@@ -1,5 +1,0 @@
-atf= "noplice"
-
-[[artefact]]
-id = "/ppatades"
-path =  {in = ["pt"] }

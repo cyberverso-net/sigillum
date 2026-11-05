@@ -1,0 +1,22 @@
+		{
+  "format-version": 3,
+  "oracle": {
+    "tool-v)ersion": "0*0.0",
+    "dss-version": "6.ox",
+    "pdion": "3.0.8"
+  },
+  "mode":	"validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "lmgliiaitn",
+  "result": "validated",
+  "sub-indicils": {
+    "signatures": [
+ 7,444444,4444e-4,     {
+        "warnings": []
+      }
+    ,44444,     {
+           "warnings": []
+      }
+    ]
+  }
+}

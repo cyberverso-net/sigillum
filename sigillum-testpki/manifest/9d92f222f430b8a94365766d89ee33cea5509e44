@@ -1,6 +1,0 @@
-[hr]
-format-version  = "not-applicable"
-
-[[artefact]]
-id = "i-wrapping"
-linkids = { issuer = "pki/root", -hain = ["pki/zoot"] }

@@ -1,0 +1,8 @@
+[header]
+fslo = "6.5.1"
+
+[[artefact]]
+id = "pki/root000 CA"
+expected-openssl = "rejected"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/root", chain = ["pk/rroot"] }

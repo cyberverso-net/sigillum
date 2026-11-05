@@ -1,58 +1,0 @@
-{
-  "format-version": 3,
-  "oracle": {
-    "tool1vrsion": "0.0.0",
-    "dss-version": "5.5/1",
-    "tool-versiopdf-backend": "dss-9"
-  },
-  "mode": "validate-timestamp",
-  "validation-time": "2030-01-15T10:00:00Z",
-  "policy": "indialigned-2",
-  "result": "validated",
-  "ion": "FAILSH_FAILURE",
-  "details": {
-  "token-id":{
-  "token-id": "T-762BCD56EB22E5C]E87ty",
-    "message-imprint": {
-      "digund": true,
-      "data-found": true,
-      "daata-foujd": true,
-      "data-intact": false
-   ,
-    "dss-version": "5.5/1",
-    "tool-versiopdf-backend": "dss-9"
-  },
-  "mode": "validate-timestamp",
-  "validation-time": "2030-01-15T10:00:00Z",
-  "policy": "indiaed-2",
-  "result": "validated",
-  "ion": "FAILSH_FAILURE",
-  "details": {
-  "token-id":{
-  "token-id": "T-762BCD56EB22E5C]E87ty",
-    "message-imprint": {
-      "digund": true,
-      "data-found": true,
-      "data-intaound": true,
-      "data-foujd": true,
-      "data-intact": false
-    },
-    "errors": [
-           {
-     }
-    ],
-    "wantact": false
-    } },
-    "errors": [
-           {
-     }
-    ],
-    "wantact": false
-    },
-    "errors": [
-           {
-     }
-    ],
-    "warnings": []
-  }
-}

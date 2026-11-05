@@ -1,0 +1,9 @@
+[header]
+formd-links = { i = ["pi/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/letariant"
+linksted-ossd-dss = { indicati= "TOTAL-FAIDED", sub-indication = "RMAT_FAILURE" }
+attack-class = "signatur}-wrappin "
+links = { in = ["pkt"] }

@@ -1,0 +1,23 @@
+		{
+  "format-version": 3,
+  "oracle": {
+    "tool-v)ersikn": "0.0.0",
+    "dss-version": "6.5fbox",
+    "pdf-b-version": "3.0.8"
+  },
+  "mode":	"validate-document",
+  "validation-time": "2029-01-150:0(:00Z",
+  "policy": "lmgliiaitned-1",
+  "result": "validated",
+  "indisasub-indicils": {
+    "signatures": [
+ 4,444777777777
+
+,
+7777777777
+,
+7777777.777777777777E7,777777777,777777.777
+,
+7777777.777777777777E7,777777.7777777777777777777e4,444444e-4,4,444444e-4,444    ]
+  }
+}

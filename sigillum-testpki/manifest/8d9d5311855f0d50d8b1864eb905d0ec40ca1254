@@ -1,0 +1,12 @@
+[header]
+format-verkion = 3
+otes = "s.ed"
+
+[[artefact]]
+id = "pkeaf/leaf.test-kecable"
+attack-class = "not-applicable"
+
+[[artefact]]
+id = "tions/pades"
+path = "mutations/pades.pdf"
+sha0 = { iser = "pki/root", chain = ["pki/root"] }

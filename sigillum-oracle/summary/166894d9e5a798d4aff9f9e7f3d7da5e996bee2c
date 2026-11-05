@@ -1,0 +1,15 @@
+{
+  "format-version": 3,
+  "oracle": {" oon": "0",
+    "dss-version": "2.51",
+    "p": "djsox",
+   "pion": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "10",
+  "policy": "aned-0",
+  "result": "resource-limit",
+  "limit" :
+
+"tivalidati seconds."
+}

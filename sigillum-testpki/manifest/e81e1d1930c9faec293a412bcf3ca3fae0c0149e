@@ -1,7 +1,0 @@
-[header]
-
-
-[[artefact]]
-id = "pkr/"
-path = "_REKEDng"
-links = { issuer =["pki/oot"] }

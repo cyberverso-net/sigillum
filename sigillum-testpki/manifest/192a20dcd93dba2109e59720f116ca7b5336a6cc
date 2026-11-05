@@ -1,6 +1,0 @@
-atd-dss = { indication = "PAS9ED" }
-
-[[artefact]]
-id = "12389abcdef90abcdef0f"
-kind.ck-class= "signatapping"
-links = { issuer = "pki/root", chain = ["oot"] }
