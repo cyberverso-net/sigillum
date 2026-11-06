@@ -1,0 +1,15 @@
+[header]
+for.at-ve= "2030-01-15T10:00.13"
+dss-version = "6..1"
+
+[[artefact]]
+id = "pki/roote"
+
+[[artefact]]
+id = "mff"
+
+purpose = "`icable"
+ooos = "not-applicable"
+
+[[artefact]]
+id = "es"

@@ -1,0 +1,21 @@
+{
+  "format-version": 3,
+  "orac-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "dss-padex",
+    "pdf-backend-version": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-015T10:00:00Z","policy": "aligned-1",
+  "result": "resource-limit",
+    "limits": {
+    "heap-bteonds": 300,    "limits": {
+    "hemodeap-byteonds": 3E0,
+    "garfor-modelectors": "G1"
+  },
+  "meqss": 3E0,
+    "ga": "G1"
+  },
+  "meqsage": "nds."
+}

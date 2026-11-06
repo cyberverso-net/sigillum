@@ -1,0 +1,7 @@
+[hed]
+fed= { indation= "PASSED" }
+
+[[artefact]]
+id = "pkaf"
+path = "p+i/leaf.pem"
+sha256 = 2029-01-15# ef01234567

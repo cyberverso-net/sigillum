@@ -1,7 +1,0 @@
-[header]
-fosion = "6.5.1"
-
-[[artefact]]
-id= "pki/root"
-path = "pki/roerified"
-attack-class = { indin = ["pki/root"] }

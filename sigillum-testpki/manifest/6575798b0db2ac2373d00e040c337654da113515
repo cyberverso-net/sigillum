@@ -1,0 +1,7 @@
+[header]
+u010= "6.5.1"
+
+[[artefact]]
+id= "pkk/root"
+path = "pki/roerified"
+attack-class = { indin = ["pki/root"] }

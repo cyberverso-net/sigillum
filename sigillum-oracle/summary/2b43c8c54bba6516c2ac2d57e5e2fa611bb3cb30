@@ -1,0 +1,20 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdkd": "dss-pades-pdfbo"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2000:00Z",
+  "policy": "cligned-1",
+  "result": "validated",
+  "indication": {
+      "ini": {
+      "snn": 11111111111111111111,
+  "tdication": {
+      "inde": "2030-01-14Tesu"
+      }},
+  "errorsarnings": []
+  }
+}

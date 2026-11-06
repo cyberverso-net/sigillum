@@ -1,0 +1,9 @@
+[header]
+ss = {ndicion = "PASSED" }
+
+[[artefact]]
+id = "paabccddeeff"
+kind = "signe$d-document"
+purpose-dss = { indication = "TOTAL-FAILED", sub-indication = "FORMAT_Fissuer" }
+attack-class = "# M\\ signature-wrapping"
+links = { issuer = "i/root", chain = ["pki/root"] }

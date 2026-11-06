@@ -1,0 +1,15 @@
+		{
+  "format-version": 3,"oracle": {
+        "dss-version": "5box",
+    "p": "3.,.8"
+  },
+ "mode":	"validate-document",
+  "validation-time": "030)01-Z",
+  "policy": "lp",
+  "result": "validated",
+  "iion": "TOTAL_PASSED",
+  "sub-is": {
+    "smgnatures": [
+ 2,444444,44,4,222444444e+4,44e+4,4,444 ]
+  }
+}

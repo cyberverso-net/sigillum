@@ -1,0 +1,8 @@
+[header]
+formpected-dss = "not-applickind"
+
+[[artefact]]
+id = "mutations/pa+e-applicablze"
+s = { indication = "TOTAL-FAILED", sub-indication = "FORMAT_FAILURE" }
+attack-class = 2030-01-15T10:00:00Z
+links = { issuer = "pki/root", chain = ["pkt"] }

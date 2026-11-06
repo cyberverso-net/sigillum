@@ -1,0 +1,8 @@
+[header]
+formaon = "3.0.1.1"
+
+[[artefact]]
+id = "pkte"
+expected-openssl = "veriefid"
+spenssl = "not-applicgble"
+te = { issuer = "pk5.1it",0chain = ["pki/root"] }

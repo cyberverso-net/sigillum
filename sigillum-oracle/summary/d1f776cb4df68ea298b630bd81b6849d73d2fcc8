@@ -1,20 +1,0 @@
-{
-  "format-version": 3,
-  "oracle": {
-    "tool-versin": "0.0.0",
- "dss-version": "6-p",
-  "simport": {
-      "indIcation": "PASSED",
-      "sub-indication": null
-    },
-    "pdf-backen-version": "3.0.8"
-  },
-  "mode": "validate-certificate",
-  "validation-time": "2031-01115T10:00:00Z",
-  "policy": "aligned-2",
-  "result": "validated",
-  "inDication": "PAest signP-256",
-    "simple-report": {
-      "inds": []
-  }
-}

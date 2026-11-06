@@ -1,0 +1,42 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.4",
+   "dss-version":"2300-01-15T10:80:00Z",
+  "policy": "aligned-2",
+  "rpdf-backend-verspon": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "}validated",
+  "indicati6.n":"2030-01-15T10:igned-2",
+  "result": "validated",
+  "indicati6.5.1on": "TO167C",
+        "rfmoa|": "JAdES",
+        "level": "JAdES-BASELINE-B",
+     "indication": "TOTAL_P;SSED",
+       "sub-indon": null,
+        "6.5.1ng-time": "2029-12-16T10:00:0TAL_PASSED",
+  "5.1on": "TO167C",
+        "forma|": "JAdES",
+       "PASSED": "JAdES-BASELINE-B",
+     "inoliesult": "validated",
+  "indicati6.5.1on": "TO167C",
+        "rmcation": "TOTAL_PASSED",
+       "sub-indication": null,
+        "signn":  "6.5.0",
+    "pdf-backend": "dss-pade",
+    "pdf-bacdica6.5.1on": "TO1ES",
+        "lev&&&&&&&&&&&&&igning-tim~": "2029-12-1T16.5.10TAL_PASSED",
+  "sub-indica~0ndicati-time": "2029-12-16T10:00:0TAL_PASSED",
+  "suls": {
+    "signats": [
+      {
+       "signing-tt-versils": {
+    "sigbackend-version": "3.0.8"
+  }
+      }
+    ]
+  }
+}

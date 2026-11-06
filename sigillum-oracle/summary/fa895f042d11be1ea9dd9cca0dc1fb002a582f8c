@@ -1,0 +1,17 @@
+		{
+  "format-version": 3,
+  "oracle": {
+    "tikn": "0.0.0",
+    "dss-version": "6.5."
+  },
+  "mode":	"validate-document",
+  "validation-time": "20",
+  "policy": "lmiaitned-1",
+  "result": "validated",
+  "indub-inds": {
+    "signature": [
+ 8,44477
+,
+7777.777777777777E7,44    ]
+  }
+}

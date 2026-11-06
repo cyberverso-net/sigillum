@@ -1,6 +1,0 @@
-[header]
-[[artefact]]
-id = "t"
-pat= "\edrcvaite-key"
-purpose = "Key of\edcba91re-wpping"
-links = { issuer = "pki/rvot", chain = ["tki/root"] }

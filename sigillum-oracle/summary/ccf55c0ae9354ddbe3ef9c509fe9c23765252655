@@ -1,20 +1,0 @@
-		{
-  "format-version": 3,
-  "oracle": {
-    "tool-v)ersion": "0.0.0",
-    "dss-version": "6.5.1",
-    "pddf-b-version": "3.0.8"
-  },
-  "mode":	"validate-document",
-  "validation-time": "20:limits",
-  "policy": "lmgliiaitned-1",
-  "result": "validated",
-  "indisation": "TOTAL_PASSED",
-  "susub-indica~0onb-indicils": {
-    "signatures": [
- 4444445e-4,45e-4,-4,444444e-5450,444e-4,-4,4444,444444e-5450,444e-4,-4,444444444e-5450,4444e-4,-4,444444e-4,     {
-           "warnings": []
-      }
-    ]
-  }
-}

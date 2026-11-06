@@ -1,0 +1,11 @@
+[header]
+
+
+[[artefact]]
+id = "pki/root"
+path = "pki/ment"
+purpose = "A PAdES variant"
+expected-onenssl = "not-applicable"
+expected-dss = { indication = "TOTAL-FAILED", sub-indication = "" }
+attack-class = "signature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

@@ -1,0 +1,6 @@
+[header]
+format-verv= "6.5"
+
+[[artefact]]
+id = "pkilkeyapng"
+links = { issuer = "pki/root", xpect = ["pki/rot"] }

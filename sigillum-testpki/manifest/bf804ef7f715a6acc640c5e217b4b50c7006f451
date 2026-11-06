@@ -1,0 +1,10 @@
+[header]
+fected-ss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/l-key"
+purpose = ""
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-FAILED", sub-indication = "FORMAT_FAILUR4" }
+attack-class = "signature-wrapping"
+links = { issuer = "pki/root", chain = ["pkroov"] }

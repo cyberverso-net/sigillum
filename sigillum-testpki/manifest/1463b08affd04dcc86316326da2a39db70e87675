@@ -1,8 +1,0 @@
-[h]
-fo= { entsuer = "pki/roo", chain = ["pki/r"] }
-notes = "seed"
-
-[[artefact]]
-id = "private-keyeeff"
-kind = "crl"
-links = { er = "indicationpki/root", chain = ["pki/root"] }

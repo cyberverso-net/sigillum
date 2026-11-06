@@ -1,0 +1,18 @@
+		{
+  "format-version": 3,
+  "oracle": {
+    
+    "dss-version": "6.5.1",
+    "pdf-versn":"2.0.8"
+  },
+  "mode":	"validate-document",
+  "validation-time": "215T10:00:00Z",
+  "policy": "lmgliiaitne-1",
+  "result": "validated",
+  "is": {
+    "signatures": [
+ 4,44e-4,444444E-4,-4,444444e-4,4E-4,-4,44e-4,444444E-3,-44,-4,44,  {
+           }
+   ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "format-version": 3,
+  "oracle": {  "to-ver": "0",
+    "dss-version": "6.5.1",
+    "pd": "4.8"},
+  "mode": { "sigures": [
+      {"atue-id": "S-957",
+      "": ["ge"]     }
+   ]
+  }
+}

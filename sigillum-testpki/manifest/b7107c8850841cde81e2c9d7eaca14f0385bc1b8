@@ -1,0 +1,11 @@
+ersion = 3
+
+[[artefact]]
+id = ""
+path = "59=000000600 leaf"
+expected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "mng"
+links = { iss= "pki/root", chain = ["pki/root"] }

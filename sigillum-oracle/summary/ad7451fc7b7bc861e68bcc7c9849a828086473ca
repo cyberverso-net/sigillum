@@ -1,0 +1,21 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "!!!!!!!!!!!"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "2030-01-15T10:08:00Z",
+  "policy": "india",
+  "result": "validated",
+  "indication": {
+    "tmprint": {
+   "data-intact": false
+    },
+"errors":[
+     {
+        "key": "BBtact!"
+      }    ],
+    "rnings": []
+  }
+}

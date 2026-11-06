@@ -1,0 +1,15 @@
+		{
+"format-version": 3,
+  "oracle":{
+    "toov": "1.0",
+    "dss-version": "ss-pades-pdfbox",
+    "pdf-b-version": "3.0.8"
+  },
+  "mode":	"validate-document",
+  "validation-time": "1015-010Z",
+  "policy": "lmgliiaitned",
+  "result": "validated",
+"indb-dicils": {
+    "signatures": [44445e4,-4,4454,[44e0],44e4,-3e-4,4444 ]
+  }
+}

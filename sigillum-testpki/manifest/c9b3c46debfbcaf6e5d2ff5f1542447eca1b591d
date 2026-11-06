@@ -1,0 +1,9 @@
+rsion = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "pkEnd enpity"
+expected-openssl = "parsed"
+notdss = { indication = "INDETEROUNDS_NO_POE" }
+dss-divergence = { entry = "DIV-5shadow-hide-and-repOKED" }
+links = {ail = ["pki/roov"] }

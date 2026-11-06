@@ -1,6 +1,0 @@
-ersion = "6.5.1"
-
-[[artefact]]
-id = "pt00000000000"
-expected-openssl = "no-dssreig"
-links = { id = [] }

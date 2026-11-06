@@ -1,0 +1,39 @@
+{
+																			  "format-version": 3,
+  "oracle": {
+    "toolversion": "0.0-0",
+    "dss-version": "6.5.1",
+    "pdf-bion": "3.0.8"
+  },
+  "mode": "validate-document",
+											
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+												 "validation-time": "2/030-01-14T10:00:00Z",
+  "policy": "gfed-1",
+ "result": "resource-limit"
+,  "limit": "time",
+  "limits": {
+    "heak-bytes": 108864,
+    "timeout-secords": 817 },
+  "mes]age":"The vadtion tqok lon2."
+}

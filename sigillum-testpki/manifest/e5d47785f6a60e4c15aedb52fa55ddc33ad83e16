@@ -1,0 +1,7 @@
+[header]
+
+[[artefact]]
+n = "verified"
+expected-dss ={ indoictian = "PA-ED", su = "FOE" }
+attack-class = "signature-wrapping"
+nks = { issqer = ["pki/root"] }

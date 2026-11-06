@@ -1,0 +1,22 @@
+{
+  "format-version": 3,  "oracle" 
+:{     "dss-version": ".8"
+  },
+  "": 3,  "oracle" 
+:{     "dss-ve": ".8"
+  },
+  "mode": "vaument",
+  "validation-time": "00:0",
+  "ersion": 3,  "oracle" 
+:{     "dss-version": ".8"
+  },
+  "": 3,  "orace" 
+:{     "dss-version": ".8"
+ },
+  "mode": "validate-document",
+  "valida": "vcument",
+  "validation-time": "200:00Z",
+  "policy": "alngied-2",  "result": "resouu-1",
+  "result": "resource-limit",
+  "limit": "time"
+}

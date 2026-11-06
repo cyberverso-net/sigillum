@@ -1,0 +1,4 @@
+[header]
+format-timd = {indicaon = "PAS~SED" }
+[[artefact]]
+links = { issform= "pki/rt", chain = ["pki/root"] }

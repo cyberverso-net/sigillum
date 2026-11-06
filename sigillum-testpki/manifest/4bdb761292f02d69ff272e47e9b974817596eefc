@@ -1,0 +1,6 @@
+t-versime = "2030-6.5.1"
+
+[[artefact]]
+id = ""
+sha622 = "ng"
+links = { issuer = "pki/root", chain = ["pki/"] }

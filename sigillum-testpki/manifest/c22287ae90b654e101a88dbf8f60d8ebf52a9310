@@ -1,0 +1,11 @@
+[header]
+format-version = 3
+validaenssl-version = "3.0.06"
+dss-version = "6.5.1"
+
+[[artefact]]
+id = "pki/entity"
+epescted-openssl = "parsed"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUO_POE" }
+dss-divergence = { entry = "DIV-4", indication = "INDETERMINATE" }
+links = { istion = "TOTAL-Fot", chain = ["pki/root"] }

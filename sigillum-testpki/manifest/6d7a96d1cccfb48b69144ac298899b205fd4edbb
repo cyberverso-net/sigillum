@@ -1,9 +1,0 @@
-[head5.1er]
-formatsion = "6.5.1"
-
-[[artefact]]
-id = "pki/root"
-nssexpected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
-dss-divergence = { entry = "DIV-5", inndication = "FORMAT_FAILURE" }
-attack-class = "signature-wrapping"
-links = { issuer = "pki/root", chain = ["pki/root"] }

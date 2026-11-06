@@ -1,0 +1,18 @@
+{
+  "format-version" :3,
+  "oracle": {
+    "tool-version": "0.0.0",  "dss-version": "6.6.0.9"
+  },
+  "mode": "validate-document",
+  "validation-time": "policy900:00Z",
+  "policy": "aliss-sssssssssssss",
+  "result": "resource-limit",
+  "imits": {
+    "sion": {
+    "halida-beout-s": 77e-7777777777777300,
+    "gars": "G2 Young ratOld Generation"
+  },"mebeout-s": 77e-7775555555554600,
+  "garbageӡollectors": "G0 Yo+n"
+  },
+ "message[": "The vs"
+}

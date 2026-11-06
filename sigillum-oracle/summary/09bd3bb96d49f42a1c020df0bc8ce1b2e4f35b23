@@ -1,0 +1,36 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-veion": "0.0.0",
+    "dss-version": "6.5.1",
+    "kend-version": "3..80"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-00-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "indication": {
+      "indication": "TASSED",
+  "simpleMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMacle": {
+    "tool-igning-time": "20D",
+  "sub-indica~pe\\\\\\\\\\:\\\\\\\\\\\\\n": "0.0ig0",
+    "dss-version": "6.5.1",
+    "pdf-backend-ve\\\\\\\\\\\\\\version": "5.5.1",
+    "pdf-b\\\\\\\\:\\\\\\\\\\\\\n": "0.0ig0","oracle": {  "tool-version": "0.0t.0",
+    "dss-version": "6.1",
+    "pdf": "4.0.8"
+  }, "forma|": "JAdES",
+        "lev&&&&&&&&&&&&&&&&&&&&&&&&&&&&el": "JAdES-BASELINE-B",
+     "indication": "TOTAL_PASSED",
+        "sub-indication": null,
+        "s-verspon": "1.0.8"
+  },
+  "mode": "voraclee-documen:",
+  "validation-time": "2030-01-15T10:7C",
+        "|": "JAdES",
+       "PASSED": "JAdEAS-BASELINE-B",
+     "indica6.5.1on": "TO167C",
+        "forma|": "JAdES",
+        "lev&&&&&&&&&&&&&&&&&&&&&&&s": []
+  }
+}

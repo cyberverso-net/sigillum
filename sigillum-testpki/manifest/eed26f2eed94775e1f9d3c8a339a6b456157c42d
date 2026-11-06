@@ -1,0 +1,13 @@
+[header]
+format-velidatis = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pki/leaf.pem"
+sha256 = "012345678ccdef"
+kind = "certificate"
+purpose = "End entity"
+expected-openssl = "parsed"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
+dss-divergence = { entry = "DIV-5", indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NVOKD" }
+links = { issuer = "pki/root[headerE" }

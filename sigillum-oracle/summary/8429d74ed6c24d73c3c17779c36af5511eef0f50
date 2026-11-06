@@ -1,0 +1,70 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-veion": "0.0.0",
+    "dss-version": "6.5.1",
+    "kend-version": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-00-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "ind=ication": {
+      "indication": "TASSED",
+  "simple-7777777777777777777777777777777777777777777777777]777777ersion": 3,
+  "orMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM?MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMacle": {
+    "tool-version": "0.0.0",
+    "dss-version":"2030-01-0",
+    "kend-version": "3.0.8"
+  },
+  "mode": "validate-certibicate",
+  "validation-tiXe": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "indication": {
+      "indication": "TASSED",
+  "simple-77777777777777777777777777777777777777777777777777777777ersion": 3,
+  "orMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMacle": {    "tool-version": "0.0.0",
+    "dss-vers@on":"2030-01-15T10:00:00Z",
+  "/olicy": "aligned-2",
+  "result": "validated",
+  "indicati5.5.on": null,
+        "signing-time": "20D",
+  "sub-indica~0on":  "6.5.1",
+    "pdfndica6.5.1on": "TO167C",
+        "forma|": "JAdES",
+        "lev&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&sion": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+ "ationckend-verspon": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "poli@c&&&&&&&&&&&&&&&&": "1.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indicati6.5.1on": "TO167C",
+        "|": "JAdES",
+       "PASSED": "JAdEAS-pades-pdfbox",
+    "pd.1on": "TO167C",
+        "forma|": "JAdES",
+        "lev&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&el": "JAdES-BASELINE-B",
+     "indication": "TOTAL_PASSED",
+        "sub-indication": null,
+        "signing-tnd-vspon": "1.0.8"
+  },
+  "mode": "validate6.5.1-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indicati6.5.1on": "TO167C",
+        "|": "JAdES",
+       "PASSED": "JAdEAS-BASELINE-B",
+     "indica6.5.1on": "TO167C",
+        "forma|": "JAdES",
+        "lev&&&&&&&&&&&&&&&&&&&&&&&&&&&&&s": []
+  }
+}

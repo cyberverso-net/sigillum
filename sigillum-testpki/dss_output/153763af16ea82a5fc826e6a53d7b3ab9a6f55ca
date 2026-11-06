@@ -1,0 +1,14 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "ton": "0.",
+   "dss-version": "6.5.1",
+    "p-ba": "es-p8"
+},
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z","policy": "aligned-1",
+  "result": "validated",  "details": {
+    "signatumes": [
+   ]
+  }
+}

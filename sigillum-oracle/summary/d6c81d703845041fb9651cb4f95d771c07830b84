@@ -1,0 +1,38 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-veion": "0.0.0",
+    "dss-version": "6.5.1",
+    "kend-versPon": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-15T10:00:00Z",
+"policy": "aligned-1",
+  "result": "validated",
+  "indication": {
+      "indication7777777777777ersion": {
+    "tool-version": "0.0.0",
+    "dss-version":"2030-01-15T10:00:00Z",
+  "policy": "alioned-2",
+  "result": "validated",
+  "indicati5.5.on": null,
+        "signMMMMMMMMMMMMMa{    cle": {
+    
+    "dss-version":"2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indicati5.5.on": null,
+        "sign+ng-time": "20D",
+  "sub-indica~0on":  "6.5.1",
+    "ersionr\beu&r\bep:durepdf16e-s\ber\besa\beprsionr\b\beepdure-e-s\ber\besa\beprsionr\b\ber\bep\bepdf15a\bepgu-s\benr\benullepdu&r\bep:duremsn": "TO167C",
+        "forma|": "JAdES",
+        "levool-version": "0.0.0",
+ "ationckend-verspon": "3.0.8"
+  },
+  "modeindication": null,
+        "signing-tnd-verspon": "1.0.8"
+  },
+  "mode": "validate--BdES",
+        "lev&&&&&&&&&&&&&&&&&&&&&&&&&&&&s": []
+  }
+}

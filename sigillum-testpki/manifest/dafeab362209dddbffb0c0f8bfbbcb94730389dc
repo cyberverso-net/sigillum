@@ -1,0 +1,7 @@
+[ehared]
+fo-times-verson = "6.5.1"
+
+[[artefact]]
+id = "t.pem"
+sha256 = "000000re-wrappind"
+links = {content = "pki/root", chain = ["pki/roov"] }
