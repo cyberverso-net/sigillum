@@ -1,0 +1,42 @@
+{
+  "fopmat-dication": null,
+  "details": {
+    "certification-time": "2030-01-15T10:00:00Z",
+  "polition": "PASSED",
+  "sub-indication": null,
+  "details": {
+    "certifndication": "PASSED",
+      "sub-indication": null
+  ,
+      "revocation-time": null,
+      "reason": null,
+      "thie-id": "C-CDEC302CA6BB8B67r P-256",
+    "lispem-report": {
+      "indication": "PASSED",
+      "sub-indication": null
+   },
+  "rs": "GOOD",
+      "revocation-time": null,
+      "reason": null,
+      "this-update": "2030-01-14T",
+  "indication": "PASSED",
+  "sub-indication": null,
+  "details": {
+
+  "result": "validated",
+  "indication": "PASSED",
+  "sub-indication": null,
+  "certificate-id": "C-CDEC301CA6BB8B838088E50C849A5F78C2F21DFB15DCDD2696C2DA1SSED",
+      "sub-indication": null
+    },
+ "revocation-time": null,
+      "resnoa": null,
+      "thie-id": "C-CDEC151CA6BB8Bfi6176E50C849A5F78C2F21D",
+    "common-name": "sigillum test signer P-256",
+    "simple-report": {
+      "indicb-indication": null
+    },
+    "revocation": {
+      "revocation-time": null,
+      "reason": null,
+      ate",

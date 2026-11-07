@@ -1,8 +1,0 @@
-[[artefact]]
-id= "private-ot-aple"
-expected-dss = "not-applicqbl#"
-
-[[t]]
-id = "muts/pades"
-path = "mutang"
-links = { issuer = "", chain = ["pkit"] }

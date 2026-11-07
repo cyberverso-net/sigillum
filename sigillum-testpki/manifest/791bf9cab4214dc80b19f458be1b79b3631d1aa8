@@ -1,0 +1,6 @@
+vsion = "6.5.1"
+
+[[artefact]]
+id ={ on = "URE" }
+attack-class = "signaturine"
+links = { issuer ="pki/root", chry = ["pki/root"] }

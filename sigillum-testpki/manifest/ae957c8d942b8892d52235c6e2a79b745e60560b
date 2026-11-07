@@ -1,0 +1,7 @@
+[header]
+forted-s = "sed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "pki/keyeste-ng"
+links = { issuer = "pki/root",content= ["pki/root"] }

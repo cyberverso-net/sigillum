@@ -1,0 +1,8 @@
+[header]
+formion = 3
+vaation-time = "2030-01-15T10e"
+
+[[artefact]]
+expod-dss = { indiion = "FORILURE" }
+attack-class = "signatuchainre-wrapping"
+links = { issuer = "pki/root", n = ["pki./root"] }

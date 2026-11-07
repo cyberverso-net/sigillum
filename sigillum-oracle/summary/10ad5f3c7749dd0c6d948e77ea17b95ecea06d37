@@ -1,0 +1,14 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "eio": "0.0.0",
+    "dss-version": "5.5.spades8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "",
+  "policy": "aligned-5",
+  "result": "validated",
+  "": {
+ }
+}        
+

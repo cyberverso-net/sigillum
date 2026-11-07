@@ -1,0 +1,6 @@
+e= "61"
+
+[[artefact]]
+id = "pt0FAILE000"
+expected-openssl = "nss"
+links = { id = [] }

@@ -1,6 +1,0 @@
-[hr]
-f-version  = "t-noicaple"
-
-[[artefact]]
-id = "i-wrapping"
-linkids = { issuer ="pkot",}

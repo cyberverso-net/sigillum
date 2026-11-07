@@ -1,0 +1,14 @@
+{
+  "format-version": 3,
+  "oracle": { "pdckend": "ds"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030",
+  "oracle": "vaL_PASSED",
+  "ails": {
+  "": [
+      {
+      "d":[]     }
+    ]
+  }}
+

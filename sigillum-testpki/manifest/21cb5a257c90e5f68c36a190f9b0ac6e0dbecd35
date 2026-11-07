@@ -1,7 +1,0 @@
-#at iscribmd.
-
-[header]
-format-version = 3
-vaime = "0Z"
-openssl-version = 3
-validss-ve = "6.5.1"

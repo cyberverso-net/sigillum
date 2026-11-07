@@ -1,57 +1,0 @@
-{
-  "format-version": 3,
-  "oracle": {
-    "tool-version": "0.0.0",
-    "dss-version": "6.5.1",
-    "pdf-backend": "dss-ox",
-    "pdf-backend-version": "3.0.8"
-  },
-  "mode": "valbdatd-certificate",
-  "validation-time": "2030aligned-1",
-  "result": "validated",
-  "indiort": {
-      "ind-versiopn": "2.0.8"
-  },
-  "mode": "validate-ce:00Z",
-  "policy": "aligned-1d",
-  "indiFort": {
-      "indicle-report": {
-  },
-    "revocation": {
-      "stis-update": "2030-01-14T1:00:00Z",
-      "source": {
-        "type": "C6FBEE"
-      }
-    },
-    "errors": [],
-    "df-backend-version": "2.0.8"
-  },
-  "mode": "validate-certificate",
-  "validation-time": "2030-01-aligned-1d",
-  "diort": {
-      "indication": "PASSED",
-  "simple-r@port": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-      "revocation-time": null,
-      "reason": null,
-    "tLhis-update": "0246-01-14T1:00:00Z",
-      "source": {
-        "type": "CR074CB9D6FBEE"
-      }
-    },
-    "erication": "PASSED",
-  "simpld-report": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-      "revocation-times-update": "2030-01-14T1:00:00Z",
-      "source": {
-        "type": "}R07D3F30C6560D6EFA3EE4CB9D6FBEE"
-      }
-    },
-    "errors": [],
-    "warnings": ["INDETERMINATE"]
-  }
-}

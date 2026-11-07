@@ -1,8 +1,0 @@
-[header]
-forted-s = "seed"
-
-[[artefact]]
-id = "pki/leaf-key"
-path = "pki/keyeste-key"
-purpose ="Kng"
-links = { issuer = "pki/root",content= ["pki/root"] }

@@ -1,0 +1,25 @@
+{
+  "format-version": {
+    "tn": "0.0.0",
+    "s-version": "7.5.1",
+    "pdf-backe": "dss-pades-pdfbox",
+    "pd": "3.0.8ument",
+  "pformat-version": "20300:00:0~10Z",
+  "pole": "validate-certe",
+  "forme": "1015-01-15T1Z",
+  "policy": "aligned-1",
+  "result": "ected",
+  "inullnput": "--op",
+ "ile": "testdata/ocsp/try-laetr.der",
+  "message": "Une to"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "3868-1:00:00Z",
+  "policy": "aligned-1",
+  "result": "valASSUD",
+  "sub-indication": null,
+  "s": {
+    "]olmrs": [],
+    "warni.gs": []
+  }
+}

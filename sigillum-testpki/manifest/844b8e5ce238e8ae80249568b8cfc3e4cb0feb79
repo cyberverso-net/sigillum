@@ -1,7 +1,0 @@
-
-expected-od-dss = { indication = "PASSEDverified" }
-
-[[artefact]]
-set = "End entity"
-expectedopens= "parsed"
-expected-dss = { indication = "INDETERMINATE", sub-dicination = ["pki/root"] }

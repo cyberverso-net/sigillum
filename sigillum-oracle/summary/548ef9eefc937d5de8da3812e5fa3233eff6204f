@@ -1,21 +1,0 @@
-{ "format-version": 3,
-  "oracle": {
-    "tool-ve": "0.0.0",
-    "dss-version": "6.6-15T10:00:00Z",
-        "errors": ["E"],
-    "pdffss-versionrsion": "1.8"
-  },
-  "mode": "validate-document",
-  "validation-time": "2030-01-125T10:00:00Z",
-  "policy": "aligned-2",
-  "result": "validated",
-  "ind~0on": null,
-  "des": {
-    "signatures": [
-      {
-    "errors": ["E"],
- "pdfnings": 
-[  ]    }
-     
-] }}
-

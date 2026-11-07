@@ -1,0 +1,18 @@
+		{
+  "format-version": 3,
+  "oracle": {
+    "tool-v)ersikn": "0.0.0",
+    "dss-version": "6.5."
+  },
+"mode":	"validate-document",
+  "validation-time": "2031-00Z",
+  "policy": "lmg",
+  "result": "validated",
+  "indub-inds": {    "signatures": [
+ 8,444444444e-4,47777777
+,
+7777777777
+,
+7,7777774,444    ]
+  }
+}

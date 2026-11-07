@@ -1,0 +1,7 @@
+[heade2]
+format-vss-version = "6.5.1"
+
+[[artefact]]
+id = "PkiA"
+expected-openssl = "v\\\\\\\\+\\\\\\\\\\\\\\"
+links = { iuer = "pki/root", chain = ["pki/root"]}

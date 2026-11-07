@@ -1,0 +1,11 @@
+[header]
+f= 3
+otes = "s.ed"
+
+[[artefact]]
+id = "pkeakecable"
+attack-class = "not-applicable"
+
+[[artefact]]
+id = "tions/pads.pdf"
+sha0 = { iser = "pki/root", chain = ["pki/root"] }

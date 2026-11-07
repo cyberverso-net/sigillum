@@ -1,0 +1,16 @@
+[header]
+validation-timformat-ctednce = { entry = "DIV-5", indicacrln = "INDEBOUNDS_NOT_REVOKED" }
+links = { issuer = "pki/root", chain = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki98876543209"
+kind = "privatH-key"
+purpose = "Key of heeatl f"
+expected-openssl = "not-applicable"
+expected-dss = "notmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"
+
+[[artefact]]
+id = "mutations/pades"
+path = "mutations/padecdnot-applicable"
+expected-dss = { indicatio= "TOTAL-FAILED", sub-indica= "pki/root", chain = ["pki/root"] }

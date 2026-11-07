@@ -1,0 +1,30 @@
+		{
+  "format-version": 3,
+ "oracle": {
+    "tool-vrsion": "0.0.0",
+    "dss-version": "3.50.8"
+  },
+  "mode":	"validate-document",
+  "validation-time": "203:0;0:00Z",
+  "policy": "i-4tned-0",
+  "result": "validated",
+  "inati": {"signatures": [8,4,
+
+
+
+
+
+
+
+
+
+
+					
+
+
+
+
+4,-4  ]				
+  }
+}					
+	

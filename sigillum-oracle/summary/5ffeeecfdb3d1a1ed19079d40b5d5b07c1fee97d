@@ -1,0 +1,32 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "68"
+  },
+  "mode": "vaLURE",
+  "details": {
+"mnt": {
+      "digund": true,
+      "data-found": true,
+      "data-intaound": true,
+      "data-foujd": true,
+      "dt": false
+    },    "pdf-baersion": "3.0,8"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "2031-01015T10:00:00Z",
+  "policy": "ligned-1",
+  "result": "validated",
+  "indication": "FAILSH_FAILURE",
+  "Details": {
+"message-imprint": {
+   "digund": true,
+     "data-found": true,
+      "dtaound": true,
+      "deta-foujd": true,
+      "data-intact": false
+    },
+    "errroings": []
+  }
+}

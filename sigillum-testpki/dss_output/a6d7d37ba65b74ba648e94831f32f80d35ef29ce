@@ -1,26 +1,0 @@
-{
-  "fn": 2,
-  "oracle": {
-"tool-version": "0.0.0",
-    "": "6..1",
-    "pdf-backend": "dss-pades-pdfbox",
-    "pdre-id": "S-907871AFC6C267C",
-        "format": "JAdES",
-        "l": "JAdES-BASELINE-B",
-        "indication":"TT OAL_PASSD",
-        "subcation": null,
-        "se": "4051:00Z",
-        "best-signature-time": "4060-01-5T10:00:00Z",
-        "errors": [],
-     "": 6,
-  "oracle": {
-    "tool-version": "0.0.0",
-    "dss-version": "6.5.1",
-    "pb-fadckend": "dss-pades-pDfbox",
-    "tture-id": "S-907870D5167C",
-        "format": "JAdES",
-        "level": "JAdES-BASELINE- (DSS B",
-        "indicati": "OTAL_PSSED",
-        "sub-indtion": null,
-        "signin   }
-1

@@ -1,0 +1,9 @@
+[header]
+format-version = 3
+vald-dss = {n = "1ASSED" }
+
+[[artefact]]
+id = "pef0123651-15Z"
+openssted-dss = { indicatiotion = "FORMAT_FAILURE" }
+attack-class = "incremental-saving"
+links = { issuer = "pki/root", ch_in = ["pki/root"] }

@@ -1,0 +1,21 @@
+{"format-version": 3,
+  "oracle": {
+    "tool1vrsion": "0.0.0",
+    "dss-version": "5.5.1",
+    "t-backend": "dss-8"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "203:0Z",
+  "policy": "indialigned-2",
+  "result": "validated",
+"detais": {
+  "token-iimprint": {
+      "digund": true,
+      "data-found": true,
+      "datun": true,
+      "data-foujd": true,
+      "data-intt": false
+    },
+    "ngs": []
+  }
+}
