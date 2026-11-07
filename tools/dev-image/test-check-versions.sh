@@ -74,7 +74,7 @@ cases=(
     ".github/workflows/fuzz-nightly.yml|s/CARGO_FUZZ_VERSION: [0-9.]*/CARGO_FUZZ_VERSION: 0.13.1/|a fuzzing workflow with another cargo fuzz"
     ".github/workflows/mutants.yml|s/cargo-mutants@[0-9.]*/cargo-mutants@27.0.0/|a workflow with another cargo mutants"
     ".github/workflows/mutants-config.yml|s/cargo-mutants@[0-9.]*/cargo-mutants@27.0.0/|a second workflow with another cargo mutants"
-    "Cargo.toml|s/^rust-version = .*/rust-version = \"1.89\"/|a workspace with another minimum Rust version"
+    "Cargo.toml|s/^rust-version = .*/rust-version = \"1.90\"/|a workspace with another minimum Rust version"
 )
 for case in "${cases[@]}"; do
     IFS='|' read -r file expression name <<< "$case"

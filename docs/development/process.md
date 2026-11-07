@@ -120,6 +120,7 @@ The minimum supported Rust version (MSRV) is raised only in a minor release, as 
 1. Open an issue that states the reason for the raise and the new version. The remaining steps are made in one pull request.
 2. Change `rust-version` in the workspace `Cargo.toml`. The CI job for the minimum supported Rust version reads it from there.
 3. Update the version stated in [architecture.md](../design/architecture.md).
-4. Check that every pin of `dtolnay/rust-toolchain` in `.github/workflows/` is the current commit of its `v1` tag, and refresh it if not, keeping the `# v1` comment. A current commit keeps the action's handling of toolchain versions up to date when the CI job switches to the new version. The commit is given by `gh api repos/dtolnay/rust-toolchain/commits/v1 --jq .sha`. Dependabot may propose newer commits of this action at any time, taken from its default branch rather than from the tag.
-5. Check that every CI job passes with the new version.
-6. Record the raise under *Changed* in a changelog fragment.
+4. Update `RUST_MSRV` in `tools/dev-image/versions.env`, which `tools/dev-image/check-versions.sh` compares with `rust-version`. The development image installs that toolchain.
+5. Check that every pin of `dtolnay/rust-toolchain` in `.github/workflows/` is the current commit of its `v1` tag, and refresh it if not, keeping the `# v1` comment. A current commit keeps the action's handling of toolchain versions up to date when the CI job switches to the new version. The commit is given by `gh api repos/dtolnay/rust-toolchain/commits/v1 --jq .sha`. Dependabot may propose newer commits of this action at any time, taken from its default branch rather than from the tag.
+6. Check that every CI job passes with the new version.
+7. Record the raise under *Changed* in a changelog fragment.
