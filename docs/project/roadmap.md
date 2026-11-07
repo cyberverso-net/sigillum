@@ -28,7 +28,7 @@ Deliverables:
 - `sigillum-cades`: CAdES-BES and baseline B-B, B-T, B-LT, enveloping and detached.
 - `sigillum-pdf`: minimal PDF reader, append-only incremental-update writer and revision analysis ([ADR-0015](../design/adr/0015-pdf-reader-and-incremental-writer.md)).
 - `sigillum-pades`: PAdES-BES and baseline B-B, B-T, B-LT on top of `sigillum-pdf`: signature dictionary, document security store, invisible and simple visible appearance.
-- `sigillum-jades`: JAdES baseline B-B, B-T, B-LT, JWS JSON and compact serialisations, enveloping and detached. Delivered after CAdES and PAdES; it may follow in release 0.2 without delaying release 0.1 ([ADR-0008](../design/adr/0008-include-jades-baseline.md)).
+- `sigillum-jades`: JAdES baseline B-B, B-T, B-LT, JWS JSON and compact serialisations, enveloping and detached. B-B is delivered with CAdES B-B, as the second user of the shared API, and B-T and B-LT after CAdES B-LT, in parallel with `sigillum-pdf` and `sigillum-pades`. It enters release 0.1 if it meets the conformance, fuzzing and platform criteria of this phase before release 0.1 is ready; otherwise it follows in release 0.2, without delaying release 0.1 ([ADR-0027](../design/adr/0027-jades-alongside-cades.md)).
 - `sigillum-ffi`: Kotlin and Swift bindings through UniFFI; WASM build with `wasm-bindgen`.
 - Example applications: remote signing through the Cloud Signature Consortium API; PKCS#12 for local testing.
 

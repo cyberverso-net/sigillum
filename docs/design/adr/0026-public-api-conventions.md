@@ -158,3 +158,7 @@ The Rust API may use traits and borrowed data. `sigillum-ffi` wraps it in the re
 - Tests change each re-supplied input and each field of each state between calls, and expect `SignatureMismatch` or `StateMismatch`, including a swapped assembly state for another signer, a changed intermediate certificate and a changed level, packaging or serialisation.
 - The bindings in `sigillum-ffi` expose the stepwise functions. Kotlin, Swift and JavaScript conveniences built on coroutines, `async`/`await` or promises are part of the binding work, not of the core.
 - Streaming of large documents is to be recorded as a known limitation in the rustdoc of the format crates, by the stories that create them, and may be the subject of a later ADR.
+
+## Notes
+
+- **2026-11-14.** [ADR-0027](0027-jades-alongside-cades.md) is accepted. JAdES B-B therefore uses the shared types after CAdES B-B and before PAdES, as the context and the consequences above foresee. This note does not change the record above.
