@@ -15,5 +15,26 @@
 //!   blocking network access (ADR-0026, decision 2).
 //!
 //! The crate performs no network access of its own. See `docs/design/architecture.md`.
+//!
+//! It also provides the types that every format crate shares
+//! (ADR-0026, decisions 3, 4 and 8):
+//!
+//! - [`Context`], with the signing and validation times as [`UnixTime`],
+//!   the trust anchors, the material the caller already has, the
+//!   [`Limits`] and the choices that relax a defensive rule;
+//! - [`Limits`] and [`InputKind`], with a documented default and maximum
+//!   for each limit (ADR-0024, rule 1; threat P2);
+//! - [`Error`], with its [`ErrorKind`] and [`Location`], which never
+//!   carries input content (threat R3).
 
 #![forbid(unsafe_code)]
+
+mod context;
+mod error;
+mod limits;
+mod time;
+
+pub use context::Context;
+pub use error::{Error, ErrorKind, JsonPointer, JsonPointerToken, Location};
+pub use limits::{InputKind, Limits};
+pub use time::UnixTime;
