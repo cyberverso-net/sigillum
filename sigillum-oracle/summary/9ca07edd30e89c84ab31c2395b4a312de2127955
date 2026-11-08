@@ -1,0 +1,18 @@
+		{
+  "format-version": 3,
+  "oracle": {
+    "tool-v)ersion": "0.0.0",
+    "dss-version": "6.5.1.0.8"
+  },
+  "mode":	"validate-document",
+  "validation-time": "2imits",
+  "policy": "lmgltiiaitned-1", "result": "validated",
+  "indisation": "TOSED",
+  "sus~0ocils": {
+    "signatures": [
+ 444444e-5450,444e-4,44e-5450,444e-8,-4,444448888e-5450,-4,     {
+           "warnings": []
+   }
+    ]
+  }
+}

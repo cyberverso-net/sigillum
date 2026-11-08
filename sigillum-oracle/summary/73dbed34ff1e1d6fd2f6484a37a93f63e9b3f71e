@@ -1,19 +1,0 @@
-		{
-  "format-version": 3,
-  "oracle": {
-    "t": "0.0.0",
-    "dss-version": "6.1",
-    "pdfndsion": "2.0"
-  },
-  "mode":	"validate-document",
-  "validation-time": "2030-01-15T10:0Z",
-  "policy": "mii-1","result": "validated",
-  "indicatil": {
-    "siges": [
- 444,444e-45,4444e-4, {
-}
-    ]
-  }
-}
-    
-  

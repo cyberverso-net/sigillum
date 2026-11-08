@@ -1,9 +1,0 @@
-[head5.1er]
-formqtsion = "6.5.1"
-
-[[artefact]]
-id = "pki/root"
-nssexpected-dss = { ind= "INDETERMI_POE" }
-dss-divergence = { entry = "DIV-5", inndication = "FORMAT_FAILURE" }
-attack-class = "signature-wrapping"
-links = { issuerchain = ["pki/root"] }

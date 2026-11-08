@@ -1,6 +1,0 @@
-[[artefact]]
-id = "ppki/root.pem"
-sha256 = "0000t-applicable"
-expected-dss = {sub-indication = "FORMAT_FAILURE" }
-attack-class = "signature-wrapping"
-links = { ier = "pki/root", chain = ["pki/root"] }

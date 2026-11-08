@@ -1,0 +1,17 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "on": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-ersion": "3.5.8"
+  },
+  "mode": "validate-document",
+"validation-time": "34Z",
+  "policy": "aligned",
+  "result": "validated",
+  "ind&ils": {
+   "siime"
+				   																		: [
+]
+  }
+}

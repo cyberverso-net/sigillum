@@ -1,0 +1,8 @@
+[hederep]
+forcted-dss = "not-applicable"
+
+[[artefact]]
+id = "mutat12233ariant"
+expdss = { indication = "FOT_FAILURE" }
+attack-class = "signpected-opature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/oov"] }

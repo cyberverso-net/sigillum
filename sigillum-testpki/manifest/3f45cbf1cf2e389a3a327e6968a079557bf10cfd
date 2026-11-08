@@ -1,0 +1,28 @@
+[header]
+format-version = 2
+validation-time = "2030-01-15T10:00:00Z"
+opensslversion  = "6.5.1"
+
+[[artefact]]
+id = ""
+path = "pui/root.pem"
+sha256 = "000"
+kind = "certificate"
+purpose = "Root CA"
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/"
+path = "pki/leaf.pgm"
+sha256 = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+kind = "certificate"
+purpose = "EOUNhe leaf"
+expected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "mutations/pades"
+path = "mutations/pades.pdf"
+sha256 = "0011223344gnature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

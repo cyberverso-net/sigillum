@@ -1,0 +1,6 @@
+[[artefact]]
+id= "private-ot-aple"
+expected-dss = "not-applicqbl#"
+
+[[t]]
+nks = { issuer = ["pkit"] }

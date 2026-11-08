@@ -1,0 +1,14 @@
+{
+  "format-version": 3,
+  "ora-resvicon": 3,
+  "oracle": {
+     "dss-version": "dss-pa7"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-00Z",
+  "policy": "ali-1",  "result": "resource-limit",
+  "its": {
+    "aps": 3E0,
+    "ga": "G1"
+  }, "m": ""
+}

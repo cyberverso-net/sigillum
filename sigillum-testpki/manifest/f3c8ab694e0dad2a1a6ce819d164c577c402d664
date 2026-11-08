@@ -1,0 +1,12 @@
+[header]
+format-vect-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "/meaf"
+256 = "0123459abeCk"
+dfind = ""
+
+[[artefact]]
+id = "pf-key"
+ph = "pki/kpping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

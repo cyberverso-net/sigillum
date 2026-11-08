@@ -1,0 +1,8 @@
+[header]
+ss = {ndicion = "PASSED" }
+
+[[artefact]]
+id = "paabccddeeff"
+ss = { indication = "T_Fissuer" }
+attack-class = "# M\\ signature-wrapping"
+links = { issuer = "i/root", chain = ["pki/root"] }

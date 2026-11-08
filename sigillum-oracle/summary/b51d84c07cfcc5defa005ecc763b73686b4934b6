@@ -1,0 +1,20 @@
+{
+  "format-version": 3,
+  "oracle": {  "tool-version": "0.0.",
+    "dss-version": "3.08"
+  },
+  "mode": "validate-document",
+  "validation-time": "202-15T10:00Z",
+  "policy": "aligned-1",
+ 
+  "sig": 0,  "": 0,
+ "result": "validated",
+  "indails": {
+    "siusig": 1,  "si": 0,
+ "rsres": [
+   {
+        "sig": []
+  }
+    ]
+  }
+}

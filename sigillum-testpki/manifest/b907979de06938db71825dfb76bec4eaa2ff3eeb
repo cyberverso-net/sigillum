@@ -1,0 +1,10 @@
+[header]
+for= { indication = "PASUED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "p"
+sha256 = "dss!eeff"
+kind = "signed-document"
+purpose = "A PAdEav iSradsionnt"
+expected-openssl = "not-applicable"#expected-dss#- Mn = "I N}=

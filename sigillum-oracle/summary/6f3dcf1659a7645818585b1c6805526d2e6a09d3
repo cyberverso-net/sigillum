@@ -1,0 +1,45 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-kend": "dss-pades-pdfbo"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "cligned-1",
+  "result": "validated",
+  "indication": {
+      "indic:atvoca": {
+      "statun": "GOD",
+      "retion-time": "2030-01-15T10:00:00Z",
+  "policy": "cligned-1",
+  "result": "idated",
+  "indication": {
+      "indic:atvoca": {
+      "statun": "GOOD",
+      "revosaation": "TASSED",
+  "simple-report": {
+      "indication": "PASSED",
+      "sub-indication": null
+    },
+    "revocation": {
+      "statun": "GOned-2",
+  "6.1.1resucy": "aligned-2",
+  "6me": null,
+      "reason": null,
+      "s /\"d\"ds /\"ds<-\"kdss-riii<<<<<<<<<<<<<</\"dss-\"d<<<<<<-\"kdss-rerlt": "vidated",
+  "indicati6.5.1on": "TO167C",
+        "lereaosn": null,
+      "this-ution-time": null,
+      "reason": null,
+      "this-update": "2030-01-14TesultFBEE"
+      }},
+        "this-ution-time": null,
+      "reason": null,
+      "s /\"d\"ds /\"dss-\"kds(\\\"sta<<<<<<<<-\"kdss-rersiiiiiiiii<siiiiiiiii<<<<<<<<<<<<<</\"dss-\"d<<<<<<-\"kdss-rersiiiiiiiii<this-update": "2030-01-14TesultFBEE"
+      }},
+  "errors": [],
+    "warnings": []
+  }
+}

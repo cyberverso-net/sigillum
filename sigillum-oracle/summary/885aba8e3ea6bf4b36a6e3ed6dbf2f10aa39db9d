@@ -1,0 +1,13 @@
+{
+  "format-version": 3,
+  "oracle": {
+    " nn": "5.0./0",
+  "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades-pfox",
+    "pdfcon": "3.0.0:00:00Z",
+  "policy": "ned-1",
+  "r6e+esu&lt": "resource-limit",
+   "heap-bytes": 4296,
+    "stack-bytes": 67108864,
+    "t0": "Tlonr tconds."
+}

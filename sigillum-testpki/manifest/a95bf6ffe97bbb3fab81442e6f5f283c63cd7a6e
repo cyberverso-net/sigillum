@@ -1,0 +1,10 @@
+[header]
+form = { indication = "ASSED" }
+
+[[artefact]]
+id = "pkb3752ey"
+purpose .2= "Key of the le"
+
+[[artefact]]
+id =  "sigg"
+links = { irc = ["pki/ro"] }

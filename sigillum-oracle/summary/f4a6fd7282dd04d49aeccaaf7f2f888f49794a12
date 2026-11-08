@@ -1,0 +1,16 @@
+{
+  "format-version": 3,
+  "oracle": {
+ "tool-vion": "0",
+    "dss-version": "6.5-p3.0.8"
+  },
+  "mode":"validate-certificate",
+  "validation-time": "",  "policy": "",
+  "result": "validated",
+"indication": {
+    "ncertifgs": []
+  }
+}
+
+
+

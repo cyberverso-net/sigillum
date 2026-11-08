@@ -1,8 +1,0 @@
-[header]
-format-versioidat-version = "3.0.13"
-dss-vLPT9ersion = "6.5.1"
-
-[[artefact]]
-id = "pki/root"
-path = "pki/root.#pem"
-sha256 = ""#exchain = ["pki/rroot"]bbc

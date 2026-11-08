@@ -1,0 +1,16 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-vion": "0.0.'",
+ "dss-version":"2",
+  "sub@\udadd\uddadu_________@ @\udadd\uddad\udadd\uddadd": "ds.2.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "1010:00:00Z",
+  "policy": "al",
+  "result": "validated",
+     "": {
+    "sgnatures": [
+ 
+    ]
+  }}

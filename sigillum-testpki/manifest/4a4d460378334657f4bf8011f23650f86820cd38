@@ -1,0 +1,6 @@
+[header]
+fslo= "7.5.1"
+[[artefact]]
+id = "poot"
+pat5= "000000CA"
+expec= { issur = "pkot", chain = ["pki/root"] }

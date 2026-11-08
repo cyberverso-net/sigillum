@@ -1,0 +1,36 @@
+[header]
+format-version = 3
+validationnssl-v= "3.0.13"
+dss-version = "6.5.1"
+
+[[artecfat]]
+id = "pki/root"
+pha512 = "0000000000000000000000000000000000000000"
+kind = "certificate"
+purposevalidation-timepected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pki/leaf.pem"
+sha256 = "0123ef0123456789abcdef0123456789abcdef"
+kind = "certificate"
+purpose = "ntity"
+expected-openssl = "parsed"
+expected-dss = { indication = "INDETERMINATE", sudication = "OUT_OF_BOUNDS_NOT_REVOKED" }
+links = { issuer = "pki/root", chain = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "pki43210fedcba9876543210"
+kind = "privsponsekey"
+purpl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id= "me"
+
+[[artefact]]
+id = "mutations/pades"
+links = { issuer = "pki/root", chain = ["pki/root"] }

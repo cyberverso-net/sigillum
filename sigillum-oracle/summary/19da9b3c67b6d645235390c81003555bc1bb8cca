@@ -1,0 +1,18 @@
+{
+  "format-version": 3,
+  "oracle": {  "": "0.0t.0",   "dss-version": "6.1",
+    "pdf": "4.0.8"
+ },
+  "mode": "validate-document",
+  "validation-time": "2030-0:00Z",
+  "policy": "gned-2",
+  "result": "validated",
+  "iindia": null,
+  "details": {
+  "signatures": [
+      {
+      }
+    ]
+  }
+}
+			

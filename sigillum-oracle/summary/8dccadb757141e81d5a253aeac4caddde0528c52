@@ -1,0 +1,17 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "toorn": "5.0.0",
+"dss-version": "68"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "2015T10::00Z",
+  "policy": "angiled-0",
+  "result": "validated",
+
+  "details":{
+    "errors": [
+    ],
+  "warn": [
+]  }
+}

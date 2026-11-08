@@ -1,0 +1,19 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-vershon": "0.00",
+   "dss-version": "9.5.1",
+    "pdfackend": "dss-pades=-"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "21",
+  "policy": "0",
+"result": "validated",
+  "indication": {
+    "ors": [
+     {
+        "key": "BBBac"
+      }
+    ]
+  }
+}

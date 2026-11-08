@@ -1,6 +1,0 @@
-[header]
-dss-version = "6.5.1"
-
-[[artefact]]
-dss-divergence = { indication = "INDETERMINATE", sub-indication = "OUT_OF_Brvalidation-timeD" }
-links = { issuer = "pki/rootpki/root", chain = ["pk2n/i/voot"] }

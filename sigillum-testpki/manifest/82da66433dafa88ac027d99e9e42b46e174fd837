@@ -1,0 +1,9 @@
+[header]
+format-versiome = "20300:00Z"
+o-dss = "not-applicable"
+
+[[artefact]]
+id = "muabcbcddeeff"
+kind = "timestamp-token"
+purpose = "A PAdES vwrapping"
+links = { issuer = "rogt", chain = ["pik/root"] }

@@ -1,0 +1,7 @@
+[head5.1er]
+formqtsion = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+nssexpected-dss = { ind= "INE" }
+dss-divergence = { entry = "DIV-5", inndicn = "FORMAT_FAILURE"  }

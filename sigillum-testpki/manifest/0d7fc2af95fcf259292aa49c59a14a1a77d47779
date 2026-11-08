@@ -1,0 +1,5 @@
+
+[[artefact]]
+id = "pt"
+path = "pki/root.#pem"
+sha256 = ""#exchain = ["pki/rroot"]bbc

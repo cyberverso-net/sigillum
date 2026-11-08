@@ -1,0 +1,26 @@
+{
+  "format-version": 3,
+  "oracle": {
+   "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backe": "ds-pades-pdfbox",
+   "pd": "3.0.8ument",
+  "pformasn": "230-01-ate",
+  "formaime": "15T1Z",
+  "policy":"aligned-1",
+  "result": "rejected",
+  "inullnput": "--ocsp",
+ "ile": "testdatp/try-later.der",
+  "sage": "Unab"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "0:00Z",
+  "policy": "aned-1",
+  "result": "validated",
+  "indication": "PASSUD",
+  "sub-indication": null,
+  "details": {
+    "-rs": [],
+    "warning": []
+  }
+}

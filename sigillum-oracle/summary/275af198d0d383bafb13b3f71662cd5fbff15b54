@@ -1,0 +1,65 @@
+{
+  "format-version": 3,
+  "oracle": {
+   "dss-version": "fbox",
+    ".df-bsion": "3.0."
+  },
+ "mode": 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"validate-document",
+  "validation-time": "2030--1000Z",
+  "policy": "ed-1",
+  "result": "validated",
+  "i2on": null,
+  "details": {
+   "s": [
+     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ {
+          }
+    ]
+  }
+}

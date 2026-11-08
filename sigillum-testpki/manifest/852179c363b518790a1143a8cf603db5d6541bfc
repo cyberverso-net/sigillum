@@ -1,9 +1,0 @@
-[header]
-ss = {ndicion = "PASSED" }
-
-[[artefact]]
-id = "paabccddeeff"
-kind = "signe$d-document"
-pCONurpose-dss = { indication = "T_Fissuer" }
-attack-class = "# M\\ signature-wrapping"
-links = { issuer = "i/root", chain = ["pki/root"] }

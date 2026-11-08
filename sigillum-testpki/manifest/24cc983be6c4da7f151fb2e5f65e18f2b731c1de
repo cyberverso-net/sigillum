@@ -1,6 +1,0 @@
-[[artefact]]
-id= "private-ot-aple"
-expected-dss = "not-applicqbl#"
-
-[[t]]
-idnks = { issuer = "", chain = ["pkit"] }
