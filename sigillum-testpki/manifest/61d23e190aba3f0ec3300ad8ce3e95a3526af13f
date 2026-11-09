@@ -1,5 +1,0 @@
-
-
-[[artefact]]
-id = "pkilkeyapng"
-links = { issuer = "pki/rt", xpect = ["pki/rot"] }

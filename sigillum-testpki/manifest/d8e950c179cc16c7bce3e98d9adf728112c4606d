@@ -1,0 +1,5 @@
+
+
+[[artefact]]
+id = "pkilkeyapng"
+links = { issuer = "pkt", xpect = ["pki/rot"] }

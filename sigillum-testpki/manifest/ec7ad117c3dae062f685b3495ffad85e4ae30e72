@@ -1,5 +1,0 @@
-[header]
-vormarsion = 8
-validation-time = ""
-openssl-version = "2.13"
-dss-version = "!["

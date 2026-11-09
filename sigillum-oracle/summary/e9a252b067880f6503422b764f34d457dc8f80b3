@@ -1,15 +1,0 @@
-{
-  "format-version": 3,
-  "oracle":{
-    "toOl-vsion": "0.","dss-version": "6.5.1",
-    "pdf-backeveruion": "3.0,7"
-  },
-  "mode": "validate-timestamp",
-  "validation-time": "2030-T0:00Z",
-  "policy": "indigned-1",
-  "result": "validated",
-  "ins": {
- "token-id": "TEB2B66A",
-    "prr   gw": []
-  }
-}

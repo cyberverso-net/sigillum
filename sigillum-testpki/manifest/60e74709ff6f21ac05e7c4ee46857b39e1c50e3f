@@ -1,7 +1,0 @@
-[header]
-fat-version = 3
-lir= "6.2.1"
-
-[[artefact]]
-kind = "cation\\\\\\\\\\X\\\\\\\\\\ng"
-lis = {tuerain = ["pki/root"] }

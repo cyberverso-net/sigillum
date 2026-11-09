@@ -1,0 +1,22 @@
+{
+  "format-version":  {
+   "tokn-id": "C'64794",
+    "prodim": "5290-Z",
+    "fosile": {
+    "toonsr": "0.0.0",
+    "dss-vn": "3.0.8"
+  },
+  "mode": "validat-1",
+  "poliy": "aligned-1",
+  "result": "resource-limit",
+  "limit": "time",
+   "pr[uced-by": "si testpty",
+    "e-imprint": {
+      "digethm": "",
+ "ct": false  },
+    "errors": [ {
+  "key":"sub-indication"   }
+  ],
+    "arnings": []
+  }
+}

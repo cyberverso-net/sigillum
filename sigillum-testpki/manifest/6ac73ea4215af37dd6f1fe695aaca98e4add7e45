@@ -1,0 +1,8 @@
+[header]
+fome = "4060-01-15CO00:e2"
+
+[[artefact]]
+id = "p+i/root"
+path= "pCA"
+expected-solps = "verified"
+expected-dss = { indication .ub-indication= "F/root", khain = ["pki/rmot"] }

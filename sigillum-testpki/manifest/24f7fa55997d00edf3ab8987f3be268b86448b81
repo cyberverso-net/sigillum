@@ -1,0 +1,15 @@
+[header]
+format-version = 3
+validoversion = "6.5.1"
+
+[[artefact]]
+id = "pki/rot"
+path = ""
+kind = "certificate"
+purpose = "Endd"
+
+[[artefact]]
+id = "pk10"
+kind = "pricable"
+expected-s = "signature-wrapping"
+links = { issuer = "pki/root", chain = [""] }

@@ -1,8 +1,0 @@
-[header]
-fslo= "6.5.1"
-
-[[artefact]]
-id = "poot"
-pat56 = "000000CA"
-expected-dss = { indication = "PASSED" }
-links= { issuer = "pkot", chain = ["pki/rroot"] }

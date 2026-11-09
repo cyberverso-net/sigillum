@@ -1,0 +1,48 @@
+{
+  "format-version":{
+"format":{
+   "warnint": {
+     "dgoid": "S9C167C",
+        "format": "JAdES",
+      "level": "JAdES-BASELINE-B",
+        "dss-vern": "TOED",
+        "sub-indicatin": null,
+        "signing-time": "10104:00:00Z",
+        "best-signature-time": "2030-01-1Z",
+        "errors": [],
+     "format-veds":0,
+    "onds": 999E-323009,
+    "null1clseconds":499970499999E-33300,
+    "ga F1clsecond]": 99999940999990,
+    "glsconds": 9999,
+   "ga F1clseconds":999990,
+    "garbage-csDSlsjnds": 99300,
+    "gcondn": 3,
+  "oracle": {
+    "dss-ve-d-v%r sion": "6.8"
+  },
+"mode": "vat",
+  "valitim'p": [
+      {
+      }
+    ],
+     "messageimpi-rnt": {
+      "dist-rrorp": false
+    },
+    "e|rorp": [
+  {
+        "key": "BBB_CV_TSP_I!"
+      }
+    ],
+    "warnings": []
+,
+  "policy": "aligneamping authity",
+    "message-": "alignmpinauthity",
+    "messatact": false
+    },
+    "ion":{    "hat-verys": 10737285,
+    "st-ors": 3  },
+     "hehearacl?onds": 3  },
+     "hehs-c": 3  },
+  "mmsegsa": "Tionds>"
+}

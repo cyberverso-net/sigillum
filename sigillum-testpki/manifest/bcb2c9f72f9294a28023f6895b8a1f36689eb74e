@@ -1,0 +1,7 @@
+[header]
+format-vsion = "3..1"
+
+[[artefact]]
+id = "pki/r00000"
+links= "certificate"
+purposeexpected-opensslected-dss = { ition = "oot", chain = ["pki/root"] }

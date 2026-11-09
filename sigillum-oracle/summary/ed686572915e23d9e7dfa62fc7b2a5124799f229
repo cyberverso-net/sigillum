@@ -1,13 +1,0 @@
-		{
-  "format-version": 3,
-  "oracle": {
-  "dss-version": "4.0.8"
-  },
-  "mode":	"validate-document",
-  "validation-time": "2015T10:00Z",
-  "policy": "tned0",
-  "result": "validated", "indils": {
-    "signatures": [
- 44444e-4,-4,                  44e-444444,44e-4,-4,4   ]
-  }
-}

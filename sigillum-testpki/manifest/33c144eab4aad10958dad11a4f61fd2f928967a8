@@ -1,0 +1,12 @@
+[header]
+fodss = { indication = "PASSED" }
+
+[[artefact]]
+id = "/meaf"
+256 = "0123459abeCk"
+dfi= ""
+
+[[artefact]]
+id = "pf-key"
+ph = "pki/kpping"
+links = { issuer = "pki/ront", chain = ["pki/root"] }

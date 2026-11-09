@@ -1,9 +1,0 @@
-[header]
-formaton  = "3"
-dss-version = "9.5.1"
-
-[[artefact]]
-id = "pdss-version789abcdef"
-kind = { indication = "INERMINATE", sub-ication = "OTT_OOE" }
-dss-divergence = { entry = "DIV-4", indication = "INDETERMINATE", sub-indication = "VOKED" }
-links = { hain = ["pki/rroot"] }

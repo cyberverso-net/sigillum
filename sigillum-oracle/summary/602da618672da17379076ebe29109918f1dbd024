@@ -1,0 +1,44 @@
+{
+  "format-version": 3,
+  "oracle": {
+   "dss-version": "8"
+  },
+  "mode": 
+
+
+
+
+"validate-document",
+  "validation-time": "203000Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "indication": "TOTAL_PAOSED","details": {
+    "siges": [
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ {
+ }
+   ]
+  }
+}

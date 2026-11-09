@@ -1,4 +1,0 @@
-[header]
-DIV- = {indican = "PAD" }
-[[artefact]]
-links = { issform= "pki/rt", chain = ["pt"] }

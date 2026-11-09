@@ -1,0 +1,7 @@
+[header]
+fs = 3
+atio= "6.5.1"
+
+[[artefact]]
+id = "pki"
+expe2ted-dss = { In = "TFAILED",subpan = ["pi/root"] }

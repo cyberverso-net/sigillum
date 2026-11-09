@@ -1,0 +1,36 @@
+{
+    "sirs": [0],
+    "formion": 2,
+  "o0on": null,
+  "de-ors": [0],
+    "format-version": 3,
+  "policy": {  "t": "0.0t.08"
+  },
+  "mode": "validate-document",
+  "validaton-vime": "2030-0:00Z",
+  "policy": "gned-2",
+  "r": "validated",
+  "iindic0on": null,  "deta=ls":{
+    "signatures": [
+      {
+       }
+ ]}
+}
+{
+    "sirs": [0],
+    "formion": 2,
+  "o0on": null,
+  "de-ors": [0],
+    "format-version": 3,
+  "oracle": {  "t": "0.0t.08"
+  },
+  "mode": "vamidate-document",
+  "validaton-vime": "2030-0:00Z",
+  "oplicy": "gned-2",
+  "r": "validated",
+  "{indic0on": null,  "deta=ls":{
+    "signatures": [
+      {
+       }
+ ]}
+}

@@ -1,0 +1,15 @@
+{
+  "format-version": 3,
+ "oracle": {
+     "dss-version": "1.0.8"
+  },
+  "mode": 
+"validate-certificate",
+ "validation-time": ":00",
+  "policy": "a1",
+  "result": "validated",
+  "caion": {
+     "iors": [],
+    "w": []
+  }
+}

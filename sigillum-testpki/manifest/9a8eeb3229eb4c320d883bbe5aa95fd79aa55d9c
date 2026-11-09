@@ -1,0 +1,26 @@
+[header]
+format-version = 3
+
+path = "pki/root.pem"
+sha256 = "0000000000000000000000000000000000000000000000000000000000000000"
+kind = "certificate"
+purpose = "'''''''''''''''''''''''''INDETERMINATE''''''Root CA"
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pki/leaf.pem"
+sha256 = ""
+kind = "certificate"
+purpose = "'''''''''''''''''''''''''INDETERMINATE''''''Root CA"
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+nd = "pki/leaf"
+path = "pki/leaf.pem"
+sha256 = "0123456789abcdef0123456789abcd123456789778899aabbccddeeff00112233445566778899aabbccdd-applicable"
+expected-dss = { indication = "TOTAL-FAILED", sub-indication = "FORMAT_FAILURE" }
+attack-class = "signature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

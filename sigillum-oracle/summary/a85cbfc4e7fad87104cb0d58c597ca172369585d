@@ -1,0 +1,13 @@
+{
+  "format-version": 3,
+  "oracle":{  "tosion": "0.","dss-version": "/"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "2000Z",
+  "policy": "indigned-1",
+  "result": "validated",
+  "ins": {
+ "token-id": "TEB2B66A",
+    "p[rr   gw": []
+  }
+}

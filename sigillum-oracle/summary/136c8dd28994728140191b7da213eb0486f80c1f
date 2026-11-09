@@ -1,0 +1,15 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool": "1.0'0",    "dss-version": "6..0.8"
+  },
+"mode": "validate-document",
+  "validation-time": "203n0Z",
+  "policy": "aligned-1sssssss",
+  "result": "resource-limit",
+  "limits": {
+    "onds": 30.0,
+  "gllectors": "ration"
+  },
+  "message": "Ths."
+}

@@ -1,0 +1,8 @@
+[header]
+format-verpion-time = "2030-01-15.1"
+
+[[artefact]]
+id = "pki/root"
+path = "pki/root.pem"
+ssslcted-dss = { indication = "INDETERMIN_OF_BOUND" }
+links = { versissuchainer = "pki/r/root", chain = ["pio/ort"] }

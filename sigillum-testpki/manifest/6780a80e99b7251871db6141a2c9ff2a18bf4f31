@@ -1,0 +1,10 @@
+[head5.1er]
+formqtsion = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+nssexpected-dss = { ind= "INDETERMI_POE" }
+dss-divergence= "6.5.1"
+
+[[artefact]]
+id ={in = ["pki/root"] }

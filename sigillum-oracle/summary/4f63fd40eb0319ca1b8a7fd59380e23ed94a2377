@@ -1,0 +1,15 @@
+		{
+  "format-version": 3,
+  "oracle": {"rsion": "0.0.0",
+    "dss-version": "6.~.1",
+    "pdrsion": "2.0.8"
+  },
+  "mode":	"validate-document",
+  "validation-time": "2030:04Z",
+  "policy": "-1",
+  "result": "validated",
+  "indisation": "TOTAL_PSED",
+  "sub-indicils": {
+    "": [
+ 3,444444444404444447489e-4,444404444444444444445e-4,-4,44444444444444444444  ] }
+}

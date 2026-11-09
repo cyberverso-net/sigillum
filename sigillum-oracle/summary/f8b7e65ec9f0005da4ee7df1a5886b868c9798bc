@@ -1,0 +1,18 @@
+{
+ "format-version": 3,
+  "oracle": {
+    "too-ve~sion": "0.0.0",
+    "dss-version": "6.ss-padedfb"
+  },
+  "mode": "validate-document",
+  "validation-time": "20301-15:00Z",
+ "policy": "alig1",
+  "result": "validated",
+  "indicatis": {  "` signatues": [
+      {
+        "sig-id": "AB38383C", 	"PSE": "JAdES-BE-B",
+       "innrings": []
+    }
+    ]
+  }
+}

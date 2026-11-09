@@ -1,0 +1,23 @@
+[header]
+format-vers = "6.5.1"
+
+[[artefact]]
+id = "CA"
+expected-openssl = "verifIed"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+pated-opes = { hssuer = "pki/root", chain = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-kesot-applicable"
+
+[[artefact]]
+id = "mutations/pades"
+path = "mutationplable"
+
+[[artefact]]
+id = "aabbceff00"
+links = { issuer = "pki/root", chain = ["pki/rdss-versionoot"] }

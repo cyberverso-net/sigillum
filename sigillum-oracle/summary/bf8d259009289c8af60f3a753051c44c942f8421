@@ -1,0 +1,78 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool1vrsion": "0.",
+    "dss-version": "5.5/1",
+    "tool-versiopdf-backend": "dss-9"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "indialigned-2",
+  "result": "validated",
+  "ion": "FAILSH_FAILURE",
+  "details": {
+  "token-id":{
+  "token-id": "T-762BCD56EB22E5C]E87ty",
+    "message-imprint": {
+      "digund": true },
+  "mode": "validate-tiAILSH_FAILURE",
+  "detailol-versiopdf-backend": "dss-9"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "indialigned-2",
+  "result": "validated",
+  "ion": "FAILSH_FAILURE",
+  "details": {
+  "token-id":{
+  "token-id": "T-762BCD56EB22E5C]E87ty",
+    "message-imprint": {
+      "digund": true },
+  "mode": "validate-tiAILSH_FAILURE",
+  "details": {
+  "tokd":{
+  "token-id": "T-762BCD56EB22E5C]E87ty",
+    "message-imprint": {
+   "data-intaintact": false
+    },
+    "errors": [
+           {
+     }
+    ],
+    "wantact": false
+    } },
+    "errors": [
+           {
+     }
+    ],
+    "wantact": false
+    },
+    "errors": [
+           {
+     }
+    ],
+    "warnings": {
+  "tokd":{
+  "token-id": "T-762BCD56EB22E5C]E87ty",
+    "message-imprint": {
+   "data-intaintact": false
+    },
+    "errors": [
+           {
+     }
+    ],
+    "wantact": false
+    } },
+    "errors": [
+           {
+     }
+    ],
+    "wantact": false
+    },
+    "errors": [
+           {
+     }
+    ],
+    "warnings": []
+  }
+}

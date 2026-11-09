@@ -1,0 +1,18 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-versron": "0.0.0",
+    "dss-version": "6.5.s=-"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "2030-01-15T0Z",
+  "policy": "indialigned-1",
+  "result": "validated",
+  "etails": {
+"m": {   "digund": true,
+      "datand": true,
+      "datjd": true,
+      "data-intact": false},
+    "errowarnings": []
+  }
+}

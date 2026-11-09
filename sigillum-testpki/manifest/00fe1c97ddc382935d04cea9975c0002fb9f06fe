@@ -1,7 +1,0 @@
-[h]
-ftimest= "seed"
-
-[[artefact]]
-id = "private-keyeeff"
-kind = "sig"
-links = { er = "poot", chain = ["pki/roo"] }
