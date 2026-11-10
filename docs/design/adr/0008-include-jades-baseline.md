@@ -1,6 +1,6 @@
 # ADR-0008: Include JAdES baseline in scope
 
-- **Status:** Accepted
+- **Status:** Accepted; order of delivery superseded by [ADR-0027](0027-jades-alongside-cades.md)
 - **Date:** 2026-10-23
 
 ## Context
@@ -38,3 +38,7 @@ A new crate, `sigillum-jades`, holds the implementation. Whether to build on the
 ## Consequences
 
 `scope.md`, `roadmap.md` and `architecture.md` are updated, and `sigillum-jades` is added to the workspace. The test PKI and the differential harness of phase 0 must cover JAdES. The verification "not supported" tests of [ADR-0007](0007-asymmetric-scope.md) extend to JAdES features left out, such as the `HttpHeaders` mechanism.
+
+## Notes
+
+- **2026-11-10.** [ADR-0027](0027-jades-alongside-cades.md) replaces the order of delivery set here. JAdES B-B is implemented with CAdES B-B, as the second user of the shared API of [ADR-0026](0026-public-api-conventions.md), and JAdES B-T and B-LT follow CAdES B-LT, in parallel with `sigillum-pdf` and PAdES, rather than after PAdES. Release 0.1 still requires CAdES, PAdES and CMS encryption, and JAdES never delays it. The scope of JAdES set by this record is unchanged. This note does not change the record above.

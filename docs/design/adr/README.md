@@ -46,7 +46,7 @@ When the lead maintainer accepts an ADR directly, without a *Proposed* stage, th
 | [0005](0005-two-step-signing.md) | Two-step signing with an external signer | Accepted; retrieval by `assemble` and binding of the inputs by the state superseded by [ADR-0026](0026-public-api-conventions.md) |
 | [0006](0006-no-network-access-in-core.md) | No network access in the core | Accepted; retrieval through a `Fetcher` during signature creation superseded by [ADR-0026](0026-public-api-conventions.md) |
 | [0007](0007-asymmetric-scope.md) | Asymmetric scope and explicit unsupported results | Accepted |
-| [0008](0008-include-jades-baseline.md) | Include JAdES baseline in scope | Accepted |
+| [0008](0008-include-jades-baseline.md) | Include JAdES baseline in scope | Accepted; order of delivery superseded by [ADR-0027](0027-jades-alongside-cades.md) |
 | [0009](0009-keep-xades-deferred.md) | Keep XAdES deferred | Accepted |
 | [0010](0010-cryptographic-backend.md) | Use RustCrypto as the cryptographic backend | Accepted |
 | [0011](0011-asn1-x509-cms-foundations.md) | Build ASN.1, X.509 and CMS on the RustCrypto formats crates | Accepted; choice of generation and of `x509-ocsp` and `x509-tsp` superseded by [ADR-0025](0025-build-phase-1-on-der-0-8.md) |
@@ -65,3 +65,4 @@ When the lead maintainer accepts an ADR directly, without a *Proposed* stage, th
 | [0024](0024-bounded-decoding-of-untrusted-input.md) | Bounded decoding of untrusted input | Accepted; move of `check_der` to `sigillum-pki` superseded by [ADR-0025](0025-build-phase-1-on-der-0-8.md) |
 | [0025](0025-build-phase-1-on-der-0-8.md) | Build phase 1 on the der 0.8 generation | Accepted |
 | [0026](0026-public-api-conventions.md) | Set the conventions of the public signing API | Accepted |
+| [0027](0027-jades-alongside-cades.md) | Develop JAdES alongside CAdES and PAdES | Accepted |
