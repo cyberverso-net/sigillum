@@ -1,0 +1,16 @@
+		{
+  "format-version": 3,
+  "oracle": {
+    "ersion": "0.0",
+"dss-version": "6.58"
+  },
+  "mode":	"validate-document",
+  "validation-time": "2000Z",
+  "policy": "l2",
+  "result": "validated",
+   "sub-indicils": {
+    "signa": [
+445e-4,-4,4,-0
+    ]
+  }
+}

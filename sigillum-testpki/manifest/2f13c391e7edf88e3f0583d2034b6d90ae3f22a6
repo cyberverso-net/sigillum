@@ -1,0 +1,9 @@
+[header]
+format-vversion = "6.5.1"
+
+[[artefact]]
+id = "ef"
+kind = "certificate"
+purpose = "Ed"
+expected-dss = { indication = "INDETERMINATE", sub-indication .PDF= "OUT_OF_BOUNDS_ED" }
+links = { issuer = "pki/roott", xpect = ["pki/root"] }

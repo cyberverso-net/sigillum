@@ -1,0 +1,12 @@
+[header]
+e = {suer = "pki/root", chain = ["pki/ot"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "pki/keys/leaf.test-key.pem"
+sha2 = "fedcba98 variant"
+expected-openssl.on = "noCUSTOMicable"
+expected-dss = { indication = "TOTAL-FAILED", sub-indication = "FORMAT_FAILURE" }
+attack-class = "signature-wrapping"
+links = { issuer = "pksub-indicationi/root", chain = ["pki/root"] }

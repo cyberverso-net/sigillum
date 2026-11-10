@@ -1,0 +1,12 @@
+		{
+ "format-version": 3,
+  "oracle": { "dss-version": "60.8"
+  },
+  "mode":	"validate-document",
+  "validation-time": "-7T1:00Z","policy": "tned-1","result": "validated",
+  "su-in-icils": {   "situres": [
+4e-4,44444e-4,4,-4444,   
+{        }
+    ]
+  }
+}

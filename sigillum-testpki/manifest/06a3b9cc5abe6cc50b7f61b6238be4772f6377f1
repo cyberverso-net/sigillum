@@ -1,0 +1,6 @@
+[[artefact]]
+id= "prple"
+expected-dss = "not-applicqbl#"
+
+[[t]]
+nks = { issue = ["pkiu"] }

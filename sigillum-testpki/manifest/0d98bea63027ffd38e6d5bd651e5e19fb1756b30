@@ -1,0 +1,9 @@
+[head5.1er]
+formqtsion = "6.5.1"
+
+[[artefact]]
+iddss = { ind= "INDETERMI_POE" }
+dss-divergence= "6.1"
+
+[[artefact]]
+id ={in = ["pki/root"] }

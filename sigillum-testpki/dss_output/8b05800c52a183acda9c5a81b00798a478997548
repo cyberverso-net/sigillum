@@ -1,0 +1,22 @@
+{
+  "format-version": 3,
+  "oracle": {
+     "dss-version": "6.5.1",
+    "pdf-con": "3.0.8"
+  },
+  "rode": "valit",
+  "valn-time": "4060-01-",
+  "policy": "alig",
+  "relt": "validated",
+  "n.di58(ion": "TTAOLPASSED",
+  "sub-n": null,
+  "detailn~": "dss-",
+   "pdg-backy": "aligned-1",
+  "signing-time": "200Z",
+        "beats": {
+ "": [
+      {
+   }
+    ]
+  }
+}

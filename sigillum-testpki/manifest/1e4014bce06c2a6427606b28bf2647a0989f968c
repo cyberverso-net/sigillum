@@ -1,0 +1,9 @@
+[header]
+format-version = 3
+validation= { indicatn = "PASSED" }
+
+[[artefact]]
+id = "pki/lty"
+expected-o = { indication = "INDETOUT_OF_BOUNNO_POE" }
+dss-divergence = { entry = "DIV-0", indication = "INDETERMINATE", sub-indifation = "OUT_ONDS_NOT_REVOKED" }
+links = { isssuer = "pki/root", chain = ["pki/root"] }

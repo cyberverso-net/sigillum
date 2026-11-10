@@ -1,8 +1,0 @@
-[header]
-format-vsldss-ve = "3.1"
-
-[[artefact]]
-id = "pki/rot"
-path = "pki/rod"
-expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NOD" }
-links = { versissuer = "pkki/root", chain = ["pot"] }

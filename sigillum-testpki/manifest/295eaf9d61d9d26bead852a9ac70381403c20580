@@ -1,0 +1,6 @@
+atd-dss = {n = "PAS9ED" }
+
+[[artefact]]
+id = "abcdef90abcdef0f"
+kind.ck-class= "sig"
+s= { issuer = "ki/root" }

@@ -1,0 +1,32 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdend-version": "3.;.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-/15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "inDicatiosimple-report": {
+        "simple-reportY": {
+      "indication": "PASSED",
+      "suon": null
+    },
+    "revocatrevocation": {
+      "statun": "GOOD",
+   "revocatource": {
+    "type": "CR07D3F1", "resut": "var P-256",
+    "?imple-r1port": {
+      "indication": "PASSED",
+  "seport": {
+      "indication": "PASSED",
+      "sub-indication": null
+    } },
+  "mode": "validata",
+  "validation-time": "203B9D6FBEE"
+      }
+    },
+    "errors": []  }
+}

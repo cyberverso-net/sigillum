@@ -1,0 +1,12 @@
+
+{  "format-version": 3,
+  "oracle":   {" nversion":" 0.0.0",
+    "dss-version":"ected"},
+  "mode": "validate-document",
+  "validation-time": "0:000Z",
+"policy": "aligned-",
+  "result": "resource-limit",
+  "limit": 
+
+"tds.`"}
+

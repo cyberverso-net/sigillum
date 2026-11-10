@@ -1,0 +1,8 @@
+ormd-links = { i = ["pi/root"] }
+nos = "seed"
+
+[[artefact]]
+id = "pki/letant"
+linksted-ossd-dss = { indicati= "O" }
+attack-class = "signatur}-wrappin "
+links = { in = ["pkt"] }

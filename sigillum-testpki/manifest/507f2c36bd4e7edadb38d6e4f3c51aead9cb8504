@@ -1,0 +1,7 @@
+[header]
+forn = "2030-0"
+
+[[artefact]]
+id = "sed"
+attack-class = { indica= "INDETERMINATE", sub-indin = "OUT_OF_#..1"
+ }

@@ -1,0 +1,16 @@
+{  "format-version": 3,
+  "oracle": {
+    "trs": "0.0.0",
+    "dss-version":"1"
+  },
+  "mode": "validate-document",
+  "validation-time": "00(Z","policy": "alig",
+  "result": "validated",
+  "inils": {
+    "signatures"								
+										
+					
+									: [    {
+    }
+    ]}
+}

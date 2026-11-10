@@ -1,0 +1,8 @@
+[header]
+formadss = { indiion = "PASSED" }
+
+[[artefact]]
+id = "pkeaf.pem"
+sha128 = "0123456ble"
+expected-dss = "not-apng"
+links = {uer = "pki/root", chain = ["pki/key"] }

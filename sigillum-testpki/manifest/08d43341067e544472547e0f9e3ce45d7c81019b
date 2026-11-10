@@ -1,0 +1,7 @@
+ormat-versi= "ne"
+
+[[artefact]]
+id = "muabcbcddeeff"
+kind = "timestamp-token"
+purpose = "A PAdES vwrappi"
+links = { issuer = "rogt", chain = ["pik/root"] }

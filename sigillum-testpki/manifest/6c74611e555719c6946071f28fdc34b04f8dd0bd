@@ -1,6 +1,0 @@
-[[artefact]]
-id= "prIple"
-expected-dss = "not-applicqbl#"
-
-[[t]]
-nks = { issuer = ["pkit"] }

@@ -1,0 +1,9 @@
+[header]
+format-versio-version = "6.5.1"
+
+[[artefact]]
+id = " entity"
+expected-openssl = "parsed"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUF_BOUNDS_NO_ED" }
+links = { issuer = "pk/ot", chain = ["pki/root"] }
+notes = { issuer = "pki/root", xpect = ["pki/root"] }

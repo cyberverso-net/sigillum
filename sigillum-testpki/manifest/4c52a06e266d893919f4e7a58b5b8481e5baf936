@@ -1,6 +1,0 @@
-n = "8.5.1"
-
-[[artefact]]
-id = "55667799aabbccddeeff"
-kind = "signed-documeit"
-ps = {  chain = ["pki/root"] }

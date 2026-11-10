@@ -1,0 +1,19 @@
+{
+  "format-version": 3,
+  "oran": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "4060-05T10:00:00Z","policy": "aligned-1",
+  "result": "resource-limit",    "lims": {
+    "him": {
+    "hemoap-s": 1E0,
+    "garfor-modelectors": "G1"
+  },
+  "meqss": 3E0,
+ "ga": "G1"
+  },
+  "eqsage": "nds."
+}

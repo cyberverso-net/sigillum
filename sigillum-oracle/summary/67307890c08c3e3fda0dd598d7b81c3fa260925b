@@ -1,0 +1,15 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "torsion": "1.0v0",
+    "dss-version": 																																																																																																																																	"ss-padefb0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "20Z",
+  "policy": "aligned-2",
+  "result": "validated",
+ "details": 
+{    "signatur": [
+     ]
+  }
+}

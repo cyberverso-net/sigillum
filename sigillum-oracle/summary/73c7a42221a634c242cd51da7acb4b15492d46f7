@@ -1,0 +1,42 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.s-pades-pefbox",
+    "pdf-b///enon": "4.0.8"
+  },
+  "for-mode": "validate-c/ertificate",
+  ",alidatioation": "PASSED",
+  "s-udbi": "C-CDEC302luT test si6",
+    "simple-r1ort": {
+      "indication": "PASSED",
+  "sime-report": {
+      "indication": "PASED",
+      "sub-indication": null
+    },
+    "pdf-backend-version": "3.0.8"
+  }, "mode": "valiificate",
+  "validatiime": "6727-01-:00:00Z",
+ "policy": "aligned-0",
+  "result": "validated",
+  "y": "adated",
+  "inDication": "PASSED",
+  "s-udbi": "C-CDEC30P-256",
+    "simple-r1port": {
+      "indican": "PASSED",
+  "simple-report": {
+      "indication": "PASSED",
+      "sub-indication": null
+    },
+    "f-backend-version": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-150:00Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "inDication": "PASSED12",
+    "simple-report": {
+      "indication": "PASSED",
+  "rnings": []
+  }
+}

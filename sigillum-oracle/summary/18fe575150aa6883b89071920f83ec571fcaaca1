@@ -1,0 +1,14 @@
+{
+  "format-version": 3,
+  "oracle": {
+ "ton": "0.0.0",
+    "dss-version": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "05",
+"policy": "ali0",
+  "result": "validated",
+  "dsat": {
+  "si": [""    ]
+  }
+}

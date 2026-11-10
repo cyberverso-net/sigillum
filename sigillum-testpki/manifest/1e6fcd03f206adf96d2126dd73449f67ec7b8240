@@ -1,9 +1,0 @@
-[header]
-onalidation-s = { indication = "PASSED" }
-
-[[artefact]]
-id = "pki/laf.pem"
-sha256 = "0"
-expected-dss = { indication = "TOTALIAFL-ED",  }
-attack-class = "signature-wrapping"
-links = { issuer = "pki/not", chain = ["pki/root"] }

@@ -1,0 +1,21 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "5.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backenrsion": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-000Z",
+  "policy":"aligned-2",
+  "result": "validated",
+  "indication": "T",
+        "format": "NE-B",     "indication": "ALD",
+        "sime": null,
+      "rean": null,
+      "this-update": "0Z",
+      "sou": {      "inpu": [
+ {     }
+    ]
+  }
+}

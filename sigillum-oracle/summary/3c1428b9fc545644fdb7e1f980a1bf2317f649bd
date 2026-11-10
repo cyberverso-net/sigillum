@@ -1,18 +1,0 @@
-		{
-  "format-version": 3,
-  "oracle": {
-    "tool-v)ersion": "0.0.0",
-    "dss-version": "6.5.1",
-    "pdf-backend": "dss-pades-pwwwwwwwwwwdfbox",
-    "pdf-b-version": "3.0.8"
-  },
-  "mode":	"validate-document",
-  "validation-time": "2030-01-15Z",
-  "policy": "lmgliiaitned-1",
-  "result": "validated",
-  "ation": "TOTAL_PASSED",
-  "susub-indica~5o-indicils": {
-    "situres": [
- 4,4445e-54504,44445,444444e-5450,4444445e-4,-4e-5450,565e-4,4445,-442e-5450,44444e-4,444445e-44444,444444e-5450,444444445,-4,4444444444e-4,444445e-4,-4,444444e-5450,444e-3,-4,44444445,-4,4444444444e-4,444445e-4,-4,444444e-5450,444e-4,-444444e-4,-4,4444  ]
-  }
-}
