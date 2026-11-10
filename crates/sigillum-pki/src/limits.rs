@@ -143,11 +143,10 @@ impl EncodingKind {
 /// number of evidence rounds and the number of evidence requests are
 /// counted over the whole signing operation, across `assemble` and every
 /// `resume`, as ADR-0017, rule 3, bounds requests per operation. The
-/// assembly state carries the counts from one call to the next, in the
-/// round counter and the record of requests that ADR-0026, decision 6,
-/// point 5, names. The library does not trust that
-/// state, so the bound holds as long as the caller's loop passes the state
-/// on without altering it. A caller that alters it only runs more requests
+/// assembly state carries the counts from one call to the next (ADR-0026,
+/// decision 6, points 4 and 5). The library does not trust that state, so
+/// the bound holds as long as the caller's loop passes the state on
+/// without altering it. A caller that alters it only runs more requests
 /// that it performs itself. The driver `sign_with` keeps its own count
 /// outside the state.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
