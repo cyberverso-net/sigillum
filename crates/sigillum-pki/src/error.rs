@@ -5,7 +5,9 @@
 //! content and no key material (threat R3 of the threat model). By
 //! convention, checked in review, the message and the member names of a
 //! JSON pointer are fixed text written in the source of sigillum, never
-//! text taken from the input. A location otherwise holds only numbers.
+//! text taken from the input. A member that sigillum does not know is
+//! written as a fixed placeholder. A location otherwise holds only
+//! numbers.
 //!
 //! Errors are for operations that cannot complete. Verification results in
 //! phase 2 are values, not errors (ADR-0017, rule 4).
@@ -26,8 +28,8 @@ pub enum ErrorKind {
     /// value stated as `Der` that is not an `ECDSA-Sig-Value`.
     Malformed,
     /// A limit of the context was reached, such as an input size, the
-    /// nesting depth, the number of evidence rounds or requests, or a
-    /// response size. See [`Limits`](crate::Limits).
+    /// nesting depth of an encoding, the number of evidence rounds or
+    /// requests, or a response size. See [`Limits`](crate::Limits).
     LimitExceeded,
     /// The input or option is valid, but outside the scope of sigillum
     /// (ADR-0007), such as an excluded algorithm or an object identifier
@@ -110,10 +112,14 @@ impl fmt::Display for Location {
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum JsonPointerToken {
-    /// A member of an object, by a name that sigillum knows. By
-    /// convention, checked in review, the name is fixed text in the source
-    /// of sigillum, never a name taken from the input.
+    /// A member of an object, by a name that sigillum knows, never
+    /// `(unknown)`. By convention, checked in review, the name is fixed
+    /// text in the source of sigillum, never a name taken from the input.
     Member(&'static str),
+    /// A member of an object whose name sigillum does not know. Its name
+    /// is never kept, and the pointer writes it as the fixed placeholder
+    /// `(unknown)`.
+    UnknownMember,
     /// An element of an array, by its index from zero.
     Index(u32),
 }
@@ -124,7 +130,8 @@ pub enum JsonPointerToken {
 /// Member names are names that sigillum knows, such as `sigD` or
 /// `x5t#S256`, written as fixed text in its source. By convention, checked
 /// in review, a pointer never repeats a name taken from the input. A
-/// decoder that meets an unknown member stops the pointer at its parent.
+/// member that sigillum does not know is recorded by
+/// [`unknown_member`](Self::unknown_member), without its name.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
 pub struct JsonPointer {
     tokens: Vec<JsonPointerToken>,
@@ -141,7 +148,16 @@ impl JsonPointer {
     /// Returns this pointer extended by the member `name`.
     #[must_use]
     pub fn member(mut self, name: &'static str) -> Self {
+        debug_assert_ne!(name, "(unknown)", "the placeholder is not a member name");
         self.tokens.push(JsonPointerToken::Member(name));
+        self
+    }
+
+    /// Returns this pointer extended by a member whose name sigillum does
+    /// not know. The name is not kept.
+    #[must_use]
+    pub fn unknown_member(mut self) -> Self {
+        self.tokens.push(JsonPointerToken::UnknownMember);
         self
     }
 
@@ -160,7 +176,11 @@ impl JsonPointer {
 }
 
 /// Writes the pointer in the syntax of RFC 6901, section 3, with `~`
-/// escaped as `~0` and `/` as `~1`. The root is the empty string.
+/// escaped as `~0` and `/` as `~1`. The root is the empty string. A member
+/// that sigillum does not know is written as `(unknown)`, which is not the
+/// name of any member that sigillum knows. The text stays a valid pointer,
+/// but a pointer with that placeholder does not resolve to the member in
+/// the input: it only shows where the member stood.
 impl fmt::Display for JsonPointer {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for token in &self.tokens {
@@ -175,6 +195,7 @@ impl fmt::Display for JsonPointer {
                         }
                     }
                 }
+                JsonPointerToken::UnknownMember => f.write_str("(unknown)")?,
                 JsonPointerToken::Index(index) => write!(f, "{index}")?,
             }
         }

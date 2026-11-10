@@ -22,8 +22,8 @@
 //! - [`Context`], with the signing and validation times as [`UnixTime`],
 //!   the trust anchors, the material the caller already has, the
 //!   [`Limits`] and the choices that relax a defensive rule;
-//! - [`Limits`] and [`InputKind`], with a documented default and maximum
-//!   for each limit (ADR-0024, rule 1; threat P2);
+//! - [`Limits`], [`InputKind`] and [`EncodingKind`], with a documented
+//!   default and maximum for each limit (ADR-0024, rule 1; threat P2);
 //! - [`Error`], with its [`ErrorKind`] and [`Location`], which never
 //!   carries input content (threat R3).
 
@@ -36,5 +36,5 @@ mod time;
 
 pub use context::Context;
 pub use error::{Error, ErrorKind, JsonPointer, JsonPointerToken, Location};
-pub use limits::{InputKind, Limits};
+pub use limits::{EncodingKind, InputKind, Limits};
 pub use time::UnixTime;

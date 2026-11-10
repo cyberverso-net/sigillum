@@ -91,6 +91,46 @@ impl InputKind {
     }
 }
 
+/// Names an encoding that has its own nesting depth limit.
+///
+/// More encodings may be added before 1.0, each with its own default and
+/// maximum. The depth of PDF arrays and dictionaries comes with the PDF
+/// stories, with the other PDF limits of threat P2.
+#[non_exhaustive]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum EncodingKind {
+    /// DER (ITU-T X.690 (02/2021), clause 10): the nesting of constructed
+    /// values. Default 32 levels, maximum 64. The default is the fixed
+    /// depth of 32 of the walk of `sigillum-testpki`, against which the
+    /// library walk is compared (ADR-0025, rule 5). A certificate nests
+    /// about ten levels deep.
+    Der,
+    /// JSON (RFC 8259, section 9): the nesting of arrays and objects, as
+    /// in a JOSE header. Default 32 levels, maximum 64. A JAdES header
+    /// nests a few levels deep.
+    Json,
+}
+
+impl EncodingKind {
+    /// Returns the default nesting depth limit of this encoding, in levels.
+    #[must_use]
+    pub const fn default_depth(self) -> u32 {
+        match self {
+            Self::Der | Self::Json => 32,
+        }
+    }
+
+    /// Returns the largest nesting depth limit that can be set for this
+    /// encoding, in levels: twice the default, so that decoders that
+    /// recurse keep a small stack.
+    #[must_use]
+    pub const fn maximum_depth(self) -> u32 {
+        match self {
+            Self::Der | Self::Json => 64,
+        }
+    }
+}
+
 /// Holds the limits that bound one operation.
 ///
 /// `Limits` is `Copy`: it holds numbers only.
@@ -99,13 +139,21 @@ impl InputKind {
 /// Each `with_` method sets one limit and refuses a value above its
 /// maximum.
 ///
-/// The limits bound each call of an operation. The number of rounds and
-/// requests is bounded across calls only as far as the caller passes the
-/// state on unchanged; the caller, or the driver `sign_with`, keeps the
-/// budget across calls (ADR-0026, decision 6, point 5).
+/// The sizes and the nesting depths bound each input as it is decoded. The
+/// number of evidence rounds and the number of evidence requests are
+/// counted over the whole signing operation, across `assemble` and every
+/// `resume`, as ADR-0017, rule 3, bounds requests per operation. The
+/// assembly state carries the counts from one call to the next, in the
+/// round counter and the record of requests that ADR-0026, decision 6,
+/// point 5, names. The library does not trust that
+/// state, so the bound holds as long as the caller's loop passes the state
+/// on without altering it. A caller that alters it only runs more requests
+/// that it performs itself. The driver `sign_with` keeps its own count
+/// outside the state.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Limits {
-    depth: u32,
+    der_depth: u32,
+    json_depth: u32,
     rounds: u32,
     requests: u32,
     response_size: u64,
@@ -119,13 +167,6 @@ pub struct Limits {
 }
 
 impl Limits {
-    /// The default nesting depth: 32 levels. It is the fixed depth of the
-    /// walk of `sigillum-testpki` that ADR-0024 makes configurable. A
-    /// certificate nests about ten levels deep.
-    pub const DEFAULT_DEPTH: u32 = 32;
-    /// The largest nesting depth that can be set: 64 levels, twice the
-    /// default, so that decoders that recurse keep a small stack.
-    pub const MAXIMUM_DEPTH: u32 = 64;
     /// The default number of evidence rounds of one signing operation: 8.
     /// B-LT needs a timestamp, the revocation data of the signer chain and
     /// of the evidence, and possibly missing certificates of each, which
@@ -152,7 +193,8 @@ impl Limits {
     #[must_use]
     pub const fn new() -> Self {
         Self {
-            depth: Self::DEFAULT_DEPTH,
+            der_depth: EncodingKind::Der.default_depth(),
+            json_depth: EncodingKind::Json.default_depth(),
             rounds: Self::DEFAULT_ROUNDS,
             requests: Self::DEFAULT_REQUESTS,
             response_size: Self::DEFAULT_RESPONSE_SIZE,
@@ -166,34 +208,39 @@ impl Limits {
         }
     }
 
-    /// Returns the nesting depth limit: the deepest nesting of constructed
-    /// DER values, JSON arrays and objects, or PDF arrays and
-    /// dictionaries that a decoder accepts. It bounds nesting only. The
-    /// further PDF limits of threat P2, on decompressed size, object count
-    /// and revision count, come with the PDF stories.
+    /// Returns the nesting depth limit of `encoding`: the deepest nesting
+    /// that its decoder accepts. It bounds nesting only.
     #[must_use]
-    pub const fn depth(&self) -> u32 {
-        self.depth
+    pub const fn depth(&self, encoding: EncodingKind) -> u32 {
+        match encoding {
+            EncodingKind::Der => self.der_depth,
+            EncodingKind::Json => self.json_depth,
+        }
     }
 
-    /// Sets the nesting depth limit.
+    /// Sets the nesting depth limit of `encoding`.
     ///
     /// # Errors
     ///
     /// [`ErrorKind::InvalidInput`] if `depth` is above
-    /// [`MAXIMUM_DEPTH`](Self::MAXIMUM_DEPTH).
-    pub fn with_depth(mut self, depth: u32) -> Result<Self, Error> {
-        if depth > Self::MAXIMUM_DEPTH {
-            return Err(above_maximum(
-                "the nesting depth limit is above its maximum",
-            ));
+    /// [`EncodingKind::maximum_depth`] for `encoding`.
+    pub fn with_depth(mut self, encoding: EncodingKind, depth: u32) -> Result<Self, Error> {
+        if depth > encoding.maximum_depth() {
+            return Err(above_maximum(match encoding {
+                EncodingKind::Der => "the DER nesting depth limit is above its maximum",
+                EncodingKind::Json => "the JSON nesting depth limit is above its maximum",
+            }));
         }
-        self.depth = depth;
+        let field = match encoding {
+            EncodingKind::Der => &mut self.der_depth,
+            EncodingKind::Json => &mut self.json_depth,
+        };
+        *field = depth;
         Ok(self)
     }
 
     /// Returns the largest number of evidence rounds of one signing
-    /// operation (ADR-0026, decision 2).
+    /// operation, counted over all its calls.
     #[must_use]
     pub const fn rounds(&self) -> u32 {
         self.rounds
@@ -217,7 +264,7 @@ impl Limits {
     }
 
     /// Returns the largest number of evidence requests of one signing
-    /// operation, counted over all its rounds (ADR-0017, rule 3).
+    /// operation, counted over all its rounds and calls (ADR-0017, rule 3).
     #[must_use]
     pub const fn requests(&self) -> u32 {
         self.requests

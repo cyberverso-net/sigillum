@@ -1,7 +1,7 @@
 //! Defaults, maxima and refusals of the limits (ADR-0024, rule 1;
 //! ADR-0026, decision 4; threat P2).
 
-use sigillum_pki::{Error, ErrorKind, InputKind, Limits};
+use sigillum_pki::{EncodingKind, Error, ErrorKind, InputKind, Limits};
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;
 
@@ -15,6 +15,8 @@ const KINDS: [InputKind; 7] = [
     InputKind::State,
 ];
 
+const ENCODINGS: [EncodingKind; 2] = [EncodingKind::Der, EncodingKind::Json];
+
 const KIB: u64 = 1024;
 const MIB: u64 = 1024 * KIB;
 const GIB: u64 = 1024 * MIB;
@@ -26,7 +28,13 @@ fn refused_kind<T>(result: Result<T, Error>) -> Option<ErrorKind> {
 #[test]
 fn defaults_are_the_documented_values() {
     let limits = Limits::default();
-    assert_eq!(limits.depth(), Limits::DEFAULT_DEPTH);
+    for encoding in ENCODINGS {
+        assert_eq!(
+            limits.depth(encoding),
+            encoding.default_depth(),
+            "{encoding:?}"
+        );
+    }
     assert_eq!(limits.rounds(), Limits::DEFAULT_ROUNDS);
     assert_eq!(limits.requests(), Limits::DEFAULT_REQUESTS);
     assert_eq!(limits.response_size(), Limits::DEFAULT_RESPONSE_SIZE);
@@ -38,7 +46,13 @@ fn defaults_are_the_documented_values() {
 
 #[test]
 fn documented_values_are_fixed() {
-    assert_eq!((Limits::DEFAULT_DEPTH, Limits::MAXIMUM_DEPTH), (32, 64));
+    for encoding in ENCODINGS {
+        assert_eq!(
+            (encoding.default_depth(), encoding.maximum_depth()),
+            (32, 64),
+            "{encoding:?}"
+        );
+    }
     assert_eq!((Limits::DEFAULT_ROUNDS, Limits::MAXIMUM_ROUNDS), (8, 32));
     assert_eq!(
         (Limits::DEFAULT_REQUESTS, Limits::MAXIMUM_REQUESTS),
@@ -66,10 +80,13 @@ fn documented_values_are_fixed() {
 #[test]
 fn every_default_is_within_its_maximum() -> TestResult {
     let mut limits = Limits::default()
-        .with_depth(Limits::DEFAULT_DEPTH)?
         .with_rounds(Limits::DEFAULT_ROUNDS)?
         .with_requests(Limits::DEFAULT_REQUESTS)?
         .with_response_size(Limits::DEFAULT_RESPONSE_SIZE)?;
+    for encoding in ENCODINGS {
+        assert!(encoding.default_depth() <= encoding.maximum_depth());
+        limits = limits.with_depth(encoding, encoding.default_depth())?;
+    }
     for kind in KINDS {
         assert!(kind.default_size() <= kind.maximum_size(), "{kind:?}");
         limits = limits.with_input_size(kind, kind.default_size())?;
@@ -81,14 +98,22 @@ fn every_default_is_within_its_maximum() -> TestResult {
 #[test]
 fn maxima_are_accepted() -> TestResult {
     let mut limits = Limits::default()
-        .with_depth(Limits::MAXIMUM_DEPTH)?
         .with_rounds(Limits::MAXIMUM_ROUNDS)?
         .with_requests(Limits::MAXIMUM_REQUESTS)?
         .with_response_size(Limits::MAXIMUM_RESPONSE_SIZE)?;
+    for encoding in ENCODINGS {
+        limits = limits.with_depth(encoding, encoding.maximum_depth())?;
+    }
     for kind in KINDS {
         limits = limits.with_input_size(kind, kind.maximum_size())?;
     }
-    assert_eq!(limits.depth(), Limits::MAXIMUM_DEPTH);
+    for encoding in ENCODINGS {
+        assert_eq!(
+            limits.depth(encoding),
+            encoding.maximum_depth(),
+            "{encoding:?}"
+        );
+    }
     assert_eq!(limits.rounds(), Limits::MAXIMUM_ROUNDS);
     assert_eq!(limits.requests(), Limits::MAXIMUM_REQUESTS);
     assert_eq!(limits.response_size(), Limits::MAXIMUM_RESPONSE_SIZE);
@@ -101,17 +126,19 @@ fn maxima_are_accepted() -> TestResult {
 #[test]
 fn zero_is_accepted() -> TestResult {
     let mut limits = Limits::default()
-        .with_depth(0)?
         .with_rounds(0)?
         .with_requests(0)?
         .with_response_size(0)?;
+    for encoding in ENCODINGS {
+        limits = limits.with_depth(encoding, 0)?;
+    }
     for kind in KINDS {
         limits = limits.with_input_size(kind, 0)?;
     }
-    assert_eq!(
-        (limits.depth(), limits.rounds(), limits.requests()),
-        (0, 0, 0)
-    );
+    for encoding in ENCODINGS {
+        assert_eq!(limits.depth(encoding), 0, "{encoding:?}");
+    }
+    assert_eq!((limits.rounds(), limits.requests()), (0, 0));
     assert_eq!(limits.response_size(), 0);
     for kind in KINDS {
         assert_eq!(limits.input_size(kind), 0, "{kind:?}");
@@ -123,10 +150,18 @@ fn zero_is_accepted() -> TestResult {
 fn values_above_the_maximum_are_refused() {
     let invalid = Some(ErrorKind::InvalidInput);
     let limits = Limits::default();
-    assert_eq!(
-        refused_kind(limits.with_depth(Limits::MAXIMUM_DEPTH + 1)),
-        invalid
-    );
+    for encoding in ENCODINGS {
+        assert_eq!(
+            refused_kind(limits.with_depth(encoding, encoding.maximum_depth() + 1)),
+            invalid,
+            "{encoding:?}"
+        );
+        assert_eq!(
+            refused_kind(limits.with_depth(encoding, u32::MAX)),
+            invalid,
+            "{encoding:?}"
+        );
+    }
     assert_eq!(
         refused_kind(limits.with_rounds(Limits::MAXIMUM_ROUNDS + 1)),
         invalid
@@ -139,7 +174,6 @@ fn values_above_the_maximum_are_refused() {
         refused_kind(limits.with_response_size(Limits::MAXIMUM_RESPONSE_SIZE + 1)),
         invalid
     );
-    assert_eq!(refused_kind(limits.with_depth(u32::MAX)), invalid);
     assert_eq!(refused_kind(limits.with_response_size(u64::MAX)), invalid);
     for kind in KINDS {
         assert_eq!(
@@ -159,7 +193,8 @@ fn values_above_the_maximum_are_refused() {
 fn refusals_carry_no_location_and_distinct_messages() {
     let limits = Limits::default();
     let errors = [
-        limits.with_depth(u32::MAX).err(),
+        limits.with_depth(EncodingKind::Der, u32::MAX).err(),
+        limits.with_depth(EncodingKind::Json, u32::MAX).err(),
         limits.with_rounds(u32::MAX).err(),
         limits.with_requests(u32::MAX).err(),
         limits.with_response_size(u64::MAX).err(),
@@ -183,8 +218,33 @@ fn setting_one_limit_leaves_the_others() -> TestResult {
     for kind in KINDS.into_iter().filter(|kind| *kind != InputKind::Crl) {
         assert_eq!(limits.input_size(kind), kind.default_size(), "{kind:?}");
     }
-    assert_eq!(limits.depth(), Limits::DEFAULT_DEPTH);
+    for encoding in ENCODINGS {
+        assert_eq!(
+            limits.depth(encoding),
+            encoding.default_depth(),
+            "{encoding:?}"
+        );
+    }
     assert_eq!(limits.response_size(), Limits::DEFAULT_RESPONSE_SIZE);
+    Ok(())
+}
+
+#[test]
+fn each_encoding_has_its_own_depth() -> TestResult {
+    let limits = Limits::default().with_depth(EncodingKind::Json, 5)?;
+    assert_eq!(limits.depth(EncodingKind::Json), 5);
+    assert_eq!(
+        limits.depth(EncodingKind::Der),
+        EncodingKind::Der.default_depth()
+    );
+    let limits = limits.with_depth(EncodingKind::Der, 7)?;
+    assert_eq!(
+        (
+            limits.depth(EncodingKind::Der),
+            limits.depth(EncodingKind::Json)
+        ),
+        (7, 5)
+    );
     Ok(())
 }
 

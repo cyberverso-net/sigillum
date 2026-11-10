@@ -4,7 +4,9 @@ use std::collections::HashSet;
 use std::sync::OnceLock;
 
 use proptest::prelude::*;
-use sigillum_pki::{Context, Error, ErrorKind, InputKind, JsonPointer, Limits, Location, UnixTime};
+use sigillum_pki::{
+    Context, EncodingKind, Error, ErrorKind, InputKind, JsonPointer, Limits, Location, UnixTime,
+};
 
 const KINDS: [ErrorKind; 8] = [
     ErrorKind::Malformed,
@@ -91,10 +93,39 @@ fn json_pointers_follow_rfc_6901() {
 #[test]
 fn json_pointer_tokens_are_kept_in_order() {
     use sigillum_pki::JsonPointerToken;
-    let pointer = JsonPointer::root().member("sigD").index(3);
+    let pointer = JsonPointer::root().member("sigD").index(3).unknown_member();
     assert_eq!(
         pointer.tokens(),
-        &[JsonPointerToken::Member("sigD"), JsonPointerToken::Index(3)]
+        &[
+            JsonPointerToken::Member("sigD"),
+            JsonPointerToken::Index(3),
+            JsonPointerToken::UnknownMember
+        ]
+    );
+}
+
+#[test]
+#[cfg(debug_assertions)]
+#[should_panic(expected = "the placeholder is not a member name")]
+fn the_placeholder_is_refused_as_a_member_name() {
+    let _ = JsonPointer::root().member("(unknown)");
+}
+
+#[test]
+fn an_unknown_member_is_written_as_a_fixed_placeholder() {
+    let pointer = JsonPointer::root()
+        .member("etsiU")
+        .unknown_member()
+        .index(2);
+    assert_eq!(pointer.to_string(), "/etsiU/(unknown)/2");
+    let error = Error::new(
+        ErrorKind::NotSupported,
+        "the header parameter is not supported",
+    )
+    .at(Location::JsonPointer(pointer));
+    assert_eq!(
+        error.to_string(),
+        "not supported: the header parameter is not supported, at JSON pointer /etsiU/(unknown)/2"
     );
 }
 
@@ -171,10 +202,10 @@ fn error_over(input: &[u8], kind: usize, choice: usize) -> Error {
         _ => {
             let mut pointer = JsonPointer::root();
             for (step, value) in input.iter().take(8).enumerate() {
-                pointer = if value % 2 == 0 {
-                    pointer.member(MEMBERS[usize::from(*value) % MEMBERS.len()])
-                } else {
-                    pointer.index(word(step))
+                pointer = match value % 3 {
+                    0 => pointer.member(MEMBERS[usize::from(*value / 3) % MEMBERS.len()]),
+                    1 => pointer.unknown_member(),
+                    _ => pointer.index(word(step)),
                 };
             }
             error.at(Location::JsonPointer(pointer))
@@ -217,7 +248,8 @@ fn build_library_errors() -> Vec<Error> {
     ];
     let limits = Limits::default();
     let mut errors = vec![
-        limits.with_depth(u32::MAX).err(),
+        limits.with_depth(EncodingKind::Der, u32::MAX).err(),
+        limits.with_depth(EncodingKind::Json, u32::MAX).err(),
         limits.with_rounds(u32::MAX).err(),
         limits.with_requests(u32::MAX).err(),
         limits.with_response_size(u64::MAX).err(),
@@ -236,7 +268,7 @@ fn build_library_errors() -> Vec<Error> {
 
 #[test]
 fn every_refusal_of_the_library_is_collected() {
-    assert_eq!(library_errors().len(), 6 + 2 * 7);
+    assert_eq!(library_errors().len(), 7 + 2 * 7);
 }
 
 /// Checks that no formatted form of `error` reproduces more than four
@@ -272,7 +304,12 @@ fn build_own_text() -> Vec<u8> {
     let mut pointer = JsonPointer::root();
     for first in MEMBERS {
         for second in MEMBERS {
-            pointer = pointer.member(first).member(second).index(0).member(first);
+            pointer = pointer
+                .member(first)
+                .member(second)
+                .index(0)
+                .unknown_member()
+                .member(first);
         }
     }
     let locations = [
