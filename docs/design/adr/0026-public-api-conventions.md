@@ -161,4 +161,4 @@ The Rust API may use traits and borrowed data. `sigillum-ffi` wraps it in the re
 
 ## Notes
 
-- **2026-11-14.** [ADR-0027](0027-jades-alongside-cades.md) is accepted. JAdES B-B therefore uses the shared types after CAdES B-B and before PAdES, as the context and the consequences above foresee. This note does not change the record above.
+- **2026-11-10.** [ADR-0027](0027-jades-alongside-cades.md) is accepted. JAdES B-B therefore uses the shared types after CAdES B-B and before PAdES, as the context and the consequences above foresee. This note does not change the record above.

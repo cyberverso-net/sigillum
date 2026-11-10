@@ -41,4 +41,4 @@ A new crate, `sigillum-jades`, holds the implementation. Whether to build on the
 
 ## Notes
 
-- **2026-11-14.** [ADR-0027](0027-jades-alongside-cades.md) replaces the order of delivery set here. JAdES B-B is implemented with CAdES B-B, as the second user of the shared API of [ADR-0026](0026-public-api-conventions.md), and JAdES B-T and B-LT follow CAdES B-LT, in parallel with `sigillum-pdf` and PAdES, rather than after PAdES. Release 0.1 still requires CAdES, PAdES and CMS encryption, and JAdES never delays it. The scope of JAdES set by this record is unchanged. This note does not change the record above.
+- **2026-11-10.** [ADR-0027](0027-jades-alongside-cades.md) replaces the order of delivery set here. JAdES B-B is implemented with CAdES B-B, as the second user of the shared API of [ADR-0026](0026-public-api-conventions.md), and JAdES B-T and B-LT follow CAdES B-LT, in parallel with `sigillum-pdf` and PAdES, rather than after PAdES. Release 0.1 still requires CAdES, PAdES and CMS encryption, and JAdES never delays it. The scope of JAdES set by this record is unchanged. This note does not change the record above.

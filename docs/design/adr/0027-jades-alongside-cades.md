@@ -1,7 +1,7 @@
 # ADR-0027: Develop JAdES alongside CAdES and PAdES
 
 - **Status:** Accepted
-- **Date:** 2026-11-14
+- **Date:** 2026-11-10
 - **Issue:** #133
 
 ## Context
