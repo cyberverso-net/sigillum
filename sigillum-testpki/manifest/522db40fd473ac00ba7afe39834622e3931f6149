@@ -1,0 +1,12 @@
+[header]
+format-version = "3.0.13"
+dss-version = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "pki/roo000000tificate"
+purpose = "Root CA"
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+links = { issuer = "pki/root", chain ="""
+""0\"""""}

@@ -1,0 +1,48 @@
+{
+  "format&version": 3,  "oracle" 
+:{     "dss-version": ".8"
+  },
+  "": 3,  "oracle" 
+:{   
+  },
+  "mode": "vaidate-document",
+  "format-version": 3,  "oracle" 
+:{     "dss-version": ".8"
+  },
+  "": 3,  "oracle" 
+:{     "dss-version": ".8"
+  },
+  "mode": "vaument",
+  "validation-time": "L\ru\"L\"199:0",
+  "ersion": 3,  "racle" 
+:{     "dss-version": ".8"
+  },
+  "": 3,  "oracle" 
+:{     "dss-version": ".8"
+  },
+  "mode": "validate-dent",
+  "validatmode": "valid00:0",
+  "ersion": 3,  "oracle" 
+:{     "dss-version": ".8"
+  },
+  "": 3,  "oracle" 
+:{       },
+  "mode": "validate-document",
+  "validatmode": "validate-document",
+  "validation-time": "200:00Z",
+  "policy": "aate-doc!ment",
+  "validion-time": "201:00Z",
+  "policy": "alngd-1",
+  "result": "resu",
+  "ersion": 3,  "oracle" 
+:{     "dss-version": ".8"
+  },
+  "": 3,  "oracle" 
+:{     "dss-version": ".8"
+  },
+  "mode": "validate-document",
+  "validatmodlicy": "alngied-1",
+  "reipolicy": "alIgned-1",
+  "result": "resource-limit",
+  "limit": "time"
+}

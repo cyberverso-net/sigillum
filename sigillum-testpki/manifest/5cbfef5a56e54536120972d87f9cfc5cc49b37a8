@@ -1,0 +1,15 @@
+[header]
+formatdss-version = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "!ki/root.pemcertificate"
+puence = { entry = "DIV-5", indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_T_REVOKED" }
+links = { issuer = "pki/root", chain.pdf = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "i/pkkeys/acbbcapplicable"
+expected-dss = { indication = "T[TAL-FAILED", sub-indication = "FORMnotesAT_FAILURE" }
+atta= { issuer = "pki/root", chain = ["pki/root"] }

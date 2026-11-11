@@ -1,0 +1,13 @@
+[header]
+format-verss = { indication = "PASSED" }
+
+[[artefact]]
+id = ""
+expected-openssl = "parsed"
+expected-dss = { indication = "	ND\\KED" }
+links = { issuerchain = ["pi/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pkif-key"
+paths = { issuer = "pki/root", chain = ["`pki/root"] }

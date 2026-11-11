@@ -1,0 +1,14 @@
+		{
+ "format-version": 3,
+  "oracle": {
+  "dss-version": "6.5.1",
+    "pdf-ba": "3.0.8"
+  },  "mode":	"validate-document",
+  "validation-time": "2031-01Z",
+  "policy": "lmgliiaitned-1",
+  "result": "validated",
+  "indisils": {
+    "sis": [
+ 4777767.777777777E77,7.77777E7,77.777E7,77777.7777777E7,7777]
+ }
+}

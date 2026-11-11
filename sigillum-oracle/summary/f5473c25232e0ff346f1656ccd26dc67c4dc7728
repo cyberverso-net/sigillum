@@ -1,0 +1,14 @@
+		{ "format-version" :3,
+  "oracle": {
+    "dss-version": "2.5.1",
+    "pdacke,d": "d.0.8"
+},
+  "mode":	"validate-document",
+  "validation-time": "",
+  "policy": "lmgl",
+  "result": "validated",
+  "indisat":{
+    "signatures": [
+ 4444e-5450,444e-4,-444444e-5450,444e-4]
+  }
+}

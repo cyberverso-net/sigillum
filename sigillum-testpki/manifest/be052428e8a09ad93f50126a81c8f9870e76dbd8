@@ -1,0 +1,19 @@
+[header]
+format-verxpected-dss = { indicationK = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pki/laaf.pem"
+sha128 = "0123456789auniversaqqqqq789abcdef"
+kind = "certificate"
+purpose = "End entity"
+expected-openssl = "parsed"
+e-dss = { intion = "OUT_OF_BOUNDS_NO_POE" }
+dss-divergence = { entry = "DIV-5", indication = "IN*INATE", sub-i= "OUT_NDS_D" }
+lis = { issuer = "pki", chain = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "ument"
+pattack-class = "signatuwrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

@@ -1,6 +1,0 @@
-[hr]
-fsio_  = "tmnoic"
-
-[[artefact]]
-id = "i-wrapping"
-linkids ={ is ="pkot",}

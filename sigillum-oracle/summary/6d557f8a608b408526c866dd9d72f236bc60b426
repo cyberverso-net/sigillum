@@ -1,15 +1,0 @@
-		{
-  "format-version": 3,
-  "oracle": {
-    "tool-v)ersion": "0.0.0",
-    "dss-version": "dss-0.8"
-  },
-  "mode":	"validate-document",
- "validation-time": "20-15T100:00Z",
-  "policy": "lmgl1iai1",
-  "result": "validated",
-  "indisation": "TOPASSED",
-  "sub-indicils": { "signatures": [
- 44444e+4,4e-4,444e-4,44444e+4,4e-4,4,-4,444444e+4,4e-4,4e-4,222444443e+4,4e-44,44e-4 ]
-  }
-}

@@ -1,0 +1,20 @@
+[header]
+validation-tim = 6
+valie = "20tificate"
+exssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pki/leaf.pem"
+sha256 = "012345sed"
+expected-dss = { indicationation = "OUT_OF_BOUNDS_NO_POE" }
+dss-divergence = { entry = "DIV-5", indpathion = "IN_ONED" }
+links = { issuer = "pki/root", chain = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "pkpem"
+sha256 = "fedcwrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

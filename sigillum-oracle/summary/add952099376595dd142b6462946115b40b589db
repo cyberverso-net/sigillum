@@ -1,0 +1,18 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0",
+    "dss-version": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+ "policy": "aligned-1",
+  "result": "validated",
+  "indication": "TOTAL_P?\/io\\\\\\\\\\?\/f\\\\\\:\//9999999sa\bepgu-s\benr\benullepdu)r\bep:duremsg\bepdf15e-s\ber\besa\b&eer\besa\bep:duremsg\bepdf15a\bepgu-s\bOdebeprsionr\b\besa\beprs\benr\ber\besep$ure-s\benr\besa-s\ber\besa\\n\\\\\/\\\\:\\\\\\\\:\/\\9999999sa\bepgu-s\benr\benullepdu)r\bep:duremsg\bepdf07e-s\ber\besa\b&eprsionr\b\beepdure-e-s\br\besa\beprsionr\b\ber\bep:duremsg\bepdf15a\bepgu-s\benrbeprsionr\b\besa\beprs\benr\ber\besepdure-s\benr\besa-s\ber\besa\beprsionr\b\ber\bep:turemsg\bepdfeprsionr\b\ber\bep:turemsg\bepdf079999\\\\\\\\5.5.1\\\\\\\\\\?dES-BASELINE-B",
+     "indidetails": {
+    "signatures": [
+      {   "signature-": []
+      }
+    ]
+  }
+}

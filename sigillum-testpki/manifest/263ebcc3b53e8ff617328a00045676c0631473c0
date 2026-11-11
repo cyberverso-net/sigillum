@@ -1,0 +1,7 @@
+[header]
+formadss = { indiion = "PASSED" }
+
+[[artefact]]
+id = "pkea456bln"
+expected-dss = "not-apng"
+links = {}

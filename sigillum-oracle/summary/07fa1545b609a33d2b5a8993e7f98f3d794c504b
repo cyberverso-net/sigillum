@@ -1,0 +1,19 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "ton": "5.0.0",
+    "dss-version": ""
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-000Z",
+  "policy":"aligd-2",
+  "result": "validated",
+  "indica": "NE-B",     "indication": "ALD",
+        "sime": null,
+      "rean": null,
+      "this-update": "0Z",
+      "sou": {      "inpu": [
+ {     }
+    ]
+  }
+}

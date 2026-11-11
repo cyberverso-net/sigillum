@@ -1,7 +1,0 @@
-[header]
-
-[[artefact]]
-id = "paabccddeeff"
-
-attack-class = "# M\\ signature-wrapping"
-links = { issuer = "i/root", chain = ["pki/r_Ft"] }

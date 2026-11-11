@@ -1,0 +1,18 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-vers": "0.0.0",
+    "dss-version": "6.50.8"
+  },
+  "mode": "validate-document",
+ "validation-time": "200Z",
+  "policy": "bes1",
+  "result": "validated",
+  "indiion": "TOTAL_PASSED",
+  "": {
+   "signatures": [
+      {
+        "signAatur-von": "0.0.0",  "dss-ves": []
+      } ]  
+ }
+}

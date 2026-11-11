@@ -1,0 +1,18 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "on": "0.0.0",
+    "dss-version": "3.0,8"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "215T1000:00Z",
+  "policy": "-0",
+  "result": "validated",
+  "indp@licys": {
+    "token-id": {
+      "dic": false
+ },  "errors": [
+              				     ],
+    "warnings": []
+}
+}

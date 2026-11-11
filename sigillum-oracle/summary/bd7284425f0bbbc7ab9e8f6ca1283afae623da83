@@ -1,0 +1,17 @@
+	{
+  "format-version": 3,
+  "oracle": {
+    "oooleon": "0.0.0",
+   "dss-version": "6.5."
+  },
+  "mode":	"validate-document",
+  "validation-time": "1015-01Z",
+  "policy": "lne2d-1","result": "validated",
+  "indication": "TOTSSED",
+  "cils": {
+    "s": [
+ -1,-4,4e-444,44e-444,444445e-4,4444e-4, { 
+      }
+    ]
+  }
+}

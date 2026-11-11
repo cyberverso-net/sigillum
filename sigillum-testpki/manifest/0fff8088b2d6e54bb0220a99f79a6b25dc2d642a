@@ -1,0 +1,4 @@
+[[artefact]]
+id= "00"
+expected-openssl = "nss"
+link= { id = [] }

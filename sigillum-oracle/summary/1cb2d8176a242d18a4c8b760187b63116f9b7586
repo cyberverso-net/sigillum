@@ -1,0 +1,17 @@
+		{
+  "format-version": 3,
+  "oracle": {
+
+    "dss-version": "3.0.8"
+  },
+ "mode":	"validate-document",
+  "validation-time": "0:00Z",
+  "policy": "lm0",
+  "result": "validated",
+  "is": {
+    "signatures": [
+ 4,4444445e-4,		     {
+      }
+    ]
+  }
+}

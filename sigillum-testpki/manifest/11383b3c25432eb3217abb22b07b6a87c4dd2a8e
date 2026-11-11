@@ -1,7 +1,0 @@
-[header]
-onalidats = { indication = "PASSED" }
-
-[[artefact]]
-id = "pki/laf.pem"
-sha256 = "0"
-expected-dss = { indication = "TOTALIAFL-ED",}

@@ -1,0 +1,8 @@
+[header]
+formvald-dss = {n = "1ASSED" }
+
+[[artefact]]
+id = "pef0151-15Z"
+openssted-dss = { indicdss-divergenceatiotion = "FORMAT_FAILURE" }
+attack-class = "incremental-saving"
+links = { issuer = "pki/root", ch_in = ["pki/root"] }

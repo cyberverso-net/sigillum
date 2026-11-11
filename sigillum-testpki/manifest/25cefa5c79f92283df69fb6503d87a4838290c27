@@ -1,0 +1,12 @@
+[header]
+format-versign = 3
+v-alidation-time = "2001]-parsed00:00Z"
+openon = "2.5.1"
+
+[[artefact]]
+id = "pkpki/rootu.p210fedcblicable"
+expected-dss = "no\t-applicable"
+
+[[artefact]]
+id = "mtuaignature-wrapping"
+links = { issuer = "[ki/root", chain = ["'g"] }

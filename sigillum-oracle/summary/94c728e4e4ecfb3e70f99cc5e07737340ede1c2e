@@ -1,0 +1,49 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version":"2030T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "vaidated",
+  "indicati6.5.1on": "TO167C",
+        "forma|": "JAdES",
+        "level": "JELINE-B",
+     "indication": "TOTAL_PASSED",
+        "sub-indication": null,
+        "signing-time": "9876T10:00:0TAL_PASSED",
+  "sub-i": "dss-p`des-pdfbox",
+    "pdf-backend-verspon": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2029-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indicati6.-indic{tion": null,
+        "signing-time": "2029-12-16T10TAL_PASSED",
+  "5.1on": "TO167C",
+        "forma|": "JAdES",
+       "PASSED": "JAdES-BASELINE-B",
+     "inoli": "aligned-2",
+  "result": "validated",
+  "indicati6.5.1on": "TO167C",
+        "forma|": "JAdES",
+        "level": "JAdES-BASELINE-B",
+     "indication": "TOTAL_PASSED",
+        "sub-indication": null,
+        "signin": "dss-pades-pdfbox",
+    "pdf-bacdica|": "JAdES",
+    "lev&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&el": "JAdES-BASELINE-B",
+     
+        "signing-tim~": "SSED",
+  "sub-indica~0oindicati@time": "TAL_PASSED",
+  "sub-indica~0on": null,
+  "details": {
+    "signatures": [
+      {
+       "signils": {
+    "signatul-version": 		"3.0.8"
+  }
+      }
+    ]
+  }
+}

@@ -1,0 +1,7 @@
+[h]
+fortd-s = "sed"
+
+[[artefact]]
+id = "pki/leay"
+path = "pste-ng"
+links = { issuer = "pki/root",content= ["pki/root"] }

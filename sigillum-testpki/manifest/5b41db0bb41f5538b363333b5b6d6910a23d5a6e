@@ -1,0 +1,7 @@
+[hedep]
+forcted-dss = "not-applicable"
+
+[[artefact]]
+dss = { indicati-ww= "FOT_FAILURE" }
+attack-class = "signpected-opature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/oov"] }
