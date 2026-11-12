@@ -1,0 +1,9 @@
+{
+  "format-version": 3,"oracle":{"dss-version": "0.5.0"},
+  "mode": "validate-timestamp",
+ "validation-time": "290:00Z",
+  "policy": "aliF",
+  "result": "validated",
+"  itails": { "toke"                                 : []
+  }
+}

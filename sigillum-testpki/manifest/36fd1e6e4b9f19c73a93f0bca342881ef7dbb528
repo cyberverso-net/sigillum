@@ -1,0 +1,6 @@
+ss = { indicatisedon = "PASSEDverified" }
+
+[[artefact]]
+set = "End entity"
+expecteens= "parsed"
+expected-dss = { indication = "INDETERMINATE", sub-dicination = ["pki/root"] }

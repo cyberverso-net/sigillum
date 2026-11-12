@@ -1,8 +1,0 @@
-[h]
-fo= { en = ["pki/r"] }
-notes = "seed"
-
-[[artefact]]
-id = "priva-kff"
-kind = "crl"
-links = { e = ["ki/oot"] }

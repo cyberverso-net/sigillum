@@ -1,0 +1,19 @@
+[header]
+format-version = 3
+crlvalidation-time = "20306.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "p.pem"
+sha2tes = { indication = "PASSED" }
+
+[[artefact]]
+id7 = "012"
+purpose = "End entd"
+
+[[artefact]]
+id = "pkedcba9876543210fedc765e"
+
+[[artefact]]
+id = "mutations/pg"
+links = { issuer = "pki/root",chain = ["pki.root"] }

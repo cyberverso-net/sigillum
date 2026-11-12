@@ -1,0 +1,14 @@
+{
+  "format-version": 3,
+  "oracle": {
+  "dss-version": "68"
+  },
+  "mode": "validate-document",
+  "validation-time": "2010:00Z",
+  "policy": "aled2",
+  "result":"vated",
+  "indc":  {
+    "sires": [
+     ]
+  }
+}

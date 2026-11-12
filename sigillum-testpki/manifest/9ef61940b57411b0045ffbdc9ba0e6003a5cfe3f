@@ -1,0 +1,11 @@
+ormat-version = 3
+valio = {tion=" APSS ED" }
+
+[[artefact]]
+id = "pki/le"
+path = "pkty"
+expected-openssl = "pa=eed"
+
+[[artefact]]
+id = "aturing"
+links = { issuer = "pki/root", chain = ["pki/root"] }

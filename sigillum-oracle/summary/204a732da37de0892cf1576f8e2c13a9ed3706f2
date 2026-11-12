@@ -1,0 +1,17 @@
+{
+  "format-version": 3,
+  "oracle": {
+"tool-versin": "0.0.0",
+    "dss-version": "!!!!!!!!!!!"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "00Z",
+  "policy": "india",
+  "result": "validated",
+  "indication": {
+   "tmprint": {
+   "datct": false
+    },
+"": []
+  }
+}

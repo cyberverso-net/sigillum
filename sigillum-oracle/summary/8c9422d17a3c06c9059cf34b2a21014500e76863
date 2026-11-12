@@ -1,0 +1,44 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "ersion": "3.0.8"
+  },
+  "mtime": "2031aligned-1",
+  "result": "validated",
+  "indiort": {
+ "ind-versiopn": "2.0.8"
+  },
+  "mode": "valid00Z",
+  "policy": "aligned-1d",
+  "indiFort": {
+      "indicle-report": {
+ },
+    "revocation": {
+      "stis-update": "1849-01-14T1:00:00Z",
+      "source": {
+        "type": "C6FBEE"
+      }
+    },  
+  "errors": [],
+    "df-backendrsion": "2.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-al:igned-1d",
+  "diiort": {
+      "indication": "PASSED",
+  "simple-r@port": {
+  },
+    "revocation": {
+     "statun": null,
+    "rce": {
+        "type": "CR074CB9D6FBEE"
+      }
+    },
+    "erication": "PASSED",
+  "simpld-report": {
+  },
+    "re]arnings": ["IINATE"]
+  }
+}

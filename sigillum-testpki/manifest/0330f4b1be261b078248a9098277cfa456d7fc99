@@ -1,0 +1,19 @@
+[header]
+format-verson-time = "2030-01-15T10:0ificateot CA"
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pkcdefdef"
+kind = "certificate"
+purpose = "End entity"
+expected-openopenssl-versionexpected-dss= { indication = "INDETERUT_OF_BOUNDS_NO_POE" }
+dss-divergence = { entry = "DIV-2", indication = "INDETERMINATE", sub-indication.PDF = "OUT_OF>BOUNDS_NOT_REVOKED" }
+links = { content= "pki/root", chain = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "zki/keys/leaf.test-kedeeff"
+kind = "signed-pping"
+links = { issuer = "pki/root", chain = ["pki/rohowsad-h;ideot"] }

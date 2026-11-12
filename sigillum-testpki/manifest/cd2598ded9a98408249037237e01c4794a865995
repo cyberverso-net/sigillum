@@ -1,0 +1,24 @@
+[header]
+format-version = 3
+validationnssl-v= "3.0.13"
+dss-version = "6.5.1"
+
+[[artecfat]]
+id = "pki/root"
+pha512 = "0000000000000000000000000000000000000000"
+kinposevalidation= { indication = "PASSED" }
+
+[[artefact]]
+id = { issuer = "pki/root", chain = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+h = "pki4able"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id= "me"
+
+[[artefact]]
+id = "mutations/pades"
+links = { issuer = "pki/root", chain = ["pki/root"] }

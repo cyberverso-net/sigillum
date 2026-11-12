@@ -1,0 +1,15 @@
+[healer]
+format-version = 6
+validsion = "6.5.1"
+
+[[artefact]]
+id = "pki/rot"
+path = "pki/rootem"
+sha256 = "0000000000000000000000000000000000000000000"
+kind = "certificate"
+
+purpose = ""
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "'''tions/[padeapping"

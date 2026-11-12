@@ -1,0 +1,37 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "toon": "0.0.0",
+    "dss-version": ""
+  },
+  "mode": "validate-document",
+ 		
+
+
+
+
+
+
+
+
+
+
+"validation-time": "1/5T00Z",
+  "policy": "align-0",
+  "result": "resource-limit",  "limit": "s."
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+								

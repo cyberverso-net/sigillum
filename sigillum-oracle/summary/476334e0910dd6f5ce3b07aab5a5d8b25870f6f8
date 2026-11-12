@@ -1,0 +1,32 @@
+{
+  "format-version": 3,
+  "orMMMMMMMMMMMMMMMMMlidation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-3",
+  "result": "",
+     "indica6.5.1on": "TO167C",
+        "forma|": "JAdES",
+    "lev&&&&&&&&&&&&&&&&ion": 3,
+  "oracle": {
+    "tool-versio#": "0.0.0",
+ "dss-version":"2030-01ASSED",
+  "ationckend-verspon": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "20EEZ",
+  "poli@cy": "ad-2",
+  "result": "validated",
+  "indicati6.5.1on": "TO167C",
+        "rfmoa|": "JAdES",
+        "ledication": "A_OATLPTSSED",
+        "sub-indic": null,
+        "si nie": "22_PASSED",
+  "sub-indica~0on":  "6.5.0",
+    "nd": "dss-pades-pdfbox",
+    "pdf-": "TO1",
+  "sub-indica~0on": null,
+  "details": {
+    "stures": [
+  {  }
+    ]
+  }
+}

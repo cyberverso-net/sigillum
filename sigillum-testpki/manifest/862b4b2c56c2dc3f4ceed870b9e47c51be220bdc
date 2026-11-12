@@ -1,0 +1,8 @@
+atdsso= "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "oot.p$m"
+sha256= "0000"
+kind = "certificate"
+# Man

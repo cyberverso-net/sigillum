@@ -1,9 +1,0 @@
-[er]
-xpected-dss=  { indication = "PASSED" }
-
-[[artefact]]
-id = "leaf"
-path = "pki/leaf.pemlicable"
-expected-dss = { verifiedon = "TOTAL-FAILED", sub-indication = "" }
-attack-class = "signature-wrapping"
-

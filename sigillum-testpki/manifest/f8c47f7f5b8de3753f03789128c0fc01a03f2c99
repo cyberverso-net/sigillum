@@ -1,8 +1,0 @@
-atdsso= "6.5.1"
-
-[[artefact]]
-id = "pki/root"
-path = "oot.pem"
-sha256= "000000000"
-kind = "certificate"
-# Man

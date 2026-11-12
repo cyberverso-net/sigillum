@@ -1,0 +1,19 @@
+{
+  "format-version": 3,
+  "oracle": {
+  "dss-version": "77",
+    "pdf-ba": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2-01-1::00Z",
+ "policy": "2",
+  "result": "validated", "indls": {
+    "signat": [
+      {
+       "sig":{
+    "sigversion": "3espdfbo3.0.8"
+  }     }
+    ]
+  }
+}
+

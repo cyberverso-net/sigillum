@@ -1,0 +1,20 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.~.0",
+    "dss-version": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+ "policy": "aligned-1",
+  "result": "validated",
+  "indication": "TOTAL_P?\/io\\\\\\\\\\?\/f\\\\\\\" [ /\"dsre<srii<<<<<</\"dss-\"zs /\"d\"ds /\"dss-\"kds\\\"stad\"d/\"d\"ds /\"dss-\"kds\\\"stad\"d/\\/\\\\\\\\\\\\\\99999999999_999[o\ns-\"kds\\\"stad\"d/\"d\"ds /\"dss-\"k\rsio\\\\\\999999999999_999[o\ns-\"kds\\\"stad\"d/\"d\"ds /\"dss-\"kds\\\"stad\"d/\\/\\\\\\\\\\\\\\\rsio\\\\\\99999999999\\\/\\\\:\\\" [ /\"dsre<srii<<<<<</\"dss-\"ds /\"d\"ds /\"ds\" [ /\"dsre<srii<<<<<</\"dss-\"zs /\"d\"ds /\"dss-\"kds\\\"stad\"d/\"d\"ds /\"dss-\"kds\\\"stad\"d/\\/\\\\\\\\\\\\\\\rsio\\\\\\999999999999_999[o\ns-\"kds\\\"stad\"d/\"d\"ds /\"dss-\"kds\\\"stad\"d/\\/\\\\\\\\\\\\\\\rsio\\\\\\999999999999_999[o\n\\\\\/\\\b:\\\\\\/\\\\:\/\\99999999_999[o\n\\\\\/\\\\:\\\\\\/\\\/\\\\\\\\\\\\|\\\\\\\\5.5.1\\\\B",
+     "indicaca~0on": null,
+  "details": {
+    "signatures": [
+      {
+   "": []
+      }
+    ] 
+ }
+}

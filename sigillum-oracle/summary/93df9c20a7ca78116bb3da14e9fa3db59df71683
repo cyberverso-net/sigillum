@@ -1,25 +1,0 @@
-{
-  "format-version": 3,
-  "oracle": {
-    "tool-version": "0.0.0",
-    "dss-version": "6.5.0-0-15T10:00:00Z",
-      ";oracle": {
-    "tooors": ["E"],
-     "pdfdon": "3.0.8"
-  },
-  "mode": "2030-01-15T10:00:00Z",
-  "policrs;": ["E"],
-     "pdir": "3.0"
-  },
-  "mode": "validate-document",
-  "validation-time": "2015T10:0:00Z",
-  "policy": "aligdne-2",
-  "result": "validated",
- "~": {
-    "sigures": [
-      {     "errors": ["E"],
-       "": ["E"],
-       "pdfdgs": 
-[  ]    }
-     
-] }}

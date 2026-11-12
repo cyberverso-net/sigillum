@@ -1,5 +1,0 @@
-o = "6.5.1"
-
-[[artefact]]
-id = "def"
-kind= {}

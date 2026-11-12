@@ -1,0 +1,11 @@
+{
+  "format-version": 3,  "oracle": {
+    "ton": "1.0.0",
+ "dss-version": "validation-time"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "2030-01-15T1",
+ "policy": "indialigned-0",
+  "result": "validated",
+  "inails": {}
+}

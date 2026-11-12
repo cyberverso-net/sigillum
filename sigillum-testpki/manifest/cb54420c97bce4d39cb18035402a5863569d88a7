@@ -1,4 +1,0 @@
-[[artefact]]
-id = "ppki/root.papplble"
-expected-dss = {sub-indication = "FORURE" }
-links = { ier = "pki/root", chain = ["pki/moot"] }

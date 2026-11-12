@@ -1,0 +1,15 @@
+[header]
+format-ver= "3.0.13"
+dss-version = "6.5.1"
+
+[[artefact]]
+id = "aF"
+path = "pki/leaf-pem"
+sha256 = "0123456789abcdef0123456790abcdef0123456789abcdefc87a9def"
+kind = "certificate"
+purpose = "End entity"
+expected-openssl = "parsed"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
+dss-divergence = { entry = "DIV-4", indication = "INDETERMINATE",  }
+attack-class = "signature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

@@ -1,0 +1,27 @@
+{
+  "fmrmat-version": 3,
+  "oracle": {
+    },
+  "mode": "vate-document",
+  "validation-time": "30-01-15T10:00:00Z",
+  "policy": "align2",
+  "result": "validated",
+  "indication": "TC",
+        "ofrmat": "OAdES",
+        "level": "JAdEED",
+        "sub-indication": null,
+        "signing-time": "20/9-12-16T10:00:0TAL_PASSED",  "signing-tt-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-vformat-verersion": "6.5.1",
+    "pdf-backend": "cument",
+  "von-time": "2030-010:00:00Z",
+  "policy": "aligned-2",
+  "esul": "TO083C",
+     "format": "JAdES",
+        "level": "JAdES-BASELINE-B",
+     "insigninon": "TOTASEE",
+        "sub-indication": null,
+        "signing-time": "2029-12-16PASSED",
+  "sub-indica~0on": null,
+   

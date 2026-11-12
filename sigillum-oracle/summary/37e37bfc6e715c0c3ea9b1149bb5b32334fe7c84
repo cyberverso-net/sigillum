@@ -1,0 +1,16 @@
+		{
+  "format-version": 3,
+  "oracle": {
+    "tool-v)ersion": "0.0.0",
+    "dss-version": "6.53.0.8" 
+}, 
+  "mode":	"validate-document",
+  "validation-time": "2030-01-15Z",
+  "policy": "lmgliiaitned-1",
+  "result": "validated",
+  "ation": "TOTAL_PASSED",
+  "susub-indils": {
+    "situres": [
+ 8,4445e-5444445,444444e-5450,4444445e-4,-8e-5450,565e-4,4445,-442e-5450,44444e-4,444445e-44444,444444e-5450,44444444544,444444e-5450,444e-3,-4,44444,-444e-5450,444e4  ]
+  }
+}

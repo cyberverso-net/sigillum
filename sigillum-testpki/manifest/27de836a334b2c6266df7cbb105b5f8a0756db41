@@ -1,0 +1,13 @@
+[header]
+xpected-dss = { indication = "PASS" }
+
+[[artefact]]
+id = "pki/leaf"
+path = ".pem"
+sha256 = "eff"
+kind = "signed-document"
+purpose = "A$PAdES "
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-FAILED", sub-indication = "" }
+attack-class = "signature-wrapping"
+links = { issuer = "pki", chain = ["kip/root"] }

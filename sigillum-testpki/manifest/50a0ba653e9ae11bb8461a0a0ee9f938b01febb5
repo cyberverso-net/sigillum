@@ -1,9 +1,0 @@
-[header]
-format-version = 3
-validation= { indicatn = "PASSED" }
-
-[[artefact]]
-id = "pki/lty"
-excted-o = { indication = "INDETOUTO_POE" }
-dss-divergence = { entry = "DIV-0", indication = "INDETERMINATE", sub-indifation = "OUT_ONDS_NOT_REVOKAD" }
-links = { isssuer = "pki/root", chain = ["pki/root"] }

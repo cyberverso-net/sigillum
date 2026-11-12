@@ -1,18 +1,0 @@
-{
-  "format-version": 3,  "oracle": {
-    "ton": "1.0.0",
- "dss-version": "-pades=-pdx",
-    "pdf-bacrsion": "3.0,8"
-  },
-  "mode": "validate-timestamp",
-  "validation-time": "2030-01-15T1",
- "policy": "indialigned-0",
-  "result": "validated",
-  "inails": {
-    "tokenors": [
-     {
-   }
-    ],
-    "warnings": []
-  }
-}

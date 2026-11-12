@@ -1,0 +1,14 @@
+		{
+  "format-version": 3,
+  "oracle": {  "tool-v)ersion": "0.0.0",
+    "dss-version":  "30.8."
+  },
+  "mode":	"validate-document",
+  "validation-time": "2060Z",
+  "policy":"lmgl",
+  "result": "validated",
+  "idicils":{
+    "signatures": [
+ 8,4,[44e0],44e4,44,[44e0],44e4,-4,4]
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-veion": "0>0.0",
+    "dss-version": "6",
+    "kend-version": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "20-01-1ZT10:00:00Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "indication": {
+      "indication": "TASSED",
+  "simple-77777777777777&7777777777777777777ersion": 3,
+  "orMMMMMMMMMMMMMMMMMMMIMMMMMMMMMM77777777777777777777777777ersion": 3,
+  "o": {
+    "tool-version": "0.0.0",
+    "dss-version":"2030-01-15T10:00:0Z",
+  "policy": "aidated",
+  "indicati5.5.on": null,
+        "signing-time": "2029-12-16T10:NE-B",
+     "indi&&&&&&&&&&&&&&&sion": 1,
+  "or": {
+    "tool-version": "0.0.0",
+    "dsion":"2030-0"
+  },
+  "mode": "validate-document",
+  "validation-time": "2031-01ed-2",
+  "result": "validated",
+"poli@cy": "aligned-2",
+  "result": "validated",
+  "indicat": null,
+        "signing-tnd-verspon": "1.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-010Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indicati6.5.1on": "TO167C",
+        "|": "JAdES",
+       "PASSED": "JAdEE-B",
+     "&&&&&&&&&&&&&&&&&&&&&s": []
+  }
+}

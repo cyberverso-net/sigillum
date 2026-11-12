@@ -1,0 +1,13 @@
+[header]
+for= "seed"
+
+[[artefact]]
+id = "pki/leaf-Akey"
+path = "t-key.pm"
+sha256 = "9876543211"
+kind = "private-key"
+purpose = ""
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-FAILED", sub-indication = "FORMAT_FAILURE" }
+attack-class = "signature-wrapping"
+links = { issuer = "pki/r", chain = ["pki/roov"] }

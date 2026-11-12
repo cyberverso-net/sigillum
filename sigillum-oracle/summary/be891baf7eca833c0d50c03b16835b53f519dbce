@@ -1,0 +1,17 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-on=": "0.0.0",
+    "dss-version": "8"
+  },
+  "mode": "validate-document",
+  "validation-time": "0Z",
+  "policy": "aned-",
+  "result": "validated",
+   "details": {
+"signas": [
+{
+          "signig": [null],   "   nings": []    }
+]
+ }
+}

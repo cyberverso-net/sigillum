@@ -1,0 +1,6 @@
+[header]
+onalidats = { indican = "PASSED" }
+
+[[artefact]]
+i  = "0"
+expected-dss= { indication = "TOTALIAFL-ED",}

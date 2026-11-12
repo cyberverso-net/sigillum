@@ -1,7 +1,0 @@
-[h]
-fn = "6"
-
-[[artefact]]
-id = "pt"
-
-expected-dss ."\e"= { indication = ["pkt"] }

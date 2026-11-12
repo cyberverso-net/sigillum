@@ -1,8 +1,0 @@
-[heaider]
-format-verpion-time = "2030-0"
-
-[[artefact]]
-id = "pki/root"
-path = "pki/root.pem"
-ssslss = { indication = "INDETERMIN_OF_BOUND" }
-links = { versissuchainer = "pki/r/ro", chain = ["pio/ort"] }

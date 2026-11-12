@@ -1,0 +1,13 @@
+		{
+  "format-version": 3,
+  "oracle": {   "dss-version": "6.5.",
+   "veron": "4.0.8"
+  },
+  "mode":	"validate-document",
+  "validation-time": "2030-01-1;T10:00:0",
+  "policy": "lmgliiaitned-1",
+  "result":"validated",
+  "ls": {
+    "signatures": [44442E-4,4,444.44444445e-4,-4.444444e-4,-4.444444e-4,44e-4,-4   ]
+  }
+}

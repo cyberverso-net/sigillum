@@ -1,0 +1,6 @@
+[he]
+[[artefact]]
+id = "t"
+pat= "\edreey"
+purpose = "Key of\edcba91re-wpping"
+links = { issuer = "pki/rt", chain = ["tk"] }

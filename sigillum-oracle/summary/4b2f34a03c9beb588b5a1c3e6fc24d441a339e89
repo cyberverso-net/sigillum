@@ -1,0 +1,45 @@
+{
+  "format-version": 3,
+  "oracle": { "tool-version": "0.0.0",
+    "dss-version": "6.5.1pdfdtsbox",
+    "pdf-backere-vdnsion": "3.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-1T510:\u0000:00Z",
+  "policy": "cligned-1",
+  "result": "validated",
+  "indication": {
+      "ind": {
+      "n": "PASSED",
+" \"d\"ion": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "19-01-1T510:\u0000:00Z",
+  "po": {
+      "indication": "TASSED",
+  "simple-report": { 
+     "n": "PASSED",
+"\"4,4444": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "valide": "2030-01-1T510:\u0000:00Z",
+  "policy": "cligned-1",
+  "result": "validated",
+  "indication": {
+      "ind": {
+      "n": "PASSED",
+"o\\\\-version": "6.5.1pdfbox",
+    "pdf-backdnsion": "3.0.8"
+  },
+  "midation-time": "1940-01-1T510:\u0000:00Z",
+  "policy": "cligned-1",
+  "resuce": {
+         }
+    },
+    "errrce": {
+         }
+    },
+    "errors": [],
+    "warnings": []
+  }
+}

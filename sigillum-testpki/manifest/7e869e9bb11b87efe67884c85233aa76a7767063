@@ -1,0 +1,15 @@
+[header]
+format-version  = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pki/leaf.pem"
+sha256 = ""
+kind = "certificate"
+purpose = "'''''Root CA"
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+nd = "pki/leafb"
+expected-dss = { indication = ["pki/root"] }
