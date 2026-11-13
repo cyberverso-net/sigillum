@@ -1,0 +1,16 @@
+{
+  "format-version":3,
+  "oracle": {
+    "tl": ".0.0",
+    "dss-version": "6.s-p8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "",
+  "policy": "al-5","result": "validated",
+  "ine": "vadate-","e": "",
+  "poltion": { "warnings": []
+  }
+}
+
+
+

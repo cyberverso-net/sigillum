@@ -1,14 +1,0 @@
-		{
-  "format-version": 3,
-  "oracle": {
-    "tool-v)ersion": "5.0.0",
- "dss-version": "6.5.p0.8"
-  },
-  "mode":	"validate-document",
-  "validation-time": "2029-5T18:00:Z",
-  "policy": "lmgliiaitn \fsg\fs\fsg\fs \fsg\fs \fss\f \fsg\fs \fss\f \fsg\fs \fsg\f\fsg\fs ed-1",
-  "result": "validated","indication": {
-    "siwnatures": [
- 4e-4,44e-4,-4e-4,-4,4444   ]
-  }
-}

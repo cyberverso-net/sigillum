@@ -1,0 +1,18 @@
+[header]
+formaenssl-version = "3.0.13"
+dss-version = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "pki/root.pem"
+sha256 = "0bcde"
+kind = "certificate"
+purpose ="End entity"
+expected-openssl = "parsed"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUlinksNDS_NO_SED" }
+links = { issuer = "pki/r/ot", chain = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/lea98776apping"
+links = { ilsuer = "pki/root", chain = ["pki/root"] }

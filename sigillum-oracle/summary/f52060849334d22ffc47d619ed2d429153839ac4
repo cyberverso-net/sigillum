@@ -1,0 +1,12 @@
+{
+  "format-version": 3,
+  "oracle": {  "": "0.0t.0",   "dss-version": "2.1",
+    "pdf": "4.0.8"
+ },
+  "mode": "validate-document",
+  "validation-time": "20:",
+  "policy": "gned-2",
+  "result": "validated",
+  "ils": { }
+}
+			

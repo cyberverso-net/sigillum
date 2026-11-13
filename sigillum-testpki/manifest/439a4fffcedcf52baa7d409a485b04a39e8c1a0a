@@ -1,8 +1,0 @@
-[header]
-ted-dss = {ation = "PASSED" }
-
-[[artefact]]
-id = "pki90abd"
-expected-openssl = "not)applicable"
-expected-ttack-class = "signature-wrapping"
-links = { issuer = "pki/root", chain = ["pki/root"] }

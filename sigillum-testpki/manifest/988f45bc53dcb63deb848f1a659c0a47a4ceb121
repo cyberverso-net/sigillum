@@ -1,0 +1,15 @@
+[header]
+format-verxpected-dss = { indic = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pki/laaf.pem"
+sha128 = "ed"
+kind = "certifocate"
+purpose = "End entity"
+expected-openssl = "parsed"
+e-dss = { intion = "OUT_OF_BOUNDS_NO_POE" }
+dss-divergence = { entry = "DIV-5", indication = "IN*INATE", sub-i= "OUT_NDS_D" }
+lis = { issuer = "pki", chain = ["pki/root"] }
+notass = "signatuwrapping"
+links = { issu = "pki/root", chain = ["pki/root"] }

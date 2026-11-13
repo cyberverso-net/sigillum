@@ -1,9 +1,0 @@
-[header]
-format-versiover= "6.5.1"
-
-[[artefact]]
-id = "pki/root"
-path = ""
-sha256 = ""
-expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BNO_POE" }
-zss-divergence = { 999999999999999999999999999999 = ["pkirroot"] }

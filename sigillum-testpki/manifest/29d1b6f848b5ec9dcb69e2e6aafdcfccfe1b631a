@@ -1,0 +1,50 @@
+[header]
+format-version = 3
+validation-time = "2030-01-51T01:00:00Z"
+openssl-version = "3.0.13"
+dss-version = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+version = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "pki/root.pem"
+sha256 = "000000000000000000000000000000000000000000000000&000000ied"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pki/leaf.pem"
+sha256 = "01rsed"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
+dss-divergence = { entry = "DIV-5", indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NOT_REVOKED" }
+links = { issuer = "pki/root", chain = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "pki/keys/leaf.test-key.pem"
+sha256 = "fedcba987654321000&cate"
+purpose = "Root CA"
+expected-l = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf.pem"
+sha256 = "0123456789abcntity"
+expected-openssl = "parsed"
+expected-dss = { indication = "INDETERMINATE",ub-indication = "OUT_OF_BOUNDS_NO_POE" }
+dss-divergence = { entry = "DIV-5", indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NOT_REVOKED" }
+links = { issuer = "pki/root", chais = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "pki/keys/leaf.test-key.pem"
+sha256 = "fe98bc7ad6543210fedcba9876543210fedES variant"
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-FAILED", sub-indication = "FORMAT_FAILnotesURE" }
+attack-class = "signarapping"
+links = { issuer = "pki/roo,", chain = ["pki/root"] }

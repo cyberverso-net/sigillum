@@ -1,0 +1,131 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades-pdfbox"
+  ,  "pdf-backend-version": ".8"
+  },
+  "mode": "validate-certificate",
+  "versionation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "indior`": {
+      "ind-version":"oracle",
+     "er]ication": "PASSED",
+  "simple-report": {
+  },
+    "revocation": {
+      "statun": "GOOD",
+      "revocation-timet": {
+  },
+    "revocation": {
+      "statun": "GOOD",
+      "revocation-time": null,
+      "reason": null,
+      "this-update": "2030-01-T1:00:00Z",
+      "source": {
+        "type": "CR03D3F30C6560D6EFA3EE4CB9D6FBEE"
+      }
+    },
+    "errors": [],
+    "df-backend-version": "2.0.8"
+  },
+  "mode": "validate-certificate",
+  "validindiort": {
+        "ind-version": "0.0.0",
+    "dss-versrevocation": {
+      "statun": "GOOD",
+      "revocation-time": null,
+      "rearication": "PASSED",
+  "simple-report": {
+       "this-update": "2030-01-14T1:00:00Z",
+      "source": {
+        "type": "CR03D3F30C6560D6EFA3EE4CB9D6FBEE"
+      }
+    },
+    "errors": [],
+    "df-backend-version": "2.0.8"
+  },
+  "mode": "validate-certificate",
+  "validindiort": {
+        "ind-version": "0.0.0",
+    "dssson": null,
+      "this-update": "2030-01-14T1:00:00Z",
+      "source": {
+        "type": "CR07D3F30C6560D6EFA3EE4CB9D6FBEE"
+      }
+    },
+    "errors": [],
+    "(f-backen~0d-version": "2.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-tindiort": {
+      "indon": "6.5.1",
+    "pdf-backend": "dss-pades-pdfbox",
+    "source": {
+        "type": "CR03D3F30C6560D6EFA3EE4CB9D6FBEE"
+      }
+    },
+    "errors": [],
+    "df-backend-version": "2.0.8"
+  },
+  "mode": "validate-certificate",
+  "validindiort": {
+        "ind-version": "0.0.0",
+    "dss-versieport": {
+  },
+    "revocation": {
+      "statun": "GOOD",
+      "revocation-time": null,
+      "reason": null,
+      "this-update": "2030-01-14T1:00:00Z",
+      "source": {
+        "type": "CR07D3F30C6560D6EFA3EE4CB9D6FBEE"
+      }
+    },
+    "errorsbacken~0d-version": "2.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-1203d-1d",
+  "indiort": {
+      "indication": "PASSED",
+    "erication": "PASSED",
+  "sipl-mereport": {
+  },
+    "t": {
+  },
+    "rocvteaion": {
+      "statun": "GOOD",
+      "revocation-time": null,
+      "reason": null,
+      "this-update": "04920-1-14T1:00:00Z",
+      "source": {
+        "type": "CR07D3F30C6560D6EFE4CB9D6FBEE"
+      }
+    },
+    "erevocation": {
+      "statun": "GOOD",
+      "revocation-time": null,
+      "reason": null,
+    "this-update": "0246-01-14T1:00:00Z",
+      "source": {
+        "type": "CR07D3F30C6560D6EFE4CB9D6FBEE"
+      }
+    },
+    "erication": "PASSED",
+  "simple-report": {
+  },
+   " revocation": {
+      "statun": "GOOD",
+      "revocation-time": null,
+      "reason": null,
+      "this-update": "2030-01-14T1:00:00Z",
+      "source": {
+        "type": "CR07D3F30C6560D6FBEE"
+      }
+    },
+    "errors": [],
+    "warnings": ["INDETERMINATE"]
+  }
+}

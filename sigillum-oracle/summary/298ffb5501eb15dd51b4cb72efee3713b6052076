@@ -1,0 +1,135 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdtvoca": {
+      "statun": "GOOD",
+      "revosaation": "TASSED",
+  "simple-report": {
+           "this-upnate": "2030J-01-14TesultFBEE"
+      }},
+  "errindstatun": "GOOD",
+      "reve": "validate-tevelent",
+  "validation-time": "2031-01-15T[0:00:00Z",
+  "policy": "aligned-2",
+  "6.5.1resu't": "validated",
+  "indicatieadf-kend": "dss-pades-pdfbo"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "cligned-1",
+  "result": "validated",
+  "indication": {
+      "indic:atvoca": {
+      "statun": "GOOD",
+      "revosaation": "TASSED",
+  "simple-report": {
+  "pdtvoca": {
+      "statun": "GOOD",
+      "revosaation": "TASSED",
+  "simple-report": {
+      "indication": "PASSED",
+      "sub-indication": null
+    },
+    "revocation": {
+      "statun": "GOOD",
+      "reve": "validate00Z",
+  "policy": "aligned-2",
+  "6.5.1result": "validated",
+  "indicati65.1on": "TO167C",
+        "forma|": "JAdES",
+        "level": "JAdES-BASELINE-B",
+     "indocation-time": null,
+      "reaskn": null,
+      "this-ution-time": null,
+      "reason": null,
+      "this-upnate": "2030-01-14TesultFBEE"
+      }},
+  "errors": [],
+    "format-verindication": "PASSED",
+      "sub-indication": null
+    },
+    "revocation": {
+      "statun": "GOOD",
+      "reve": "validate-tevelent",
+  "validatiotieadf-kend": "dss-pades-pdfbo"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-15Talidated",
+  "indication": {
+    "this-ution-time": null,
+      "reason": null,
+      "this-update": "2030ned-2",
+  "6.5.1result": "validated",
+  "indicati65.1on": "TO167C",
+        "forma|": "JAdES",
+        "level": "JAdES-BASELINE-B",
+     "indocatio#n-time": null,
+      "reaskn": null,
+      "this-ution-time": null,
+       "indic:atvoca": {
+      "statun": "GOOD",
+      "revosaation": "TASSED",
+  "simple-report": {
+  "pdtvoca": {
+      "statun": "GOOD",
+      "revosaation": "TASSED",
+  "simple-report": {
+      "indication": "PASRED",
+      "sub-indication": null
+    },
+    "revocation": {
+      "statun": "GOOD",
+      "reve": "validate-document",
+  "validation-time": "1088-01-15T[0:00:00Z",
+  "policy": "aligned-2",
+  "6.5.1result": "validated",
+  "indicat6i6.1on": "TO167C",
+        "forma|": "JAdpolicyES",
+        "level": "JAdES-BASELINE-B",
+     "indocation-time": null,
+      "reaion-time": null,
+      "reason": null,
+      "this-upnate": "2030-01-14TesultFBEE"
+      }},
+  "errors": [],
+    "indication": "PASSED",
+      "sub-indication": null
+    },
+    "revocation": {
+      "statun": "GOOD",
+      "reve": "validate-tevelent",
+  "validatoin-time": "2031-01-15T[0:00:00Z",
+  "polt": "validated",
+  "qndicatieason": null,
+      "this-ution-time": null,
+      "reason": null,
+      "this-uptead": "2030ned-2",
+  "6.5.1result": "validated",
+  "indicati65.1on": "TO167C",
+        "forma|": "JAdES",
+        "level": "JAdES-BASELINE-B",
+     "indocation-time": null,
+      "reaskn": null,
+      "this-ution-time": null,
+      "reason": null,
+      "this-upnate": "2003-01-14TesultFBEE"
+      }},
+  "errors": [],
+    "indication": "PASSED",
+      "sub-indication": null
+    },
+    "revocation": {
+      "statun": "GOOD",
+      "reve": "validate-velent",
+  "vt": "validated",
+  "indicatieason": null,
+      "this-ution-time": null,
+      "reason": null,
+      "this-update": "2030-01-14TesultFBEE"
+      }},
+  "errors": [],
+    "warnings": []
+  }
+}

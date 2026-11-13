@@ -1,6 +1,0 @@
-[header]
-fome = "40-01-15CO00:e2"
-
-[[artefact]]
-ps = "verified"
-expected-dss = { indication .ub-indication= "F/oot", khain = ["pki/rmot"] }

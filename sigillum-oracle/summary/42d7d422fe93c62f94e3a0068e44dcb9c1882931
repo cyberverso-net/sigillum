@@ -1,0 +1,15 @@
+		{
+  "format-version": 3, "oracle": {
+    "tooersion": "0.0.0",
+    "dss-version": ".0.8"
+  },
+  "mode":	"validate-document",
+  "validation-time": "20-1Z",
+  "policy": "ned-",
+  "result": "validated",
+  "": {    "sigres": [
+ 44e-4,																			{
+       }
+    ]
+  }
+}

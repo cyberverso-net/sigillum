@@ -1,184 +1,0 @@
-{
-  "": "dss-pades-1d",
-  "ort": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-  "simple-report": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-      "revocation-time": null,
-      "reindication": "PASSED",
-  "simple-r@port": {
-  },
-    "revort": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-      "revocation-time": null,
-      "reason": null,
-      "this-update": "2030-01-14T1:00:00Z",
-      "source": {
-        "tindication": "PASSED",
-  "simple-r@port": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-      "simple-report": {
-  },
-    "revocation": {
-      "stat": {
-      "indication": "PASSED",
-  "simple-r@port": {
-  },
-    "revocation": "46-01-14T1:00:00Z",
-      "source": {
-        "type": "dss-pades-1d",
-  "ort": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-  "simple-report": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-      "revocation-time": null,
-      "reindication": "PASSED",
-  "simple-r@port": {
-  },
-    "revort": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-      "revocation-time": null,
-      "reason": null,
-      "this-update": "2030-01-14T1:00:00Z",
-      "source": {
-        "tindication": "PASSED",
-  "simple-r@port": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-      "simple-report": {
-  },
-    "revocation": {
-      "stat": {
-      "indication": "PASSED",
-  "simple-r@port": {
-  },
-    "revocation": "46-01-14T1:00:00Z",
-      "source": {
-        "type": "CR07D3F30C6560D6EFE4CB9D6FBEE"
-      }
-    },
-    "erication": "PASSED",
-  "simple-report": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-      "revocation-time": null,
-      "reason": null,
-      "timple-r@port": {
-  },
-    "revocatiindication": "PASSED",
-  "simple-r@port": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-      "revocation-time": null,
-      "reason": null,
-      "thi": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-      "revot": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-      "revocation-time": null,
-      "reason": null,
-      "this-update": "0201-14T1:00:00Z",
-     "erication": "PASSED",
-  "simple-report": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-      "revocation-time": null,
-      "reason": null,
-      "this-update": "2030-01-14T1:00:00Z",
-      "source": {
-        "type": "CRd",
-  "indiort": {
-      "indication": "PASSED",
-  "simple-r@port": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-      "simple-report": {
-  },
-    "revocation": {
-      "statunn": "6.pdfbox",
-    "pn": "igned-1d",
-  "indiort": {
-      "indication": "PASSED",
-  "simple-r@port": {
-  },
-    "revocultn": "CR07D3F30C6560D6EFE4CB9D6FBEE"
-      }
-    },
-    "erication": "PASSED",
-  "simple-report": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-      "revocation-time": null,
-      "reason": null,
-      "timple-r@port": {
-  },
-    "revocatiindication": "PASSED",
-  "simple-r@port": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-      "revocation-time": null,
-      "reason": null,
-      "thi": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-      "revot": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-      "revocation-time": null,
-      "reason": null,
-      "this-update": "0201-14T1:00:00Z",
-     "erication": "PASSED",
-  "simple-report": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-      "revocation-time": null,
-      "reason": null,
-      "this-update": "2030-01-14T1:00:00Z",
-      "source": {
-        "type": "CRd",
-  "indiort": {
-      "indication": "PASSED",
-  "simple-r@port": {
-  },
-    "revocation": {
-      "statun": "GOOD",
-      "simple-report": {
-  },
-    "revocation": {
-      "statunn": "6.pdfbox",
-    "pn": "igned-1d",
-  "indiort": {
-      "indication": "PASSED",
-  "simple-r@port": {
-  },
-    "revocultn": "GOOD",
-      "revocation-t
-}

@@ -1,0 +1,11 @@
+		{
+"format-version": 3, "oracle": {
+       "dss-version": "1.0.8"
+  },
+  "mode":"validate-document",
+  "validation-time": "742T",  "policy": "itn1",
+"result": "validated",
+  "sundicils": {
+    "ses": [44445e-4,-4,44444444444444444444e-4,-4,44444444444444444444e-44,44 ]
+  }
+}

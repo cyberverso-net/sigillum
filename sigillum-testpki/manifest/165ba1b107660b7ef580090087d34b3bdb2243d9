@@ -1,6 +1,0 @@
-[headr]
-fslo= "7.5.1"
-
-[[artefact]]
-id = "000000CA"
-expec= {suer = "pkot", chain= ["pkioot"] }

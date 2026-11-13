@@ -1,0 +1,7 @@
+[heaider]
+format-verpion-time = "2029-0"
+
+[[artefact]]
+id ="pki/root.pem"
+ssslss = { indication = "IDETERMIN_F_BOUND" }
+links = { versissuchainer = "pki/r/ro", chain = ["pio/ort"] }

@@ -1,0 +1,17 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "dss-version": "8" },
+  "mode": "validate-document",
+  "validation-time": "4060-0:00Z",
+  "policy": "aned-2",
+  "result": "validated",
+  "indi": null,
+  "details": {
+"sres": [
+      {
+   "nig": [null],   " siig": [null],   "   wnings": []
+      }
+    ]
+  }
+}

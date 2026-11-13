@@ -1,6 +1,0 @@
-time = "2030-6.5.1"
-
-[[artefact]]
-id = ""
-sha622 = "ng"
-links = { issuer ="pkiroot", chain = ["pki/"] }

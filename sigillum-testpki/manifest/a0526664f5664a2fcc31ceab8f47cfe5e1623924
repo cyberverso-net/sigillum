@@ -1,0 +1,29 @@
+[header]
+format-version = 3
+validatirsion = "3.0.13"
+dss-version = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "pki/root.pem"
+sha256 = "00000000000000000"
+kind = "certificate"
+purpose = "Root CA"
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pki/leaf.pem"
+sha256 = "0123456789a"
+kind = "certificate"
+purpose = "Root CA"
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+paes = "sea9876543211"
+kind = "private-keyble"
+expect= "not-applicabpin "
+links = { issuer = "p", chain = ["pki/root"] }

@@ -1,9 +1,0 @@
-penon = "2.5.1"
-
-[[artefact]]
-id = "pkpki/rootu.p210fedcblicable"
-expected-dss = "no\t-applicable"
-
-[[artefact]]
-id = "mtuaignature-wrapping"
-links = { suer = "[ki/root", ch= ["'g"] }

@@ -1,0 +1,6 @@
+[r]
+u010= "6.1.5"
+
+[[artefact]]
+id= "pk"
+attack-class = { indn = ["/r"] }

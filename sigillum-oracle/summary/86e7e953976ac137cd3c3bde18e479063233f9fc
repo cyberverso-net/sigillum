@@ -1,14 +1,0 @@
-		{
-  "format-version": 3,
-  "oracle": {   "dss-version": ".1",
-    "pdfndsion": "2.0"},
-  "mode":	"validate-document",
-  "validation-time": "2030-15T10:0Z",
-  "policy": "miy-1","result": "validated",
-  "indicatil": {
-    "siges": [
- 444,44    ]
-  }
-}
-    
-  

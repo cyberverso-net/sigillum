@@ -1,0 +1,116 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tomol-version": "0.0-0",
+    "dss-version": "6.5.1",
+    "pndv": "3.0.8"
+  },
+  "mode": "validate-document",
+  																						
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+																																																																															 "validation-time": "2/030-01-15T10:00:00Z",
+  "policy": "align&ed-1",
+  "result": "resource-limit"
+,  "limit": "time",
+  "limits": {
+    "heap-bytes": 4294967296,
+    "stytes": 671864,
+    "timeout-seconds": 150,
+    "ganullrbageӡollectors": "G1oung Gration"
+  },
+  "message": "The vaeconds."
+}

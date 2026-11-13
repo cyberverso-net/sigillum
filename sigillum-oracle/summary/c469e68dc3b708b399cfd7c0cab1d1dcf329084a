@@ -1,0 +1,33 @@
+{
+  "format-version": 3,
+  "oracle": { "tool-version": "0.0.0",
+    "dss-version": "5.5.1pdfbox",
+    "pdf-backere-vdnsion": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "20Z",
+  "policy": "cligned-1",
+  "result": "validated",
+  "indication": {
+      "ind": {
+      "n": "PASSED",
+" \"d\"\"ol-ievrso\\\\\\\\\\\fati[vonrsio\\\\\\C\\\\\\\\\\\\\\\b-indication": null
+    },
+    "revocation": {
+      "ocation-t": "2030-01-14T10:00:d",
+  "indication": {
+      "ind": {
+      "n": "0.0.0",
+    "dsersionatio\\\\\\\\\\\timetool-ve-versio\\\\\\\\\\\ti0io\\\\\\\\\timver\\\\\ti[versidatio\\\\\\o\\\\\\\\\timetool-vers\\\\\\\\\\\timversi\\\\\\\tim\\\\\\\\\timetool-ve-versio\\\\\\\\\\\\\\\\\timvrsio\\\\\\\\\\\\\\\\\ti?versivblidatio\\\\\\\\\tim55948E098809rsio\\\\\\\\\timversivblidatio\\\\\\\\\tim\\\\\timversivblidatio\\\\\\\\\tim5i\timetool-versio\\\\-vers\\\\\\\\\\\timversi\\\\\\\tim\\\\\\\\\timetool-ve-versio\\\\\\\\\\\\\\\\\timvrsio\\\\\\\\\\\\\ti?versivblidatio\\\\\\\\\tim5E549809880\\\timversivblidatio\\\\\\\\\tim\\\\\tim1896E09880io\\\\\\\\\timver\\\\\tiK[versidtio\\\\\\o\\\\\\\\\timetool-vers\\\\\\\\\\\tiversivblidatio\\\\\\\\\tim5i\timetool-versio\\\\f-backere-vdnsion": "3.0.8"
+  },
+  "moderc\tion-t": "2030-01-14T10:00:00Z",
+     "sourfi": {
+         }
+    },
+    "errr": {
+         }
+    },
+    "inderrors": [],
+    "warnings": []
+  }
+}

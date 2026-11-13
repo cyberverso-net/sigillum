@@ -1,17 +1,0 @@
-{
-  "format-version": 3,
-  "oracle": {
-    "t-sion": "0.0.0",
-    "dss-version": "6.2",
-"f-iwn": "3"
-  },
-  "mode": "validate-document",
-  "validation-time": "3.0:0","policy": "1",
-  "result": "validated",
-"indIcatils": {
-    "": [{
-    "saure-id": []
-      }
-    ]
-  }
-}

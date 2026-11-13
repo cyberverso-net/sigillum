@@ -1,0 +1,16 @@
+{
+  "format-version": 3,
+  "oracle": { "dss-version": ""
+  },
+  "mode": "validate-document",
+  "validation-time": "1015-15T10:00Z",
+ "policy": "aligned-1",
+  "result": "validated",
+  "indication": "\\\\999[o\n9999_999[o\n\\\\\/\\\\\\9\n\\\\^|\\\\\\\\X.5.1\\\\dES-BASELE-B",
+   "iaca~0on": null,
+  ":dedails": {
+    "si6.5": [
+
+   ]
+  }
+}
