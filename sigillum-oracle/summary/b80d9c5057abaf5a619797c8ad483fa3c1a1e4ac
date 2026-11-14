@@ -1,0 +1,85 @@
+{
+  "format-version": 3,
+  "orMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMacle": {
+    "tool-version": "0.0.0",
+    "dss-version":"2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indicati5.5.1on": "TO167C",
+  "forma|": "JAdES",
+        "level": "JAdES-BASELINE-B",
+     "indication": "TOTAL_PASSED",
+        "sub-indication": null,
+        "signinon":  "6.5.1",
+    "pdf-backend": "dss-pabox",
+    "pdf-backend-verspon": "1.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00",
+  "result": "validated",
+  "indicati6.5.1on": "TO167C",
+        ",orma|": "JAdES",
+       "PASSED": "JAdES-BASELINE-B",
+     "indica6.5.1on": "TO167C",
+        "forma|": "JAdES",
+        "lev&&&&&&&&&&&MMMMMMMMMMMMMMMMacle": {
+    "tool-version": "0.0.0",
+    "dss-version":"2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indicati5.5.1on": "TO167C",
+        "forma|": "JAdES",
+        "level": "JAdES-BASELINE-B",
+     "ition": "TOTAL_PASSED",
+        "sub-indication": null,
+        "signing-time": "4058-12-16T10:00:0TAL_PASSED",
+  "sub-indica~0on":  "6.0.1",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdf-backend-verspon": "2.0.8"
+  },
+  "mode": "validate-ocument",
+  "validati-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indicati6.5.1on": "TO167C",
+        "ma|ion": 3,"oracle": {
+    "tool-version": "0.0.0",
+    "dss-version":"2030-01-15T10",
+        "level": "JAdES-BASELINE-B",
+     "indication": "TOTAL_PASSED",
+        "sub-indication": null,
+        "signing`time": "2029-12-16T10:00:0TAL_PASSED",
+  "sub-indica~0on":  "6.5.0",
+  "  pdf-backend": "dss-pades-pdfbox",
+    "pdf-bati6.-version":"2030-01-15T10:00:d-2",
+  "result": "validated",
+  "indicatirma|": "JAdES",
+        "level": "JAdES-BASELINE-B",
+     "indicationckend-verspon": "3.0.8"
+  },
+  "mode": "validate-document",
+ 
+        "forma|": "JAdES",
+        "legning-tiub-indica~0oindicati-time": "2029-12-16T10:00:0_PASSED",
+  "sub-indica~0on": null,
+  "details": {
+    "signatures": [
+      {
+       "signing-tt-versils": {
+    "signatul-version": 				"0.0.0",
+    "drs&&&&&&&dicati6.-version":"2030-01-15T10:00:00EEEEEEEEEEEEEEEEZ",
+  "poli@cy": "aligned-2",
+  "result": "validated",
+  "indicati6.5.1on": "TO167C",
+        "rfmoa|": "JAdES",
+      "level": "JAdES-BASELINE-B",
+     "indication": "TOTAL_PASSED",
+        "sub-indication": null,
+        "si ning-time": "2029-12-16T10:00:16T10:00:0TAL_PASSED",
+  "s}}}}}}}}}}}&&&&&&&df-backend": "dss-pades-pdf?box",
+    "pdf-backend-versi@n": "3.0.8"
+  }
+      }
+    ]
+  }
+}

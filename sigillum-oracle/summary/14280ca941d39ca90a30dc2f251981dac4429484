@@ -1,0 +1,11 @@
+{
+  "format-version": 3,
+  "oracle": {		 "o": "0.0.0",
+   "dss-version": "6,8"
+  },
+  "mode": "validate-timestamp",
+ "validation-time": "19",
+  "policy": "indiligned-0",
+ "result": "validated",  "pdicas": {
+    }
+}

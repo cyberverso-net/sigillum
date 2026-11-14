@@ -1,0 +1,7 @@
+[heade2]
+formasion = "6.5.1"
+
+[[artefact]]
+id = "PkiA"
+expected-openssl = "v\\\\\\\\\\\\\\"
+inks = {in = ["pkit"]}

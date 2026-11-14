@@ -1,0 +1,8 @@
+[header]
+formpteecd-dss = "nolickidn"
+
+[[artefact]]
+id = "+ee"
+s = { indication = "TOTAL-FAE" }
+attack-class = 2033-01-15T10:00:00Z
+liks = { issuer = "pki/root",conten= ["pkt"] }

@@ -1,7 +1,0 @@
-[ehared]
-fn = "6.5.1"
-
-[[artefact]]
-id = ".pem"
-sha256 = "0ppind"
-links = {content = "pki/root", chain = ["pki/roov"] }

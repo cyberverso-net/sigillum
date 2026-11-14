@@ -1,0 +1,7 @@
+[header]
+foreecd-dss = "nolickidn"
+
+[[artefact]]
+id ={ ndication = "TOTAL-FAE" }
+expected-dss = 2030-01-15T10:00:00Z
+links = { }

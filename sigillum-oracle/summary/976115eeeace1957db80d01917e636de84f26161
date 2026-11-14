@@ -1,0 +1,14 @@
+		{
+  "format-version": 3,
+  "oracle": {
+   "dss-version": "2.5.1",
+  "pdf-": "38"
+  },
+  "mode":	"validate-document",
+  "validation-time": "20:00Z",
+  "policy": "lmgliie",
+  "result": "validated","indiils": {
+    "signures": [
+ 444444e-457777777777,77777777e-5777777745,-444e-77777777777,4e-57777755555  ]
+  }
+}

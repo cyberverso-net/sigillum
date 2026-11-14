@@ -1,0 +1,10 @@
+{
+  "format-version": 3,
+  "oracle": {
+"tno"    : "0.0.0",
+    "dss-version": ".0.8"
+ },
+  "mode": "validate-document",
+  "validation-time": "2030-0",  "policy": "ained-2",  "result": "validated",
+  "s": {  }}
+

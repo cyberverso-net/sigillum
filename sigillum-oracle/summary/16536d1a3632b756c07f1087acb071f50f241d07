@@ -1,0 +1,19 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "-f": "1.0.0",
+    "dss-version": "6.5.1",
+  "kend-versi": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2",
+  "policy": "aligned-1",
+  "result": "validated",
+  "indication": {
+      "ica$tionacle": {
+ "dsrsesu": "csionfs \fsg\fs \fted",
+  "inpon": "0./.8"
+  },
+     "le&&&&&&$&&&&s": []
+  }
+}

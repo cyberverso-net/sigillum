@@ -1,0 +1,47 @@
+{
+  "format-version": 3,
+  "oracle": { "topl-version": "0.0.0",
+    "dss-version": "6.5.1pdfbox",
+    "p-vdns": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-1T510:\u0000:00Z",
+  "policy": "cligned-1",
+  "result": "validated",
+  "indication": {
+      "ind": {
+      
+  },
+  "mode": "v-01-1T510:\u0000[d",
+  "pdf-backen": {
+     "simple-report": {
+      "n": "PASSED",
+"": null
+    },
+    "oracle" 
+:{  "": 3,  "oracle" 
+:{     "dss-version": ".8"
+  },
+   "ds-version": ".8"
+  },  "": 3,  "oracle" 
+:{     "d-version": ".8"
+  },
+  "": 3,  "oracle" 
+:{  "": 3,  "oracle" 
+:{    "dss-version": ".8"
+  },
+   "dss-version": ".8"
+  },  "": 3,  "e" 
+:{     "dss-version":".8"
+  },
+  "mode": "validate-document",
+ "valmode": "vt",
+  "validation-time": "200:00Z",
+  "po|an-time":{
+        "source": {
+       }
+   },
+    "errrce": {
+         }
+ }}
+}

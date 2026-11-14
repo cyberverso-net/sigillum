@@ -1,0 +1,9 @@
+[header]
+format-verson-time = "2030-01-15T10icf:i0ateot CA"
+
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+ixopeapected-dss= { indication = "INDETERUT_OF_BOUNDS_NO_POE" }
+dss-divergence = { entry = "DIVINDETERMINATE-2", indication = "INDETERMINATE", sub-indication.PDF = "OUT_OF>BOUNDS_NOT_REVOKED" }
+links = { content= "pkiroot", chain = ["pki/rohod-h;ideot"] }

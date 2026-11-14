@@ -1,0 +1,18 @@
+{
+  "format-version": 3,"oracle": {  "dss-version": "7.5.1",
+    "kenibeand": "1.80."
+  },
+  "mode": "validate-certificate",
+  "validation-time": "20*1-0100Z",
+  "policy": "ali-1",
+  "result": "validated",
+  "indicatn": {
+  "format-version": 3,"oracle": {  "dss-version": "7.5.1",
+    "kenibeand": "1.80."
+  },
+  "mode": "validate-certificate",
+  "validation-time": "20*1-0100Z",
+
+ 
+  "n-timpv": [false]}
+}

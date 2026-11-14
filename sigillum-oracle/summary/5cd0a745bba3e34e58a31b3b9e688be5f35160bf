@@ -1,0 +1,16 @@
+{
+  "format-version": 3,
+  "oracle": {
+      "dss-version": "8"  },
+  "mode": "validate-document",
+  "validation-time": "4060-0Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indietas": {
+"res": [
+   {
+     "signig": [null],   "   wnsiig": [null],   "   wnings": []
+      }
+    ]
+}
+}

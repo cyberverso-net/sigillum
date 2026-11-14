@@ -1,0 +1,10 @@
+[header]
+va= { einn = "{ i/root", chain = ["pki/rot"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki988765-applicable"
+expected-dss = "nntmmmmmmmmmmmrmmm"
+
+[[artefact]]
+cted-dss = { i= "TOTAL-FAILED", sub-indica= "pki/root", chain = ["pki/root"] }

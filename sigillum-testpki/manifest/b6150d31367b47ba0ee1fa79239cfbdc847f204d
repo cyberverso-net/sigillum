@@ -1,0 +1,5 @@
+forn = "20"
+
+[[artefact]]
+id = "sed"
+attack-class = { indica= "TE", su-indin = "OUT_OF_#..1" }

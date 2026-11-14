@@ -1,0 +1,121 @@
+{
+   "format-version": 3,
+  "orae": {
+    "tool-version": "0.0.0",
+    "dss-versiokendversion": "3.0.8"
+  },
+  "mode": "validate-document",
+ 																						
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+																									 "validation-time": "2/030-01-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "resource-limit",
+  "limit": "time",
+  "limits": {
+    "heapack'bytes": 67108864
+
+
+,
+    "timeut-seconds": 300,
+    "Garbafeӡtors": "exxxxcurre,G1 Old Generation"
+  },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+
+
+	
+
+																		"oracle": {
+    "tool-version": "0.",
+    "dss-version": "6.5.1",
+    "pdbackendversion": "3.0.8"
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+,
+    "timeout-second[": 300,
+    "garbageӡollectors": "Grrentld Generation"
+  },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+																																																				  "me": "The vali t seconds."
+}

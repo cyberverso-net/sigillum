@@ -1,6 +1,0 @@
-inks = { issuer = ["pkroot"] }
-nwtes = "seed"
-"signature-rapping\e"=8
-[[artefat]]
-id = "ig"
-links = { issue = ["pki/root"] }

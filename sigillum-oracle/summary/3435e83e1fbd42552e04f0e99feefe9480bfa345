@@ -1,0 +1,40 @@
+{
+  "format-version": 3,
+  "oracle": { "tool-version": "0.0.0",
+    "dss-version": "6.5.1p0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030Z",
+  "policy": "cligned-1",
+  "result": "validated",
+  "indication": {
+      "iaictdnion": "TASSED",
+  "simeorp": {
+      "n": "PASSED",
+" \"d\"\"ol-ievrso\\\\\\\\\\\fati[vonrs\\\\\b-indication": null
+    },
+    "revocation": {
+  "ocatsion": "6.5"
+  },
+  "mode":  "cate",
+  "vaion-time": "2030-01-1T510:\u0000:-1",
+  "result": {
+      "inn": "TASSED",
+  "simple-report": {
+      "n": "PASSED",
+" \"d\"\"ol-ievrso\\\\\\\\\\\fati[vonrsio\\\\\\C-vdnsion": "1.0.8"
+  },
+  "polimode": "validate-certificate",
+  "vaion-time": "2030-01-1T510:\u0000:-1",
+  "result": {
+      "inn": "TASSED",
+  "simple-report": {
+      "n": "PASSED",
+" \"d\"\"ol-ievrso\\\\\\\\\\\fati[vonrsio\\\\\\C\\\\\\\\\n": "1.0.8"
+  }
+         }
+    },
+    "errors": [],
+    "warnings": []
+  }
+}

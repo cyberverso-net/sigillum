@@ -1,0 +1,7 @@
+[header]
+format-veersion = "6.5.1"
+
+[[artefact]]
+dss-divergence = { entry = "DIV-5", indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NOOKED" }
+links = { issuer = "pki/root", }
+notes = { issue = ["pki/root"] }

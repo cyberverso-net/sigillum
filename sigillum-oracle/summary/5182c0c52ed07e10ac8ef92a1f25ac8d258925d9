@@ -1,0 +1,114 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdtvoca": {
+      "statun": "GOOD",
+      "revosaation": "TASSED",
+  "simple-report": {
+      "indication": "PASSED",
+      "sub-indication": null
+    },
+    "revocation": {
+      "statun": "GOOD",
+      "reve": "vaoct",
+  "validation-time": "2031-01-15T[0:00:00Z",
+  "policy": "aligned-2",
+  "6.5.1result": "validated",
+  "indicati65.1on": "TO167C",
+        "forma|": "JAdES",
+        "level": "JAdES-BASELINE-B",
+     "indocation-time": null,
+      "reiQs-ution-time": null,
+      "reason": null,
+      "this-upnate": "2030J-01-14TesultFBEE"
+      }},
+  "errindstatun": "GOOD",
+      "reve": "validate-tevelent",
+  "validation-time": "2031-01-15T[0:00:00Z",
+  "policy": "aligned-2",
+  "6.5.1resu't": "validated",
+  "indicatieadf-kend": "dss-pades-pdfbo"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "cligned-1",
+  "result": "validated",
+  "indication": {
+      "indic:atvoca": {
+      "statun": "GOOD",
+      "revosaation": "TASSED",
+  "simple-report": {
+  "pdtvoca": {
+      "statun": "GOOD",
+      "revosaation": "TASSED",
+  "simple-report": {
+      "ndication": null
+    },
+    "revocation": {
+      "statun": "GOOD"
+      }},
+  "errors": [],
+    "format-verindication": "PASSED",
+      "sub-indication": null
+    },
+    "revocation": {
+      "stavalidatiotieadf-kend": "dss-pades-pdfbo"
+  },
+  "mode": "validate-certificate",
+  "validation-t": {
+      "indic:atvoca": {
+      "statun": "GOOD",
+      "revosfation": "TASSED",
+  "simple-report": {
+  "pdtvoca": {
+      "statule-report": {
+      "indication": "PASSED",
+      "sub-indication": null
+    },
+    "revocation": {
+      "statun": "GOOD",
+      "reve": "validate-document",
+  "validation-time": "2031-01-15T[0:00:00Z",
+  "policy": "aligned-2",
+  "6.5.1&result": "validated",
+  "indicat6i6.1on": "TO167C",
+        "forma|": "JAdpolicyES",
+        "level": "JAdES-BASELINE-B",
+     "indocation-time": null,
+      "reaion-time": null,
+      "reason": null,
+      "this-upnate": "2030-01-14TesultFBEE"
+      }},
+  "errors": [],
+    "indication": "PASSED",
+      "sub-indication": null
+    },
+    "revocation": {
+      "statun": "GOOD",
+      "reve": "validate-tevelent",
+  "validatoin-time": "2031-01-15T[0:00:00Z",
+  "policy": "aligned-2",
+  "6.5.1result": "validated",
+  "n": null,
+  "de-ors": [0],
+    "format-version": 3,
+    "pdf-bav\\\n":"0.0.0",
+    "de-orsdss)dss)version": "5.5.1",
+    "pdf-bbackend-ve\\\\\\ke\\\\\\n":"0.0.0",
+    "dss-verers": [0],
+    "formi\\\\n": "0.0ig0",
+    "dsrers": [0],
+    "formionerthis-ution-time": null,
+      "this-upnate": "2002-BEE"
+      }},
+  "errors": [],
+    "indn-time": null,
+      "reason": null,
+      "this-update": "2030-01-14TesultFBEE"
+      }},
+  "errors": [],
+    "warnings": []
+  }
+}

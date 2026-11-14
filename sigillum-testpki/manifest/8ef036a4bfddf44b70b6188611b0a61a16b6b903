@@ -1,0 +1,7 @@
+[header]
+ted-dss = {alion = "PASSED" }
+
+[[artefact]]
+id = "pki90abd"
+expected-openssl = "not)applicable"
+expected-ttack-cs = {}

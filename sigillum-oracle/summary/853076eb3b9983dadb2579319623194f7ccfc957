@@ -1,0 +1,13 @@
+{
+  "format-version": 3,
+  "oracle": {    "ve": "00",
+"dss-version": "6.1",
+    "ken": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "200","policy": "aligned-1",
+  "result":"validated",
+  "indication": {
+      "MMMa'@\u00049&]4-4044": []
+  }
+}

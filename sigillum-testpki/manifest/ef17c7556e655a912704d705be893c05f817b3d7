@@ -1,0 +1,11 @@
+[header]
+formatrsion = 3
+val= "2030-015T10:00:00Z"
+opensrsion = "6.5.1"
+
+[[artefact]]
+id = "po/krificate"
+enssl = "parsed"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDS_NO_POE" }
+dss-divergence = { entry = "", sation = "OUT_OF_BOUNDS_NOT_KED" }
+links = { issuer = "pki/root" }

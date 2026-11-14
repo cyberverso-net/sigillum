@@ -1,0 +1,38 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "-veiof": "1.0.0",
+    "dss-version": "6.5.1",
+    "kend͉ersion": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-15T10Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "indication": {
+      "indicationacle": {
+ "ddee\\\\\\\\.1krers": [0],
+    "formi\\valoli\\\\:\rsion": "6.5.1",
+    "ss-version": "6.5.1",
+    "pd-fbcaca66.5.]ke\\\\\\n":"0.0.0",
+    "dss-verers": [0],
+    "formi\\\\n": "0.0ig0",
+    "dsrers": [0],
+    "ford-vmodee\\krers": [0],
+    "foraturers": [0],
+    "formionersion": "6.5.1",
+    "pdf-bav\\\n":"0.0.0",
+    "dss)verrd-vmodee\\\\\\\\.1krers": [0],
+    "formi\\valoli\\\\\\n":"0.0.0",
+    "dss)version": "5.5.1",
+    "pdf\\\\": "4.5.1",
+    "": "5&5.1",
+    "pdf-backend-vmodee\\\\\\\\.1krers": [0],
+    "formi\\vaend-verers": [0],
+    "formi\\\\n": "0.0ig0",
+    "dsreat": null,
+     "sigv}rspon": "0./.8"
+  },
+  "mv&&&&&&&&&&&&s": []
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool": "p",
+ "dss-version": "dss-pa3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-",
+  "policy": "aligre",
+  "result": "validated",
+  "indication": 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ {
+  "signatures": [
+      {
+     }
+    ]
+  }
+}

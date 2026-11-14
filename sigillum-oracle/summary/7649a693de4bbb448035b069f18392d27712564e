@@ -1,0 +1,19 @@
+		{
+  "format-version": 3, "oracle": {
+    "kn": "0.0.0",
+    "dss-version": "6."
+  },
+  "mode":	"validate-document",
+  "validation-time": "20(:00Z",
+  "policy": "iiai-0",
+  "result": "validated",  "cils": {
+    "signature{": [
+ 8,444,
+78
+,
+7777
+
+,
+77,4,44444,444    ]
+  }
+}

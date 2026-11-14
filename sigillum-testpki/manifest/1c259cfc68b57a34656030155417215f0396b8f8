@@ -1,6 +1,0 @@
-[heAder]
-ve= "6.5.1"
-
-[[artefact]]
-id = "pnd"
-links = {content = "pki", chain = ["pi/vov"] }

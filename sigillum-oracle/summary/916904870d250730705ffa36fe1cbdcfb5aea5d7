@@ -1,0 +1,131 @@
+{
+  "format-version": 3,
+  "oracle": { "tool-version": "0.0.0",
+    "dss-version": "6.5.1pdfbox",
+    "pdf-backere-vdnsion": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-1T510:\u0000:00Z",
+  "policy": "cligned-1",
+  "result": "validated",
+  "indication": {
+      "ind": {
+      "n":"6.5.1pdfbox",
+    "pdf-backere-vdnsion": "3.0.8"
+  },
+  "mode": "validate-cicate",
+  "validation-time": "1940-01-1T510:\u0000:00Z",
+  "policy": "cligned-1",
+  "result": "validated",
+  "indication": {
+      "indication": "TASSED",
+  "simple-report": {
+      "n": "PASSED",
+"\"4,4444": "3.0.8"
+  },
+  "mode": "validate-510:\u0000:00Z",
+  "policy": "cligned-1",
+  "r[sult": "validaed",
+  "indication": {
+      "ind": {
+      "n": "PASSED",
+" \"l-version": "0.0.0",
+    "dss-version": "6.5.1pdfbox",
+    "pdf-backere-vdnsion": "3.0.8"
+  },
+  "mode": "validate-cicate",
+  "validation-time": "1940-01-1T510:\u0000:00Z",
+  "policy": "cligned-1",
+  "result": "validated",
+  "indication": {
+      "indication": "TASSED",
+  "simple-report": {
+      "n": "PASSED",
+"\"4,4444": "3.0.8"
+  },
+  "mode": "validate-510:\u0000:00Z",
+  "policy": "cligned-1",
+  "result": "validated",
+  "indication": {
+      "ind": {
+      "n": "PASSED",
+" \"d\"\"ol-ievrso\\\fati[vonrsio\\\\\\\b-indication": null
+    },
+    "revocation": {
+      "ocation-t": "2030-01-14T10:00:00Z",
+      "soutool-version": "0.0.0",
+    "dss-version": "6.5.1pdfbox",
+    "pdfnsion": "3.0.8"
+  },
+  "mode": {
+      "ind": {
+      "n": "PASSED",
+" \"d\"\"ol-ievrso\\\\\\\\\\\fati[vonrsio\\\\\\C\\\\\\\\\\\\\\\\\b-ind=cation": null
+    },
+    "revocation": {
+      "ocation-t": "2030-01-14T10:00:00Z",
+      "source": {
+         }
+    },
+    "errrce": {
+         }
+    },
+    "errors": [],
+    "war44e-4,4\\\\\\\fati[vonrsio\\\\\\\\b-in": null
+    },
+    "revocation": {
+      "ocation-t": "2030-01-14T10:00:00Z",
+      "source": {
+         }
+    },
+    "errrce": {
+         }
+    },
+    "erde": "validate-certificate",
+  "validation,time": "1940-01-1T510:\u0000:00Z0:\u0001:00Z",
+  "policy": "cligned-1",
+  "result": "validated",
+  "indicatino": {
+      "ind": {
+      "n": "PASSED",
+" \"d\"\"ol-ievrso\\\\\\\\\\\fio\\\\\\C\\\\\\\\\\\\\\\\\b-iniidtocan": null
+    },
+    "revocation": {
+      "ocation-t": "2030-01-14T10:00:00Z",
+      "sourceversion": "6.5.1pdfbox",
+    "pdfnsion": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "1940-01-1T510:\u0000:00Z0:\u0000:00Z",
+  "policy": "cligned-1",
+  "result": "validated",
+  "indication": {
+   "   ind": {
+      "n": "PASSED",
+" \"d\"\"ol-ievrso\\\\\\\\\\\fati[vonrsio\\\\\\C\\\\\\\\\\\\\\\\\b-indication": null
+    },
+    "revocation": {
+      "ocation-t": "4060-01-14T10:00:00Z",
+      "source": {
+         }
+    },"errr": {
+         }
+    },
+    "errrce": {
+         }
+    },
+    "errors": [],
+    "war44e-4,4\\\\\\\fati[vonrsio\\\\\\\\b-in": null
+    },
+    "revocation": {
+      "ocation-t": "2030-01-14T10:00:00Z",
+      "source": {
+         }
+    },
+    "errrce": {
+         }
+    },
+    "errors": [],
+    "warnings": []
+  }
+}

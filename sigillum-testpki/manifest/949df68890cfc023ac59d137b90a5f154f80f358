@@ -1,5 +1,0 @@
-
-
-[[artefact]]
-id ="27"
-links = { issuer = "pkt", xpect = ["pki/rot"] }

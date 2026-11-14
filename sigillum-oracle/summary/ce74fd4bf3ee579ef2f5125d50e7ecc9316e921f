@@ -1,0 +1,16 @@
+		{
+  "format-version": 3,
+  "oracle": {
+    "to-vsion": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-badf-b-version": "3.0.8"
+  },
+  "mode":	"validate-document",
+  "validation-time": "230-01:00Z",
+  "policy": "lmglited-1",
+  "result": "validated",
+  "indicils": {
+    "signatures": [
+ 44e+4,402444444e+4,4,444e4,4449e+4,4e-4,4e-4,222444844e+4,4444444e+4,4e-4,-4,4444,222444444e+4,4e-4,-4,4444e-4,4,78639e+4,4e-4,4e-4,222444444e+4,4e-4,-4,44444e4 ]
+  }
+}

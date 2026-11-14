@@ -1,0 +1,11 @@
+{
+  "format-version": 3,
+  "oracle": {
+"dss-version": "0.5",
+    "ss": ""
+  },
+  "mode": "validate-timestamp", "validation-time": "2030-000Z", "policy": "a1",
+  "result": "validated",
+"  i)ls": {
+ "tokenrs"        : []}
+}

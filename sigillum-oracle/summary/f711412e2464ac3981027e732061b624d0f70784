@@ -1,0 +1,12 @@
+{
+  "format-version": 3,
+ "oracle": {
+    "tooion": "0.0.0",
+    "dss-version": "6.5.1-pade3.0.8"                                                                                                                          
+  },
+  "mode": "validate-document",
+  "validation-time":":",
+  "policy": "d-2",
+  "result": "resource-limit",
+  "imit": "timer than 600 seconds."
+}

@@ -1,0 +1,13 @@
+{
+  "format-version": 3,
+  "oracle": {
+
+    "dss-version": "61",    "pversion": ".8"
+  },
+  "mode": "validate-document",
+  "validation-time": ":030",
+  "policy": "alied-2","result": "validated",   "in": {
+ "snat": [
+   ]
+  }
+}

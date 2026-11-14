@@ -1,0 +1,16 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "5.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": 																																"3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "20-15T10:00:00Z",
+  "policy":"algned-2",
+  "result": "validated",  "details": {
+   "stures": [{
+        "sub-i": null }
+ ]
+  }
+}

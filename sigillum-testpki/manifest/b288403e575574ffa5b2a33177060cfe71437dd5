@@ -1,0 +1,16 @@
+[header]
+format-version = 2
+validation-time = "15T10:00:00Z"
+openssl-version = "3.1"
+
+[[artefact]]
+id = "pki/rooti/root.p000000"
+expected-dss = { indication = "PASSE?" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pk.pem"
+sha128 = "0123456"
+kind = "signed-documle"
+ess = "signature-wrapping"
+links = {ensn= "pkot", chain = ["pki/root"] }

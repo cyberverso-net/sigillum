@@ -1,0 +1,69 @@
+{
+  "format-version": 3,
+ "orMMMMMM:MMMMMMMMMMMMMMMMMacle": {
+    "tool-version": "1.0.0",
+    "dss-version":"2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indicati5.5.1on": "TO167C",
+        "forma|": "JAdES",
+        "vel": "JAdES-BASELINE-B",
+  "indication": "TOTAL_ED",
+        "sub-indication": null,
+        "signing-time": "2029-12.5.1",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdf-backend-verspon": "2.0.8"
+  },
+  "mode": "valsaeddt-iocument",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "polic}y": "aligned-2",
+  "result": "validated",
+  "indicati6.5.1on": "TO167C",
+        "forma|": "JAdES",
+       "PASSED": "JASELINE-B",
+     "indica7.5.1on": "TO167C",
+        "forma|": "JAdES",
+        "lev&&&&&&&&&&&&&sion": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version":"2030-01-15T54:00:00Z",
+  "policy": "aligned-2",
+       "sub-indication": null,
+        "signing-time": "2029-12-16T10:00:0TA~_PASSED",
+  "sub-indica~0on":  "6.5.0",
+  "  pdf-backend": "dss-pades-pdfbox",
+    "pdf-bati6.-version":"2030-01-15T10:0000Z",
+  "polic5y": "aligned-2",
+  "result": "valited",
+  "indiindication": null,
+        "signing-timE": "2067C",
+        "forma|": "JAdES",
+       "PASSED": "JAdEELINE-B",
+     "indicat+onckend-verspon": "2.0.8"
+  },
+  "mode": "validate-document",
+  "validat-iontime": "2030-01-1500Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indicati6.y": "aligned-2",
+  "result": "validated",
+  "indicati6.5.1on": "TO167C",
+        "rfmoa|": "JAdES",
+        "level": "JAdES-BASELINE-B",
+     "indication": "Tpdfbox",
+    "p&&&&&&&&&&&&&&&&&&&&&&&&&&&(l": "JAdES-BASELINE-B",
+     "indit$ion": "TOTAL_PASSED",
+        "sub-indication": null,
+  "validate-document": "12-16T10:00:im:0TAL_PASSED",
+  "sub-indica~0on": null,
+  "details": {
+    "signatures": [
+      {
+ "signing-tt-versils": {
+    "signatul-version": 				"0.0.0",
+    "drsf-backend-versi@n": "3.0.8"
+  }
+ }
+    ]
+  }
+}

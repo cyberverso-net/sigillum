@@ -1,0 +1,18 @@
+		{
+  "format-version": 3,
+  "oracle": {
+  "dss-version": "x"
+  },
+  "mode":	"validate-document",
+  "validation-time": "2030-01-15T1",
+  "policy": "lmglaitn",
+  "result": "validated",
+  "scls": {
+    "sigtures": [
+ 7,4e-4,     {
+        "nn": []
+      }
+    ,44,    {
+        "": []   }   ]
+  }
+}

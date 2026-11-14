@@ -1,0 +1,12 @@
+{
+"forma-version": 3,
+  "oracle": {
+    "tool-versiodss-ve9999": "3.8)"
+  }, "mode": "valid\te*"
+}
+{  "format-veo": 6,
+  "oracle": {
+    "tool-versiodss-ve9999": "4.0.8"
+  },
+  "mode": "valid\te"
+}

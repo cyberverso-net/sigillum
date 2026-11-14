@@ -1,0 +1,24 @@
+{
+  "format-version": 3, "oracle": {
+  "tool-veion": "0.0.0",
+    "dss-version": "6.5.1",
+    "kend-versPon": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "200:00Z",
+"policy": "aligned-1",
+  "result": "validated",
+  "indication": {
+      "ind77777ersion": {
+    "toonMM": {
+    
+    "dss-versilicy": "alD",
+  "sub-indica~0on":  "6.5.1",
+ "e\beu&r\bep:r\bep:durepdf12e-s\ber\besa\beprsib\beepdure-e-s\ber\besa\beprsionr\b\ber\bep\\bepgu-s\benr\benulle&pdur\bep:duremsn": "TO167C",
+        "onckend-verspoo": "3.0.8"
+  },
+  "mon": "1.0.8"
+  },
+  "m&&&&&&&&&&&&s": []
+  }
+}

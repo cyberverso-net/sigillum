@@ -1,0 +1,15 @@
+{
+  "format-version": 3,
+  "oracle":  
+   {"n": "0.0.0",  "dss-version": "ted"},
+  "mode": "validate-document",
+  "validation-time": "615IED",
+  "sub-i{dication": "HASH_FAILURE" ,
+ "dd": true,
+      "dan": "HARE" ,
+ "dd": true,
+      "aomn": "D",
+  "sub-i{dication": "HAS_5-15T1Z",
+  "policy": "aligned-1",
+  "result": "resource-limit"
+}

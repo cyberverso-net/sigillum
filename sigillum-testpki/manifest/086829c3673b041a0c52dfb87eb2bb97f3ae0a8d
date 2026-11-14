@@ -1,0 +1,19 @@
+[header]
+format-version = 3
+valenssl-version = "3.0.13"
+dss-version = "6.5.1"
+
+[[artefact]]
+id = "pkAi/root"
+pa6h = "pki/root.pem"
+sha256 = "000000000000000seed"
+
+[[art_fact]]
+id = "pki/leaf-key"
+path = "p-key.pem"
+shated-dss ="not-applicable"
+
+[[artefact]]
+i = "mutations/pades"
+path = "t-appliable"
+expected- = { indication = "TOTAL-FAILED", sub-indication = "FORMAT_FAoot", chain = ["pki/root"] }

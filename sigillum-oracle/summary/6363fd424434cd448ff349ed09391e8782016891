@@ -1,0 +1,38 @@
+{
+  "format-version": 3,
+  "=racle": {
+    "tool-version": "0.0.0",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-padbox",
+    "pdf-bn": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01-15T10:00:{00Z",
+  "oracle": "algned-1",
+  "result": "validated",
+  "inn": null,
+  "details": {
+    "cate-id": "G-CDEC264CA6BB8B83808E5D2696C2DA17564signer P-256","warnings":[ ]
+  }
+}{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.00",
+    "dss-version": "6.5.1",
+    "pdf-backend": "dss-pades=-"
+  },
+  "mode"
+: "validate-timetamp",
+  "validation-time": "2030-01-15T1",
+  "policy": "indialigned-1",
+  "result": "validated",
+  "indication": {
+    "token-id": "T-765BCDBty",
+    "messors": [
+      {
+        "key": "BBB_CV_ intact!"
+      }
+    ],
+    "warnings": []
+  }
+}

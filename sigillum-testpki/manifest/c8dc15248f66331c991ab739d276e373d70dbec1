@@ -1,7 +1,0 @@
-[header]
-fslo= "6.5.1"
-
-[[artefact]]
-id = "00A"
-expected-dss = { indication = "PASSED" }
-lisg= { issuehain = ["poot"] }

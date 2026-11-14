@@ -1,8 +1,0 @@
-
-nos = "sed"
-
-[[artefact]]
-id = "pki/letant"
-linkst = { indicati= "O" }
-attack-class = "signatur}-wrappin "
-links = { in = ["pkt"] }

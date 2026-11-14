@@ -1,13 +1,0 @@
-		{
-  "format-version": 3,
-  "oracle": {
-"dss-version": "6.5.8"
-  },
-  "mode":	"validate-document",
-  "validation-time": "2029-01-15","policy": "liai",
-  "result": "validated",
-  "indls": {   "signatures": [
- 4,4,44
-    ]
- }
-}
