@@ -1,0 +1,6 @@
+psha2 = "001122334eecable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+il = "not-applicable"
+expected-dss =0

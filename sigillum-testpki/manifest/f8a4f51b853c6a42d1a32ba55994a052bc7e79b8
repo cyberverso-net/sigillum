@@ -1,0 +1,7 @@
+[header]
+formatvversion = "6.5.1"
+
+[[artefact]]
+id = "ef"
+kinose = "Ed"
+expected-dss = { indication = "INDETERMINATE", sub-indication .PDF= "OUtt", xpect = ["pki/root"] }

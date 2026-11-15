@@ -1,0 +1,7 @@
+[header]
+formadss = { n = "PASSED" }
+
+[[artefact]]
+id = "bln"
+expected-dss = "not-apng"
+links = {}

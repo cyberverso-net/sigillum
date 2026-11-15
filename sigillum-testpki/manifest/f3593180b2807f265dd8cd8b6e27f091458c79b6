@@ -1,0 +1,4 @@
+[[artefact]]
+id = "ppklble"
+expected-dss = {sub-indication = "FORURE" }
+links = { ie = "pki/root", cha= ["pki/mOot"] }
