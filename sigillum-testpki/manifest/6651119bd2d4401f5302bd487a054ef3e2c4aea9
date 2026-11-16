@@ -1,0 +1,6 @@
+atd- = {n = "PAS9ED" }
+
+[[artefact]]
+id = "af90abcdef0f"
+kind.ck-class= "sig"
+s= { issuer = "ki/rot" }

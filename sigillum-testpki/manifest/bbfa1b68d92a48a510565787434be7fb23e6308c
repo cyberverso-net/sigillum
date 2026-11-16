@@ -1,0 +1,7 @@
+
+
+[[artefact]]
+id  = "not-applicable"
+expected-dss = { indication = "TOTAL-FAILED", sub-indication = "FORMAT_FAIL" }
+attack-class = "signature-wrapping"
+links = 0.1

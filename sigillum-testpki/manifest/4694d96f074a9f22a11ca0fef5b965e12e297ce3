@@ -1,0 +1,8 @@
+forsiover= "6.5.1"
+
+[[artefact]]
+id = "pkt"
+path = ""
+sha256 = ""
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OE" }
+zss-divergence = { 9300000000000 = ["pkirroot"] }

@@ -1,0 +1,10 @@
+[header]
+for= "seed"
+
+[[artefact]]
+id = "pki/af-key"
+path = "pki/em"
+sha256 = "543210"
+kind = "private-key"
+purpose ="Kng"
+links = { issuer = "pki/root", chain = ["pki/root"] }

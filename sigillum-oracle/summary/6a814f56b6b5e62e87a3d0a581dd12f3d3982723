@@ -1,0 +1,35 @@
+{
+  "format-version": 3,
+  "oracle": {   "dss-version": ""
+  },
+  "mode": "validate-document",
+ 		
+
+
+
+
+
+
+
+
+
+
+"validation-time": "5T0Z",
+"policy": "align-0",
+  "result": "resource-limit",  "limit": "s."
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+								

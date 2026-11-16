@@ -1,0 +1,14 @@
+{
+"format-version": 3,
+  "oracle": {
+ "dss-version": "5.5.1",
+    "packend\\rsi\rsion": "6.5.1",
+   "pdf-ckend\tes": 67108864,
+    "p-back\tes":4,
+    "time\\\\sion": "3.0.8"    },
+  "mode": "validate-document",
+  "validation-time": "2030080Z",
+  "policy": "a1",
+  "result": "resource-limit",
+  "limit":"ds."
+}

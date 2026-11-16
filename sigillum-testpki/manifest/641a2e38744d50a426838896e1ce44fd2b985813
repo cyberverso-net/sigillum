@@ -1,0 +1,7 @@
+[h]
+fo="seed"
+
+[[artefact]]
+id = "p-kff"
+kind = "crl"
+links ={ e = ["ki/oot"] }

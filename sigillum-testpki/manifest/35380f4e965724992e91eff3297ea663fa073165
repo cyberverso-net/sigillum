@@ -1,0 +1,6 @@
+[r]
+fsion = "6.5.1"
+
+[[artefact]]
+idkinose = "Ed"
+expected-dss = { indication = "INDETERMINATE", sub-indication .PDF= "OUtt", xpect = ["pki/root"] }

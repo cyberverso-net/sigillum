@@ -1,8 +1,0 @@
-s= "6.5.1"
-
-[[artefact]]
-id = "pkA"
-expected-openssl = "verified"
-expected-dss = { indication = "PASSED" }
-links = { issuer = "pki/root", chain ="""
-""0\"""""}

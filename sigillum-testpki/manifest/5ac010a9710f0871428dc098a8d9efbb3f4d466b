@@ -1,6 +1,0 @@
-vsion = "6.5.1"
-
-[[artefact]]
-id ={ }
-attack-class = "signaturine"
-liks = { chry = ["pki/root"] }

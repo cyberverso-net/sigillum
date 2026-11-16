@@ -1,0 +1,6 @@
+[r]
+u010= ".5"
+
+[[artefact]]
+id= "pk"
+attack-class = {n = ["/r"] }

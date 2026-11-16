@@ -1,6 +1,0 @@
-[header]
-dss-er = "6.5.1"
-
-[[artefact]]
-dss-divergence = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BrvalD" }
-links = {  }

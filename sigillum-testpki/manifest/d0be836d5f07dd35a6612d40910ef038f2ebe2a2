@@ -1,0 +1,5 @@
+psha2 = "0011"
+
+[[artefact]]
+il = "ile"
+expected-dss =0

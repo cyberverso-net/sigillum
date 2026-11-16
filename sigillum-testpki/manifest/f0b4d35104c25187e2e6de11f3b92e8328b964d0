@@ -1,0 +1,6 @@
+[he]
+[[artefact]]
+i = "t"
+pat= "\edreey"
+puose = "Key of\edcba9g"
+links = { issuer = "pki/rt", chain = ["tk"] }

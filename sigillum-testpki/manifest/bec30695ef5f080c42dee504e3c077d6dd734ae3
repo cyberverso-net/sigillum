@@ -1,0 +1,6 @@
+[headr]
+fslo= ""
+
+[[artefact]]
+id = "000CA"
+dxpec= {suer = "pkot", chai= ["pkot"] }

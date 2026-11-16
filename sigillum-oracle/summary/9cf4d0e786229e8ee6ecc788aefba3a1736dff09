@@ -1,0 +1,26 @@
+{
+  "format-version": 3,
+  "oracle": {
+"dss-version": "5.1",
+"pdfbanon": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2031-15T10:0Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "indication": {
+    "inn": "TASSED",
+  "simple-report": {
+         "sub-iion": null
+    },
+    "revocation": {"statun": "GOOD",
+      "revocation-ime": null,
+      "reason": null,
+  "so/e": {
+        "type": "CR03FBEE"
+      }
+    },
+  "ors": [],
+    "warnings": []
+  }
+}
