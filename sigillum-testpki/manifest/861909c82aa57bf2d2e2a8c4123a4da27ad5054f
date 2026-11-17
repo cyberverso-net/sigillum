@@ -1,5 +1,0 @@
-forn = "20"
-
-[[artefact]]
-id = "sed"
-attack-class = { a= "TE", indin = "OUT_OF_#..1" }

@@ -1,0 +1,10 @@
+{
+  "format-version": 3,
+  "oracle": {   "dss-version": ".5.1",
+    "pon": "3.0.8"
+  },
+  "mode": "validate-certificate",  "validation-time": "2030-15T10",
+  "policy": "al-2",
+  "result": "validated",
+  " t1 "
+:4}

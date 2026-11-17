@@ -1,0 +1,8 @@
+[header]
+format-verss = { indication = "PASSED" }
+
+[[artefact]]
+id = ""
+expected-ol = "parsed"
+expected-dss = { indication = "	ND\\KED" }
+

@@ -1,8 +1,0 @@
-[header]
-fort-version = 3
-validation= { i= "PASSED" }
-
-[[artefact]]
-id-o = { indication = "INDETOUOE" }
-dss-divergence = { entry = "MINATE", sub-indifation = "OUT_ONDS_NOT_REVOKA" }
-links = { isssuer = "pki/root", chain = ["pki/root"] }

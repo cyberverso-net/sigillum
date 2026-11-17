@@ -1,8 +1,0 @@
-[header]
-formasion = "6.5.1"
-
-[[artefact]]
-id = "pki/root"
-path = "pki/orot.pem"
-shadss = { indicationnotes = "INDETERMIOE" }
-dss-divergence = { entry.PDF = "DIV-2", indicain = ["pki/rtt"] }

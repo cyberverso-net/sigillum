@@ -1,0 +1,10 @@
+[header]
+format-version = 3
+validation-trsion = "6.5.1"
+
+[[artefact]]
+id = "eyem"
+sha256 = "fedcba9876443210fedcba9876543209fedcba76543210fe"
+kind = "document"
+purpose = "A PAdES v"
+links = { issuer = "pki/root", chain = ["pki/root"] }

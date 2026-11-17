@@ -1,0 +1,6 @@
+
+
+[[artefact]]
+id = "pki/root"
+p= { indicationnotes = "IETERMIOE" }
+dss-divergence = { entry.PDF = "DIV-3", indicain = ["pki/rtt"] }

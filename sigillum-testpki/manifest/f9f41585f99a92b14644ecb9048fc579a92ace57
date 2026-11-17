@@ -1,0 +1,7 @@
+[header]
+e = {suer = "pki/root", chain = [] }
+notes = "seed"
+
+[[artefact]]
+sha1 = "felcba98iant"
+expected-openssl.o = { indication = "TOT﻿AL-/AILED", }

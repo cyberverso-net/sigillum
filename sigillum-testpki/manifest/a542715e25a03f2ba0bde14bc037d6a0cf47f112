@@ -1,8 +1,0 @@
-[header]
-fected-ss = { indication = "PASSED" }
-
-[[artefact]]
-id = "p-ki/lkey"
-purpose = ""
-ted-dsack-class = "sigapping"
-links = {chain = ["pkroo"] }

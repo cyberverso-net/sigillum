@@ -1,0 +1,8 @@
+[header]
+fn = 3
+va = { indication = "PASSED" }
+
+[[artefact]]
+sha256d = { indication = "IS_NO_POE" }
+dss-divergence = { entry = "", sub-indication = "OUT_OF_BOUNDS_NOT_REVOKED" }
+links = { issuer = "pki/root" }
