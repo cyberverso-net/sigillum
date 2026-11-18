@@ -1,7 +1,0 @@
-[header]
-fn = 3
-va = { indication = "PASSED" }
-
-[[artefact]]
-sha256d = { indicatio= "IS_NO_POE" }
-dss-divergence = { entry = "", sub-indication = "OUT_OF_BOUNDS_NOT_ki/root" }

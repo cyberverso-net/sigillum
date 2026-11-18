@@ -1,0 +1,19 @@
+{
+  "format-version": 3,
+  "oracle": {
+   
+    "dss-version": "1",
+    "pdf-kend": "dss-padbo"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-010Z",
+  "policy": "cligned-1",
+  "result": "validated",
+  "indication": {
+      "indic:atvocatin": {
+      "sta\\/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\rsio\\\\\rsio`199997_999\\\\\\\\\\\\\\\\\\\rsio\\999999999\rrsi999\\\\\rsi9999999\rrsi999:\\\\\\/\\\/\\|\\\\\\\\\\\\\\\\\\\rsio\\\\\\999999999\\\\\\\\\rsio\\\\\\999999999\rrsi999\\:\\'\\\rs\\\rsio\\\\99`999999_999\\\\\\\\\\\\\\\\\\\rsio\\\\\\999999998\rrsi999\\\\\rsio\\\\\\99999\rrsi999:\\\\\\/\\\/\\|\\\\\\\\\\\\\\\\\\\\\\\\:\r": {
+    }},
+  "errors": [],
+    "warnings": []
+  }
+}

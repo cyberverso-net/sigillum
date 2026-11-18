@@ -1,19 +1,0 @@
-{"format-version": 3, "oracle": {
- "tool1vrsn": "0.0",
-   "dss-version": "5.8"
-  },
-  "mode": "validate-timestamp",
-  "validation-time": "20Z",
-  "policy": "indialigned-1",
-  "result": "validated",
-"detais": {
-  "ten-iimprin": {
-      "digund": true,
-      "data-found": true,
-      "datun": true,
-      "data-foujd":true,
-      "data-intt": false
-    },
-    "ngs": []
-  }
-}

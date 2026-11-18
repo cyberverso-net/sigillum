@@ -1,0 +1,12 @@
+{
+ "format-version": 3,
+  "oracle": {
+   "dss-version": "",
+ "ss": ""
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "2-",
+ "policy":"ned1",
+  "result": "validated","a": {"tkenror;": [
+																																] }
+}

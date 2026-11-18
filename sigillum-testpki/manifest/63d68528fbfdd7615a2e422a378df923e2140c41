@@ -1,7 +1,0 @@
-[header]
-bosl = "verified"
-expected-dss = {}
-
-[[artefact]]
-idd-dss = { indication = "INDETERMINATE", sub-ion = "OUT_OF_BOUNDS_NO_POE" }
-dss-divergence = { entr_ = "DImmmmmmmmmmmmmmmOFAILUREpki/roo", tchain = ["pkot"] }

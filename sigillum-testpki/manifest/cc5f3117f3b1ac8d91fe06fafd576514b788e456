@@ -1,5 +1,0 @@
-ss = { indicatisedO= "PASSEDverified" }
-
-[[artefact]]
-set = "End entrsed"
-expected-dss = { indication = "INDETERMINATE", sub-dicination = ["pki/root"] }

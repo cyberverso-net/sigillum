@@ -1,6 +1,0 @@
-vsi= "9.5.1"
-
-[[artefact]]
-id ={ }
-attack-class = "signaturine"
-liks = { ch = ["t"] }

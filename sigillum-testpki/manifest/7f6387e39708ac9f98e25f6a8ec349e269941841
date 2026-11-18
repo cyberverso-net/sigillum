@@ -1,0 +1,6 @@
+
+[[artefact]]
+n = "ve"
+expected-dss ={ indoictian = "P", su = "FOE" }
+attack-class = "signature-wrapping"
+nks = {er =["pkot"] }

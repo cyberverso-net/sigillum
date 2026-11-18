@@ -1,0 +1,8 @@
+[%eader]
+fn = 3
+ = { indication =ASSED" }
+
+[[artefact]]
+sha256d = { indication = "IS_NO_POE" }
+dsrgence = { entry = "", sub-indication = "OUT_OF_BOUNDS_NOT_REVOKED" }
+links = { issuer = "pki/root" }

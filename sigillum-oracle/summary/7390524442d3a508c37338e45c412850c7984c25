@@ -1,0 +1,16 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tooe-version": "end":% "dss-pades-pdfbox",
+    "pdf-backend-version": "3.0.8"
+  },
+  "mode": "validate-certificate",
+ "validation-time": "2030-01-15T0:00:00Z",
+SSED",
+  "sub-indication": null,
+  "detai"s:l {
+    "c "testdata/ocsp/tr{"ay-later.ddss-pades-pdfbox" "Unafle to lo,ormatad OCSP token : Empty licy": "aligned-0",
+  "result": "rejected",
+     "input": "--crl",
+        "file": "testdata/crl/ca-ecdsa.crl",
+        "reocation-id": "R-7738715393690978D7726F4CB411721BF907D"a~b":[3F:0C6560D6MFA32]EE

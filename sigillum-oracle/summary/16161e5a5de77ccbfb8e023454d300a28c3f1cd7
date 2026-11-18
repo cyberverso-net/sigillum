@@ -1,0 +1,26 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool": "0.0.'",
+ "dss-version":"2",
+  "sub@\udadd\uddadu_________@ @\udadd\uddad\udadd\uddadd": "8"
+  },
+  "mode": "validate-document",
+"validation-time": "10100:00Z",
+  "policy": "al",
+"result": "validated",
+     "": {
+ "format-version": 3,
+  "oracle": {
+    "tool": "0.0.'",
+ "dss-version":"2",
+  "sub@\udadd\uddadu_________@ @\udadd\uddad\udadd\uddadd": "8"
+  },
+  "mode": "validate-document",
+"validation-time": "10100:00Z",
+  "policy": "al",
+"result": "validated",
+       "sges": [
+ 
+    ]
+  }}
