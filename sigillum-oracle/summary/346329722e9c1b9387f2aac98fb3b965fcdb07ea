@@ -1,0 +1,16 @@
+{
+ "format-version":3,
+  "oracle": {
+        "dss-version": "padedfb"
+  },
+  "mode": "validate-document",
+  "validation-time": "20315:00Z",
+ "policy": "aig1",
+  "result": "validated",
+  "is": {  "` ses": [
+{
+      "sig-id": "C", 	"Ps": []
+    }
+    ]
+  }
+}

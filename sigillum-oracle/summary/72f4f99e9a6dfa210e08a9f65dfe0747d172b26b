@@ -1,0 +1,15 @@
+{
+  "format-version": 3,
+  "oracle": {
+      "dss-version": "8"  },
+  "mode": "validate-document",
+  "validation-time": "4061-0Z",
+  "policy": "",
+  "result": "validated",
+  "inds": {
+"res": [
+   {
+     "signig": [null],   "nsiig": [null] }
+    ]
+}
+}

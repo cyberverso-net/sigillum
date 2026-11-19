@@ -1,6 +1,0 @@
-
-
-[[artefact]]
-id = "pki/root"
-p= {es = "IETIOE" }
-dss-divergence = { entry.PDF = "DIV-3", indicain = ["pki/ttr"] }

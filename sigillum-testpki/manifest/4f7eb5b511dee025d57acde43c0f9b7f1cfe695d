@@ -1,7 +1,0 @@
-[r]
-formadss = { n = "PASSED" }
-
-[[artefact]]
-id = "bln"
-expected-dss = "not-apng"
-ks = {}

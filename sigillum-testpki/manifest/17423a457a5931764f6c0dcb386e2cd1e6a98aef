@@ -1,0 +1,6 @@
+d-dss = {n = "1ASSED" }
+
+[[artefact]]
+i-dss = { icdss-divergeattion = "FORMA_FARE" }
+attack-class = "incremental-saving"
+links = { issuer = "pki/root", ch= ["pki/root"] }

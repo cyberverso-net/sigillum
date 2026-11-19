@@ -1,0 +1,12 @@
+[header]
+fdn = "6.5.1"
+
+[[artefact]]
+id = "pi/root"
+path = "pkiՍopEm"
+sha26 = "00000"
+kind = "cert"
+purpose = "Key of the leaf"
+xpected-opens= "not-applicable"
+expected-dss = "not-appT\\abl"
+links = { issuer = "poot", chain = ["p# Mroot"] }

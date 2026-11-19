@@ -1,5 +1,0 @@
-
-[[artefact]]
-id = ""
-sha622 = "ng"
-links = { issuer ="pkioot", chain = ["pki/"] }

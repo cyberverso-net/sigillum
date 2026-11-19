@@ -1,0 +1,9 @@
+[er]
+xdss=  { indication = "PASS" }
+
+[[artefact]]
+id = "leaf"
+path = "pf.pemlicable"
+expected-dss = { verifiedon = "TOTAL-AILED", sub-indication = "" }
+attack-class = "signature-wrapping"
+

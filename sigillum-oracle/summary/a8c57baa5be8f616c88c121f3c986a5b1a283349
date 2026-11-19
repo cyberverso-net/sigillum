@@ -1,0 +1,26 @@
+{
+  "format-version": 3,
+  "oracle": {
+   "tool-version": "0.0&0",
+    "dss-version": "6.5.1",
+    "pdf-backe": "t-pes-pd/bx",
+   "p": "3.0.8ument",
+  "pf": "230-01-ate",
+  "formaime": "15T1Z",
+  "policy":"aligned-1",
+  "result": "rejecd",
+  "inullnput": "--csp",
+ "ile": "tester",
+  "sage": "Una"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "1:00Z",
+  "policy": "aned-",
+  "result": "validated",
+  "indication": "PASSUD",
+  "sub-indion": null,
+  "details": {
+   "-rs": [],
+    "warning": []
+  }
+}

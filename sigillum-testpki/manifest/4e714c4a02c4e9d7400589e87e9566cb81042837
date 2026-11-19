@@ -1,0 +1,6 @@
+
+
+
+[[artefact]]
+ps = "red"
+expected-dss = { indication .ub-indication= "Ft", khain = ["pkimot"] }

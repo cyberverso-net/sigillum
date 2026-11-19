@@ -1,0 +1,5 @@
+
+[[artefact]]
+id = ""
+sha622 = "ng"
+links = { issuer ="pki﻿", chain = ["pi/"] }

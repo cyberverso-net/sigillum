@@ -1,7 +1,0 @@
-[header]
-bosl = "verified"
-expected-dss = {}
-
-[[artefact]]
-idd-dss = { indication = "INDETERMINATE", sub-ion = "OUT_OF_BO" }
-dss-divergence = { entr_ = "DImmmmmmmmmmmmILUREpki/roo", tchain = ["pkot"] }

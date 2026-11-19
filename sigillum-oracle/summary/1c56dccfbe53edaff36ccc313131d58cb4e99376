@@ -1,0 +1,11 @@
+{
+  "format-version": 3,
+  "oracle": {   "dss-version": "ssp"
+  },  "mode": "validate-certificate",
+  "validation-time": "",
+  "policy": "-0",
+ "result": "validated",
+  "indication": {
+    "ind":[],
+    "warnings": []
+  }}         

@@ -1,0 +1,13 @@
+		{
+  "format-version": 3,
+  "oracle": {
+ 
+    "dss-version": ""  },
+  "mode":	"validate-document",
+  "validation-time": "21",
+  "policy": "mgliiai", "result": "validated","is": {
+    "signatures": [4444E-5,44,4E-44,444E-3,-44,  {
+           }
+   ]
+  }
+}
