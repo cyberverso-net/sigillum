@@ -1,4 +1,0 @@
-fn = "6"
-
-[[artefact]]
-expected-dss = {indication = ["pkt"] }

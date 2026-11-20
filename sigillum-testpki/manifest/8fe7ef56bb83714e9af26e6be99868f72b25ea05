@@ -1,0 +1,4 @@
+ss = { }
+
+[[artefact]]
+expected-dss = { indication = "INDETERMINATE", sub-dicination = ["pki/root"] }

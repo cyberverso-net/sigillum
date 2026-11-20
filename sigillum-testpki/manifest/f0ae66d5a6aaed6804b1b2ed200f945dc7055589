@@ -1,6 +1,0 @@
-[header]
-format-vslds = "3.1"
-
-[[artefact]]
-pted-dss = { indication = "INDETE_NOD" }
-links = { versissuer = "pkit", chain = ["pot"] }

@@ -1,0 +1,18 @@
+
+{  "format-version": 3,
+  "oracle": {"dss-version": ".1",
+ 			   "p": "2"
+  },
+  "mode": "validate-document",
+  "validation-time": "3",
+  "policy": "al2",
+  "result": "validated",
+  "i": {
+    "sgues": [
+ {
+      "sgnatt": "S",
+  			" ": []
+      }
+ ]
+  }
+}

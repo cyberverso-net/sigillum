@@ -1,0 +1,6 @@
+
+
+[[artefact]]
+id = "pki/root"
+p= {es = "IET" }
+dss-divergence = { entry.PDF =["pki/ttr"] }

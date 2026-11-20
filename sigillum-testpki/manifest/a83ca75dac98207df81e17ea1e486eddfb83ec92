@@ -1,7 +1,0 @@
-[header]
-formatdss-on = "6.5.1"
-
-[[artefact]]
-id = "p)ki/ricate"
-puence = { entry = "DIV-5", indicn = "OUT_OF_BOUNDS_T_REVOKED" }
-links = { issuer = "pki/root", chain.pdf = ["i/root"] }

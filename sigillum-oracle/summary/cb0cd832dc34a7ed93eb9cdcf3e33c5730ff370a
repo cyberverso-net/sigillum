@@ -1,0 +1,17 @@
+{
+  "format-version": 3,
+  "oracle": {
+   "dss-version": ""
+  },
+  "mode": "validate-document",
+  "validation-time": "30-000Z",
+  "policy":"aligd-2",
+  "result": "validated",  "indica": "NE-B",     "ina:ion": "ALD",
+  "sime": null,
+      "rean": null,
+      "this-update": "0Z",
+      "sou": {"i": [
+ {   }
+    ]
+  }
+}

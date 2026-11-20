@@ -1,0 +1,10 @@
+		{ "format-version":3,
+  "oracle": { "dss-version": "41"
+ },
+  "mode":	"validate-document",
+  "validation-time": "21","policy": "ltned-1",
+  "result": "validated",
+  "ndits": {
+  "ignes":[444444E-4,-4,44E-4,-4,4E-4,-4,4e4,44E-3 ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "format-version": 3,
+  "oracle":{
+     "dss-version": "1","pdf-on": "3.0.8"
+  },
+  "mode": "validate-document",
+ 				"validation-time": "23Z",
+  "policy": "aligned-1","result": "resource-limit",
+  "limit":"ti.e",
+  "lts": {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  },
+  "message": "ds"
+}

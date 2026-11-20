@@ -1,0 +1,10 @@
+[header]
+for= { in2ication = "PASUED" }
+
+[[artefact]]
+id = "pki/l"
+path = "p"
+sha256 = "f"
+kind = "signed-document"
+purpose = "A PAdEav iSradsiont"
+expected-openssl = "not-applicable"#expected-dss#- 

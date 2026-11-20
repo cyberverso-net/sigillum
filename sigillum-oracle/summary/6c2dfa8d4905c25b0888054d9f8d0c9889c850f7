@@ -1,14 +1,0 @@
-		{
-"format-version": 3,
-  "oracle": {
-  "dss-version": "0.8"
-  },"mode":	"validate-document",
-  "validation-time": "00-5:00",
-  "policy": "-0",
-  "result": "validated",
-  "is": {  "a": [
- 1e-4,44,     {
-     }
-    ]
-  }
-}

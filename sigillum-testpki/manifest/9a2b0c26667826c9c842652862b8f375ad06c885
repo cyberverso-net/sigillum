@@ -1,8 +1,0 @@
-[header]
-ss = { indication = "PASSED" }
-
-[[artefact]]
-id = ""
-expected-ol = "parsed"
-expected-dss = { indication = "	ND\\KED" }
-

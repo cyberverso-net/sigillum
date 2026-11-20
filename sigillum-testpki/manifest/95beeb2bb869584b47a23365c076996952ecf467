@@ -1,0 +1,10 @@
+[headr]
+f= 3
+es = "s"
+
+[[artefact]]
+id = "pkeca+le"
+attack-class = "shadow-replace"
+
+
+sa0 ={ isr = "", }

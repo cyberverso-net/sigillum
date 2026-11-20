@@ -1,5 +1,0 @@
-ss = { }
-
-[[artefact]]
-set = "End erse"
-expected-dss = { indication = "INDETERMINATE", sub-dicination = ["pki/root"] }

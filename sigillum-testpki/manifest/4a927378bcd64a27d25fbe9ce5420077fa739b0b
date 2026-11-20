@@ -1,0 +1,7 @@
+[header]
+formatdss-on = "6.5.1"
+
+[[artefact]]
+id = "p)ki/ricate"
+puence = { entry = "DIV-5", indicn = "OUT_KED" }
+links = { issuer = "pki/root", chain.pdf = ["i/root"] }

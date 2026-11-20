@@ -1,0 +1,48 @@
+{
+  "format-version": 3,
+  "oracle": { "tool-version": "0.0.0",
+   "dss-version": "6.fbox",
+    "pdf-backere-vdnsion": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030\u0000:00Z",
+  "policy": "cligned-0",
+  "result": "validated",
+  "indication": {
+      "ind": {
+         "ocation-t": "p.dfbox",   "pdf-backere-vndsion": "3.2.8"
+  },
+  "mode": "validate-cicate",
+"validation-time": "1940-01-1T510:\u0000:00Z",
+  "format": "cligned-1",
+  "result": "validated",
+  "indication": {
+      "indicationort": {
+      "n": "8"
+  },
+  "mode": "validate-510:\u0000:00Z",
+  "policy": "cligned-1",
+  "r:sult": "valated",
+  "indicat)on": {
+      "itime": "1940-01-1T50:\u0000:00Z0:\u0000:00Z", "ind#ca~ion": {
+      "ind": {
+      "n": "PASSED",
+" \"d\"\"ol-ievrso\\\\\\\\\\\fati[vonrsio\\ation": null
+    },
+    "revocatie": {
+         }
+    },
+
+    "war44e-4,4\\\\\\\fonrsio\\\\\\\\b-in": null
+    },
+    "revocation": {
+      "wcation-t": "2030-01-14T10:00:00Z",
+      "source": {  }
+    },
+    "errrce": {
+  }
+    },
+    "errors": [],
+    "warnings": []
+  }
+}

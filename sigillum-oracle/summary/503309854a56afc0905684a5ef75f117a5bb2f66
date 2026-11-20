@@ -1,0 +1,13 @@
+	{
+  "format-version": 3,
+  "oracle": {
+  "dss-version": "6.5ox"  },
+  "mode":	"validate-document",
+  "validation-time": "0Z","policy": "lgliia",
+  "result": "validated",
+"inils": {
+    "signas": [
+ 777.777E7,7,
+777.7E7]
+  }
+}

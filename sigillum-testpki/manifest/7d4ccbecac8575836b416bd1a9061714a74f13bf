@@ -1,0 +1,5 @@
+on = ".5"
+
+[[artefact]]
+etdss = {ind= "INE" }
+dss-divergence ={ entry = "D", inn= "FOHURE"  }

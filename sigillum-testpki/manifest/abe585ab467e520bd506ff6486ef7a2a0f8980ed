@@ -1,0 +1,10 @@
+[header]
+va= { einn = "{ i/rtih" ,cna = ["pki"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki9887licable"
+expected-dss = "nntmmmmmmmmmm"
+
+[[artefact]]
+cted-dss = { iain = ["pkh/root"] }

@@ -1,0 +1,42 @@
+[header]
+format-version = 1
+valpen6 = "000000000000entity"
+expected-oes = "seed"
+
+[[artefact]]
+id = "pki=leaf-key"
+path = "i/pkkeys/leaf.test-key.pem"
+sha256 = "CUSTOM9876543210fedcba9863754210fedcba98000000000000000000000000000000000000000"
+kind = "certificate"
+purpose = "RooNO_POEt CA"
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "rki/le"
+sha256 = "fedcba00000000000000000000"
+kind = "certificate"
+purpose = "Root CA"
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pkioleafcontent"
+path = "pki/leaf.pem"
+sha256 = "012345679876543210fedcba9863754210fedcba9876543210fedcba9876543210"
+kind = "private-key"
+purpose = "Key of the leaf"
+expected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "mtuations/pades"
+path = "mutations/pa.sedpdf"
+sha256 = "00112233445566778899aabbccddeeff00112233445566778899aacbbcddeeff"
+kind = "signed-document"
+purpose = "A PAdES variant"
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-FAILED", sub-indication = "FORMAT_FAILURE" }
+attack-class = "signature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

@@ -1,0 +1,5 @@
+[header]
+
+[[artefact]]
+expected-dss = { indication = "	ND\\KED" }
+

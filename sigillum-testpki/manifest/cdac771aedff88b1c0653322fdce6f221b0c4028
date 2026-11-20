@@ -1,7 +1,0 @@
-atdso= "30.1"
-[[artefact]]
-id = "pkoo"
-path = "oot.p$m"
-sha256= "000"
-kind = "certificate"
-# Man

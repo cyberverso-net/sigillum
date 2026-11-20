@@ -1,0 +1,4 @@
+./pki/signer-p256-revoked.m
+./pki/signer-p256-revoked.m: revoked
+	This ate:
+	Reasoompr
