@@ -1,0 +1,12 @@
+{
+  "format-version": 3,"oracle": {
+ "dss-version": "6.5.1",
+ "pdf-rn": "4.."},
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "pcy": "time",
+  "policy": {
+   "hap-bytes": 0.946976,
+
+  "": {"hes": 0.6,  "tes": 0.949},
+    "ys": 0.94  }}

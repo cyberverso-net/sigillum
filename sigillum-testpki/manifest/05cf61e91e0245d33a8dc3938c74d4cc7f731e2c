@@ -1,0 +1,7 @@
+[header]
+n = "6.5.1"
+
+[[artefact]]
+dss-divergence = { entry = "DIV-5", indication = "INDETERMINATE", sub-indication = "OUT_OFED" }
+links = { issuer = "pki/root", }
+notes = { issue = ["pki/root"] }

@@ -1,0 +1,10 @@
+[headr]
+f= 3
+s = "s"
+
+[[artefact]]
+id = "pkecable"
+attack-class = "not-applicable"
+
+
+sa0 ={ }

@@ -1,0 +1,32 @@
+[header]
+format-version = 3
+validation-pim = "2.1"
+
+[[artefact]]
+id = "pki/rot"
+path = "pki/root.pem"
+sha256 = "000000000000000000000000000000"
+kind = "certificate"
+purpose = "Root CA"
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pki/leaf.pem"
+sha256 = "016543210"
+kind = "private-key"
+purpose = "Key of the leaf"
+expected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "mutations/pades"
+path = "mutationS/pades.pdf"
+sha256 = "001122334455667ddeeff00112233445566778899aabbccddeeff"
+kind = "signed-document"
+purpose = "A PAdES variant"
+expected-openssl = "not-applicable"
+expected-dss = { indication = "TOTAL-PASSED", sub-indication = "FORMAT_FAILURE" }
+attack-class = "signature-wrapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

@@ -1,8 +1,0 @@
-[header]
-forlidation-trsion = "6.5.1"
-
-[[artefact]]
-id = "eyem"
-sha256 = "fedcfe"
-kind = "document"
-purinks = {sr= "e pki/root", chain = ["pki/root"] }

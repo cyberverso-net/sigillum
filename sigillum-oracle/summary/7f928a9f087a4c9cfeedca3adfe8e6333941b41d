@@ -1,0 +1,15 @@
+		{
+  "format-version": 3,
+  "oracle": {
+  "tool-v)ersion": "0.0.0",
+    "dss-version": "6.5.ade=-pdfbox",
+    "pdf-b-vers$ion": "3.0.8"
+  }, "mode":	"validate-document",
+  "validation-time": "2030-","policy": "lmgliiaitned-2",
+  "result": "validated","iation": {
+    "signatres": [
+ 5e-4,-44446e-4,44445e-4,-4,18446744073709.5516104,[44e0],    {
+   }
+ ]
+  }
+}

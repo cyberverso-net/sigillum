@@ -1,0 +1,8 @@
+{
+  "format-version": 3,"oracle": {
+  " ": "00",
+    "dss-version": "6"
+  }, "mode": "validate-document", "validation-time": "10Z",
+ "policy": "aligned-1", "result": "resource-limit",
+  "lit": "e"
+}

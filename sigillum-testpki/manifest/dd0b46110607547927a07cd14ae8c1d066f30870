@@ -1,0 +1,18 @@
+ie = "20tificate"
+exssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pki/leaf.pem"
+sha256 = "012345sed"
+expected-dss = { ation = "OUOE" }
+dss-divergence = { entry = "DIV-5", indpathion = "IN_ONED" }
+links = { issuer = "pki/t", chain = ["ot"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "pkpm"
+sha256 = "fedcwrapping"
+s = { issuer = "pki/root", chain = ["pki/root"] }

@@ -1,0 +1,8 @@
+[header]
+fn = 3
+val= "%030:005.1"
+
+[[artefact]]
+id = "po/krifirse"
+ex= { indicaion = "OUS_NOPOE" }
+dss-divergence = { entry = "",uer = "pki/root" }

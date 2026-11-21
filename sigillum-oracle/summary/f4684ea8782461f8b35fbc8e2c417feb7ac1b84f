@@ -1,0 +1,11 @@
+								{
+ "format-version": 3,
+  "oracle": {
+    "dss-version":"d",  "n":"3.8.8"
+  },
+  "mode":"validate-certificate",
+  "validation-time": "Z",
+  "policy":"ali-d2",
+ "result": "validated",
+ "": {}}
+

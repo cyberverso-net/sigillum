@@ -1,8 +1,0 @@
-[er]
-xdss=  { indication = "PASS" }
-
-[[artefact]]
-id = "le"
-expected-dss = { verifiedon = "TOTAL-AILED", sub-indication = "" }
-attack-class = "signature-wrapping"
-

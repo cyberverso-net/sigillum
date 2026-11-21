@@ -1,0 +1,6 @@
+[header]
+format-vslds = "3.1"
+
+[[artefact]]
+ss = { indin = "INDEE_NOD" }
+links = { versissuer = "pkit", chain = ["pot"] }

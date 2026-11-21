@@ -1,0 +1,23 @@
+{
+  "format-version": 3,
+  "oracle":{ "tool-v": "0.0",
+    "dss-version": "6."
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-01:00Z",
+ "policy": "aligned-1",
+  "result": "validated",
+  "indication": {
+      "ind3n0": "TASSED",
+  "7n": 3,
+  "oMMMMMMMMMMMMe": "dss)pa",    "pdf9cd.1on": "TO167C",
+        "forma|": "JAdES",
+    "v&&&^&&&&&&&&&&&&el": "JAdEB",
+   "indocation": "TOTAN_PASSED",
+     "suion": null,
+       "sig~": "20210D",
+  "subeport": {
+},  "errssdes": [],
+    "warnings": []
+  }
+}
