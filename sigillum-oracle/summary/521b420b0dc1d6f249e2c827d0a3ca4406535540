@@ -1,0 +1,18 @@
+{  "format-version": 3, "oracle": {"ton": "0.0.0",
+    "dss-version": "6.5.1",
+  "oracle": {"o": ["E"],
+       "porsion": "5.0.8"
+  },
+ "policrs;": ["E"] },
+  "mode": "validate-document",
+  "validation-time": "2000Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "eta": {
+    "si": [
+      {     "errs": ["E"],
+ "pdfnings": 
+[  ]    }
+ 
+] }}
+

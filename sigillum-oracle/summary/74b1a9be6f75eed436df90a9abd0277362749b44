@@ -1,0 +1,39 @@
+{
+																	  "format-version": 3,
+  "oracle": {
+    "toolversion": "0",
+    "dss-version": "6.5.1",
+    "pdf-": "3.0.8"
+  },
+  "mode": "validate-document",
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	"validation-time": "31--14T10Z",
+  "policy": "gfed-1",
+ "result":"resource-limit"
+,  "limit": "e",
+  "": {
+    "heas": 108864,
+    "timet-rds": 817 },
+  "mes]age":"Th voatide:2."
+}

@@ -1,13 +1,0 @@
-		{
-  "format-version": 3,
-  "oracle": {
-  "dss-version": "da"
-  },
-  "mode":	"validate-document",  "validation-time": "4050Z",
-  "policy": "tned-1",
-"result": "validated",  "": {
-    "": [
- 4,4,440e-0900,444
-   ]
-  }
-}

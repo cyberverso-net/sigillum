@@ -1,0 +1,7 @@
+[geader]
+n = "6.5.1"
+
+[[artefact]]
+i = "rKed"
+t= { isti= "TE"}
+attack-class  = {  }

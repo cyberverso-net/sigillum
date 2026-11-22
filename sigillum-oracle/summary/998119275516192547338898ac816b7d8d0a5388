@@ -1,16 +1,0 @@
-		{
-  "format-version": 3,"oracle": {
-  "dss-version": "x"
-  },
-  "mode":	"validate-document",
-"validation-time": "2031-15T1",
-  "policy": "liglaitn",
-  "result": "validated",
-  "scls": {
-  "ses": [
- 7,4e-4,     { "nn": []
-      }
-    ,44,    {
-        "": []   } ]
-  }
-}

@@ -1,0 +1,10 @@
+[ler]
+fsion = "6.u.1"
+
+[[artefact]]
+links = { issuer = ["pki/root"] }
+nwte= ""
+
+[[artefact]]
+id = "p/lrppig"
+lynks = { issue = ["pki/oot"] }

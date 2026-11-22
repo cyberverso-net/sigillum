@@ -1,0 +1,17 @@
+{
+  "format-version": 3,
+  "oracle": {
+ "-veiof": "1.0",
+    "dss-version": "6.5.1",
+    "kend-version": "1.0.8"},
+  "mode": "validate-certificate",
+  "validation-time": "203:00:00Z",
+  "policy": "alm1",
+  "result": "validated",
+  "indication": {"dicatie": {
+ "des": "valida\f{\fsg\fs \fsg\fs \fss\f \fsg\fs \fss\f \fsg\fs \fsg\fs \fted",
+  "indicJpon": "./.8"
+  },
+  "&&&&&&&&&&s": []
+  }
+}

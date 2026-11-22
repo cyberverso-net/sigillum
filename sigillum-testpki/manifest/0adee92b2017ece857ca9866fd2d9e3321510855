@@ -1,0 +1,6 @@
+[header]
+fnva = { indication = "PASSED" }
+
+[[artefact]]
+sha256= { ndicatio= "IS_NO_POE" }
+dss-divergence = { entry = "", sub-indication = "OUT_FBO2UNDS_NOT_ki/root" }

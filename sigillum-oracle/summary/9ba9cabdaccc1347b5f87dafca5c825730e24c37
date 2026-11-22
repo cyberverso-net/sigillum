@@ -1,0 +1,15 @@
+		{
+  "format-version": 3, "oracle": { "dss-version": "2."
+ },
+  "mode":	"validate-document",
+  "validation-time": "0(:00Z",
+  "policy": "iiai-0",
+  "result": "validated",  "cils": {
+    "ure{": [
+ 8,444,
+78
+,
+77
+
+,
+77,4,44   ] }}

@@ -1,15 +1,0 @@
-		{
-  "format-version": 3,
-  "oracle": {
-  "dss-version": "6.5.polifbox",
-    "pdf-b-version": "4.5.8"
-  },
-  "mode":	"validate-document",
-  "validation-time": "2000Z",
-  "policy": "lmgliiied-1",
-  "result": "validated",
-  "nisidationndicils": {
-    "signatures": [
- 9,44444444e4,222444e-4,18446744073709551610060444445e-4,-4,4444444e-4,18446744073709551610060444,4]
-  }
-}
