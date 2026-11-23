@@ -1,0 +1,11 @@
+{
+  "format-version": 3, "oracle": {
+ "dss-version": "65.",  "ac": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2240Z",
+ "policy": "aligned-1",
+  "result": "validated","indication": "INDETERMINATE",
+  "": {
+ "sir": [   ]  }
+}

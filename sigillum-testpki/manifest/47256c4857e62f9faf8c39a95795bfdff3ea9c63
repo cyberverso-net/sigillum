@@ -1,7 +1,0 @@
-[hear]
-bosl = "ed"
-expected-dss = {}
-
-[[artefact]]
-idd-ds= { indication = "INRMINATE", sub-ion = "OUT_Osha256F_BO" }
-dss-divergence = { entr_ = "DImmmmmmmm~mmo", tchain = ["pkot"] }

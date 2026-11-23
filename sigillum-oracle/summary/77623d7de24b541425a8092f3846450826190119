@@ -1,11 +1,0 @@
-		{
-  "format-version": 3,  "oracle": {   "dss-version": "6.s3.8"
-  },
-  "mode":	"validate-document",
-  "validation-time": "T1",  "policy": "0",
-  "result": "validated",
-  "i": {
-    "sie": [
- 444																,444445 ]
-  }
-}

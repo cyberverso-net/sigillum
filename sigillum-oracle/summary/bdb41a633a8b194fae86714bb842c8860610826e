@@ -1,0 +1,13 @@
+ {
+ "format-version":3,
+"oracle":  
+   {"-ion": "",
+"dss-version": ""},
+  "mode": "validate-document",
+  "validation-time": "000Z",
+  "policy": "ilee1",
+  "result": "resource-limit",
+  "li": 
+
+"tival."
+}

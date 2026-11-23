@@ -1,0 +1,8 @@
+[header]
+fn = 2
+val= "2"
+
+[[artefact]]
+id = "po/kre"
+expess = { n = "2US_NO_POE" }
+dss-divergence = { entry = "", satiossuer ="pki/root" }

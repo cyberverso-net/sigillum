@@ -1,0 +1,7 @@
+so= "30.1"
+[[artefact]]
+id = "pko"
+path = "$m"
+sha256= "000"
+kind = "certificate"
+# n

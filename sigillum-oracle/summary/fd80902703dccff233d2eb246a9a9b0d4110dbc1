@@ -1,0 +1,11 @@
+{
+  "format-version": 3,
+ "oracle": {
+   "dss-version":"d"
+  },
+  "mode": "validate-document","validation-time": "20:Z",
+  "policy": "al1",
+  "result": "validated",
+  "ias": {
+}
+}

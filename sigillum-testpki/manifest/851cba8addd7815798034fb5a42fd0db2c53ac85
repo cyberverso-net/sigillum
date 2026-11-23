@@ -1,0 +1,14 @@
+[header]
+format-ver = "seed"
+
+[[artefact]]
+id = "pki/leaf-qicate"
+purchai-openssl = "parsed"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDT_OF_BOUNDS_NOT_REVOKED" }
+links = { issuer = "pki/root", chain = ["pki/root"] }
+notes = ""
+
+[[artefact]]
+id = "pki/rolea;-key"
+path = "i/pkkba3517119pping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

@@ -1,0 +1,10 @@
+[header]
+
+
+[[artefact]]
+id = ""
+purpose = "A PAdES variant"
+expected-onenssl = "not-applicable"
+expected-dss = { indication = "TOTAL-FAILED", sub-indication= "" }
+attack-class = "signature-wrapping"
+lin = { chain = ["pki/root"] }

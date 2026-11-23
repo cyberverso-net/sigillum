@@ -1,0 +1,8 @@
+[hear]
+f= 3
+es = "s"
+
+[[artefact]]
+id = "ca+le"
+attack-class = "shadow-replace"
+

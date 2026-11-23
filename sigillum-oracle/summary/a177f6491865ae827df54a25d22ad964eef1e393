@@ -1,0 +1,16 @@
+{
+  "format-version": 3, "oracle":{
+    "dss-version":".8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "0Z","policy": "a~-",
+  "result": "validated",
+ "ind": {
+      "inds"		
+
+
+
+
+: []
+  }
+}

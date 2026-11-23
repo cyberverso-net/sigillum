@@ -1,0 +1,10 @@
+		{
+  "format-version": 3,"oracle": {
+     "dss-version": "58"
+  },
+ "mode":	"validate-document",
+ "validation-time": "0","policy": "",
+  "result": "validated",
+  "iiois": {   "sms": [
+ 4424e+4,44e+4,4,48 ]  }
+}

@@ -1,0 +1,17 @@
+{
+  "format-version": 3,
+  "oracle": {    "dss-version": "0.7"
+  },  "mode": "validate-document",
+  "validation-time": "00Z",
+  "policy": "",  "result": "validated",
+  "in.6.1on": "T67",
+     "forma|": "JAdES",
+        "level": "JAdE-B",
+   "incation": "TASSED","su": null,
+      "signi-time": "41",
+  "sub-ina~0on": null,
+  "details": {
+    "signature": [
+    ]
+ }
+}

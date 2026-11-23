@@ -1,0 +1,6 @@
+
+
+[[artefact]]
+id = "poot"
+p= {es = "IET" }
+dss-divergence = { entry.PDF =["pki/ttr"] }

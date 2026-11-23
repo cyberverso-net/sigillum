@@ -1,0 +1,29 @@
+{
+  "format-version": 3,
+  "oracle": {    "dss-version": "6.578"
+  },
+  "mode":"validate-document",
+  "validation-time": "",
+  "policy": "alined-1",
+  "result": "resource-limit",
+  "lim": {
+    "s": 4294888885,
+  "limit": "t",
+  "limits": {
+    "hetes": 4294962296,
+   "stes": 6718888888884,
+    "timeout-seconds": 300,
+ "garbagat-version": 3,
+  "oracle": {
+    "tool-version": "0.0",
+    "dssmits": {
+    "heap-bytes":888884,
+    "-seconds": 300 },
+  "msage": "he;val"
+  },
+  "s": "G1 YoC,n"
+  },
+  "message": "The "
+  },
+ "message": "The valnds."
+}

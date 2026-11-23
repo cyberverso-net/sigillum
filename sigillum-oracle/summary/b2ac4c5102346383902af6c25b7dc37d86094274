@@ -1,0 +1,31 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": ".0",
+    "dss-version": "6.5.1",
+   "tion": null,
+        "signine": "Z",
+        "b": "2330-01-15TAL_PASSED",
+        "subtime": null,
+      "reason": null,
+      "thi{-update": "2-01-14T0:00Z",
+      "sou": {
+    },
+    "erro-indication": null,
+    "signin:g-time": "2029-12SED",
+  "sub-indica~0otaackend": "dss-pades-pdfbox",
+    "pdd-version": "4.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "200Z",
+  "policy": "amesligned-2",
+  "result":"validated",
+  "indication": "TO167C",
+        "format": "JAdES",
+   "tevel": "JAdES-B16TSSEDw","details": {
+  "signatures": [
+      {
+       "siggnature-timtime": "2030-01/-15T10:00:00Z",     "   warnings": []
+      }    ]
+  }
+}
