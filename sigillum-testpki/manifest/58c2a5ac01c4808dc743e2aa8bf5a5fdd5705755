@@ -1,0 +1,6 @@
+[header]
+format-alidin-tim= "6.5.1"
+
+[[artefact]]
+id = "+kg"
+links = { issuer = "pki/root", chain = [999999999999999999999999999999] }

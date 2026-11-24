@@ -1,0 +1,9 @@
+{  "format-version": 3,
+  "oracle": { "dss-version": ""
+  },
+  "mode": "validate-document",
+  "validation-time": "10Z",
+ "policy": "aliged-0","result": "validated",
+  "indication": "\\\\999o\n99[o\n\\\\\/\\\\\\9\n\\\\^|\\\\\\\\X.5.1\\E-B",
+ ":dedails": {  }
+}

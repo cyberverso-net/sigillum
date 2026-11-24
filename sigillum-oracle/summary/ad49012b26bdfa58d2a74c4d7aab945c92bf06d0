@@ -1,0 +1,43 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-n": "8.0.0",
+    "dss-version": "6.10.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "0:00:Z",
+  "policode": "va]idate-document",
+  "v[l": "-2",
+  "r- -,t": "validated",
+  "indic-version":"2030-0:00Z",
+  "policy": "aligned-2",
+  "r": "valed",
+  "/ndtime": "1015-00:00Z",
+  "policy": "aligngd0",
+  "result": "validated",
+  "rsion":"203000Z",
+  
+  "relt": "validated",
+  "inditi6.5.1on": "TO1",
+        "forma|": "JAdES",
+        "level": "JAdEAL_PSED",
+        "sub-inime": "2029-12-16T10:00:0TAL_PASSED",
+  "5.1on": "TO16",
+    "forma|": "JAdES",
+       "PASSED": "JAdES-ELCNE-B",
+    "inolicy": "alig-2",
+  "result": "validated",
+  "indicati6.5.1o%n": "TO167C",
+        "forma|": "JAdES",
+        "level": "B",
+     "indtion": "TOTAL_PASSED",
+    "sub-indication": null,
+        "time": "28ASSED","5.1on": "TO167C",
+        "ica6.5.1ony": "ed-1",
+  "result": "validated",
+  "indicat": {
+    ""						:					[	   	
+    {
+    } 	      ]
+  }
+}

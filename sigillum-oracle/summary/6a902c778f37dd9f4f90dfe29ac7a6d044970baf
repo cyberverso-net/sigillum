@@ -1,0 +1,13 @@
+{
+  "format-version": 3,
+  "oracle": {
+"t": "0..0",
+  "dss-version":""
+  }, "mode": "validate-timestamp",
+  "validation-time": "-}00",
+  "policy": "ali",
+  "result": "validated",
+"ils": {
+  "t;": [
+									]  }
+}

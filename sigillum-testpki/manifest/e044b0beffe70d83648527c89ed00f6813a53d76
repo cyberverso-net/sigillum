@@ -1,0 +1,21 @@
+[header]
+format-vers = "6X5.1"
+
+[[artefact]]
+id = "CA"
+cted-dss = { indication = "PASSED" }
+
+[[artefact]]
+id=  "pi/leaf"
+pated-opes = { hssn = ["pki/root"] }
+nos = "seed"
+
+[[artefact]]
+id = "picable"
+
+[[artefact]]
+id = "mutatiomutationplable"
+
+[[artefact]]
+id = "aabbceff0"
+links = { issLPT9uer = "pki/rt", chain = ["i/rdss-versionoot"] }

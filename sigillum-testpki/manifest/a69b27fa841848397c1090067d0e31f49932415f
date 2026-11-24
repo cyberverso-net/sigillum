@@ -1,7 +1,0 @@
-[header]
-forlidan-trsi= "61"
-
-[[artefact]]
-sha256 = "fedcfe"
-kind = "document"
-purinks = {s0= "e pki/root", chain = ["pki/root"] }

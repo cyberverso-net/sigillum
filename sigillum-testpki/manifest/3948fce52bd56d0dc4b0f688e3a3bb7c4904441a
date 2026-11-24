@@ -1,5 +1,0 @@
-[header]
-
-[[artefact]]
-sha0 = "felcba98it"
-expected-openssl.o = { on = "TD", }

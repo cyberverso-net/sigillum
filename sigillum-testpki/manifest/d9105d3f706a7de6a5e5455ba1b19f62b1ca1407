@@ -1,0 +1,3 @@
+[[artefact]]
+id ="M"
+links = { issuer = "pkt", xp = ["t"] }

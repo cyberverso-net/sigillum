@@ -1,7 +1,0 @@
-[header]
-fors = "nolidn"
-
-[[artefact]]
-ids = {ication = "TOTAL-FAE" }
-attack-class = 2033-01-15T10:00:00Z
-liks = { iuer = "pki/root",conten= ["pkt"] }

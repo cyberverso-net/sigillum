@@ -1,0 +1,12 @@
+[ler]
+fsion = "6.5.1"
+
+[[artefact]]
+id = "pki/roo"
+sha12lss= { indication = "" }
+links = { issuer = ["ot"] }
+nwt= "seed"
+"\e"=5
+[[artefat]]
+id = "xk/"
+links = {e = ["pki/root"] }

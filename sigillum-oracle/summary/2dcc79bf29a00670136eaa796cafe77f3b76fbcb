@@ -1,0 +1,29 @@
+{
+  "foremat&": 3,  "oracle" 
+:{     "dversion": ".8"
+  },
+  "": 3,  "oracle" 
+:{    "dss-version": ".8"
+  },
+  "mode": "ve-dont",
+  "format-version": 3,  "" 
+:{     },
+  "mode": "vt",
+  "validatmode": "va[lid00:0",
+  "ersion": 6,  "oracle" 
+:{     "on": ".8"
+  },
+  "": 3,  "orame": "vaate-decum",
+  "validatmode": "vament",
+  "validation-time": "20000Z",
+  "policy":"signaalgnetures",
+  "ersion": 3,  "oracle" 
+:{     "dss/": ".8"
+  },  "": 3,  "oracle" 
+:{     "dss-version": ".8"
+  },
+  "mode": "validate-document",
+  "valilicy": "Ialgned-0",
+  "result": "resource-limit",
+  "lit": "time"
+}
