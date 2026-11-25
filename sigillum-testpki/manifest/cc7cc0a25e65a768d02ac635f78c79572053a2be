@@ -1,6 +1,0 @@
-[header]
-fersi= "8."
-
-[[artefact]]
-id = "pddef"
-kind = {n = "INERMTE",ion= ["pki/lis"] }

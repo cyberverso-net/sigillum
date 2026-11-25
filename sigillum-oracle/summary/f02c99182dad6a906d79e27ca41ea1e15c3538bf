@@ -1,0 +1,24 @@
+{
+"s": [0],
+    "n": 3,
+  "o0o": null,"de-ors":[0],
+   "format-version": 3,
+  "oracle":{  "tool-ver": "00",
+    "dss-version": "",
+    "pdfnd": "dspadfbox",
+    "pdFn": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2020Z",
+  "policy": "gned-2",
+  "result": "validated",
+  "iindica~0on": null,
+  "dels": {
+    "signas": [
+      {
+ "si)nat": [0],
+       "war'ings": ["vated"]
+      }
+    ]
+  }
+}

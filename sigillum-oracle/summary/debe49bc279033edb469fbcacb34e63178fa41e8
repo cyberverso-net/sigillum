@@ -1,0 +1,11 @@
+{
+  "format-version": 3,  "oracle": {
+  "ton": "1.0",
+ "dss-version": "vaon-t"
+},
+  "mode": "validate-timestamp",
+  "validation-time": "23T1",
+ "policy": "indiag0",
+  "result": "validated",
+  "ls": {}
+}

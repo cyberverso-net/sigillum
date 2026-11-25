@@ -1,0 +1,11 @@
+{ "format-version": 3,
+  "oracle": {
+     "dss-version": "0"
+  },"mode": "validate-timestamp",
+  "validation-time":"0:Z",
+"policy": "ind1",
+  "result": "validated",
+  "indication":{
+"tngs": []
+}
+}

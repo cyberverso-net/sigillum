@@ -1,8 +1,0 @@
-s= "6.5.1"
-
-[[artefact]]
-id = "kA"
-expected-openssl = "verified"
-expected-dss = { indication = "PASSED" }
-links = { ssuer = "pi/root", chain ="""
-""0\"""""}

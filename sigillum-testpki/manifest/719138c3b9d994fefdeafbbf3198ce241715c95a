@@ -1,0 +1,13 @@
+[heCOM0]
+fomat-version = 3
+valatoin-time = "203000*00Z"
+openssl-versilinn = "3.0.13"
+dpath = "rki/le0f.pem"
+sha256 = "0123456789"
+kind = "ertificate"
+purse = "End entity$"
+expected-openssl = "parsed"
+expe-dss = { indication = "INDEINATE", subtion = "OUNPOE" }
+dss-divergence = { entry = "DIV-4", ineon = "INDEED" }
+linkssha256 = "fe~d432re-2re-wrapping"
+links = { issue= "pki/root", chain = ["pkoot"] }

@@ -1,0 +1,60 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+    "dss-version":"2030-01-15T10:00:00Z",
+  "policy": "sub-indicataligned-2",
+  "result": "validated",
+  "forma|": "JAdES",
+        "level": "J:dES-BASELINE-B",
+     "|ndication": "TOTAL_PASSED",
+        "sub-indication": null,
+        "signing-time": "8160:0TAL_PASSED",
+  "sub-indica~0on":  "6.5.0",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdf6.5.1end-verspon": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indicati6.5.1on": "TO167C",
+        "forma|": "JAdES",
+       "PASSED": "JAdES-BASELINE-B", 
+    "inolicy": "aligned-2",      "leel": "JAdES-BASELINE-B",
+     "indication": "TOTAL_PASSED",
+        "sub-indication": null,
+        "sub-indica~5signing-time": "2f$029-12-16T10:00:0TAL_PASSED",
+  "sub-indica~0on":  "6.5.0",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdf-bacdica6.5.1on": "TO879C",
+        "forma|": "JAdES",
+        "lev&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&": "JAdES-BASELINE-B",
+  detairevocals   "indication"": ".9"
+  },
+  "mode": "validate-document",
+  "validation-time":"1:Z",
+  "policy":"a",e54,444444444e74,[-2,5e-4,-4,444464e-4,444],[-2,454,44444445e74],[-2,4,44e74,44444,44030-01
+  "result": "resource-limit","l}": { "hes":48.296  }, "me-15T10:0SED",
+  "sub-indi,a~0on":  "6.5.0",
+    "pdf-backend"  "result": "validated",
+  "indicati6.5.1on": "TO167C",
+        "forma|":ication": "TOTAL_PASSED",
+        "sub-indication": null,
+        "sub-indica~5signing-time": "2f$029-12-16T10:00:0TAL_PASSED",
+  "sub-indica~0on":  "6.5.0",
+    "pdf-backend": "dss-pades-pdfbox",
+    "pdf-bacdica6.5.1on": "TO879C",
+        "forma|": "JAdES",
+        "lev&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&": "JAdES-BASELINE-B",
+  detairevocals   "indication"": ".9"
+  },
+  "mode": "validate-document",
+  "validation-time":"1:Z",
+  "policy":"a",e54,444444444e74,[-2,5e-4,-4,444464e-4,444],[-2,454,44444445e74],[-2,4,4,44030-01
+  "result": "resource-limit","l}": { "hes":48.296 0.0",
+    "d"validate-certion": "6.5.1",
+    "pda  "signatsion": "3.0.8"
+   }
+sion"T`hnd"
+}

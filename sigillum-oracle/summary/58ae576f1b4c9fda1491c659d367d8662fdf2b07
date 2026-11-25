@@ -1,0 +1,22 @@
+{
+  "format-version": 3,
+  "oracle":  
+   
+
+
+
+
+
+
+
+{ "dss-version": ".1",
+    "nd": "p"
+  },
+  "mode":"validate-document",
+  "validation-time": "00Z","policy": "",
+  "result": "resource-limit",
+  "imit":
+
+
+"."
+}

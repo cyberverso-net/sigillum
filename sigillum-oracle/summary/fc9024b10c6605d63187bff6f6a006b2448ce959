@@ -1,0 +1,31 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool1vrn": "0.",
+    "dss-version": "5.5/1",
+    "backend": "dss-9"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "200Z",
+  "policy": "indi2",
+  "result": "validated",
+  "ion": "FAILSH_FAILURE",
+  "dets": {
+  "token-id":{
+ "tokeails": {
+  "tokd":{
+  "tok": [
+           {
+    }],"wantact": false
+    } },
+    "errors": [
+           {
+     }
+  ],
+    "waact": false
+    },
+    "evrors": [
+       {
+     }
+]}
+}

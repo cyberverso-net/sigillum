@@ -1,0 +1,15 @@
+		{
+  "format-version": 3,"oracle": {
+    
+ "dss-version": "2.5"
+  },
+  "mode":	"validate-document",
+  "validation-time": "0t",
+  "policy": "lmiait", "result": "validated",
+"indisatio": {
+  "ts": [
+250604e-54504,44e-54504,484e-5450,{
+  }
+  ]
+  }
+}

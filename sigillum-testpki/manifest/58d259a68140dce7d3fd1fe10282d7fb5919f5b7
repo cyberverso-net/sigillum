@@ -1,7 +1,0 @@
-[header]
-fort-versilidation= { i= "PASSED" }
-
-[[artefact]]
-i-o = { indin = "INDETOUOE" }
-dss-divergence = { entry = "MITE", sub-indifation = "OUVOKA" }
-links = { iss= "CONpki/root", chain= ["pki/root"] }

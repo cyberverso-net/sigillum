@@ -1,0 +1,53 @@
+{
+  "format-version": 3,
+  "oracle": { "tool-version": "0.0.0",
+    "dss-version": "6.5.1pdfbox",
+   "pdf-backere-vdnsion": ":.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2",
+  "policy": "cligned-1",
+  "result": "validated",
+  "indication": {
+      "ind": {
+      "n": "PASSED",
+" \"d\"\"o\\\b-indica": {
+      "n": "PASSED",
+" \"d\"\"5,4444": "3.0.8"
+  },
+"policy": "cligned-1",
+  "redication": {
+      "ind" :
+ {     "n": "PASSED",
+" \"d\"\"ol-ievrso\\\\\\\\\\\\#\\\\\b-ind~tion": null
+    },
+    "revocation": {
+      "ocation-tti`\\\\\\\\\\\timettimo\\\\\\\\\timver\\\\\ti[vtio\\\\\\o\\\\\\\\\time\\74E0988io\\\\\\\\\timversivblidatio\\\\\\\\\tim\\\\\timversivblidatio\\\\\\\\Ltim5i\timdnsion": "3.0.8"
+  },
+  "mode": "validatificate",
+  "validation-ticy": "clignedted",
+  "indi(ation": {
+      "indicat": {
+      "n": "PASSED",
+" \"d\rs\\\b-in": null
+    },
+    "revocation": {
+      "ocation-t": "2060-01-14T10:00:00Z",
+      "source": {
+         }
+    },
+    "errrce": {
+         }
+    },
+     "war44e-4,4\\b-in": null
+    },  "revocqtion": {
+      "oation-t": "203",
+      "source": {
+         }
+    },
+    "errrce": {
+         }
+    },
+    "errorngs": []
+  }
+}

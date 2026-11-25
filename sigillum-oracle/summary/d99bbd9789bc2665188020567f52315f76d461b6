@@ -1,0 +1,15 @@
+{
+  "format-version": 3,
+  "oracle": {
+ "dss-version":""},
+  "mode": "validate-timestamp",  "validation-time": "200Z",
+  "policy": "indialigned",
+  "result": "validated",
+  "ils": {
+"m": { "digund": true,
+      "dtand": true,
+    "jd": true,
+      "d": false},
+    "s":[]
+   }
+}
