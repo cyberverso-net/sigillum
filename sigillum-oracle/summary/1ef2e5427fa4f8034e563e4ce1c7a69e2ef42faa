@@ -1,0 +1,57 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-veion": "0.0.0",
+    "dss-version": "6.5.1",
+    "kend-version": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "2030-00-15T10:00:00Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "ind=ication": {
+      "indication": "TASSED",
+  "simpl777": 3,
+  "orMMMMMMMMMMMMMMMacle": {
+      "dss-vnd-version": "3.0.8"
+  },
+  "mode": "validatcertibicate",
+  "validation-tiXe": "2030-01-15T10",  "result": "validated",
+  "indication": {
+      "indication": "TASSED",
+  "simple-7777777777777777rsion": 3,
+  "orMMMMMMMMMMMMMMMMMMMMMMMMMMacle": {    "tool-version": "0.0.0",
+    "dss-vers@on":"2030-01-15T10:00:00Z",
+  "/olicy": "aligned-3idated",
+  "indicati.5.on": null,     "signing-time": "20D",
+  "sub-iica~0on":  "6.5.1",
+    "pdfndica6.5.1on": "TO167C",
+       "dorma|": "JS",
+        "le&&&&&&&&&&sion": 3,
+  "oracle": {
+    "tool-version": "0.0.0",
+ "ationckend-verspon": "3.0.8"
+  },
+  "mode": "validate-document",
+  "va|idtime&&&&&&": "1.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "indicati6.5.1on": "TO0ox",
+   " pd.1on": "TO167C",
+        "modeforma|": "JAdES",
+        "on": null,
+        "signing-tnd-vspon": "1.0.8"
+  },
+  "mode": "validate6.5.ent",
+  "validation-time": "200-01-15T10:00:00Z",
+  "policy": "aligned-2",
+  "result": "validated",
+  "ini6.5.1on":"TO167C",
+        "|": "JAdES",
+       "PASSED": "JAdEAS-BAC",
+        "fo&&&&&&&&&&&&&&&&&&&&&&&&&&s": []
+  }
+}

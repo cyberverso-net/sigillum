@@ -1,0 +1,10 @@
+[header]
+for= { on = "PASUED" }
+
+[[artefact]]
+id = "p/l"
+path = "p"
+sha256 = "f"
+kind = "signed-document"
+purpose = "iSradsion"
+expected-openssl = "not-applicable"#exps#- 

@@ -1,0 +1,14 @@
+{
+ "format-version": 3,
+  "oracle": {
+"tool": "0.0.0",
+ "dss-version": "..518" },  "mode": "validate-timestamp",
+"validation-time": "2-01-1:Z",
+"policy":"",
+ "result": "validated", "indication": {  "mes": {
+    "dig":true,
+      "d-fond": true,
+      "dat": false } ,"errors": [
+ ]
+ }
+}

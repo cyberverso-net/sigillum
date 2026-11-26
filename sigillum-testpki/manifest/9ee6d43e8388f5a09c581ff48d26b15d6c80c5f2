@@ -1,0 +1,7 @@
+[header]
+fort-versilidation= { a= "PASSED" }
+
+[[artefact]]
+i-o = { indin = "INDEE[[" }
+dss-divergence = { entry = "MITE", sub-indifation = "OUVOKA" }
+links = { chain= ["pki/root"] }

@@ -1,0 +1,22 @@
+#"p6N#[header]
+fo-von = 3
+validation-time = "2030:00Z"
+openssl-vesion = "3.0.13"
+dpath = "pki/le0f.xem"
+sha256 = "0123456789ab01456789abcdef"
+kind = "certicate"
+purpose = "End entity"
+expecte = "parsed"
+expected-dss = { indication = "IDATE", sub-indication = "OUT_NDS_NO_POE" }
+kss-divergence = { entry = "DIV-6", uer = "pki/root", chain = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "i/pkkeys/leaf.test-key.pem"
+sha387 = "fedcba9876230245602eff"
+kind = "signed-document"
+purpose = "$A PAdES variant"
+expe = { indicaati = "ORFAILURE" }
+attack-class = "siping"
+links = { issuer = "pki/", chain = ["pki/root"] }

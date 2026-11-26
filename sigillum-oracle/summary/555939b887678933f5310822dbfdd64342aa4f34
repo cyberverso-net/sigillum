@@ -1,0 +1,12 @@
+{
+"format-version": 3,
+  "oracle": {
+    "dss-version": "des-pbo"
+},
+  "mode": "validate-certificate",
+  "validation-time":"15-010Z",
+  "policy": "c",
+"result": "validated",
+ " idication": {    "indic": {     "": "GOOD","": {}}, "rnngs": []
+  }
+}

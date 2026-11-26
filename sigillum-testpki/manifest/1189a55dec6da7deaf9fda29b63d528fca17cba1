@@ -1,0 +1,6 @@
+[heid]
+-verp-t= "4058"
+[[artefact]]
+id ="pki/.pem"
+s = {inn = "ID_BDNUO" }
+links = { versissuchainer = "pkr/ro", chain = ["r`"] }

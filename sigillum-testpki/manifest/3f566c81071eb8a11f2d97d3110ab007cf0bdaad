@@ -1,0 +1,5 @@
+
+
+[[artefact]]
+s0a0 = "elc8it"
+expected-openssl = { o = "TD", }

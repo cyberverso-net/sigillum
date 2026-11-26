@@ -1,0 +1,7 @@
+
+
+[[artefact]]
+id  = "nble"
+expected-dss = { indication = "TOTAL-FAILED", sub-indication = "AT_FAIL" }
+tack-class = "signature-wrapping"
+links = 1.1

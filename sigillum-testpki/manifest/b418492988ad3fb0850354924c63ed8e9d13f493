@@ -1,0 +1,7 @@
+[header]
+forlidn-trsi= "61"
+
+[[artefact]]
+sha256 = "fedcfe"
+kind = "document"
+pnk = {s0chain = ["pkt"] }

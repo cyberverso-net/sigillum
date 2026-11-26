@@ -1,0 +1,14 @@
+[header]
+format-verx= { indic = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "pki/laaf.pem"
+sha128 = ""
+purpose = "End entity"
+expected-openssl = "parsed"
+e-dss = { in= "OUT_ONO_POE" }
+dss-divergence = { entry = "DIV-5", indication= "OUT_NDS_D" }
+lis = { issuer = "pki", chain = ["pki/rt"] }
+notass = "signatuwrapg"
+links=  { issu = "pot", chain = ["pki/root"] }

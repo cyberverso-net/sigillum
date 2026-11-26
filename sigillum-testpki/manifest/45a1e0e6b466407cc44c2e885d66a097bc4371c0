@@ -1,0 +1,10 @@
+[header]
+v = ["pki}"] 
+notes = "seed"
+
+[[artefact]]
+id = "pki9887lica"
+expected-dss = "nntmmmmmmmmmm"
+
+[[arteftca]]
+cted-dss = { iain = ["pkh/root"] }

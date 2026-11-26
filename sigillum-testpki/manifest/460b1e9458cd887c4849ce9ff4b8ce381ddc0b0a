@@ -1,7 +1,0 @@
-[header]
-format-ver= 3
-va = { indication = "PASSED" }
-
-[[artefact]]
-id = "pOa97gnaturrapping"
-links = { issuer = "pk", chain = [] }

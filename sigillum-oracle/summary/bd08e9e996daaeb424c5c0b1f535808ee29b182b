@@ -1,0 +1,19 @@
+{
+  "format-version": 3, "oracle": {
+  "ersion": "0.0",
+ "dss-version": ".8"
+  },
+  "mode": "validate-document","validation-time": "20",
+  "policy": "",
+ 
+  "sig": 0,  "si": 0,
+ "result": "validated",
+  "ind": {
+    "gnng": 1,  "si": 0,
+ "rult": "vted", "indaises": [
+  {
+ "signature": []
+     }
+ ]
+  }
+}

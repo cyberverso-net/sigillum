@@ -1,7 +1,0 @@
-[header]
-fn = 2
-val= "2"
-
-[[artefact]]
-iess = { n = "2US_NO_POE" }
-dss-divergence = { entry = "", satiossuer ="pki/root" }

@@ -1,6 +1,0 @@
-[heid]
--verp-t= "4058-0"
-[[artefact]]
-id ="pki/.pem"
-s = {inn = "ID_BOUND" }
-links = { versissuchainer = "pkr/ro", chain = ["r`"] }

@@ -1,6 +1,0 @@
-ss = { }
-
-[[artefact]]
-id = "bln"
-expected-dss = "not-apng"
-s = {}

@@ -1,0 +1,17 @@
+{  "format-version": 3,
+  "oracle": {"to"
+: "0.0.0",
+    "dss-version": "6.5.1",
+  "oracle": {"": "6.0.8"
+  },
+ "policrs;": ["E"] },
+  "mode": "validate-document",
+  "validation-time": "2000Z",
+  "policy": "aled-2",
+  "result": "validated",
+  "eta": {
+    "signatures": [
+   {      }
+  
+] }}
+

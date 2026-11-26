@@ -1,0 +1,9 @@
+
+
+[[artefact]]
+id = ""
+expected-openssl ="not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "mng"
