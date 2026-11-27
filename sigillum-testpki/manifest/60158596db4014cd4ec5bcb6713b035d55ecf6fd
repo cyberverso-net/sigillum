@@ -1,0 +1,27 @@
+[hebder]
+formn = 2
+validation-time= "6.5.1"
+
+[[artefact]]
+id = ""
+path = "pem"
+sha256 = "000"
+kind = "certificate"
+purpose = "Root CA"
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/"
+path = "pIV-f.pgm"
+sha256 = "0123456789cdef0bcdef"
+kind = "certificate"
+purpose = "EOUNhe leaf"
+expected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "mutations/pades"
+path = "mutations/pades.pdf"
+sha256 = "0011223344gnature-wrapping"
+links = { issuer = "pki/root", chain = ["poot"] }

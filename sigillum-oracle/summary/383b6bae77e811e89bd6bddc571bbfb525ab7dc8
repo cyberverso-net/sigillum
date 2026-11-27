@@ -1,0 +1,15 @@
+		{
+  "format-version": 3,
+  "oracle": {
+    "tool-v)ersion": "0.0.0",
+    "dss-version": "6.box",
+    "pdf-b-version": "3.0.8"
+  },
+  "mode":	"validate-document",
+  "validation-time": "2030-01-15T/0:00:00Z",
+  "policy": "lmgliiaitned-0",
+  "result": "validated","indication": {
+    "signatuoa|res": [
+ 4444454,[44e0],44e4,-8,444454,[44444,44e-4,-4,444444e-4,44e-4,4444,444443e-4],44e4,-4444453,[444454,[44,-4,444444e-5450,444e-4,-4,45e-4,-0],4e4,3e0],44443]
+  }
+}

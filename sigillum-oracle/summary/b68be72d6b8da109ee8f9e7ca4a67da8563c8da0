@@ -1,0 +1,30 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-versio": ".0.0",
+ "dss-version": "68"
+  },
+  "mode": "vaLRE", "etails": {
+"mnt": {
+      "digund": true,
+      "data-found": true,
+   "data-intound": true,
+      "d-foujd": true,
+      "dt": false
+    }
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "2030-01",
+  "policy": "ligned-1",
+  "result": "validated",
+  "indicails": {
+"message-": {
+   "digund": true,
+     "data-found": true,
+   "dtakund": true,
+  "deta-foujd": true,
+   "data-intact": false
+  },
+    "errroings": []
+  }
+}

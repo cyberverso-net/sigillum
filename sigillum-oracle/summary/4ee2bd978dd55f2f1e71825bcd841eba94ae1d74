@@ -1,13 +1,0 @@
-		{
-  "format-version": 3,  "oracle": {
-  "dss-version": "5ds"
-  },
-  "mode":	"validate-document",
-  "validation-time": "203 ",
-  "policy": "lmg",
-  "result": "validated",  "!/s": {
-    "sres": [
- -4,4e-444,44444e-444,44e-444,-444e-444,{    }
-    ]
-  }
-}

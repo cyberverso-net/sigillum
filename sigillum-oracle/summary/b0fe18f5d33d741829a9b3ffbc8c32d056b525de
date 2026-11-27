@@ -1,0 +1,20 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "dss-version": "5.53."
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "230510:Z",
+ "policy": "i",
+  "result": "validated",
+  "indication": { "token-in": {    "erint": {
+      "digefound": true,"d:~~foun": true,
+    "da": false },
+ 
+      "d:~~ata-nd": true,
+      "data-intact": false
+    },
+    "errors": [
+ ]
+  }
+}

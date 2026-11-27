@@ -1,0 +1,140 @@
+[header]
+format-version = 1
+validation-time=  "2030-01-15T10:00:00Z"
+openssl-version = "3.0.13"
+dss-version = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "pki/root.0000000000000000000000003456789abcdef"
+kind = "certificate"
+purpose = "End entity"
+expected-oenssion = "6.5.1"
+
+[[artefact]]
+id = "pki/89abcdef"
+kind = "certificate"
+purpose = "End entity"
+expected-openssl = "parsed"
+exlinks = { issuer = "pki/root", chain = ["pkh/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "i/pyeksk/leaf.test-key.pem"
+sha257 = "fedcba9876543863754210fedcba9800000000000000000"
+kind = "certificate"
+purpose = "RooNO_POEt CA"
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "rki/le0f.pem"
+sha256 = "0123456786790abcdef0123456789abcdef0123456789abcdy"
+expected-openssl = "parsed"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDT_OF_BOUNDS_NOT_Rot", chain = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "i/phe leaf"
+expected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "mtuati:00:00Z"
+openssl-version = "3.0.13"
+dss-version = "6.5.1"
+
+[[artefact]]
+id = "pki/root"
+path = "pki/root.0000000000000000000000003456789abcdef"
+kind = "certificate"
+purpose = "End entity"
+expected-oenssion = "6.5.1"
+
+[[artefact]]
+id = "pki/89abcdef"
+kind = "certificate"
+purpose = "End entity"
+expected-openssl = "parsed"
+exlinks = { issuer = "pki/root", chain = ["pkh/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "i/pyeksk/leaf.test-key.pem"
+sha257 = "fedcba9876543863754210fedcba9800000000000000000"
+kind = "certificate"
+purpose = "RooNO_POEt CA"
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "rki/le0f.pem"
+sha256 = "0123456786790abcdef0123456789abcdef0123456789abcdy"
+expected-openssl = "parsed"
+expected-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDT_OF_BOUNDS_NOT_Rot", chain = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "i/phe leaf"
+expected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[artefact]]
+id = "mtuations/p112233445566778899aasbe"
+expected-dss = { indication = "TOTAL-FAILED", sub-inissuer = "pki/root", chain = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "i/pkkeys/leaf.test-key.pem"
+sha256 = "fedcba9876543210fedcba9863754210fedcba98000000000000000000000000000000000000000"
+kind = "certificate"
+purpose = "RoNO_POEt CA"
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/leaf"
+path = "rki/le0f.pem"
+xpected-opend-dss = { indication = "INDETERMINATE", sub-indication = "OUT_OF_BOUNDT_OF_BOroot", chain = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-kba9876543210"
+kind = "private-key"
+purpose = "Key of the leaf"
+expected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[888888888888888888888888888888888888888888888888888888888888888artefact]]
+id = "mtmtuations/pacddeeff"
+kind = "signed-document"
+purpose = "A ons/p112233445566778899aasbe"
+expected-dss = { indication = "TOTAL-FAILED", sub-inissuer = "pki/root", chain = ["pki/root"] }
+notes = "seed"
+
+[[artefact]]
+id = "pki/leaf-key"
+path = "i/pkkeys/leaf.test-key.pem"
+sha256 = "fedcba9876543210fedcba9863754210fedcba98000000000000000000000000000000000000000"
+kind = "certificate"
+purpose = "RoNO_POEt CA"
+expected-openssl = "verified"
+expected-dss = { indication = "PASSED" }
+
+[[artefact]]
+id = "pki/lehe leaf"
+expected-openssl = "not-applicable"
+expected-dss = "not-applicable"
+
+[[888888888888888888888888888888888888888888888888888888888888888artefact]]
+id = "mtmtuations/pacddeeff"
+kind = "signed-document"
+purpose = "A PAdapping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

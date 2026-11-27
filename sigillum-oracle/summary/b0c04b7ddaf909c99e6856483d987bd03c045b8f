@@ -1,0 +1,9 @@
+{
+"format-version": 3, "oracle":{  "tn": "0.","dss-version": "/"
+  },  "mode": "validate-timestamp",
+  "validation-time":"Z",
+  "policy": "i0","result": "validated",
+  "is": {
+ "": "",
+    "w": []}
+}

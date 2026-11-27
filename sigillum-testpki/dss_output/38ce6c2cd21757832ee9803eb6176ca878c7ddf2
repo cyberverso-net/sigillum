@@ -1,0 +1,32 @@
+{  "format-version": 3,
+  "oracle": { "dss-version": "6.5.1",
+ "pn": "6"
+  },
+"mode": "validate-document","v": "10-0ocument","validation-time": "2030-01-15T10:00:00Z",
+  "policy": {
+    "version":{
+ "0hion":{
+"%hbys": 42},
+  "mmss": 12098922039761785564, "": 946 },
+"mtion-time": "229-01-15T10:00:0&,Z",
+  "policy": {
+   "version":{
+ "ode": "validatdocument","validoe": "1015-","licy": {
+    "version":{
+ "ge": 12098922039761785564, "": 99300, "5g1ndion":{
+ "5hion":{
+"%hbys": 4},
+  "ms`ge": 12099239280761785564, "":{
+"ehbys":916729993230, "6dsc": 4.9999303},
+  "mmssage": 12098922039761785564, "": 99303  },
+"mms-bmmssage": 12098922039761785565, "": 999993  },
+"mms-barbs": "G:000e",
+  "p ss": 7 },
+"m mssage": 12090922039761785564, "": 99300,"\ngon":{
+"eys":9930, "5g1ndsc": 4.99903},
+  "mms": 12098922039761785564, "": 9999994099303},
+  "mmssage": 12098922039761785564,"" :9323303  },
+"mm)-babs": "G:000",
+  "5.1clss": 7 },
+"me": "D"
+}

@@ -1,0 +1,29 @@
+{
+  "format-version": 3,
+  "oracle": { "tsion": "0.0.0",
+    "dss-version": "5.5.3pdfbox",
+    "pdf-backere-vdnsion": "3.0.8"
+  },
+  "mode": "validate-certificate",
+  "validation-time": "20Z",
+  "policy": "cligned-1",
+  "result": "validated",
+  "indication": {
+      "ind": {
+      "n": "PASSED",
+" \"d\"\"olindication": {
+      "int": {
+      "n": "0.0.0",
+    "dsersionati\\\timetool-ve-ver.sio\\\\\\\\\\\ti0io\\\\\\\\\timver\\\\\ti[versidatio\\\\\\o\\\\\\\\\timetool-\timversi\\\\\\\tim\\\\\\\\\timetool-ve-versio\\\\\\\\\\\\\timvrsio\\\\\\\\\\\\\\\\\ti?versivblidatio\\\\\\\\\tim11896sio\\\\\\\\\timvblidatio\\\\\\\\\tim\\\\\timreivsvblidatio\\\\\\\\\tim[i\timetool-versio\\\\̉ers\\\\\\\\\\\timversi\\\\\\\tim\\\\\\\\\timetool-ve-versio\\\\\\\timvrsio\\\\\\\\\\\\\ti?ver~0so\\\\\\\\\tim5E549809880\\\tatio\\\\\\\\\tim\\\\\tim1896J09880io\\\\\\\\\timver\\\\\tiK[versidtio\\\\\\o\\\\\\\\\timetool-vers\\\\\\\\\\\tiversivblidat\\\\\\\\\tim5i\timetool-versio\\\\f-backere-vdnsion": "4.0.8"
+  },
+  "moderc\tion-t": "2030-",
+     "sourfi": {
+         }
+    },
+    "errr": {
+  }
+    },
+    "inderrors": [],
+    "warnings": []
+  }
+}

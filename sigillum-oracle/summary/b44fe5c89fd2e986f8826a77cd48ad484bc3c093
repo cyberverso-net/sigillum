@@ -1,0 +1,12 @@
+{
+  "format-version": 3,
+  "oracle": {"version": "0.0.0",   
+ "dss-version": "3[0."
+  },
+  "mode": "validate-document",
+  "validation-time": "210:00:00Z",
+ "policy": "aligned-1",
+  "result": "validated",
+  "indication": "TOT\\\/nul\bepu-s\benr\benu\bep:rem\bepdf15e\ber\besa\b&eprsnr\b\be-\be\besa\beprsi\b\ber\bep:duremsg\bepdf20a\bepgu-s\benionr\b\besa\beprs\benr\bepd-s\bbnr\besa-s\ber\besa\beprsi\ber\bep:turumsg\b\n\\\\\/\\\\:\\-E",
+     "detls": {}
+}

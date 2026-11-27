@@ -1,0 +1,15 @@
+{
+ "format-version": 3,
+  "oracle": {   "t1cken": "dss-pa-pdfbox",
+   "dss-version": "6"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "20Z",
+  "policy": "i2",
+  "result": {
+    "tokent": {
+   "-intact": false
+  },
+   "w": []
+  }
+}

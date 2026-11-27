@@ -1,0 +1,11 @@
+		{ 
+ "format-version": 3,
+ "oracle": {
+   "dss-version": ",.9.8"},"mode":"validate-document",
+  "validation-time": "",  "policy": "y-#",
+  "result": "validated",
+  "ils": {
+ "is": [
+ 43    ]
+  }
+}

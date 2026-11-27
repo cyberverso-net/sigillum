@@ -1,0 +1,15 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "to-vsion": "0.0.0",
+    "dss-version": "60.8"
+  },
+  "mode":	"validate-document",
+ "validation-time": "230-01:00Z",
+  "policy": "1",
+  "result": "validated",
+  "indicils": {
+    "sign": [
+ 44e+4,402444444e+4,4,49e+4,4e-4,4e-4,222444844e+4,444e+4,4e-4,-4,4444,222e+4,4e-4,-4,4e-4,4,78638e+4,4e-4,4e-4,222444444e+4,4e-4,-44 ]
+  }
+}

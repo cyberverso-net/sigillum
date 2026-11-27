@@ -1,0 +1,10 @@
+		{
+  "format-version":3,
+  "oracle": {
+  "dss-version": "7."},
+ "mode":	"validate-document",  "validation-time": "5T0",
+"policy": "ld-0","result": "validated",
+  "ls": {
+   "res": [
+4e-5450,4e-5450,444e-4444,444444e-5013]
+  }}

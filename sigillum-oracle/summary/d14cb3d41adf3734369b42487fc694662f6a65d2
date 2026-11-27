@@ -1,0 +1,15 @@
+		{
+  "format-version": 3,
+  "oracle": {
+  "dss-version": "6.5.polbox",
+    "pdf-b-version": "4..8"
+  },
+  "mode":	"validate-document",
+  "validation-time": "2000Z",
+  "policy": "lmgl-1",
+  "result": "validated",
+  "ntionndicils": {
+    "signatus": [
+ 9,44444e-4,18446744073709551610060444445e-4,-4,95516e-4,184467440737095516100604444444e-4,18446744073709551610060444,4]
+  }
+}

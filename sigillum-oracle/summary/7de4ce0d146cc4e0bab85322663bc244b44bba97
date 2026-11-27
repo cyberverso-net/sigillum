@@ -1,0 +1,10 @@
+		{
+  "format-version": 3,
+  "oracle": {
+     "dss-version": "8"
+  }, "mode":	"validate-document", "validation-time": "310Z","policy": "t-1",
+  "result": "validated",
+  "indication":  {
+    "sgnates": [
+ 5,44444e-4,444445e-4,-4,444445e-4,-569288e-4,44443e-4,444445e-4,-4]  }
+}

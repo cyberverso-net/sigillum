@@ -1,0 +1,139 @@
+{ "format-version": 3,
+  "oracle": {
+    "l-version": "0.0.0", 
+   "dss-version": "6.5.1",
+    "n":"3.0.8"
+  },
+  "mode": "validate-document",
+ 																						
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+																																																																					 "validation-time": "00Z",
+  "policy": "ali-1",
+  "result": "resource-limit",
+  "limit": "time",
+  "limits": {
+    "heaytes": 54432,
+    "timeconds": 600,
+    "agelectors": "GG Geneon"
+  },
+  "m": "gerds."}

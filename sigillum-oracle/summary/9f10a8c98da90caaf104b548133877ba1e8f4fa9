@@ -1,0 +1,14 @@
+		{
+  "format-version": 3, "oracle": {
+ "dss-version": "..8"
+  },
+  "mode":	"validate-document",
+  "validation-time": "10-1Z",
+  "policy": "ned-",
+  "result": "validated",
+  "": {    "sigr": [
+ 44e-4,																{
+}
+    ]
+  }
+}

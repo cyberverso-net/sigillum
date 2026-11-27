@@ -1,0 +1,18 @@
+{
+     "r": [0],
+    "format-version": 3,
+  "oracle": {
+"dss-version": "0."
+  },
+  "mode": "validate-document",
+  "validation-time": "406",
+  "policy": "",
+ "result": "validated",
+ "": {
+    "sires": [
+ {
+"ers": [0],
+"wings": []}
+    ]
+ }
+}

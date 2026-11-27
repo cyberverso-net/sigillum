@@ -1,0 +1,13 @@
+[header]
+format-ver = "seed"
+
+[[artefact]]
+id ="parsed"
+expected-dss = { indication = "INDETERMINATE", sub-indication= "OUT_OF_BOUNDT_OF_BNOT_REVOKED" }
+links = { issuer = "pki/root", chain = ["pki/root"] }
+notes = ""
+
+[[artefact]]
+id = "pki/rolea;-key"
+path = "i/pkkba7034236pping"
+links = { issuer = "pki/root", chain = ["pki/root"] }

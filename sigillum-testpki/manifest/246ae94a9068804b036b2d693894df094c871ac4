@@ -1,0 +1,10 @@
+[r]
+for= "seed"
+
+[[artefact]]
+id = "pky"
+path = "pki/em"
+sha256 = "54"
+kind = "private-key"
+purpose ="Kng"
+links = { issuer = "pki/rAoot", chain = ["pki/root"] }
