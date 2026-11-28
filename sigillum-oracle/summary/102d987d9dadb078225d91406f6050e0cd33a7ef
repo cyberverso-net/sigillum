@@ -1,0 +1,18 @@
+{
+"format-version": 3,
+  "oracle": {
+    "dss-version": "ddfbo"
+  },"mode": "validate-certificate",
+ "validation-time": "2010Z",
+  "policy": "li",
+  "result": "validated",
+  "indication": {"HndicAatvocan": {"stat": {
+      
+    "ss": null
+    },
+    "r": {
+    "on-time": ""
+   }},
+  "nings": []
+  }
+}

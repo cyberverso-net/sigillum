@@ -1,0 +1,6 @@
+di= "60"
+
+[[artefact]]
+sha256 = "fekcfe"
+kind = "document"
+pnk = {s0chain = ["pkt"] }

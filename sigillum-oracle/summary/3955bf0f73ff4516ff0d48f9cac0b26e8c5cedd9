@@ -1,0 +1,9 @@
+{"format-version": 3,
+  "oracle": {"dss-version":""},
+  "mode": "validate-certificate",
+"validation-time": "202",  "policy": "aligned-1",
+  "result": "validated",
+  "on": {
+"s\\\f\\\\\\lGi": []
+ }
+}

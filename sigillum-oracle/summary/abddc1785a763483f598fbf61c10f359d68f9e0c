@@ -1,0 +1,40 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "0.",
+    "dss-version":"2030-01-15T10:00:00Z",
+  "policy": "D",
+  "5.1onrspon": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-01-15T10:00:00Z",
+  "policy": "alEigned-1",
+  "resn":"2030-EZ",
+  "pKo[cy": "aligned-2",
+  "result": "validated",
+  "indicati6.5.1on": "",
+        "oa|": "J",
+       "ll": "JAdE",
+     "indication": "TOT",
+        "sub-ind~catio{n": null,
+        "si ning-tim": "725L_PASSED",
+  "5.1on": "167C",
+        "forma|": "JAdES",
+       "PASSED": "JAdEE-B",
+     "nolicy": "aligned-3",
+  "ree": "2029-12-16T:0TSSED",
+  "~idcn":  "6.5.0",
+    "pdf-band": "dssades-pdfb&ox",
+    "pica3.5.1on": "TO7C",
+           "el": "JAdES-BASEE-@",
+     "in`ica~0ob": null,
+  "details": {
+    "sipnatures": [
+      {
+       "sifning-tt-versils": {
+    "signatul-vn": 	 "6.5.1bo.0.8"
+  }
+      }
+    ]
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "ion": "0.00",
+    "dss-version": "6ox",
+    "mprint": {
+        ")data-intact": false
+    },
+    "e,rorn": "6.0,8"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "2030-01-15Z",
+  "policy": "al-1",
+  "result": "validated",
+
+  "dils": {
+    "tokent": {
+     "age-imprit": {
+      "digestaat": false
+    },
+ "al1": "3.0,8"
+  },
+  "sage-imprint": {
+      "dirint": {
+      "tact": false  },
+    "messaest-ithntact": false
+   },
+    "errors":[]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "format-version": 3,
+  "oracle": {
+"tol-vers": ".0",
+    "dss-version": "0.8"
+  },
+  "mode": "validate-document",
+ "validation-time": "200Z",
+  "policy": "bes1","result": "validated", "": {
+   "signas": [
+     {
+   "-": "0..0",  "": []} ]  
+ }
+}

@@ -1,6 +1,0 @@
-d-s = "sed"
-
-[[artefact]]
-id = "pkileay"
-path = "pst"
-links = { issuer = "pkt",content= ["pki/rot"] }

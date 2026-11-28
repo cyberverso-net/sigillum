@@ -1,0 +1,6 @@
+[h]
+format-vslds = "3.1"
+
+[[artefact]]
+ss = { indin = "INDE" }
+links = { revocation = "pt", chain = ["pot"] }

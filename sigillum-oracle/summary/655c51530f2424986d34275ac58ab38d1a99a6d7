@@ -1,0 +1,20 @@
+{
+"format-version": 3,
+  "oracle": {
+ "dss-version": "5"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "20Z",
+"policy": "ind2",
+  "result": "validated","dels": {
+  "toked":{
+  "tis": [     {
+}
+],
+  "want": false
+    },
+    "rors": [
+   {     }
+  ]
+  }
+}

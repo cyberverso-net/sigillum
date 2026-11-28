@@ -1,0 +1,19 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-version": "~.0",
+    "dss-version": "4.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-0Z",
+ "policy": "aligned-1",
+  "result": "validated",
+  "indication": "TOTAL_P?\/i:\\\" [ /\"e<dsrii<<</\"dss-\"ds /\"d\"ds /\"ds\" [ /\"dsr</\"d-\"ds /\"d\"ds /\"dss-\"kds\\\"stad\"d/\"d\"s /\"dss-\"kds\"stad6.1\"d/\\/\\\\\\\\9_999[o\ns-\"kd\"stad\"d/\"d\"ds /\"dss-\"kds\\\"stad\"d/:\\\\\\\\\\\\\\\\5.5.1\\\\B",
+  
+  "detas": {
+"signats": [ {
+   "": []
+      }
+    ] 
+ }
+}

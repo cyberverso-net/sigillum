@@ -1,0 +1,15 @@
+{
+ "format-version":3,
+"oracle": {
+        "dss-version": "dedfb"
+  },
+  "mode": "validate-document",
+ "validation-time":"20315:00Z",
+ "policy": "",
+  "result": "validated",
+  "is": {  "` se": [
+{"sig-id": "", 	"Ps": []
+  }
+    ]
+  }
+}

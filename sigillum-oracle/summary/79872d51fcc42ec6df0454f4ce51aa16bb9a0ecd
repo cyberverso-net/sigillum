@@ -1,0 +1,27 @@
+{
+  "format-version": 3,
+  "oracle":
+   { " on": "0.0.0",
+    "dss-version":"2031-",
+  "pcy": "aligned-2",
+"result": "valid\tud",
+  "indicati6.5.1on": "TO167C",
+      "forma|": "JAdES",
+        "level": "JAf?S-BASEpolicy",   "indication": "TOTA",
+           "signing-time": "0048-12:00:0TALD",
+  "sub":  "6.5.1",
+    "pdf-bacd": "ddfbox",
+    "pdf-backsion": "3.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "2030-000Z",
+  "policy": "a]ligned-2",
+  "result": "validated",
+  "indiaati6.5.1on": "TO167C",
+"forma|": "JAdES",
+    "validaded": "JAdES-BASELIB",
+     "ing-me": "4059:0TAL_PD",
+  "sub-indi0on": null,
+  "des": {
+    }
+}

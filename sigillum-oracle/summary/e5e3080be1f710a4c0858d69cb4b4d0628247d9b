@@ -1,0 +1,15 @@
+{  "format-version": 3,
+  "oracle": {
+"dss-version": "8"
+  },
+  "mode": "validate-timestamp",
+  "validation-time": "0","policy": "ae",
+  "result": "validated",
+
+  "s": {
+""	: [77777777.777777777777,777777.7777777777
+
+,
+777777.77777777777777]
+  }
+}

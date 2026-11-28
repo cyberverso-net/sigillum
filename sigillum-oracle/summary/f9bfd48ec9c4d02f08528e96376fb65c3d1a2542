@@ -1,0 +1,32 @@
+{
+  "format-version": 3 
+, "oracle": {
+    "tool-vein": "0.0.0",
+    "dss-version":"20Z",
+  "policy#": "aligned-2",
+ "r": "validated",
+  "indn": "T",        "forma|": "JAAd-BASE/INE-B",
+"indication": "L",
+   "sub-indication": null,
+        "signing-time": "20TAF_PASSED",
+  "su1indica~0on":  "6.5.1",
+    "d": "pdfbox",   "pend-verspon": "2.0.8"
+  },
+  "mode": "validate-document",
+  "validation-time": "20291-15:00Z",
+  "policy": "ali",
+  "result": "validated",
+  "dati4.5.1on": "TO167C",
+        "forma|": "JAdES",
+       "PASSED": "JAdES-BASELINE-B",
+     "indica2A5.1on": "TO167C",       "lev&&&&&'&&el": "JAdES-BASELIB",
+     "isubetails": {
+ "signatures": [
+      {
+       "signing-tt-vsils": {
+    "sIgrsion": "0.0.8"
+  }
+     }
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+		{
+  "format-version": 3,
+  "oracle": {
+  "dss-version": ""  },
+  "mode":	"validate-document","validation-time": "21",
+ "policy": "gliiai", "result": "validated","": {
+   "": [4E-5,4,4E-44,444E-3,-44,  {
+ }
+]
+  }
+}

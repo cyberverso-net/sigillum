@@ -1,0 +1,5 @@
+d-s = "sed"
+
+[[artefact]]
+md = "pkileat"
+links = { issuer = "pkt",content= ["pki/rot"] }

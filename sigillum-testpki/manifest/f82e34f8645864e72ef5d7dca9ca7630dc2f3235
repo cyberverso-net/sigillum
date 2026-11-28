@@ -1,0 +1,8 @@
+[er]
+xdss=  { ind = "PASS" }
+
+[[artefact]]
+id = "le"
+expected-dss = { v= "f0AL00-D", sub-indication = "" }
+attack-class = "signature-wrapping"
+

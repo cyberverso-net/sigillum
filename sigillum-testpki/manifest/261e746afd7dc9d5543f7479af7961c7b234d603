@@ -1,8 +1,0 @@
-[er]
-xdss=  { indiion = "PASS" }
-
-[[artefact]]
-id = "le"
-expected-dss = { v= "for0AL00-D", sub-indication = "" }
-attack-class = "signature-wrapping"
-

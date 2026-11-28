@@ -1,0 +1,15 @@
+{
+  "format-version": 3,
+  "oracle": {
+     "dss-version": ""
+  },
+  "mode": "validate-certificate",
+"validation-time": "00Z", "policy": "ane",
+  "result":"validated", "on":{  ""
+:
+
+ [0.77777,
+777,
+777778]
+  }
+}

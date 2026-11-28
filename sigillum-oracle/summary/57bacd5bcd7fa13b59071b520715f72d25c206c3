@@ -1,0 +1,15 @@
+{
+ "ig": [0],
+  "o0on": null,
+ "ors": [0],"format-version": 3,
+  "oracle": {  "tosion": "0.0t", "dss-version": "6" },
+  "mode": "validate-document",
+  "validation-time": "2029-0:0Z",
+  "policy": "gned-2",
+  "result": "validated","i":{
+    "ses": [    {
+        "signau": [0],
+    "wri": [""]
+      }  ]
+  }
+}

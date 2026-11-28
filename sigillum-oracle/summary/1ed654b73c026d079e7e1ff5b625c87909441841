@@ -1,0 +1,16 @@
+		{
+  "format-version": 3,
+  "oracle": {
+    "tool-v)ersion": "0.0.0",
+    "dss-version": "4.0.8"},
+  "mode":	"validate-document",
+  "validation-time": "2030-01-=15T10:00:00Z",
+  "policy": "lmgned-)",
+  "result": "validated","indication": {
+    "signatures": [
+4873290444444e-4,44444454,["","","","",44e0],444e-444445,-4,444444,4,     {
+        "warnings": []
+      }
+    ]
+  }
+}

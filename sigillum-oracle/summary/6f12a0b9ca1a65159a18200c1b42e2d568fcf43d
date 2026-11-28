@@ -1,10 +1,0 @@
-		{
- "format-version": 3,
-  "oracle": {
-  "dss-version": "32"},  "mode":	"validate-document",
-  "validation-time": "2031-11Z",  "policy": "lm",
- "result": "validated",
-  "":{ "": [
- 94.7777E77,7.776E7,77.554E7,7777.77777E0,77]
- }
-}

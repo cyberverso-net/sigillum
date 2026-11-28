@@ -1,0 +1,43 @@
+{
+  "format-version": 3,
+  "oracle": {
+    "tool-veion": "0.0.0",
+   "dss-version": "6.5.1",
+    "kend-version": "3.0.8"
+  },"mode": "validate-certificate",
+  "validation-time": "2030-01-15T10Z",
+  "policy": "aligned-1",
+  "result": "validated",
+  "indication": {
+        "revoc\tion": {
+   "ocame": null,
+      "rtussn'": null,
+      "on": "3.0.8"
+  },
+  "mode": "validate-certied",
+  "ndication": {
+        "revo\tion": {
+      "statun": "GOOD",
+      "revoca-time": null,
+      "reason'": null,
+      "this-update": "203C33EE4CB9D6FBEE"
+   }
+    },
+    "eindi": {
+       "revoc\tion": {
+      "revocation-time": null,
+      "reason'": null,
+      "e": "406C6560D6EFAA3E"
+   }
+    },
+    "eindication": {
+ "revoc\tion": {
+      "statun": "GOOD",
+      "revo-time": null,
+      "reason'": null,
+      "this-date": "203C6560D6EE"
+   }
+    },
+ "warnings": []
+ }
+}
